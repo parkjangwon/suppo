@@ -13,7 +13,9 @@ const createAgentSchema = z.object({
     .refine((value) => value.includes("@"), "유효한 이메일을 입력해주세요"),
   role: z.enum(["ADMIN", "AGENT"]),
   maxTickets: z.number().int().min(1).max(200),
-  categories: z.array(z.string().trim().min(1)).default([])
+  categories: z.array(z.string().trim().min(1)).default([]),
+  teams: z.array(z.string().trim().min(1)).default([]),
+  leaderTeamId: z.string().trim().optional()
 });
 
 function isAdminSession(role: string | undefined): boolean {
@@ -48,6 +50,13 @@ export async function GET(request: NextRequest) {
       categories: {
         include: {
           category: true
+        }
+      },
+      teamMemberships: {
+        include: {
+          team: {
+            select: { id: true, name: true }
+          }
         }
       },
       _count: {
@@ -90,12 +99,25 @@ export async function POST(request: NextRequest) {
         maxTickets: parsed.data.maxTickets,
         categories: {
           create: parsed.data.categories.map((categoryId) => ({ categoryId }))
+        },
+        teamMemberships: {
+          create: parsed.data.teams.map((teamId) => ({
+            teamId,
+            isLeader: teamId === parsed.data.leaderTeamId
+          }))
         }
       },
       include: {
         categories: {
           include: {
             category: true
+          }
+        },
+        teamMemberships: {
+          include: {
+            team: {
+              select: { id: true, name: true }
+            }
           }
         }
       }

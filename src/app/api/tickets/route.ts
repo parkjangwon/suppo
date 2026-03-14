@@ -4,6 +4,49 @@ import { verifyCaptcha } from "@/lib/security/captcha";
 import { ticketFormSchema } from "@/lib/validation/ticket";
 import { processAttachments, AttachmentError } from "@/lib/storage/attachment-service";
 import { createTicket } from "@/lib/db/queries/tickets";
+import { getAdminTickets } from "@/lib/db/queries/admin-tickets";
+import { auth } from "@/auth";
+import { TicketStatus, TicketPriority } from "@prisma/client";
+
+export async function GET(request: NextRequest) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+
+    const status = searchParams.get("status") as TicketStatus | undefined;
+    const priority = searchParams.get("priority") as TicketPriority | undefined;
+    const categoryId = searchParams.get("categoryId") || undefined;
+    const assigneeId = searchParams.get("assigneeId") || undefined;
+    const search = searchParams.get("search") || undefined;
+    const cursor = searchParams.get("cursor") || undefined;
+
+    const result = await getAdminTickets({
+      status,
+      priority,
+      categoryId,
+      assigneeId,
+      search,
+      cursor,
+      agentId: session.user.agentId,
+      agentRole: session.user.role as "ADMIN" | "AGENT",
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("Failed to fetch tickets:", error);
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json(
+      { error: "티켓 목록을 불러오는 중 오류가 발생했습니다." },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,3 +125,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+

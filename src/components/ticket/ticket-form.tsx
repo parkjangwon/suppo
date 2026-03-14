@@ -198,19 +198,24 @@ export function TicketForm({ categories }: TicketFormProps) {
         </div>
 
         {process.env.NODE_ENV !== "test" && (
-          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-center">
-            <p className="text-sm text-gray-500">CAPTCHA 위젯 영역</p>
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-700 mb-2">
+              개발 환경에서는 아래 버튼을 클릭하여 캡챠를 우회할 수 있습니다.
+            </p>
             <button 
               type="button" 
-              onClick={() => setValue("captchaToken", "dev-token")}
-              className="ml-4 px-3 py-1 bg-gray-200 text-xs rounded hover:bg-gray-300"
+              onClick={() => {
+                setValue("captchaToken", "dev-token-bypass");
+                alert("개발용 캡챠 토큰이 설정되었습니다. 티켓을 제출하세요.");
+              }}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
             >
-              개발용 토큰 채우기
+              개발 환경 캡챠 우회하기
             </button>
           </div>
         )}
         {errors.captchaToken && (
-          <p className="mt-1 text-sm text-red-500">{errors.captchaToken.message}</p>
+          <p className="mt-1 text-sm text-red-500">CAPTCHA를 완료해주세요</p>
         )}
       </div>
 

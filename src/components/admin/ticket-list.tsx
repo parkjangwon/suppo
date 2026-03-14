@@ -2,19 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { TicketFilters } from "./ticket-filters";
 
-interface Ticket {
+export interface Ticket {
   id: string;
   ticketNumber: string;
   subject: string;
@@ -24,7 +16,7 @@ interface Ticket {
   priority: string;
   category: { name: string };
   assignee: { name: string } | null;
-  createdAt: string;
+  createdAt: Date | string;
 }
 
 const statusLabels: Record<string, string> = {
@@ -67,125 +59,19 @@ export function TicketList({
   agents: { id: string; name: string }[];
 }) {
   const router = useRouter();
-  const [filters, setFilters] = useState({
-    status: "",
-    category: "",
-    priority: "",
-    assignee: "",
-    search: "",
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const filteredTickets = tickets.filter((ticket) => {
-    if (filters.status && ticket.status !== filters.status) return false;
-    if (filters.category && ticket.category.name !== filters.category) return false;
-    if (filters.priority && ticket.priority !== filters.priority) return false;
-    if (filters.assignee && ticket.assignee?.name !== filters.assignee) return false;
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      const match =
-        ticket.ticketNumber.toLowerCase().includes(search) ||
-        ticket.subject.toLowerCase().includes(search) ||
-        ticket.customerEmail.toLowerCase().includes(search);
-      if (!match) return false;
-    }
-    return true;
-  });
+  const totalPages = Math.ceil(tickets.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedTickets = tickets.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>필터</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-5 gap-4">
-            <Select
-              value={filters.status}
-              onValueChange={(value) =>
-                setFilters((f) => ({ ...f, status: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="상태" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">전체</SelectItem>
-                {Object.entries(statusLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.category}
-              onValueChange={(value) =>
-                setFilters((f) => ({ ...f, category: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="카테고리" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">전체</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.name}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.priority}
-              onValueChange={(value) =>
-                setFilters((f) => ({ ...f, priority: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="우선순위" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">전체</SelectItem>
-                {Object.entries(priorityLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.assignee}
-              onValueChange={(value) =>
-                setFilters((f) => ({ ...f, assignee: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="담당자" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">전체</SelectItem>
-                <SelectItem value="미할당">미할당</SelectItem>
-                {agents.map((agent) => (
-                  <SelectItem key={agent.id} value={agent.name}>
-                    {agent.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Input
-              placeholder="티켓번호, 제목, 이메일 검색"
-              value={filters.search}
-              onChange={(e) =>
-                setFilters((f) => ({ ...f, search: e.target.value }))
-              }
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <TicketFilters
+        categories={categories}
+        agents={agents}
+      />
 
       <div className="rounded-md border">
         <table className="w-full">
@@ -218,7 +104,7 @@ export function TicketList({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredTickets.map((ticket) => (
+            {paginatedTickets.map((ticket) => (
               <tr
                 key={ticket.id}
                 className="cursor-pointer hover:bg-gray-50"
@@ -260,9 +146,48 @@ export function TicketList({
         </table>
       </div>
 
-      {filteredTickets.length === 0 && (
+      {tickets.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           티켓이 없습니다
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            총 {tickets.length}개 중 {startIndex + 1}-{Math.min(startIndex + itemsPerPage, tickets.length)}개 표시
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+            >
+              이전
+            </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  className="w-8 h-8 p-0"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+            >
+              다음
+            </Button>
+          </div>
         </div>
       )}
     </div>

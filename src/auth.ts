@@ -12,6 +12,7 @@ import {
   isBackofficeRole,
   type BackofficeRole
 } from "@/lib/auth/config";
+import BoxyHQSAML from "@/lib/auth/providers/boxyhq-saml";
 import { prisma } from "@/lib/db/client";
 
 const DEFAULT_ADMIN_EMAIL = "admin@crinity.io";
@@ -158,7 +159,27 @@ if (process.env.AUTH_GITHUB_ID && process.env.AUTH_GITHUB_SECRET) {
   providers.push(
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
+      authorization: {
+        params: {
+          scope: "read:user user:email",
+        },
+      },
+    })
+  );
+}
+
+if (
+  process.env.AUTH_BOXYHQ_SAML_ID &&
+  process.env.AUTH_BOXYHQ_SAML_SECRET &&
+  process.env.AUTH_BOXYHQ_SAML_ISSUER
+) {
+  hasOAuthProviders = true;
+  providers.push(
+    BoxyHQSAML({
+      clientId: process.env.AUTH_BOXYHQ_SAML_ID,
+      clientSecret: process.env.AUTH_BOXYHQ_SAML_SECRET,
+      issuer: process.env.AUTH_BOXYHQ_SAML_ISSUER,
     })
   );
 }
@@ -173,15 +194,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      if (account.provider !== "google" && account.provider !== "github") {
-        return true;
-      }
-
       if (!HAS_DATABASE) {
         return false;
       }
 
-      const mappedProvider = account.provider === "google" ? "GOOGLE" : "GITHUB";
+      const providerMap: Record<string, string> = {
+        google: "GOOGLE",
+        github: "GITHUB",
+        "boxyhq-saml": "SAML",
+      };
+
+      const mappedProvider = providerMap[account.provider];
+      if (!mappedProvider) {
+        return true;
+      }
+
       const agent = await prisma.agent.upsert({
         where: { email: user.email.toLowerCase() },
         update: {

@@ -20,9 +20,16 @@ export function isBackofficeRole(value: unknown): value is BackofficeRole {
   return value === "ADMIN" || value === "AGENT";
 }
 
+if (typeof window === "undefined" && !process.env.AUTH_SECRET) {
+  throw new Error(
+    "AUTH_SECRET environment variable is required. " +
+    "Please set a strong secret (min 32 characters) in your .env file."
+  );
+}
+
 export const authConfig = {
   providers: [],
-  secret: process.env.AUTH_SECRET ?? "local-auth-secret-for-development",
+  secret: process.env.AUTH_SECRET,
   pages: {
     signIn: BACKOFFICE_LOGIN_PATH
   },

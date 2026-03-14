@@ -15,7 +15,9 @@ const updateAgentSchema = z.object({
   role: z.enum(["ADMIN", "AGENT"]).optional(),
   maxTickets: z.number().int().min(1).max(200).optional(),
   isActive: z.boolean().optional(),
-  categories: z.array(z.string().trim().min(1)).optional()
+  categories: z.array(z.string().trim().min(1)).optional(),
+  teams: z.array(z.string().trim().min(1)).optional(),
+  leaderTeamId: z.string().trim().optional()
 });
 
 interface RouteContext {
@@ -60,12 +62,30 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
                 create: data.categories.map((categoryId) => ({ categoryId }))
               }
             }
+          : {}),
+        ...(data.teams
+          ? {
+              teamMemberships: {
+                deleteMany: {},
+                create: data.teams.map((teamId) => ({
+                  teamId,
+                  isLeader: teamId === data.leaderTeamId
+                }))
+              }
+            }
           : {})
       },
       include: {
         categories: {
           include: {
             category: true
+          }
+        },
+        teamMemberships: {
+          include: {
+            team: {
+              select: { id: true, name: true }
+            }
           }
         }
       }

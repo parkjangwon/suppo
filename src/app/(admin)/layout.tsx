@@ -1,9 +1,27 @@
 import { AdminShell } from "@/components/app/admin-shell";
+import { BrandingProvider } from "@/lib/branding/context";
+import { getSystemBranding } from "@/lib/db/queries/branding";
+import type { Metadata } from "next";
 
-export default function AdminLayout({
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getSystemBranding();
+
+  return {
+    title: branding.adminPanelTitle,
+    icons: branding.faviconUrl ? { icon: branding.faviconUrl } : undefined,
+  };
+}
+
+export default async function AdminLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <AdminShell>{children}</AdminShell>;
+  const branding = await getSystemBranding();
+
+  return (
+    <BrandingProvider branding={branding}>
+      <AdminShell>{children}</AdminShell>
+    </BrandingProvider>
+  );
 }

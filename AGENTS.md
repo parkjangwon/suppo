@@ -61,6 +61,8 @@ Ticket 1--N Comment
 Ticket N--1 Agent (assignee)
 Ticket N--1 Category
 Agent N--N Category (expertise)
+TenantBranding 1--1 Domain (고객사 브랜딩)
+SAMLProvider 1--1 Domain (SAML 인증 설정)
 ```
 
 **주의사항:**
@@ -70,7 +72,7 @@ Agent N--N Category (expertise)
 ### 3. 인증 아키텍처
 
 **NextAuth.js v5 (Auth.js) 선택:**
-- Credentials + OAuth 통합
+- Credentials + OAuth + SAML 통합
 - 세션 관리 자동화
 - Prisma Adapter로 DB 연동
 
@@ -78,6 +80,23 @@ Agent N--N Category (expertise)
 - `auth.ts`에서 session callback으로 role/agentId 추가
 - Middleware에서 `/admin/*` 보호
 - API Routes에서는 `auth()`로 세션 확인
+
+### 4. SAML SSO 아키텍처
+
+**BoxyHQ SAML Jackson 선택:**
+- OAuth 2.0 to SAML Bridge 패턴
+- NextAuth.js와 완벽한 통합
+- SP-initiated 및 IdP-initiated 지원
+
+**구성 요소:**
+- `SAMLProvider` 테이블: IdP 설정 저장
+- `/api/auth/saml/[domain]`: SP 메타데이터 엔드포인트
+- `/admin/settings/saml`: 관리자 설정 UI
+
+**중요:**
+- 각 도메인별 별도의 SAMLProvider 레코드
+- SP Entity ID: `{baseUrl}/api/auth/saml/{domain}`
+- ACS URL: `{baseUrl}/api/auth/callback/boxyhq-saml`
 
 ---
 
@@ -300,6 +319,47 @@ pnpm tsc --noEmit
 pnpm build
 ```
 
+### 문제 5: SAML 로그인 실패
+
+**증상:** SAML 인증 후 로그인되지 않음
+
+**확인:**
+```sql
+-- SAML Provider 활성화 상태 확인
+SELECT * FROM "SAMLProvider" WHERE domain = 'acme.com' AND "isActive" = true;
+
+-- IdP 설정 확인
+SELECT "idpEntityId", "idpSsoUrl", "idpCertificate" FROM "SAMLProvider" WHERE domain = 'acme.com';
+```
+
+**해결:**
+1. SP Entity ID와 ACS URL이 IdP에 정확히 등록되었는지 확인
+2. IdP 인증서가 유효한지 확인 (만료일 체크)
+3. BoxyHQ 환경 변수 설정 확인:
+   ```bash
+   AUTH_BOXYHQ_SAML_ID=
+   AUTH_BOXYHQ_SAML_SECRET=
+   AUTH_BOXYHQ_SAML_ISSUER=
+   ```
+4. SP 메타데이터 다운로드: `/api/auth/saml/{domain}`
+5. 브라우저 개발자 도구에서 SAML Response 확인
+
+### 문제 6: 브랜딩 적용 안 됨
+
+**증상:** 고객사별 커스텀 로고/색상이 표시되지 않음
+
+**확인:**
+```sql
+-- 브랜딩 설정 확인
+SELECT * FROM "TenantBranding" WHERE domain = 'acme.com' AND "isActive" = true;
+```
+
+**해결:**
+1. 도메인이 정확히 일치하는지 확인 (대소문자 구분)
+2. `isActive`가 true인지 확인
+3. 이미지 URL이 유효한지 확인
+4. 브라우저 캐시 새로고침 (Ctrl+F5)
+
 ---
 
 ## 📈 확장 가이드
@@ -363,6 +423,7 @@ pnpm build
 - [ ] 파일 업로드 MIME 타입 검증
 - [ ] S3 버킷 퍼블릭 액세스 차단
 - [ ] 데이터베이스 외부 접근 차단
+- [ ] SAML 설정 필요 시 `AUTH_BOXYHQ_SAML_*` 환경 변수 설정
 
 ### 정기 점검
 

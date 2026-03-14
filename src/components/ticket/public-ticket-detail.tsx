@@ -3,7 +3,6 @@ import { ko } from "date-fns/locale";
 import { CommentList } from "./comment-list";
 import { CustomerReplyForm } from "./customer-reply-form";
 import { TransferDialog, type TransferAgent } from "@/components/admin/transfer-dialog";
-import { GitIntegrationSection } from "./git-integration-section";
 
 interface PublicTicketDetailProps {
   ticket: {
@@ -22,14 +21,7 @@ interface PublicTicketDetailProps {
       author: { name: string } | null;
       attachments: { id: string; url: string; filename: string }[];
     }[];
-    gitLinks: {
-      id: string;
-      provider: "GITHUB" | "GITLAB" | "CODECOMMIT";
-      repoFullName: string;
-      issueNumber: number;
-      issueUrl: string;
-      createdAt: Date;
-    }[];
+
   };
   transfer?: {
     currentAssigneeId: string | null;
@@ -110,14 +102,6 @@ export function PublicTicketDetail({ ticket, transfer }: PublicTicketDetailProps
         <h3 className="text-lg font-medium mb-6">답변 내역</h3>
         <CommentList comments={ticket.comments} />
       </div>
-
-      <GitIntegrationSection
-        ticketId={ticket.id}
-        ticketNumber={ticket.ticketNumber}
-        ticketSubject={ticket.title}
-        ticketDescription={ticket.description}
-        initialLinks={ticket.gitLinks}
-      />
 
       {ticket.status !== "CLOSED" && (
         <CustomerReplyForm ticketId={ticket.id} />

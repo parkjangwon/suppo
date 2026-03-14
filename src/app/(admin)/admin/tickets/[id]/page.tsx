@@ -1,76 +1,101 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
-import { AdminShell } from "@/components/app/admin-shell";
 import { TicketDetail } from "@/components/admin/ticket-detail";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "티켓 상세 | Crinity",
+  title: "티켓 상세 | Crinity Ticket",
+  description: "티켓 상세 정보 및 관리",
 };
 
-export default async function TicketDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const session = await auth();
+interface TicketDetailPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
+export default async function TicketDetailPage({ params }: TicketDetailPageProps) {
+  const session = await auth();
   if (!session?.user) {
     redirect("/admin/login");
   }
+  const agent = session.user;
 
-  const ticket = await prisma.ticket.findUnique({
-    where: { id: params.id },
-    include: {
-      category: true,
-      assignee: {
-        select: { id: true, name: true },
-      },
-      comments: {
+  try {
+    const { id } = await params;
+    const [ticket, agents] = await Promise.all([
+      prisma.ticket.findUnique({
+        where: { id },
         include: {
-          attachments: {
-            select: { id: true, fileName: true, fileUrl: true },
+          category: true,
+          assignee: {
+            select: { id: true, name: true },
+          },
+          comments: {
+            include: {
+              attachments: {
+                select: { id: true, fileName: true, fileUrl: true },
+              },
+            },
+            orderBy: { createdAt: "asc" },
+          },
+          activities: {
+            include: {
+              actor: {
+                select: { id: true, name: true },
+              },
+            },
+            orderBy: { createdAt: "desc" },
+          },
+          gitLinks: {
+            orderBy: { createdAt: "desc" },
           },
         },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
+      }),
+      prisma.agent.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+    ]);
 
-  if (!ticket) {
-    redirect("/admin/tickets");
-  }
+    if (!ticket) {
+      notFound();
+    }
 
-  const agents = await prisma.agent.findMany({
-    where: { isActive: true },
-    select: { id: true, name: true },
-  });
-
-  const isAdmin = session.user.role === "ADMIN";
-  const currentAgentId = session.user.agentId;
-
-  return (
-    <AdminShell>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-between mb-6">
-          <Link href="/admin/tickets">
-            <Button variant="outline">← 목록으로</Button>
-          </Link>
-          <Link href="/admin/dashboard">
-            <Button variant="outline">대시보드</Button>
-          </Link>
+    return (
+      <div className="container mx-auto py-10 max-w-5xl">
+        <div className="mb-6">
+          <Button variant="ghost" asChild className="-ml-4">
+            <Link href="/admin/tickets">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              목록으로 돌아가기
+            </Link>
+          </Button>
         </div>
 
-        <TicketDetail
-          ticket={ticket}
-          agents={agents}
-          isAdmin={isAdmin}
-          currentAgentId={currentAgentId}
+        <TicketDetail 
+          ticket={ticket} 
+          agents={agents} 
+          currentAgentId={agent.id || ""} 
+          isAdmin={agent.role === "ADMIN"} 
         />
       </div>
-    </AdminShell>
-  );
+    );
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return (
+        <div className="container mx-auto py-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">접근 권한이 없습니다</h1>
+          <p className="text-muted-foreground mb-8">
+            이 티켓을 볼 수 있는 권한이 없습니다.
+          </p>
+          <Button asChild>
+            <Link href="/admin/tickets">목록으로 돌아가기</Link>
+          </Button>
+        </div>
+      );
+    }
+    throw error;
+  }
 }
