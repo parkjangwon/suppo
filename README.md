@@ -1,9 +1,7 @@
 # Crinity Ticket System
 
-**English** | [한국어](./README.ko.md)
-
 <p align="center">
-  <strong>Modern Ticket Management System for Customer Support</strong>
+  <strong>현대적인 고객 지원 티켓 관리 시스템</strong>
 </p>
 
 <p align="center">
@@ -16,211 +14,244 @@
 
 ---
 
-## 📋 Table of Contents
+## 📋 목차
 
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [Database](#database)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## 🎯 Overview
-
-**Crinity Ticket System** is a comprehensive ticket management solution for SaaS products. It provides a seamless experience for customers to submit inquiries and for support agents to efficiently manage and resolve them.
-
-### Key Features
-
-- **Customer Portal**: Easy ticket submission with file attachments
-- **Admin Console**: Complete ticket lifecycle management
-- **Auto-Assignment**: Smart round-robin assignment based on agent expertise and workload
-- **AI-Powered Analysis**: LLM integration for customer behavior analysis (Ollama/Gemini)
-- **Audit Logging**: Complete activity tracking with XLSX export for compliance
-- **Multi-tenant Branding**: Custom branding per domain
-- **Security**: CAPTCHA, Rate Limiting, Signed Cookies
+- [프로젝트 개요](#-프로젝트-개요)
+- [기술 스택](#-기술-스택)
+- [주요 기능](#-주요-기능)
+- [프로젝트 구조](#-프로젝트-구조)
+- [시작하기](#-시작하기)
+- [환경 변수](#-환경-변수)
+- [데이터베이스](#-데이터베이스)
+- [기여하기](#-기여하기)
+- [라이선스](#-라이선스)
 
 ---
 
-## 🛠 Tech Stack
+## 🎯 프로젝트 개요
 
-### Frontend
+**Crinity Ticket System**은 SaaS 제품에 대한 기술지원 및 VOC(Voice of Customer) 처리를 위한 종합 티켓 관리 솔루션입니다. 고객이 웹 페이지에서 문의를 작성하면 상담원에게 자동 할당되어 효율적으로 처리되는 구조입니다.
+
+### 핵심 가치
+
+- **고객 중심**: 고객이 쉽게 문의하고 추적할 수 있는 직관적인 인터페이스
+- **효율적 운영**: 자동 할당과 로드밸런싱으로 상담원 업무 분배
+- **AI 활용**: LLM 연동을 통한 고객 행동 분석 및 인사이트 제공
+- **보안 강화**: 감사로그, CAPTCHA, Rate Limiting, Signed Cookie
+- **확장성**: Git 연동, 이메일 알림, 첨부파일 지원, SAML SSO
+
+---
+
+## 🛠 기술 스택
+
+### 프론트엔드
 - **Next.js 15** (App Router)
 - **React 19**
 - **TypeScript**
 - **Tailwind CSS**
-- **shadcn/ui**
+- **shadcn/ui** (Radix UI 기반)
 
-### Backend
+### 백엔드
 - **Next.js API Routes**
 - **Server Actions**
 - **NextAuth.js v5** (Auth.js)
 - **Prisma ORM**
 - **PostgreSQL 16**
 
-### AI & Integrations
-- **Ollama** (Local LLM)
+### AI 및 연동
+- **Ollama** (로컬 LLM)
 - **Google Gemini API**
-- **AWS S3** (File storage)
-- **SMTP/SES/Resend** (Email)
-- **GitHub/GitLab API** (Issue integration)
+- **AWS S3** (파일 저장)
+- **SMTP/SES/Resend** (이메일 발송)
+- **GitHub/GitLab API** (이슈 연동)
+
+### 인프라
+- **Docker & Docker Compose**
+- **pnpm** (패키지 매니저)
 
 ---
 
-## ✨ Features
+## ✨ 주요 기능
 
-### Customer Features
+### 1. 고객용 기능 (Public)
 
-| Feature | Description |
-|---------|-------------|
-| Ticket Creation | Create tickets with category, priority, attachments |
-| CAPTCHA | Cloudflare Turnstile protection |
-| Rate Limiting | 5 requests per minute per IP |
-| File Attachments | Up to 10MB, 20 files per ticket |
-| Ticket Lookup | Access via ticket number + email |
-| Thread View | View status and conversation history |
+| 기능 | 설명 |
+|------|-------------|
+| **티켓 작성** | 이름, 이메일, 전화번호, 카테고리, 우선순위, 제목, 내용, 첨부파일 |
+| **CAPTCHA** | Cloudflare Turnstile로 봇 방지 |
+| **Rate Limiting** | IP당 분당 5회 제한 |
+| **첨부파일** | 최대 10MB, 20개, 이미지/문서/압축파일 지원 |
+| **티켓 조회** | 티켓번호 + 이메일 인증, Signed Cookie 발급 |
+| **대화 스레드** | 상태 및 대화 내역 확인, 추가 메시지 작성 |
 
-### Admin Features
+### 2. 관리자용 기능 (Admin)
 
-| Feature | Description |
-|---------|-------------|
-| **Dashboard** | Statistics and agent performance metrics |
-| **Ticket Management** | List, filter, assign, transfer, status change |
-| **Auto-Assignment** | Category expertise + load balancing algorithm |
-| **Agent Management** | CRUD with phone number support |
-| **Customer Management** | Customer profiles with AI analysis |
-| **Response Templates** | Pre-defined response templates |
-| **Git Integration** | Link/create GitHub/GitLab issues |
-| **Email Settings** | SMTP/SES/Resend configuration |
-| **AI Settings** | Ollama/Gemini LLM configuration |
-| **Audit Logs** | Complete activity tracking with XLSX export |
-| **Branding** | Custom domain branding |
+| 기능 | 설명 |
+|------|-------------|
+| **대시보드** | 오늘/주/월 통계, 상태별 현황, 상담원별 처리 현황 |
+| **티켓 목록** | 필터(상태/카테고리/우선순위/담당자), 검색, 정렬 |
+| **티켓 상세** | 상태/우선순위/담당자 변경, 코멘트, 낶부 메모 |
+| **자동 할당** | 카테고리 전문성 + 로드밸런싱 알고리즘 |
+| **티켓 양도** | 다른 상담원으로 양도, 사유 기록 |
+| **상담원 관리** | CRUD, 전화번호 관리, 비활성화 시 자동 재할당 |
+| **고객 관리** | 고객 프로필, 티켓 이력, 메모, AI 분석 |
+| **응답 템플릿** | 자주 사용하는 응답 템플릿 관리 |
+| **Git 연동** | GitHub/GitLab 이슈 연결/생성 |
+
+### 3. 설정 기능
+
+| 기능 | 설명 |
+|------|-------------|
+| **이메일 설정** | SMTP/SES/Resend 프로바이더 설정 |
+| **AI 설정** | Ollama/Gemini LLM 설정, 고객 분석 활성화 |
+| **브랜딩** | 도메인별 커스텀 로고, 색상, 파비콘 설정 |
+| **SAML SSO** | 기업 SSO 연동 (BoxyHQ) |
+| **문의 유형** | 카테고리별 기본 담당 팀, 우선순위 설정 |
+| **SLA 정책** | 서비스 레벨 계약 설정 |
+
+### 4. 감사 및 보안
+
+| 기능 | 설명 |
+|------|-------------|
+| **감사로그** | 모든 관리자/상담원 행동 기록, XLSX 날짜 지원 |
+| **활동 로그** | 티켓 상태 변경, 할당, 양도 이력 |
+| **보안** | 티켓 접근 토큰, 민감 데이터 암호화 |
+
+### 5. 시스템 기능
+
+| 기능 | 설명 |
+|------|-------------|
+| **이메일 알림** | 티켓 접수/할당/응답/상태변경 시 알림 |
+| **Outbox 패턴** | 이메일 발송 실패 시 재시도 (최대 3회) |
+| **AI 고객 분석** | 티켓 히스토리 기반 고객 패턴 분석 |
+| **파일 저장** | 개발: 로컬, 프로덕션: AWS S3 |
 
 ---
 
-## 📁 Project Structure
+## 📁 프로젝트 구조
 
 ```
 crinity-ticket/
 ├── prisma/
-│   ├── schema.prisma          # Database schema
-│   └── migrations/            # Database migrations
+│   ├── schema.prisma          # 데이터베이스 스키마
+│   └── migrations/            # 마이그레이션 파일
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── (public)/          # Customer-facing routes
-│   │   ├── (admin)/           # Admin routes
-│   │   └── api/               # API endpoints
+│   │   ├── (public)/          # 고객용 라우트
+│   │   │   ├── page.tsx       # 랜딩 페이지
+│   │   │   └── ticket/        # 티켓 관련 페이지
+│   │   ├── (admin)/           # 관리자용 라우트
+│   │   │   └── admin/         # 관리자 페이지
+│   │   └── api/               # API 엔드포인트
 │   ├── components/
-│   │   ├── ui/                # shadcn/ui components
-│   │   ├── app/               # App shell components
-│   │   ├── ticket/            # Ticket components
-│   │   └── admin/             # Admin components
+│   │   ├── ui/                # shadcn/ui 컴포넌트
+│   │   ├── app/               # 앱 쉘 컴포넌트
+│   │   ├── ticket/            # 티켓 관련 컴포넌트
+│   │   └── admin/             # 관리자 컴포넌트
 │   ├── lib/
-│   │   ├── db/                # Prisma client & queries
-│   │   ├── auth/              # Authentication
-│   │   ├── tickets/           # Ticket services
-│   │   ├── audit/             # Audit logging
-│   │   ├── llm/               # LLM integration
-│   │   └── email/             # Email services
-│   └── types/                 # TypeScript types
-├── scripts/                   # Utility scripts
-├── tests/                     # Test files
-└── docker-compose.yml         # Docker setup
+│   │   ├── db/                # Prisma 클라이언트 및 쿼리
+│   │   ├── auth/              # 인증 설정 및 가드
+│   │   ├── audit/             # 감사로깅
+│   │   ├── llm/               # LLM 연동 (Ollama/Gemini)
+│   │   ├── tickets/           # 티켓 서비스
+│   │   ├── assignment/        # 할당 알고리즘
+│   │   ├── email/             # 이메일 발송
+│   │   ├── storage/           # 파일 저장
+│   │   └── utils/             # 유틸리티
+│   └── types/                 # TypeScript 타입
+├── scripts/                   # 유틸리티 스크립트
+├── tests/                     # 테스트 파일
+└── docker-compose.yml         # Docker 설정
 ```
 
 ---
 
-## 🚀 Getting Started
+## 🚀 시작하기
 
-### Prerequisites
+### 사전 요구사항
 
-- **Node.js** 20.x or higher
-- **pnpm** 10.x or higher
-- **Docker** (optional)
-- **PostgreSQL** 16 (if not using Docker)
+- **Node.js** 20.x 이상
+- **pnpm** 10.x 이상
+- **Docker** (선택사항)
+- **PostgreSQL** 16 (로컬 설치 시)
 
-### Quick Start (Docker)
+### 방법 1: Docker Compose (권장)
 
 ```bash
-# Clone repository
+# 1. 저장소 클론
 git clone <repository-url>
 cd crinity-ticket
 
-# Copy environment file
+# 2. 환경 변수 설정
 cp .env.example .env
 
-# Start with Docker Compose
+# 3. Docker Compose 실행
 docker compose up --build
 
-# Access application
+# 4. 브라우저 접속
 open http://localhost:3000
 ```
 
-### Local Development
+### 방법 2: 로컬 개발
 
 ```bash
-# Install dependencies
+# 1. 의존성 설치
 pnpm install
 
-# Copy environment file
+# 2. 환경 변수 설정
 cp .env.example .env
-# Edit .env with your database URL
 
-# Generate Prisma client
+# 3. Prisma 클라이언트 생성
 pnpm prisma generate
 
-# Run migrations
+# 4. 데이터베이스 마이그레이션
 pnpm prisma migrate dev
 
-# Seed admin account
+# 5. 관리자 계정 생성
 npx tsx scripts/seed-admin.ts
 
-# Start development server
+# 6. 개발 서버 실행
 pnpm dev
 
-# Access application
+# 7. 브라우저 접속
 open http://localhost:3000
 ```
 
-### Default Admin Account
+### 초기 관리자 계정
 
-After seeding:
+시드 실행 후 기본 계정:
 
-- **Email**: `admin@crinity.io`
-- **Password**: `admin1234`
+- **이메일**: `admin@crinity.io`
+- **비밀번호**: `admin1234`
 
 ---
 
-## 🔐 Environment Variables
+## 🔐 환경 변수
 
-### Required
+### 필수 설정
 
 ```bash
-# Database
+# Database (필수)
 DATABASE_URL="postgresql://user:password@localhost:5432/crinity"
 
-# Auth
+# Auth (필수)
 AUTH_SECRET="your-secret-key-min-32-characters"
-AUTH_TRUST_HOST=true  # For localhost development
+AUTH_TRUST_HOST=true  # 로컬 개발 시 필요
 
-# Ticket Access
+# Ticket Access (필수)
 TICKET_ACCESS_SECRET="another-secret-key-for-ticket-access"
 ```
 
-### Optional
+### 선택 설정
 
 ```bash
-# OAuth
+# OAuth (선택)
 AUTH_GOOGLE_ID="your-google-client-id"
 AUTH_GOOGLE_SECRET="your-google-client-secret"
 AUTH_GITHUB_ID="your-github-client-id"
 AUTH_GITHUB_SECRET="your-github-client-secret"
 
-# Email (SMTP/SES/Resend)
+# 이메일 (SMTP/SES/Resend)
 SMTP_HOST="smtp.example.com"
 SMTP_PORT="587"
 SMTP_USER="user@example.com"
@@ -234,7 +265,7 @@ SES_REGION="ap-northeast-2"
 # Resend
 RESEND_API_KEY="your-resend-api-key"
 
-# Storage (Production)
+# 파일 저장 (프로덕션)
 AWS_ACCESS_KEY_ID="your-access-key"
 AWS_SECRET_ACCESS_KEY="your-secret-key"
 AWS_REGION="ap-northeast-2"
@@ -243,74 +274,84 @@ AWS_S3_BUCKET_NAME="crinity-uploads"
 # CAPTCHA
 TURNSTILE_SECRET_KEY="your-turnstile-secret"
 
-# LLM (Optional)
+# LLM (선택)
 OLLAMA_URL="http://localhost:11434"
 OLLAMA_MODEL="llama3.2"
 GEMINI_API_KEY="your-gemini-api-key"
 
-# Git Integration
+# Git 연동
 GIT_TOKEN_ENCRYPTION_KEY="32-byte-encryption-key"
+
+# SAML SSO
+AUTH_BOXYHQ_SAML_ID=""
+AUTH_BOXYHQ_SAML_SECRET=""
+AUTH_BOXYHQ_SAML_ISSUER=""
 ```
 
 ---
 
-## 🗄 Database
+## 🗄 데이터베이스
 
-### Core Entities
+### 핵심 엔티티
 
-- `Ticket` - Ticket information
-- `Agent` - Support agents with phone numbers
-- `Customer` - Customer profiles with AI analysis
-- `Category` - Ticket categories
-- `Comment` - Comments/replies
-- `Attachment` - File attachments
-- `AuditLog` - Complete activity logging
-- `LLMSettings` - AI configuration
-- `EmailSettings` - Email provider settings
+- `Ticket` - 티켓 정보
+- `Agent` - 상담원 정보 (전화번호 포함)
+- `Customer` - 고객 정보 (AI 분석 포함)
+- `Category` - 티켓 카테고리
+- `Comment` - 코멘트/댓글
+- `Attachment` - 첨부파일
+- `AuditLog` - 감사로그 (모든 활동 기록)
+- `LLMSettings` - AI 설정
+- `EmailSettings` - 이메일 프로바이더 설정
+- `TicketActivity` - 티켓 활동 로그
+- `TicketTransfer` - 티켓 양도 이력
+- `ResponseTemplate` - 응답 템플릿
+- `GitLink` - Git 이슈 연결
+- `EmailDelivery` - 이메일 발송 큐
 
-### Prisma Commands
+### Prisma 명령어
 
 ```bash
-# Generate migration
+# 마이그레이션 생성
 pnpm prisma migrate dev --name <migration-name>
 
-# Deploy to production
+# 프로덕션 마이그레이션
 pnpm prisma migrate deploy
 
-# Generate client
+# Prisma 클라이언트 생성
 pnpm prisma generate
 
-# Open Prisma Studio
+# Prisma Studio 실행
 pnpm prisma studio
 ```
 
 ---
 
-## 🧪 Testing
+## 🧪 테스트
 
 ```bash
-# Run all tests
+# 모든 테스트
 pnpm test
 
-# E2E tests
+# E2E 테스트
 pnpm test:e2e
 
-# Specific test file
+# 특정 테스트 파일
 pnpm test tests/unit/assignment/pick-assignee.spec.ts
 ```
 
 ---
 
-## 🤝 Contributing
+## 🤝 기여하기
 
-Contributions are welcome! Please submit a PR.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
+기여는 언제나 환영합니다! PR을 보내주세요.
 
 ---
 
-**Crinity Ticket System** - Efficient customer support ticket management solution
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+
+---
+
+**Crinity Ticket System** - 효율적인 고객 지원을 위한 티켓 관리 솔루션
