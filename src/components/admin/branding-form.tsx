@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
 
 interface SystemBranding {
   companyName: string;
@@ -476,7 +477,7 @@ export function BrandingForm() {
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    footerPhone: e.target.value,
+                    footerPhone: formatPhoneNumberInput(e.target.value),
                   }))
                 }
                 placeholder="02-1234-5678"

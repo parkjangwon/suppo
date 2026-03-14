@@ -4,6 +4,8 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { formatPhoneNumber } from "@/lib/utils/phone-format";
 import {
   Select,
   SelectContent,
@@ -238,15 +240,21 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
               <div>
                 <div className="text-sm font-medium text-muted-foreground">이메일</div>
                 <div>
-                  <a href={`mailto:${ticket.customerEmail}`} className="text-blue-600 hover:underline">
-                    {ticket.customerEmail}
-                  </a>
+                  {ticket.customerId ? (
+                    <Link href={`/admin/customers/${ticket.customerId}`} className="text-blue-600 hover:underline">
+                      {ticket.customerEmail}
+                    </Link>
+                  ) : (
+                    <a href={`mailto:${ticket.customerEmail}`} className="text-blue-600 hover:underline">
+                      {ticket.customerEmail}
+                    </a>
+                  )}
                 </div>
               </div>
               {ticket.customerPhone && (
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">전화번호</div>
-                  <div>{ticket.customerPhone}</div>
+                  <div>{formatPhoneNumber(ticket.customerPhone)}</div>
                 </div>
               )}
             </CardContent>

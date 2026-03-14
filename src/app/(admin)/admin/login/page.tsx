@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">상담원 로그인</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">관리 콘솔</CardTitle>
           <CardDescription>관리자 계정으로 로그인하세요</CardDescription>
         </CardHeader>
         <CardContent>

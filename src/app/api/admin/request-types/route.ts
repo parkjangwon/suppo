@@ -46,7 +46,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  
+
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -55,13 +55,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = requestTypeSchema.parse(body);
 
-    const requestType = await prisma.requestType.create({
-      data: validated,
-      include: {
-        defaultTeam: {
-          select: { id: true, name: true },
+    const requestType = await prisma.$transaction(async (tx) => {
+      // Create linked Category for agent specialization
+      const category = await tx.category.create({
+        data: {
+          name: validated.name,
+          description: validated.description,
+          sortOrder: validated.sortOrder,
         },
-      },
+      });
+
+      // Create RequestType with link to Category
+      return await tx.requestType.create({
+        data: {
+          ...validated,
+          categoryId: category.id,
+        },
+        include: {
+          defaultTeam: {
+            select: { id: true, name: true },
+          },
+          category: {
+            select: { id: true, name: true },
+          },
+        },
+      });
     });
 
     return NextResponse.json(requestType, { status: 201 });

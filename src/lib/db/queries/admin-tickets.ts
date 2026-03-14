@@ -202,6 +202,12 @@ export async function addComment(data: {
   authorId: string;
   authorName: string;
   authorEmail: string;
+  attachments?: {
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    fileUrl: string;
+  }[];
 }) {
   return prisma.comment.create({
     data: {
@@ -212,6 +218,18 @@ export async function addComment(data: {
       authorId: data.authorId,
       authorName: data.authorName,
       authorEmail: data.authorEmail,
+      attachments: data.attachments && data.attachments.length > 0
+        ? {
+            create: data.attachments.map(att => ({
+              ticketId: data.ticketId,
+              fileName: att.fileName,
+              fileSize: att.fileSize,
+              mimeType: att.mimeType,
+              fileUrl: att.fileUrl,
+              uploadedBy: data.authorName,
+            })),
+          }
+        : undefined,
     },
     include: {
       author: true,

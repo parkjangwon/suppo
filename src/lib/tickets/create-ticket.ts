@@ -15,6 +15,7 @@ type TicketPriority = "URGENT" | "HIGH" | "MEDIUM" | "LOW";
 interface TicketRecord {
   id: string;
   ticketNumber: string;
+  customerId: string | null;
   customerName: string;
   customerEmail: string;
   customerPhone: string | null;
@@ -83,10 +84,29 @@ interface CandidateQueryClient {
 }
 
 interface CreateTicketTxClient extends CandidateQueryClient {
+  customer: {
+    upsert: (args: {
+      where: { email: string };
+      update: {
+        name: string;
+        phone?: string | null;
+        ticketCount: { increment: number };
+        lastTicketAt: Date;
+      };
+      create: {
+        email: string;
+        name: string;
+        phone?: string | null;
+        ticketCount: number;
+        lastTicketAt: Date;
+      };
+    }) => Promise<{ id: string }>;
+  };
   ticket: {
     create: (args: {
       data: {
         ticketNumber: string;
+        customerId?: string;
         customerName: string;
         customerEmail: string;
         customerPhone?: string;
@@ -209,9 +229,27 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
         const candidates = await buildCandidates(tx, input.categoryId);
         const assignee = pickAssignee(candidates, input.categoryId);
 
+        const customer = await tx.customer.upsert({
+          where: { email: input.customerEmail },
+          update: {
+            name: input.customerName,
+            phone: input.customerPhone,
+            ticketCount: { increment: 1 },
+            lastTicketAt: new Date()
+          },
+          create: {
+            email: input.customerEmail,
+            name: input.customerName,
+            phone: input.customerPhone,
+            ticketCount: 1,
+            lastTicketAt: new Date()
+          }
+        });
+
         const ticket = await tx.ticket.create({
           data: {
             ticketNumber,
+            customerId: customer.id,
             customerName: input.customerName,
             customerEmail: input.customerEmail,
             customerPhone: input.customerPhone,

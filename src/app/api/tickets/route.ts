@@ -3,10 +3,11 @@ import { checkRateLimit } from "@/lib/security/rate-limit";
 import { verifyCaptcha } from "@/lib/security/captcha";
 import { ticketFormSchema } from "@/lib/validation/ticket";
 import { processAttachments, AttachmentError } from "@/lib/storage/attachment-service";
-import { createTicket } from "@/lib/db/queries/tickets";
+import { createTicket } from "@/lib/tickets/create-ticket";
 import { getAdminTickets } from "@/lib/db/queries/admin-tickets";
 import { auth } from "@/auth";
 import { TicketStatus, TicketPriority } from "@prisma/client";
+import { prisma } from "@/lib/db/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,21 +92,8 @@ export async function POST(request: NextRequest) {
     }
 
     const files = formData.getAll("attachments") as File[];
-    
-    // Generate a temporary ticket ID for storage
-    const tempTicketId = `temp-${Date.now()}`;
-    
-    let processedAttachments = [];
-    try {
-      processedAttachments = await processAttachments(files, tempTicketId);
-    } catch (error) {
-      if (error instanceof AttachmentError) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
-      }
-      throw error;
-    }
 
-    const ticket = await createTicket({
+    const result = await createTicket({
       customerName: validationResult.data.customerName,
       customerEmail: validationResult.data.customerEmail,
       customerPhone: validationResult.data.customerPhone,
@@ -113,10 +101,33 @@ export async function POST(request: NextRequest) {
       priority: validationResult.data.priority as "URGENT" | "HIGH" | "MEDIUM" | "LOW",
       subject: validationResult.data.subject,
       description: validationResult.data.description,
-      attachments: processedAttachments,
     });
 
-    return NextResponse.json({ ticketNumber: ticket.ticketNumber }, { status: 201 });
+    if (files.length > 0) {
+      try {
+        const processedAttachments = await processAttachments(files, result.ticket.id);
+
+        if (processedAttachments.length > 0) {
+          await prisma.attachment.createMany({
+            data: processedAttachments.map(a => ({
+              ticketId: result.ticket.id,
+              fileName: a.fileName,
+              fileSize: a.fileSize,
+              mimeType: a.mimeType,
+              fileUrl: a.fileUrl,
+              uploadedBy: validationResult.data.customerName,
+            })),
+          });
+        }
+      } catch (error) {
+        if (error instanceof AttachmentError) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        throw error;
+      }
+    }
+
+    return NextResponse.json({ ticketNumber: result.ticket.ticketNumber }, { status: 201 });
   } catch (error) {
     console.error("Failed to create ticket:", error);
     return NextResponse.json(

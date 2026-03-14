@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { verifyTicketAccessToken } from "@/lib/security/ticket-access";
 import { cookies } from "next/headers";
+import { processAttachments, AttachmentError } from "@/lib/storage/attachment-service";
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +18,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { ticketId, content } = await request.json();
+    const formData = await request.formData();
+    const ticketId = formData.get("ticketId") as string;
+    const content = formData.get("content") as string;
 
     if (!ticketId || !content) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -32,6 +35,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const files = formData.getAll("attachments") as File[];
+    let processedAttachments = [];
+
+    if (files.length > 0) {
+      try {
+        processedAttachments = await processAttachments(files, ticketId);
+      } catch (error) {
+        if (error instanceof AttachmentError) {
+          return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+        throw error;
+      }
+    }
+
     const comment = await prisma.comment.create({
       data: {
         content,
@@ -40,6 +57,21 @@ export async function POST(request: Request) {
         authorType: "CUSTOMER",
         authorName: ticket.customerName,
         authorEmail: ticket.customerEmail,
+        attachments: processedAttachments.length > 0
+          ? {
+              create: processedAttachments.map(att => ({
+                ticketId,
+                fileName: att.fileName,
+                fileSize: att.fileSize,
+                mimeType: att.mimeType,
+                fileUrl: att.fileUrl,
+                uploadedBy: ticket.customerName,
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        attachments: true,
       },
     });
 

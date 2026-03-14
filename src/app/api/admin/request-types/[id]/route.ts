@@ -20,7 +20,7 @@ interface RouteParams {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const session = await auth();
-  
+
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -30,14 +30,43 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const body = await request.json();
     const validated = updateSchema.parse(body);
 
-    const requestType = await prisma.requestType.update({
-      where: { id },
-      data: validated,
-      include: {
-        defaultTeam: {
-          select: { id: true, name: true },
+    const requestType = await prisma.$transaction(async (tx) => {
+      // Get current request type to find linked category
+      const current = await tx.requestType.findUnique({
+        where: { id },
+        include: { category: true },
+      });
+
+      if (!current) {
+        throw new Error("Request type not found");
+      }
+
+      // Sync Category if name or sortOrder changed
+      if (validated.name || validated.sortOrder !== undefined) {
+        if (current.category) {
+          await tx.category.update({
+            where: { id: current.category.id },
+            data: {
+              ...(validated.name && { name: validated.name }),
+              ...(validated.sortOrder !== undefined && { sortOrder: validated.sortOrder }),
+              ...(validated.description !== undefined && { description: validated.description }),
+            },
+          });
+        }
+      }
+
+      return await tx.requestType.update({
+        where: { id },
+        data: validated,
+        include: {
+          defaultTeam: {
+            select: { id: true, name: true },
+          },
+          category: {
+            select: { id: true, name: true },
+          },
         },
-      },
+      });
     });
 
     return NextResponse.json(requestType);

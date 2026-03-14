@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { getBackofficeSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
+import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
+import { createAuditLog } from "@/lib/audit/logger";
 
 const createAgentSchema = z.object({
   name: z.string().trim().min(1, "이름을 입력해주세요"),
@@ -11,6 +13,7 @@ const createAgentSchema = z.object({
     .trim()
     .min(3, "이메일을 입력해주세요")
     .refine((value) => value.includes("@"), "유효한 이메일을 입력해주세요"),
+  phone: z.string().trim().optional(),
   role: z.enum(["ADMIN", "AGENT"]),
   maxTickets: z.number().int().min(1).max(200),
   categories: z.array(z.string().trim().min(1)).default([]),
@@ -95,6 +98,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: parsed.data.name,
         email: parsed.data.email,
+        phone: parsed.data.phone ? formatPhoneNumberInput(parsed.data.phone) : undefined,
         role: parsed.data.role,
         maxTickets: parsed.data.maxTickets,
         categories: {
@@ -120,6 +124,25 @@ export async function POST(request: NextRequest) {
             }
           }
         }
+      }
+    });
+
+    await createAuditLog({
+      actorId: session.user.id,
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      actorName: session.user.name || "Unknown",
+      actorEmail: session.user.email || "Unknown",
+      action: "CREATE",
+      resourceType: "agent",
+      resourceId: agent.id,
+      description: `상담원 생성: ${agent.name} (${agent.email})`,
+      newValue: {
+        name: agent.name,
+        email: agent.email,
+        role: agent.role,
+        maxTickets: agent.maxTickets,
+        categories: agent.categories.map((c) => c.category.name),
+        teams: agent.teamMemberships.map((m) => m.team.name)
       }
     });
 

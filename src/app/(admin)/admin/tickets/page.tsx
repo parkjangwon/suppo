@@ -3,8 +3,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { TicketList } from "@/components/admin/ticket-list";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Prisma, TicketStatus, TicketPriority } from "@prisma/client";
 
 export const metadata: Metadata = {
@@ -78,11 +76,8 @@ export default async function TicketsPage({
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold">티켓 목록</h1>
-        <Link href="/admin/dashboard">
-          <Button variant="outline">대시보드</Button>
-        </Link>
       </div>
 
       <TicketList

@@ -38,7 +38,9 @@ import {
   Mail,
   Inbox,
   AlertCircle,
+  Phone,
 } from "lucide-react";
+import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +58,7 @@ interface AgentItem {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   role: "ADMIN" | "AGENT";
   isActive: boolean;
   maxTickets: number;
@@ -91,6 +94,7 @@ interface AgentListProps {
 interface AgentFormState {
   name: string;
   email: string;
+  phone: string;
   role: "ADMIN" | "AGENT";
   maxTickets: number;
   categories: string[];
@@ -101,6 +105,7 @@ interface AgentFormState {
 const EMPTY_FORM: AgentFormState = {
   name: "",
   email: "",
+  phone: "",
   role: "AGENT",
   maxTickets: 10,
   categories: [],
@@ -291,6 +296,7 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
     setEditForm({
       name: agent.name,
       email: agent.email,
+      phone: agent.phone ?? "",
       role: agent.role,
       maxTickets: agent.maxTickets,
       categories: agent.categories.map((c) => c.category.id),
@@ -393,6 +399,12 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
                       <Mail className="w-3 h-3" />
                       {agent.email}
                     </CardDescription>
+                    {agent.phone && (
+                      <CardDescription className="text-xs flex items-center gap-1 mt-0.5">
+                        <Phone className="w-3 h-3" />
+                        {agent.phone}
+                      </CardDescription>
+                    )}
                   </div>
                 </div>
                 <DropdownMenu>
@@ -557,6 +569,21 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="phone">전화번호</Label>
+              <Input
+                id="phone"
+                value={createForm.phone}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    phone: formatPhoneNumberInput(e.target.value),
+                  }))
+                }
+                placeholder="010-0000-0000"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="role">역할</Label>
@@ -710,6 +737,21 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
                 onChange={(e) =>
                   setEditForm((prev) => ({ ...prev, email: e.target.value }))
                 }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-phone">전화번호</Label>
+              <Input
+                id="edit-phone"
+                value={editForm.phone}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    phone: formatPhoneNumberInput(e.target.value),
+                  }))
+                }
+                placeholder="010-0000-0000"
               />
             </div>
 
