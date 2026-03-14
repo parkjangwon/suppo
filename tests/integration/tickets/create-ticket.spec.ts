@@ -17,6 +17,7 @@ describeIfDatabase("createTicket", () => {
     await prisma.responseTemplate.deleteMany();
     await prisma.category.deleteMany();
     await prisma.agent.deleteMany();
+    await prisma.customer.deleteMany();
   });
 
   afterAll(async () => {
@@ -149,5 +150,50 @@ describeIfDatabase("createTicket", () => {
 
     expect(result.ticket.assigneeId).toBeNull();
     expect(result.activities.some((activity) => activity.action === "ASSIGNED")).toBe(false);
+  });
+
+  it("upserts customer record and links to ticket", async () => {
+    const category = await prisma.category.create({
+      data: { name: "Support", sortOrder: 1 }
+    });
+
+    const result1 = await createTicket({
+      customerName: "New Customer",
+      customerEmail: "new@example.com",
+      customerPhone: "010-1234-5678",
+      subject: "First Ticket",
+      description: "Hello",
+      categoryId: category.id,
+      priority: "MEDIUM"
+    });
+
+    const customer1 = await prisma.customer.findUnique({
+      where: { email: "new@example.com" }
+    });
+
+    expect(customer1).not.toBeNull();
+    expect(customer1?.name).toBe("New Customer");
+    expect(customer1?.ticketCount).toBe(1);
+    expect(result1.ticket.customerId).toBe(customer1?.id);
+
+    const result2 = await createTicket({
+      customerName: "Updated Name",
+      customerEmail: "new@example.com",
+      customerPhone: "010-9999-9999",
+      subject: "Second Ticket",
+      description: "World",
+      categoryId: category.id,
+      priority: "LOW"
+    });
+
+    const customer2 = await prisma.customer.findUnique({
+      where: { email: "new@example.com" }
+    });
+
+    expect(customer2?.id).toBe(customer1?.id);
+    expect(customer2?.name).toBe("Updated Name");
+    expect(customer2?.phone).toBe("010-9999-9999");
+    expect(customer2?.ticketCount).toBe(2);
+    expect(result2.ticket.customerId).toBe(customer1?.id);
   });
 });

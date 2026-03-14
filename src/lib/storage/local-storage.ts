@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
 
 function sanitizeFilename(filename: string): string {
   const ext = path.extname(filename).toLowerCase();

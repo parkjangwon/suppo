@@ -51,7 +51,8 @@ export default async function TicketPage({ params }: TicketPageProps) {
       attachments: c.attachments.map((a: any) => ({
         id: a.id,
         url: a.fileUrl,
-        filename: a.fileName
+        filename: a.fileName,
+        mimeType: a.mimeType
       }))
     })),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

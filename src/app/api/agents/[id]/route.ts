@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import { getBackofficeSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
+import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
+import { createAuditLog } from "@/lib/audit/logger";
 
 const updateAgentSchema = z.object({
   name: z.string().trim().min(1).optional(),
@@ -12,6 +14,7 @@ const updateAgentSchema = z.object({
     .min(3)
     .refine((value) => value.includes("@"), "유효한 이메일을 입력해주세요")
     .optional(),
+  phone: z.string().trim().optional(),
   role: z.enum(["ADMIN", "AGENT"]).optional(),
   maxTickets: z.number().int().min(1).max(200).optional(),
   isActive: z.boolean().optional(),
@@ -45,6 +48,17 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
   }
 
   const data = parsed.data;
+  const oldAgent = await prisma.agent.findUnique({
+    where: { id },
+    include: {
+      categories: { include: { category: true } },
+      teamMemberships: { include: { team: true } }
+    }
+  });
+
+  if (!oldAgent) {
+    return NextResponse.json({ error: "상담원을 찾을 수 없습니다" }, { status: 404 });
+  }
 
   try {
     const agent = await prisma.agent.update({
@@ -52,6 +66,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       data: {
         ...(data.name ? { name: data.name } : {}),
         ...(data.email ? { email: data.email } : {}),
+        ...(data.phone !== undefined ? { phone: data.phone ? formatPhoneNumberInput(data.phone) : null } : {}),
         ...(data.role ? { role: data.role } : {}),
         ...(typeof data.maxTickets === "number" ? { maxTickets: data.maxTickets } : {}),
         ...(typeof data.isActive === "boolean" ? { isActive: data.isActive } : {}),
@@ -91,6 +106,35 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       }
     });
 
+    await createAuditLog({
+      actorId: session.user.id,
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      actorName: session.user.name || "Unknown",
+      actorEmail: session.user.email || "Unknown",
+      action: "UPDATE",
+      resourceType: "agent",
+      resourceId: agent.id,
+      description: `상담원 정보 수정: ${agent.name} (${agent.email})`,
+      oldValue: {
+        name: oldAgent.name,
+        email: oldAgent.email,
+        role: oldAgent.role,
+        isActive: oldAgent.isActive,
+        maxTickets: oldAgent.maxTickets,
+        categories: oldAgent.categories.map((c) => c.category.name),
+        teams: oldAgent.teamMemberships.map((m) => m.team.name)
+      },
+      newValue: {
+        name: agent.name,
+        email: agent.email,
+        role: agent.role,
+        isActive: agent.isActive,
+        maxTickets: agent.maxTickets,
+        categories: agent.categories.map((c) => c.category.name),
+        teams: agent.teamMemberships.map((m) => m.team.name)
+      }
+    });
+
     return NextResponse.json({ agent });
   } catch (error) {
     const maybeCode = error as { code?: string };
@@ -117,9 +161,33 @@ export async function DELETE(_request: NextRequest, { params }: RouteContext) {
     return NextResponse.json({ error: "본인 계정은 삭제할 수 없습니다" }, { status: 400 });
   }
 
+  const agent = await prisma.agent.findUnique({
+    where: { id }
+  });
+
+  if (!agent) {
+    return NextResponse.json({ error: "상담원을 찾을 수 없습니다" }, { status: 404 });
+  }
+
   try {
     await prisma.agent.delete({
       where: { id }
+    });
+
+    await createAuditLog({
+      actorId: session.user.id,
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      actorName: session.user.name || "Unknown",
+      actorEmail: session.user.email || "Unknown",
+      action: "DELETE",
+      resourceType: "agent",
+      resourceId: id,
+      description: `상담원 삭제: ${agent.name} (${agent.email})`,
+      oldValue: {
+        name: agent.name,
+        email: agent.email,
+        role: agent.role
+      }
     });
 
     return NextResponse.json({ ok: true });

@@ -19,7 +19,7 @@ interface PublicTicketDetailProps {
       createdAt: Date;
       isInternal: boolean;
       author: { name: string } | null;
-      attachments: { id: string; url: string; filename: string }[];
+      attachments: { id: string; url: string; filename: string; mimeType?: string }[];
     }[];
 
   };

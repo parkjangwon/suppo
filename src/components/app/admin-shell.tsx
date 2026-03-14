@@ -4,10 +4,9 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LogOut } from "lucide-react";
+import { LogOut, Users, FileText, LayoutDashboard, Inbox, Users2, GitBranch, Mail, Palette, ClipboardList, Shield, Brain } from "lucide-react";
 import { useBranding } from "@/lib/branding/context";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -35,17 +34,85 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <NavLink href="/admin/dashboard">대시보드</NavLink>
-          <NavLink href="/admin/tickets">티켓 목록</NavLink>
-          <NavLink href="/admin/agents">상담원 관리</NavLink>
-          <NavLink href="/admin/teams">팀 관리</NavLink>
+          <NavLink href="/admin/dashboard">
+            <div className="flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" />
+              <span>대시보드</span>
+            </div>
+          </NavLink>
+          <NavLink href="/admin/tickets">
+            <div className="flex items-center gap-2">
+              <Inbox className="h-4 w-4" />
+              <span>티켓 목록</span>
+            </div>
+          </NavLink>
+          <NavLink href="/admin/agents">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span>상담원 관리</span>
+            </div>
+          </NavLink>
+          <NavLink href="/admin/teams">
+            <div className="flex items-center gap-2">
+              <Users2 className="h-4 w-4" />
+              <span>팀 관리</span>
+            </div>
+          </NavLink>
+          <NavLink href="/admin/customers">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span>고객 관리</span>
+            </div>
+          </NavLink>
           
           <div className="pt-4 mt-4 border-t border-border">
             <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">설정</p>
-            <NavLink href="/admin/settings/request-types">문의 유형</NavLink>
-            <NavLink href="/admin/settings/saml">SAML SSO</NavLink>
-            <NavLink href="/admin/settings/git">Git 연동</NavLink>
-            <NavLink href="/admin/settings/branding">브랜딩</NavLink>
+            <NavLink href="/admin/settings/request-types">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" />
+                <span>문의 유형</span>
+              </div>
+            </NavLink>
+            <NavLink href="/admin/settings/saml">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                <span>SAML SSO</span>
+              </div>
+            </NavLink>
+            <NavLink href="/admin/settings/git">
+              <div className="flex items-center gap-2">
+                <GitBranch className="h-4 w-4" />
+                <span>Git 연동</span>
+              </div>
+            </NavLink>
+            <NavLink href="/admin/settings/email">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                <span>이메일 연동</span>
+              </div>
+            </NavLink>
+            <NavLink href="/admin/settings/branding">
+              <div className="flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                <span>브랜딩</span>
+              </div>
+            </NavLink>
+            <NavLink href="/admin/settings/llm">
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4" />
+                <span>AI 연동</span>
+              </div>
+            </NavLink>
+          </div>
+
+          <div className="pt-4 mt-4 border-t border-border">
+            <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">로그</p>
+            <NavLink href="/admin/audit-logs">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span>감사 로그</span>
+              </div>
+            </NavLink>
           </div>
         </nav>
         <div className="p-4 border-t border-border">
@@ -60,7 +127,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"

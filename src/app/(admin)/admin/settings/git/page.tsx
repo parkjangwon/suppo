@@ -3,8 +3,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { GitSettings } from "@/components/admin/git-settings";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Git 설정 | Crinity",
@@ -33,25 +31,11 @@ export default async function GitSettingsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Git 설정</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            GitHub/GitLab/CodeCommit 연동 설정
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/admin/settings">
-            <Button variant="outline" size="sm">
-              설정 목록
-            </Button>
-          </Link>
-          <Link href="/admin/dashboard">
-            <Button variant="outline" size="sm">
-              대시보드
-            </Button>
-          </Link>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Git 설정</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          GitHub/GitLab/CodeCommit 연동 설정
+        </p>
       </div>
 
       <GitSettings initialCredentials={credentials} />

@@ -98,6 +98,7 @@ enum GitEventType {
 model Ticket {
   id                String         @id @default(cuid())
   ticketNumber      String         @unique
+  customerId        String?
   customerName      String
   customerEmail     String
   customerPhone     String?
@@ -127,6 +128,7 @@ model Ticket {
   assignee      Agent?          @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   team          Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
   requestType   RequestType?    @relation(fields: [requestTypeId], references: [id], onDelete: SetNull)
+  customer      Customer?       @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: SetNull)
   comments      Comment[]
   attachments   Attachment[]
   gitLinks      GitLink[]
@@ -142,6 +144,7 @@ model Ticket {
   @@index([priority])
   @@index([teamId])
   @@index([requestTypeId])
+  @@index([customerId])
   @@index([createdAt])
   @@index([searchVector])
 }
@@ -150,6 +153,7 @@ model Agent {
   id             String       @id @default(cuid())
   name           String
   email          String       @unique
+  phone          String?
   role           AgentRole    @default(AGENT)
   isActive       Boolean      @default(true)
   maxTickets     Int          @default(10)
@@ -173,6 +177,66 @@ model Agent {
   @@index([isActive])
 }
 
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  ASSIGN
+  TRANSFER
+  STATUS_CHANGE
+  PRIORITY_CHANGE
+  SETTINGS_CHANGE
+  PASSWORD_RESET
+  ACTIVATE
+  DEACTIVATE
+}
+
+model AuditLog {
+  id           String      @id @default(cuid())
+  actorId      String
+  actorType    AuthorType
+  actorName    String
+  actorEmail   String
+  action       AuditAction
+  resourceType String
+  resourceId   String?
+  description  String
+  oldValue     Json?
+  newValue     Json?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime    @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+}
+
+model Customer {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  phone          String?
+  memo           String?  @db.Text
+  analysis       String?  @db.Text
+  analyzedAt     DateTime?
+  ticketCount    Int      @default(0)
+  lastTicketAt   DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tickets Ticket[] @relation("CustomerTickets")
+
+  @@index([email])
+  @@index([lastTicketAt])
+}
+
 model Category {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -184,6 +248,7 @@ model Category {
   tickets           Ticket[]
   specializedAgents AgentCategory[]
   templates         ResponseTemplate[]
+  requestType       RequestType? // One-to-one relation with RequestType
 
   @@index([sortOrder])
 }
@@ -393,6 +458,70 @@ model SystemBranding {
   updatedAt         DateTime @updatedAt
 }
 
+// Email Settings (이메일 서버 설정)
+model EmailSettings {
+  id                  String   @id @default("default")
+  
+  // Email Provider
+  provider            String   @default("nodemailer") // nodemailer, ses, resend
+  
+  // SMTP Settings (for nodemailer)
+  smtpHost            String?
+  smtpPort            Int      @default(587)
+  smtpSecure          Boolean  @default(false)
+  smtpUser            String?
+  smtpPassword        String?
+  
+  // Sender Settings
+  fromEmail           String   @default("no-reply@crinity.io")
+  fromName            String   @default("Crinity Ticket")
+  
+  // AWS SES Settings
+  sesAccessKey        String?
+  sesSecretKey        String?
+  sesRegion           String   @default("ap-northeast-2")
+  
+  // Resend API Key
+  resendApiKey        String?
+  
+  // Notification Settings
+  notificationsEnabled Boolean  @default(true)
+  notifyOnNewTicket   Boolean  @default(true)
+  notifyOnAssign      Boolean  @default(true)
+  notifyOnComment     Boolean  @default(true)
+  notifyOnStatusChange Boolean @default(true)
+  notificationEmail   String?
+  
+  // Test Settings
+  testMode            Boolean  @default(false)
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// LLM Settings (AI 분석 설정)
+model LLMSettings {
+  id                  String   @id @default("default")
+  
+  // Provider Selection
+  provider            String   @default("ollama") // ollama, gemini
+  
+  // Ollama Settings
+  ollamaUrl           String   @default("http://localhost:11434")
+  ollamaModel         String   @default("llama3.2")
+  
+  // Gemini Settings
+  geminiApiKey        String?
+  geminiModel         String   @default("gemini-1.5-flash")
+  
+  // Analysis Settings
+  analysisEnabled     Boolean  @default(false)
+  analysisPrompt      String?  @db.Text
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
 // Team (팀/그룹 관리)
 model Team {
   id          String   @id @default(cuid())
@@ -430,6 +559,7 @@ model RequestType {
   channel         RequestTypeChannel  @default(WEB)
   defaultPriority TicketPriority      @default(MEDIUM)
   defaultTeamId   String?
+  categoryId      String?             @unique // Link to Category for agent specialization
   autoAssignEnabled Boolean           @default(true)
   isActive        Boolean             @default(true)
   sortOrder       Int                 @default(0)
@@ -438,9 +568,11 @@ model RequestType {
 
   tickets     Ticket[]
   defaultTeam Team?    @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([isActive])
   @@index([sortOrder])
+  @@index([categoryId])
 }
 
 // Custom Field (커스텀 필드 정의)

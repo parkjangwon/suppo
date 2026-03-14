@@ -80,18 +80,36 @@ function getNextRetryAt(now: Date, nextAttemptCount: number): Date | null {
   return new Date(now.getTime() + retryDelay);
 }
 
-async function createConfiguredProvider(): Promise<EmailProvider> {
-  const configuredProvider = process.env.EMAIL_PROVIDER?.toLowerCase();
+async function createConfiguredProvider(): Promise<EmailProvider | null> {
+  const settings = await prisma.emailSettings.findUnique({
+    where: { id: "default" },
+  });
 
-  if (configuredProvider === "ses") {
+  if (!settings || settings.testMode) {
+    return null;
+  }
+
+  const provider = settings.provider.toLowerCase();
+
+  if (provider === "ses" && settings.sesAccessKey && settings.sesSecretKey) {
+    process.env.AWS_ACCESS_KEY_ID = settings.sesAccessKey;
+    process.env.AWS_SECRET_ACCESS_KEY = settings.sesSecretKey;
+    process.env.AWS_REGION = settings.sesRegion;
     return createSesProvider();
   }
 
-  if (configuredProvider === "resend") {
+  if (provider === "resend" && settings.resendApiKey) {
+    process.env.RESEND_API_KEY = settings.resendApiKey;
     return createResendProvider();
   }
 
-  if (configuredProvider === "nodemailer") {
+  if (provider === "nodemailer" && settings.smtpHost) {
+    process.env.SMTP_HOST = settings.smtpHost;
+    process.env.SMTP_PORT = String(settings.smtpPort);
+    process.env.SMTP_SECURE = String(settings.smtpSecure);
+    process.env.SMTP_USER = settings.smtpUser || "";
+    process.env.SMTP_PASS = settings.smtpPassword || "";
+    process.env.EMAIL_FROM = settings.fromEmail;
     return createNodemailerProvider();
   }
 
@@ -104,7 +122,20 @@ async function createConfiguredProvider(): Promise<EmailProvider> {
 
 export async function processOutbox(input: ProcessOutboxInput = {}): Promise<ProcessOutboxResult> {
   const db = input.db ?? prisma;
+  const settings = await prisma.emailSettings.findUnique({
+    where: { id: "default" },
+  });
+
+  if (settings && !settings.notificationsEnabled) {
+    return { sent: 0, retried: 0, failed: 0, processed: 0 };
+  }
+
   const provider = input.provider ?? (await createConfiguredProvider());
+  
+  if (!provider) {
+    return { sent: 0, retried: 0, failed: 0, processed: 0 };
+  }
+
   const now = input.now ?? new Date();
   const limit = input.limit ?? 25;
 

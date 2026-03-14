@@ -23,6 +23,7 @@
 ### Task 1: Bootstrap The Next.js Monolith And Test Harness
 
 **Files:**
+
 - Create: `package.json`
 - Create: `tsconfig.json`
 - Create: `next.config.ts`
@@ -83,6 +84,7 @@ git commit -m "chore: bootstrap ticket system app"
 ### Task 2: Establish Route Groups, Shells, And Shared UI Foundation
 
 **Files:**
+
 - Create: `src/app/(public)/layout.tsx`
 - Create: `src/app/(admin)/layout.tsx`
 - Create: `src/app/(admin)/admin/login/page.tsx`
@@ -97,7 +99,9 @@ git commit -m "chore: bootstrap ticket system app"
 **Step 1: Write the failing shell test**
 
 ```ts
-test("admin login and public routes render different shells", async ({ page }) => {
+test("admin login and public routes render different shells", async ({
+  page,
+}) => {
   await page.goto("/admin/login");
   await expect(page.getByText("상담원 로그인")).toBeVisible();
   await page.goto("/");
@@ -135,6 +139,7 @@ git commit -m "feat: add app shells and shared ui foundation"
 ### Task 3: Model The Database Schema, Prisma Client, And Seed Data
 
 **Files:**
+
 - Create: `prisma/schema.prisma`
 - Create: `prisma/seed.ts`
 - Create: `src/lib/db/client.ts`
@@ -170,6 +175,7 @@ model Ticket {
 ```
 
 Expand the schema to include the full spec models plus:
+
 - `User`, `Account`, `Session`, `VerificationToken`
 - `GitProviderCredential`
 - `NotificationSetting`
@@ -192,6 +198,7 @@ git commit -m "feat: add prisma schema and seed data"
 ### Task 4: Implement Authentication, Sessions, And Role Guards
 
 **Files:**
+
 - Create: `src/auth.ts`
 - Create: `src/app/api/auth/[...nextauth]/route.ts`
 - Create: `src/lib/auth/config.ts`
@@ -228,7 +235,10 @@ Expected: FAIL because NextAuth and route guards are not configured.
 **Step 3: Write minimal implementation**
 
 ```ts
-export function requireAssignedOrAdmin(session: BackofficeSession, assigneeId: string | null) {
+export function requireAssignedOrAdmin(
+  session: BackofficeSession,
+  assigneeId: string | null,
+) {
   return session.role === "ADMIN" || session.agentId === assigneeId;
 }
 ```
@@ -250,6 +260,7 @@ git commit -m "feat: add auth and role guards"
 ### Task 5: Build Ticket Numbering, Auto-Assignment, And Activity Logging
 
 **Files:**
+
 - Create: `src/lib/assignment/pick-assignee.ts`
 - Create: `src/lib/tickets/create-ticket.ts`
 - Create: `src/lib/tickets/activity.ts`
@@ -270,7 +281,9 @@ it("prefers the least-loaded specialist and breaks ties by oldest assignment", (
 it("creates an unassigned ticket when every candidate is at capacity", async () => {
   const result = await createTicket(buildCreateInput());
   expect(result.ticket.assigneeId).toBeNull();
-  expect(result.activities.some((entry) => entry.action === "ASSIGNED")).toBe(false);
+  expect(result.activities.some((entry) => entry.action === "ASSIGNED")).toBe(
+    false,
+  );
 });
 ```
 
@@ -283,13 +296,20 @@ Expected: FAIL because the assignment service and ticket creation flow do not ex
 
 ```ts
 export function pickAssignee(candidates: CandidateAgent[]) {
-  return candidates
-    .filter((candidate) => candidate.loadRatio < 1)
-    .sort((a, b) => a.loadRatio - b.loadRatio || a.lastAssignedAt.getTime() - b.lastAssignedAt.getTime())[0] ?? null;
+  return (
+    candidates
+      .filter((candidate) => candidate.loadRatio < 1)
+      .sort(
+        (a, b) =>
+          a.loadRatio - b.loadRatio ||
+          a.lastAssignedAt.getTime() - b.lastAssignedAt.getTime(),
+      )[0] ?? null
+  );
 }
 ```
 
 Implement:
+
 - `CRN-${nanoid(10)}` ticket numbers
 - category-affinity filtering
 - load-based assignment with `lastAssignedAt` tie-break
@@ -311,6 +331,7 @@ git commit -m "feat: add ticket creation and assignment services"
 ### Task 6: Deliver Public Ticket Submission With Validation, CAPTCHA, Rate Limits, And Attachments
 
 **Files:**
+
 - Create: `src/app/(public)/ticket/new/page.tsx`
 - Create: `src/app/(public)/ticket/submitted/page.tsx`
 - Create: `src/app/api/tickets/route.ts`
@@ -333,7 +354,9 @@ it("rejects files over 10MB and more than 20 attachments", async () => {
 ```
 
 ```ts
-test("public user can submit a ticket and see the issued number", async ({ page }) => {
+test("public user can submit a ticket and see the issued number", async ({
+  page,
+}) => {
   await page.goto("/ticket/new");
   await page.getByLabel("이름").fill("Kim Customer");
   await page.getByRole("button", { name: "제출" }).click();
@@ -358,6 +381,7 @@ export const ticketSchema = z.object({
 ```
 
 Implement:
+
 - public ticket form
 - `POST /api/tickets`
 - IP-based rate limiting (`5/min`)
@@ -380,6 +404,7 @@ git commit -m "feat: add public ticket submission flow"
 ### Task 7: Implement Secure Ticket Lookup, Public Thread View, And Customer Replies
 
 **Files:**
+
 - Create: `src/app/(public)/ticket/lookup/page.tsx`
 - Create: `src/app/(public)/ticket/[number]/page.tsx`
 - Create: `src/app/api/tickets/lookup/route.ts`
@@ -393,13 +418,18 @@ git commit -m "feat: add public ticket submission flow"
 
 ```ts
 it("returns a ticket only when number and email match", async () => {
-  const response = await lookupTicket({ ticketNumber: "CRN-ABC", email: "wrong@example.com" });
+  const response = await lookupTicket({
+    ticketNumber: "CRN-ABC",
+    email: "wrong@example.com",
+  });
   expect(response.status).toBe(404);
 });
 ```
 
 ```ts
-test("customer cannot see internal notes in the public thread", async ({ page }) => {
+test("customer cannot see internal notes in the public thread", async ({
+  page,
+}) => {
   await page.goto("/ticket/lookup");
   await page.getByLabel("티켓 번호").fill("CRN-VALID123");
   await page.getByLabel("이메일").fill("customer@example.com");
@@ -416,12 +446,16 @@ Expected: FAIL because lookup, signed access cookies, and public comment APIs do
 **Step 3: Write minimal implementation**
 
 ```ts
-export async function issueTicketAccessCookie(ticketNumber: string, email: string) {
+export async function issueTicketAccessCookie(
+  ticketNumber: string,
+  email: string,
+) {
   return sign({ ticketNumber, email }, process.env.TICKET_ACCESS_SECRET!);
 }
 ```
 
 Implement:
+
 - `/ticket/lookup` lookup form and result redirect
 - signed, short-lived ticket-access cookie after successful lookup
 - `/ticket/[number]` public thread page
@@ -443,6 +477,7 @@ git commit -m "feat: add customer lookup and reply flow"
 ### Task 8: Ship Admin Ticket List, Detail Actions, Comments, And Internal Notes
 
 **Files:**
+
 - Create: `src/app/(admin)/admin/tickets/page.tsx`
 - Create: `src/app/(admin)/admin/tickets/[id]/page.tsx`
 - Create: `src/app/api/tickets/[id]/route.ts`
@@ -490,6 +525,7 @@ export async function listTickets(input: TicketListInput) {
 ```
 
 Implement:
+
 - cursor-based pagination (default 20)
 - filtering by status, category, priority, assignee
 - search by ticket number, subject, customer email
@@ -513,6 +549,7 @@ git commit -m "feat: add admin ticket list and detail workflows"
 ### Task 9: Add Ticket Transfer, Agent Management, Category Affinity, And Deactivation Reassignment
 
 **Files:**
+
 - Create: `src/app/(admin)/admin/agents/page.tsx`
 - Create: `src/app/api/agents/route.ts`
 - Create: `src/app/api/agents/[id]/deactivate/route.ts`
@@ -540,12 +577,20 @@ Expected: FAIL because transfer services, deactivation logic, and admin agent sc
 **Step 3: Write minimal implementation**
 
 ```ts
-export async function transferTicket(ticketId: string, fromAgentId: string, toAgentId: string, reason?: string) {
-  return prisma.ticketTransfer.create({ data: { ticketId, fromAgentId, toAgentId, reason } });
+export async function transferTicket(
+  ticketId: string,
+  fromAgentId: string,
+  toAgentId: string,
+  reason?: string,
+) {
+  return prisma.ticketTransfer.create({
+    data: { ticketId, fromAgentId, toAgentId, reason },
+  });
 }
 ```
 
 Implement:
+
 - transfer UI and API
 - `TicketTransfer` history rows
 - agent CRUD for admins
@@ -568,6 +613,7 @@ git commit -m "feat: add ticket transfer and agent management"
 ### Task 10: Build Dashboard Metrics, Response Templates, And Admin Settings
 
 **Files:**
+
 - Create: `src/app/(admin)/admin/dashboard/page.tsx`
 - Create: `src/app/(admin)/admin/templates/page.tsx`
 - Create: `src/app/(admin)/admin/settings/page.tsx`
@@ -605,6 +651,7 @@ export async function getDashboardMetrics() {
 ```
 
 Implement:
+
 - today / week / month intake metrics
 - unassigned count
 - average first-response and resolution time
@@ -627,6 +674,7 @@ git commit -m "feat: add dashboard templates and settings"
 ### Task 11: Add Email Outbox, Provider Adapters, And Retry Handling
 
 **Files:**
+
 - Create: `src/lib/email/enqueue.ts`
 - Create: `src/lib/email/process-outbox.ts`
 - Create: `src/lib/email/providers/nodemailer.ts`
@@ -669,6 +717,7 @@ export function nextRetryAt(attemptCount: number, now = new Date()) {
 ```
 
 Implement:
+
 - outbox rows for each notification event
 - provider adapter selection by environment
 - retry scheduling up to three attempts
@@ -690,6 +739,7 @@ git commit -m "feat: add resilient email delivery pipeline"
 ### Task 12: Implement Git Provider Settings, Token Encryption, And Issue Linking
 
 **Files:**
+
 - Create: `src/lib/crypto/encrypt.ts`
 - Create: `src/lib/git/provider.ts`
 - Create: `src/lib/git/providers/github.ts`
@@ -733,6 +783,7 @@ export interface GitProvider {
 ```
 
 Implement:
+
 - AES-256-GCM encrypt/decrypt utilities using `GIT_TOKEN_ENCRYPTION_KEY`
 - provider settings save/load
 - GitHub issue search/create
@@ -755,6 +806,7 @@ git commit -m "feat: add git provider integration"
 ### Task 13: Finish Dockerized Local Development And Full-System Verification
 
 **Files:**
+
 - Create: `Dockerfile`
 - Create: `docker-compose.yml`
 - Create: `.env.example`
@@ -764,13 +816,16 @@ git commit -m "feat: add git provider integration"
 **Step 1: Write the failing system verification test**
 
 ```ts
-test("customer and agent can complete the core ticket lifecycle", async ({ browser }) => {
+test("customer and agent can complete the core ticket lifecycle", async ({
+  browser,
+}) => {
   const context = await browser.newContext();
   expect(context).toBeTruthy();
 });
 ```
 
 Document the full regression sequence in the spec order:
+
 - customer creates ticket
 - customer receives ticket number
 - agent sees assignment
@@ -793,6 +848,7 @@ services:
 ```
 
 Implement:
+
 - PostgreSQL + app services in `docker-compose.yml`
 - production-minded `Dockerfile`
 - `.env.example` with auth, DB, mail, storage, CAPTCHA, and encryption variables

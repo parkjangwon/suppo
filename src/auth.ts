@@ -16,7 +16,7 @@ import BoxyHQSAML from "@/lib/auth/providers/boxyhq-saml";
 import { prisma } from "@/lib/db/client";
 
 const DEFAULT_ADMIN_EMAIL = "admin@crinity.io";
-const DEFAULT_ADMIN_PASSWORD = "admin123";
+const DEFAULT_ADMIN_PASSWORD = "admin1234";
 const DEFAULT_ADMIN_PASSWORD_HASH = hashSync(DEFAULT_ADMIN_PASSWORD, 10);
 const HAS_DATABASE = Boolean(process.env.DATABASE_URL);
 
