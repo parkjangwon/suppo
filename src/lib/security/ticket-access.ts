@@ -1,6 +1,13 @@
 import { sign, verify } from "jsonwebtoken";
 
-const TICKET_ACCESS_SECRET = process.env.TICKET_ACCESS_SECRET || "fallback-secret-for-dev";
+if (!process.env.TICKET_ACCESS_SECRET) {
+  throw new Error(
+    "TICKET_ACCESS_SECRET environment variable is required. " +
+    "Please set a strong secret (min 32 characters) in your .env file."
+  );
+}
+
+const TICKET_ACCESS_SECRET = process.env.TICKET_ACCESS_SECRET;
 
 export async function issueTicketAccessCookie(
   ticketNumber: string,

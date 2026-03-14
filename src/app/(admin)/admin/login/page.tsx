@@ -39,11 +39,11 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-      <Card className="w-full max-w-md border-slate-800 bg-slate-900 text-slate-50">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background">
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-bold tracking-tight">상담원 로그인</CardTitle>
-          <CardDescription className="text-slate-400">관리자 계정으로 로그인하세요</CardDescription>
+          <CardDescription>관리자 계정으로 로그인하세요</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleCredentialsLogin}>
@@ -60,7 +60,6 @@ export default function AdminLoginPage() {
                 placeholder="admin@crinity.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="border-slate-800 bg-slate-950 text-slate-50 placeholder:text-slate-500"
                 autoComplete="email"
                 required
               />
@@ -77,22 +76,21 @@ export default function AdminLoginPage() {
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="border-slate-800 bg-slate-950 text-slate-50"
                 autoComplete="current-password"
                 required
               />
             </div>
-            {errorMessage ? <p className="text-sm text-rose-400">{errorMessage}</p> : null}
-            <Button type="submit" className="w-full bg-blue-600 text-white hover:bg-blue-700" disabled={isPending}>
+            {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
+            <Button type="submit" className="w-full" disabled={isPending}>
               로그인
             </Button>
           </form>
 
-          <div className="mt-4 space-y-2 border-t border-slate-800 pt-4">
+          <div className="mt-4 space-y-2 border-t pt-4">
             <Button
               type="button"
               variant="outline"
-              className="w-full border-slate-700 bg-transparent text-slate-100 hover:bg-slate-800"
+              className="w-full"
               onClick={() => signIn("google", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
             >
               Google로 계속하기
@@ -100,14 +98,14 @@ export default function AdminLoginPage() {
             <Button
               type="button"
               variant="outline"
-              className="w-full border-slate-700 bg-transparent text-slate-100 hover:bg-slate-800"
+              className="w-full"
               onClick={() => signIn("github", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
             >
               GitHub로 계속하기
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="justify-center text-xs text-slate-500">
+        <CardFooter className="justify-center text-xs text-muted-foreground">
           OAuth 공급자 설정은 환경변수를 통해 활성화됩니다.
         </CardFooter>
       </Card>

@@ -1,59 +1,51 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/db/client";
+import { addComment, getAdminTicketDetail, updateTicketStatus } from "@/lib/db/queries/admin-tickets";
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  if (!session?.user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    const body = await request.json();
+    const { ticketId, content, isInternal } = body;
 
-  const body = await request.json();
-  const { ticketId, content, isInternal } = body;
+    if (!ticketId || !content) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
 
-  if (!ticketId || !content) {
-    return Response.json(
-      { error: "Missing required fields" },
-      { status: 400 }
-    );
-  }
+    const ticket = await getAdminTicketDetail(ticketId, session.user.agentId, session.user.role as "ADMIN" | "AGENT");
 
-  // Check permissions
-  const ticket = await prisma.ticket.findUnique({
-    where: { id: ticketId },
-    select: { assigneeId: true, customerEmail: true },
-  });
+    if (!ticket) {
+      return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+    }
 
-  if (!ticket) {
-    return Response.json({ error: "Ticket not found" }, { status: 404 });
-  }
-
-  const isAdmin = session.user.role === "ADMIN";
-  const isAssignee = ticket.assigneeId === session.user.agentId;
-
-  if (!isAdmin && !isAssignee) {
-    return Response.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  const comment = await prisma.comment.create({
-    data: {
+    const comment = await addComment({
       ticketId,
-      authorType: "AGENT",
+      content,
+      isInternal: isInternal || false,
       authorId: session.user.agentId,
       authorName: session.user.name,
       authorEmail: session.user.email,
-      content,
-      isInternal: isInternal || false,
-    },
-  });
-
-  if (!isInternal && ticket.assigneeId) {
-    await prisma.ticket.update({
-      where: { id: ticketId },
-      data: { status: "IN_PROGRESS" },
     });
-  }
 
-  return Response.json(comment);
+    if (!isInternal && ticket.assigneeId && ticket.status !== "IN_PROGRESS") {
+      await updateTicketStatus(ticketId, "IN_PROGRESS", session.user.agentId);
+    }
+
+    return NextResponse.json(comment, { status: 201 });
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
 }
+
+
+

@@ -3,11 +3,21 @@ export async function verifyCaptcha(token: string): Promise<boolean> {
     return true;
   }
 
+  if (process.env.NODE_ENV === "development" && token === "dev-token-bypass") {
+    console.log("Development mode: Bypassing CAPTCHA with dev token");
+    return true;
+  }
+
   const secretKey = process.env.TURNSTILE_SECRET_KEY;
   
   if (!secretKey) {
-    console.warn("TURNSTILE_SECRET_KEY is not set. Bypassing CAPTCHA verification.");
-    return true;
+    if (process.env.NODE_ENV === "development") {
+      console.warn("TURNSTILE_SECRET_KEY is not set. Bypassing CAPTCHA verification in development mode.");
+      return true;
+    }
+    
+    console.error("TURNSTILE_SECRET_KEY is not set in production. Blocking request.");
+    return false;
   }
 
   try {

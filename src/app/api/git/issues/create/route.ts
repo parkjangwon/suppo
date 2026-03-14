@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { decryptToken } from "@/lib/crypto/encrypt";
 import { parseProvider, validateRepoFullName } from "@/lib/git/provider";
@@ -21,6 +22,15 @@ function createProviderClient(provider: "GITHUB" | "GITLAB" | "CODECOMMIT", toke
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const body = (await request.json()) as {
       provider?: string;
       repoFullName?: string;
@@ -34,6 +44,30 @@ export async function POST(request: Request) {
         { error: "provider와 repoFullName은 필수입니다." },
         { status: 400 }
       );
+    }
+
+    if (body.ticketId) {
+      const ticket = await prisma.ticket.findUnique({
+        where: { id: body.ticketId },
+        select: { assigneeId: true }
+      });
+
+      if (!ticket) {
+        return NextResponse.json(
+          { error: "Ticket not found" },
+          { status: 404 }
+        );
+      }
+
+      const isAdmin = session.user.role === "ADMIN";
+      const isAssignee = ticket.assigneeId === session.user.agentId;
+
+      if (!isAdmin && !isAssignee) {
+        return NextResponse.json(
+          { error: "Forbidden: You can only link issues to your assigned tickets" },
+          { status: 403 }
+        );
+      }
     }
 
     const provider = parseProvider(body.provider);
@@ -103,11 +137,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ issue }, { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Git create issue error:", error);
 
     return NextResponse.json(
-      { error: `이슈 생성에 실패했습니다: ${message}` },
-      { status: 400 }
+      { error: "이슈 생성에 실패했습니다." },
+      { status: 500 }
     );
   }
 }

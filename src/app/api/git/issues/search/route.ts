@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { decryptToken } from "@/lib/crypto/encrypt";
 import { parseProvider, resolveLimit, validateRepoFullName } from "@/lib/git/provider";
@@ -21,6 +22,15 @@ function createProviderClient(provider: "GITHUB" | "GITLAB" | "CODECOMMIT", toke
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const providerParam = request.nextUrl.searchParams.get("provider");
     const repoParam = request.nextUrl.searchParams.get("repo");
     const query = request.nextUrl.searchParams.get("q") ?? undefined;
@@ -61,11 +71,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ issues });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Git search error:", error);
 
     return NextResponse.json(
-      { error: `이슈 검색에 실패했습니다: ${message}` },
-      { status: 400 }
+      { error: "이슈 검색에 실패했습니다." },
+      { status: 500 }
     );
   }
 }
