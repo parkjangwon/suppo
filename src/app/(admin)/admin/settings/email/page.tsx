@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { EmailSettingsForm } from "@/components/admin/email-settings-form";
 
 export const metadata: Metadata = {
-  title: "이메일 설정 | Crinity",
+  title: "이메일 연동 | Crinity",
 };
 
 export default async function EmailSettingsPage() {
