@@ -237,65 +237,53 @@ npx tsx scripts/seed-admin.ts
 
 ## 🔐 환경 변수
 
-### 필수 설정
+### 설계 철학
+
+Crinity Helpdesk는 **최소한의 환경 변수**만 `.env` 파일에서 관리하고, 나머지 모든 설정은 **웹 관리 콘솔**에서 관리할 수 있도록 설계되었습니다.
+
+### 필수 설정 (`.env` 파일)
+
+이 값들은 애플리케이션 시작 시 반드시 필요하며, 데이터베이스 연결 및 핵심 보안 기능에 사용됩니다.
 
 ```bash
 # Database (필수)
 DATABASE_URL="postgresql://user:password@localhost:5432/crinity"
 
-# Auth (필수)
+# Auth (필수) - 세션 암호화용, 최소 32자 권장
 AUTH_SECRET="your-secret-key-min-32-characters"
-AUTH_TRUST_HOST=true  # 로컬 개발 시 필요
+AUTH_URL="http://localhost:3000"
 
-# Ticket Access (필수)
+# Ticket Access (필수) - 티켓 접근 토큰 서명용, 최소 32자 권장
 TICKET_ACCESS_SECRET="another-secret-key-for-ticket-access"
-```
 
-### 선택 설정
-
-```bash
-# OAuth (선택)
-AUTH_GOOGLE_ID="your-google-client-id"
-AUTH_GOOGLE_SECRET="your-google-client-secret"
-AUTH_GITHUB_ID="your-github-client-id"
-AUTH_GITHUB_SECRET="your-github-client-secret"
-
-# 이메일 (SMTP/SES/Resend)
-SMTP_HOST="smtp.example.com"
-SMTP_PORT="587"
-SMTP_USER="user@example.com"
-SMTP_PASS="password"
-
-# AWS SES
-SES_ACCESS_KEY="your-access-key"
-SES_SECRET_KEY="your-secret-key"
-SES_REGION="ap-northeast-2"
-
-# Resend
-RESEND_API_KEY="your-resend-api-key"
-
-# 파일 저장 (프로덕션)
-AWS_ACCESS_KEY_ID="your-access-key"
-AWS_SECRET_ACCESS_KEY="your-secret-key"
-AWS_REGION="ap-northeast-2"
-AWS_S3_BUCKET_NAME="crinity-uploads"
-
-# LLM (선택)
-OLLAMA_URL="http://localhost:11434"
-OLLAMA_MODEL="llama3.2"
-GEMINI_API_KEY="your-gemini-api-key"
-
-# Git 연동
+# Git Integration (필수) - Git 토큰 암호화용, 32바이트 권장
 GIT_TOKEN_ENCRYPTION_KEY="32-byte-encryption-key"
 
-# SAML SSO
-AUTH_BOXYHQ_SAML_ID=""
-AUTH_BOXYHQ_SAML_SECRET=""
-AUTH_BOXYHQ_SAML_ISSUER=""
-
-# Initial Admin Account (최초 관리자 계정)
+# Initial Admin Account (필수) - 최초 관리자 계정
 INITIAL_ADMIN_EMAIL="admin@crinity.io"
 INITIAL_ADMIN_PASSWORD="admin1234"
+```
+
+### 웹 콘솔에서 관리되는 설정
+
+다음 설정들은 `.env` 파일이 아닌 **관리자 웹 콘솔**에서 관리됩니다:
+
+| 설정 카테고리 | 관리 경로 | 설명 |
+|--------------|----------|------|
+| **이메일 설정** | `/admin/settings/email` | SMTP, AWS SES, Resend 설정 |
+| **AI/LLM 설정** | `/admin/settings/llm` | Ollama, Google Gemini API 키 |
+| **브랜딩** | `/admin/settings/branding` | 로고, 색상, 회사명, 푸터 정보 |
+| **SAML SSO** | `/admin/settings/saml` | 기업 SSO 연동 설정 |
+| **문의 유형** | `/admin/settings/request-types` | 티켓 문의 유형 관리 |
+| **Git 연동** | `/admin/settings/git` | GitHub/GitLab 토큰 설정 |
+
+### Docker Compose 전용 (선택)
+
+```bash
+# PostgreSQL (Docker Compose 사용 시에만 필요)
+POSTGRES_USER=user
+POSTGRES_PASSWORD=pass
+POSTGRES_DB=crinity
 ```
 
 ---
