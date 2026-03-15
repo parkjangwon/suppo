@@ -121,7 +121,7 @@ export default function CalendarPage() {
       const res = await fetch("/api/agents");
       if (!res.ok) throw new Error("Failed to fetch agents");
       const data = await res.json();
-      setAgents(data);
+      setAgents(data.agents || []);
     } catch (error) {
       toast.error("상담원 목록을 불러오는 중 오류가 발생했습니다.");
     }
