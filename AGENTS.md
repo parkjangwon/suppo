@@ -1,8 +1,8 @@
-# AGENTS.md - Crinity Ticket System 유지보수 가이드
+# AGENTS.md - Crinity Helpdesk System 유지보수 가이드
 
 > **다음 유지보수 담당자를 위한 가이드**
 > 
-> 이 문서는 Crinity 티켓 시스템의 아키텍처, 핵심 로직, 주의사항, 문제 해결 방법을 정리합니다.
+> 이 문서는 Crinity 헬프데스크 시스템의 아키텍처, 핵심 로직, 주의사항, 문제 해결 방법을 정리합니다.
 
 ## 📋 목차
 

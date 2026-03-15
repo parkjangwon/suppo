@@ -39,7 +39,7 @@ export function EmailSettingsForm() {
     smtpSecure: false,
     smtpUser: "",
     fromEmail: "no-reply@crinity.io",
-    fromName: "Crinity Ticket",
+    fromName: "Crinity Helpdesk",
     sesAccessKey: "",
     sesRegion: "ap-northeast-2",
     resendApiKey: "",
