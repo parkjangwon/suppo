@@ -187,7 +187,8 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
               <CommentSection 
                 ticketId={ticket.id} 
                 comments={ticket.comments} 
-                canEdit={canEdit} 
+                canEdit={canEdit}
+                requestTypeId={ticket.requestTypeId}
               />
             </TabsContent>
             

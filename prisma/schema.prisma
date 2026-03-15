@@ -227,6 +227,7 @@ enum AuditAction {
   PASSWORD_RESET
   ACTIVATE
   DEACTIVATE
+  USE
 }
 
 model AuditLog {
@@ -370,21 +371,25 @@ model TicketTransfer {
 }
 
 model ResponseTemplate {
-  id          String   @id @default(cuid())
-  title       String
-  content     String
-  variables   Json?    // 사용 가능한 변수 목록 [{"name": "customer.name", "description": "고객 이름"}]
-  categoryId  String?
-  createdById String
-  isShared    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  content        String
+  variables      Json?    // 사용 가능한 변수 목록 [{"name": "customer.name", "description": "고객 이름"}]
+  categoryId     String?
+  requestTypeId  String?  // 추천 대상 문의 유형
+  createdById    String
+  isShared       Boolean  @default(true)
+  isRecommended  Boolean  @default(false) // 추천 여부
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  createdBy Agent     @relation("TemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  requestType RequestType? @relation(fields: [requestTypeId], references: [id], onDelete: SetNull)
+  createdBy   Agent        @relation("TemplateCreator", fields: [createdById], references: [id], onDelete: Restrict)
 
   @@index([categoryId])
+  @@index([requestTypeId])
   @@index([createdById])
   @@index([sortOrder])
 }
@@ -605,9 +610,10 @@ model RequestType {
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
-  tickets     Ticket[]
-  defaultTeam Team?    @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
-  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tickets          Ticket[]
+  responseTemplates ResponseTemplate[]
+  defaultTeam      Team?    @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
+  category         Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([isActive])
   @@index([sortOrder])
