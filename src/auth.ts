@@ -26,6 +26,7 @@ type AuthenticatedAgent = {
   name: string;
   role: BackofficeRole;
   agentId: string;
+  isInitialPassword?: boolean;
 };
 
 async function ensureDefaultAdminSeed() {
@@ -69,13 +70,15 @@ function toAuthenticatedAgent(agent: {
   email: string;
   name: string;
   role: BackofficeRole;
+  isInitialPassword?: boolean;
 }): AuthenticatedAgent {
   return {
     id: agent.id,
     agentId: agent.id,
     email: agent.email,
     name: agent.name,
-    role: agent.role
+    role: agent.role,
+    isInitialPassword: agent.isInitialPassword
   };
 }
 
@@ -121,7 +124,16 @@ const providers: Provider[] = [
         await ensureDefaultAdminSeed();
 
         const agent = await prisma.agent.findUnique({
-          where: { email }
+          where: { email },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            role: true,
+            passwordHash: true,
+            isActive: true,
+            isInitialPassword: true
+          }
         });
 
         if (!agent || !agent.passwordHash || !agent.isActive) {
@@ -231,7 +243,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       (user as AuthenticatedAgent).role = agent.role;
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         const backofficeUser = user as Partial<AuthenticatedAgent>;
         token.sub = backofficeUser.id ?? token.sub;
@@ -239,20 +251,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.name = backofficeUser.name ?? token.name;
         token.role = backofficeUser.role;
         token.agentId = backofficeUser.agentId ?? backofficeUser.id ?? token.sub;
+        token.isInitialPassword = backofficeUser.isInitialPassword ?? false;
       }
 
-      if (HAS_DATABASE && (!token.role || !token.agentId) && token.sub) {
-        const agent = await prisma.agent.findUnique({
-          where: { id: token.sub },
-          select: {
-            role: true,
-            id: true
-          }
-        });
+      if (HAS_DATABASE && token.sub) {
+        const shouldFetch = !token.role || !token.agentId || (trigger === "update");
+        if (shouldFetch) {
+          const agent = await prisma.agent.findUnique({
+            where: { id: token.sub },
+            select: {
+              role: true,
+              id: true,
+              isInitialPassword: true
+            }
+          });
 
-        if (agent && isBackofficeRole(agent.role)) {
-          token.role = agent.role;
-          token.agentId = agent.id;
+          if (agent && isBackofficeRole(agent.role)) {
+            token.role = agent.role;
+            token.agentId = agent.id;
+            token.isInitialPassword = agent.isInitialPassword ?? false;
+          }
         }
       }
 
@@ -268,6 +286,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.name = token.name ?? "";
       session.user.role = isBackofficeRole(token.role) ? token.role : "AGENT";
       session.user.agentId = typeof token.agentId === "string" ? token.agentId : token.sub ?? "";
+      (session.user as { isInitialPassword?: boolean }).isInitialPassword = token.isInitialPassword as boolean ?? false;
 
       return session;
     }
