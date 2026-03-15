@@ -31,7 +31,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
-      <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col">
+      <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col h-screen sticky top-0">
         <div className="h-16 flex items-center px-6 border-b border-border">
           <Link 
             href="/admin/dashboard" 
