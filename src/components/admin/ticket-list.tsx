@@ -15,6 +15,7 @@ export interface Ticket {
   status: string;
   priority: string;
   category: { name: string } | null;
+  requestType: { name: string } | null;
   assignee: { name: string } | null;
   createdAt: Date | string;
 }
@@ -93,7 +94,7 @@ export function TicketList({
                 우선순위
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                카테고리
+                문의 유형
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
                 담당자
@@ -131,7 +132,7 @@ export function TicketList({
                     {priorityLabels[ticket.priority]}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-sm">{ticket.category?.name || "-"}</td>
+                <td className="px-4 py-3 text-sm">{ticket.requestType?.name || "-"}</td>
                 <td className="px-4 py-3 text-sm">
                   {ticket.assignee?.name || (
                     <span className="text-gray-400">미할당</span>

@@ -116,11 +116,11 @@ export function TicketFilters({ categories, agents }: TicketFiltersProps) {
           value={searchParams.get("categoryId") || "all"}
           onValueChange={(value) => handleFilterChange("categoryId", value)}
         >
-          <SelectTrigger aria-label="카테고리 필터">
-            <SelectValue placeholder="카테고리" />
+          <SelectTrigger aria-label="문의 유형 필터">
+            <SelectValue placeholder="문의 유형" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 카테고리</SelectItem>
+            <SelectItem value="all">모든 문의 유형</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.name}
