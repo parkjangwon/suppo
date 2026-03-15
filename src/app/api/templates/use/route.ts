@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
       select: {
         id: true,
         title: true,
+        isShared: true,
+        createdById: true,
       },
     });
 
@@ -36,6 +38,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "템플릿을 찾을 수 없습니다." },
         { status: 404 }
+      );
+    }
+
+    const hasAccess = template.isShared || template.createdById === session.user.id;
+    if (!hasAccess) {
+      return NextResponse.json(
+        { error: "이 템플릿을 사용할 권한이 없습니다." },
+        { status: 403 }
       );
     }
 

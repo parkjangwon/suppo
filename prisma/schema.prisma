@@ -797,4 +797,24 @@ model SavedFilter {
   @@index([isShared])
 }
 
+// Git Operation Queue (Git 연동 실패 시 재시도)
+model GitOperationQueue {
+  id            String      @id @default(cuid())
+  operation     String      // CREATE_ISSUE, LINK_ISSUE, etc.
+  provider      GitProvider
+  payload       Json        // 요청 데이터
+  status        String      @default("PENDING") // PENDING, PROCESSING, SUCCESS, FAILED
+  retryCount    Int         @default(0)
+  maxRetries    Int         @default(3)
+  errorCode     String?     // TIMEOUT, AUTH_FAILED, RATE_LIMIT, etc.
+  errorMessage  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  processedAt   DateTime?
+
+  @@index([status])
+  @@index([retryCount])
+  @@index([createdAt])
+}
+
 
