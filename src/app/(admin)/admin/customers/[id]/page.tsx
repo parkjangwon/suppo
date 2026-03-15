@@ -25,6 +25,7 @@ interface Customer {
   name: string;
   email: string;
   phone: string | null;
+  organization: string | null;
   ticketCount: number;
   memo: string | null;
   analysis: string | null;
@@ -166,6 +167,12 @@ export default function CustomerDetailPage() {
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">전화번호</div>
                   <div>{formatPhoneNumber(customer.phone)}</div>
+                </div>
+              )}
+              {customer.organization && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">소속</div>
+                  <div>{customer.organization}</div>
                 </div>
               )}
               <div>

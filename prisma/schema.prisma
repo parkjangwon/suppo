@@ -161,6 +161,8 @@ model Agent {
   avatarUrl      String?
   authProvider   AuthProvider @default(CREDENTIALS)
   passwordHash   String?
+  passwordChangedAt DateTime?
+  isInitialPassword Boolean   @default(false)
   lastAssignedAt DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt

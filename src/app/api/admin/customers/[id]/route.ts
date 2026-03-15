@@ -33,6 +33,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
             ticketNumber: true,
             subject: true,
             status: true,
+            customerOrganization: true,
             createdAt: true,
           },
           orderBy: {
@@ -51,11 +52,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Customer not found" }, { status: 404 });
     }
 
+    // Get organization from the most recent ticket
+    const latestTicket = customer.tickets[0];
+    const organization = latestTicket?.customerOrganization || null;
+
     return NextResponse.json({
       id: customer.id,
       email: customer.email,
       name: customer.name,
       phone: customer.phone,
+      organization,
       memo: customer.memo,
       analysis: customer.analysis,
       analyzedAt: customer.analyzedAt,
