@@ -6,7 +6,7 @@
 
 **Architecture:** Start from the current docs-only workspace and bootstrap a single Next.js App Router application. Keep business logic in `src/lib/**` service modules, keep Route Handlers and Server Actions thin, use Prisma/PostgreSQL for source-of-truth state, and add a DB-backed email outbox so notification failures never block ticket workflows. Public ticket detail access should be protected by a signed cookie minted after a successful ticket-number-plus-email lookup.
 
-**Tech Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui, Prisma ORM, PostgreSQL, NextAuth.js v5, Zod, React Hook Form, Nodemailer, AWS SDK v3, Vitest, Playwright, Docker Compose
+**Tech Stack:** Next.js 15, React 19, TypeScript, Tailwind CSS, shadcn/ui, Prisma ORM, SQLite, NextAuth.js v5, Zod, React Hook Form, Nodemailer, AWS SDK v3, Vitest, Playwright
 
 ---
 
