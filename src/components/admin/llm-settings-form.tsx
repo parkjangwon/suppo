@@ -235,9 +235,12 @@ export function LLMSettingsForm() {
               onChange={(event) =>
                 setSettings({ ...settings, analysisPrompt: event.target.value })
               }
-              placeholder="예: 고객 문의를 한국어로 분류하고, 우선순위와 답변 초안을 제안해 주세요."
+              placeholder="추가 분석 지시사항을 입력하세요. 티켓 히스토리는 자동으로 포함됩니다.&#10;&#10;예: 고객 문의를 한국어로 분류하고, 우선순위와 답변 초안을 제안해 주세요."
               rows={5}
             />
+            <p className="text-sm text-muted-foreground">
+              비워두면 기본 분석 지시사항이 사용됩니다. 티켓 히스토리 데이터는 항상 포함됩니다.
+            </p>
           </div>
         </CardContent>
       </Card>

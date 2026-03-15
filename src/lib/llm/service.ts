@@ -5,8 +5,8 @@ import { callOllama } from "@/lib/llm/providers/ollama";
 
 const DEFAULT_SETTINGS_ID = "default";
 
-const DEFAULT_PROMPT_TEMPLATE =
-  "다음은 고객의 티켓 히스토리입니다. 이 고객의 문의 패턴, 주요 이슈, 우선순위 경향, 전반적인 특성을 분석해주세요.\n\n티켓 목록:\n{tickets}\n\n분석 결과:";
+const DEFAULT_ANALYSIS_INSTRUCTIONS =
+  "이 고객의 문의 패턴, 주요 이슈, 우선순위 경향, 전반적인 특성을 분석해주세요.";
 
 function formatDateTime(value: Date | null): string {
   if (!value) {
@@ -38,11 +38,18 @@ function formatTicketHistory(tickets: Ticket[]): string {
     .join("\n\n");
 }
 
-function buildPrompt(template: string | null, tickets: Ticket[]): string {
-  const promptTemplate = template?.trim() || DEFAULT_PROMPT_TEMPLATE;
+function buildPrompt(customInstructions: string | null, tickets: Ticket[]): string {
   const ticketText = formatTicketHistory(tickets);
+  const instructions = customInstructions?.trim() || DEFAULT_ANALYSIS_INSTRUCTIONS;
 
-  return promptTemplate.replace("{tickets}", ticketText);
+  return `다음은 고객의 티켓 히스토리입니다.
+
+티켓 목록:
+${ticketText}
+
+${instructions}
+
+분석 결과:`;
 }
 
 async function getLlmSettings(): Promise<LLMSettings> {
