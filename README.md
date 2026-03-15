@@ -77,7 +77,7 @@
 
 | 기능 | 설명 |
 |------|-------------|
-| **티켓 작성** | 이름, 이메일, 전화번호, 카테고리, 우선순위, 제목, 내용, 첨부파일 |
+| **티켓 작성** | 이름, 이메일, 전화번호, 소속, 문의 유형(RequestType), 우선순위, 제목, 내용, 첨부파일 |
 | **CAPTCHA** | Cloudflare Turnstile로 봇 방지 |
 | **Rate Limiting** | IP당 분당 5회 제한 |
 | **첨부파일** | 최대 10MB, 20개, 이미지/문서/압축파일 지원 |
@@ -95,7 +95,7 @@
 | **티켓 양도** | 다른 상담원으로 양도, 사유 기록 |
 | **상담원 관리** | CRUD, 전화번호 관리, 비활성화 시 자동 재할당 |
 | **고객 관리** | 고객 프로필, 티켓 이력, 메모, AI 분석 |
-| **응답 템플릿** | 자주 사용하는 응답 템플릿 관리 |
+| **응답 템플릿** | 자주 사용하는 응답 템플릿 관리, 변수 치환({{ticket.id}}, {{customer.name}} 등), 조걸 렌더링 지원 |
 | **Git 연동** | GitHub/GitLab 이슈 연결/생성 |
 
 ### 3. 설정 기능
@@ -107,7 +107,7 @@
 | **브랜딩** | 도메인별 커스텀 로고, 색상, 파비콘 설정 |
 | **SAML SSO** | 기업 SSO 연동 (BoxyHQ) |
 | **문의 유형** | 카테고리별 기본 담당 팀, 우선순위 설정 |
-| **SLA 정책** | 서비스 레벨 계약 설정 |
+| **SLA 정책** | 서비스 레벨 계약 설정, WAITING 상태에서 자동 일시정지 |
 
 ### 4. 감사 및 보안
 
@@ -121,7 +121,7 @@
 
 | 기능 | 설명 |
 |------|-------------|
-| **이메일 알림** | 티켓 접수/할당/응답/상태변경 시 알림 |
+| **이메일 알림** | 티켓 접수/할당/응답/상태변경 시 알림, 스레딩 헤더 지원 |
 | **Outbox 패턴** | 이메일 발송 실패 시 재시도 (최대 3회) |
 | **AI 고객 분석** | 티켓 히스토리 기반 고객 패턴 분석 |
 | **파일 저장** | 개발: 로컬, 프로덕션: AWS S3 |
@@ -219,10 +219,20 @@ open http://localhost:3000
 
 ### 초기 관리자 계정
 
-시드 실행 후 기본 계정:
+`.env` 파일의 `INITIAL_ADMIN_EMAIL`과 `INITIAL_ADMIN_PASSWORD`로 관리자 계정이 생성됩니다:
 
-- **이메일**: `admin@crinity.io`
-- **비밀번호**: `admin1234`
+```bash
+# .env
+INITIAL_ADMIN_EMAIL=admin@crinity.io
+INITIAL_ADMIN_PASSWORD=admin1234
+```
+
+시드 스크립트 실행:
+```bash
+npx tsx scripts/seed-admin.ts
+```
+
+> **보안 주의**: 최초 로그인 시 반드시 비밀번호를 변경해야 합니다. 시스템이 자동으로 비밀번호 변경 페이지로 리다이렉트합니다.
 
 ---
 
@@ -286,6 +296,10 @@ GIT_TOKEN_ENCRYPTION_KEY="32-byte-encryption-key"
 AUTH_BOXYHQ_SAML_ID=""
 AUTH_BOXYHQ_SAML_SECRET=""
 AUTH_BOXYHQ_SAML_ISSUER=""
+
+# Initial Admin Account (최초 관리자 계정)
+INITIAL_ADMIN_EMAIL="admin@crinity.io"
+INITIAL_ADMIN_PASSWORD="admin1234"
 ```
 
 ---
@@ -294,10 +308,11 @@ AUTH_BOXYHQ_SAML_ISSUER=""
 
 ### 핵심 엔티티
 
-- `Ticket` - 티켓 정보
-- `Agent` - 상담원 정보 (전화번호 포함)
+- `Ticket` - 티켓 정보 (소속, 문의 유형 포함)
+- `Agent` - 상담원 정보 (전화번호, 비밀번호 변경 이력 포함)
 - `Customer` - 고객 정보 (AI 분석 포함)
-- `Category` - 티켓 카테고리
+- `Category` - 티켓 카테고리 (상담원 전문성)
+- `RequestType` - 문의 유형 (티켓 생성 시 선택)
 - `Comment` - 코멘트/댓글
 - `Attachment` - 첨부파일
 - `AuditLog` - 감사로그 (모든 활동 기록)
@@ -305,9 +320,11 @@ AUTH_BOXYHQ_SAML_ISSUER=""
 - `EmailSettings` - 이메일 프로바이더 설정
 - `TicketActivity` - 티켓 활동 로그
 - `TicketTransfer` - 티켓 양도 이력
-- `ResponseTemplate` - 응답 템플릿
+- `ResponseTemplate` - 응답 템플릿 (변수 치환, 조걸 렌더링)
 - `GitLink` - Git 이슈 연결
-- `EmailDelivery` - 이메일 발송 큐
+- `EmailDelivery` - 이메일 발송 큐 (Outbox 패턴)
+- `EmailThreadMapping` - 이메일 스레딩 관리
+- `SLAClock` - SLA 시간 추적 (일시정지/재개 지원)
 
 ### Prisma 명령어
 
