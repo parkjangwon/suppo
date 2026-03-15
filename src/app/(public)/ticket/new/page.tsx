@@ -1,5 +1,5 @@
 import { TicketForm } from "@/components/ticket/ticket-form";
-import { listCategories } from "@/lib/db/queries/categories";
+import { prisma } from "@/lib/db/client";
 import { getSystemBranding } from "@/lib/db/queries/branding";
 
 export async function generateMetadata() {
@@ -9,14 +9,22 @@ export async function generateMetadata() {
   };
 }
 
+async function listActiveRequestTypes() {
+  return prisma.requestType.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, name: true, description: true },
+  });
+}
+
 export default async function NewTicketPage() {
   const branding = await getSystemBranding();
-  
-  let categories = [];
+
+  let requestTypes: Awaited<ReturnType<typeof listActiveRequestTypes>> = [];
   try {
-    categories = await listCategories();
+    requestTypes = await listActiveRequestTypes();
   } catch (error) {
-    console.error("Failed to load categories:", error);
+    console.error("Failed to load request types:", error);
   }
 
   return (
@@ -24,7 +32,7 @@ export default async function NewTicketPage() {
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-10">
-            <h1 
+            <h1
               className="text-3xl md:text-4xl font-bold mb-4"
               style={{ color: branding.primaryColor }}
             >
@@ -36,7 +44,7 @@ export default async function NewTicketPage() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
-            <TicketForm categories={categories} />
+            <TicketForm requestTypes={requestTypes} />
           </div>
         </div>
       </div>

@@ -12,10 +12,10 @@ import { Loader2 } from "lucide-react";
 import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
 
 interface TicketFormProps {
-  categories: { id: string; name: string }[];
+  requestTypes: { id: string; name: string; description?: string | null }[];
 }
 
-export function TicketForm({ categories }: TicketFormProps) {
+export function TicketForm({ requestTypes }: TicketFormProps) {
   const router = useRouter();
   const branding = useBranding();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,43 +110,58 @@ export function TicketForm({ categories }: TicketFormProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="customerPhone" className="text-slate-700">
-          전화번호
-        </Label>
-        <input
-          id="customerPhone"
-          type="tel"
-          {...register("customerPhone")}
-          onChange={(e) => {
-            const formatted = formatPhoneNumberInput(e.target.value);
-            e.target.value = formatted;
-            register("customerPhone").onChange(e);
-          }}
-          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
-          placeholder="010-1234-5678"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="customerPhone" className="text-slate-700">
+            전화번호
+          </Label>
+          <input
+            id="customerPhone"
+            type="tel"
+            {...register("customerPhone")}
+            onChange={(e) => {
+              const formatted = formatPhoneNumberInput(e.target.value);
+              e.target.value = formatted;
+              register("customerPhone").onChange(e);
+            }}
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
+            placeholder="010-1234-5678"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="customerOrganization" className="text-slate-700">
+            소속/회사
+          </Label>
+          <input
+            id="customerOrganization"
+            type="text"
+            {...register("customerOrganization")}
+            className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
+            placeholder="회사명 또는 소속 기관"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="categoryId" className="text-slate-700">
-            카테고리 <span className="text-red-500">*</span>
+          <Label htmlFor="requestTypeId" className="text-slate-700">
+            문의 유형 <span className="text-red-500">*</span>
           </Label>
           <select
-            id="categoryId"
-            {...register("categoryId")}
+            id="requestTypeId"
+            {...register("requestTypeId")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all bg-white"
           >
             <option value="">선택해주세요</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
+            {requestTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
               </option>
             ))}
           </select>
-          {errors.categoryId && (
-            <p className="text-sm text-red-500">{errors.categoryId.message}</p>
+          {errors.requestTypeId && (
+            <p className="text-sm text-red-500">{errors.requestTypeId.message}</p>
           )}
         </div>
 

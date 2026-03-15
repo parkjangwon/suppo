@@ -110,13 +110,18 @@ interface CreateTicketTxClient extends CandidateQueryClient {
         customerName: string;
         customerEmail: string;
         customerPhone?: string;
+        customerOrganization?: string;
         subject: string;
         description: string;
         categoryId: string;
+        requestTypeId?: string;
         priority: TicketPriority;
         assigneeId?: string;
       };
     }) => Promise<TicketRecord>;
+  };
+  requestType: {
+    findUnique: (args: { where: { id: string }; include?: { category?: boolean } }) => Promise<{ id: string; categoryId?: string | null; category?: { id: string } | null } | null>;
   };
   agent: CandidateQueryClient["agent"] & {
     update: (args: { where: { id: string }; data: { lastAssignedAt: Date } }) => Promise<unknown>;
@@ -139,9 +144,10 @@ export interface CreateTicketInput {
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
+  customerOrganization?: string;
   subject: string;
   description: string;
-  categoryId: string;
+  requestTypeId: string;
   priority: TicketPriority;
 }
 
@@ -226,8 +232,19 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
 
     try {
       return await prisma.$transaction(async (tx: CreateTicketTxClient) => {
-        const candidates = await buildCandidates(tx, input.categoryId);
-        const assignee = pickAssignee(candidates, input.categoryId);
+        // Get request type and its category
+        const requestType = await tx.requestType.findUnique({
+          where: { id: input.requestTypeId },
+          include: { category: true }
+        });
+
+        if (!requestType) {
+          throw new Error("Invalid request type");
+        }
+
+        const categoryId = requestType.categoryId || input.requestTypeId;
+        const candidates = await buildCandidates(tx, categoryId);
+        const assignee = pickAssignee(candidates, categoryId);
 
         const customer = await tx.customer.upsert({
           where: { email: input.customerEmail },
@@ -253,9 +270,11 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
             customerName: input.customerName,
             customerEmail: input.customerEmail,
             customerPhone: input.customerPhone,
+            customerOrganization: input.customerOrganization,
             subject: input.subject,
             description: input.description,
-            categoryId: input.categoryId,
+            categoryId: categoryId,
+            requestTypeId: input.requestTypeId,
             priority: input.priority,
             assigneeId: assignee?.id
           }

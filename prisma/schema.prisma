@@ -102,6 +102,7 @@ model Ticket {
   customerName      String
   customerEmail     String
   customerPhone     String?
+  customerOrganization String?
   subject           String
   description       String
   categoryId        String

@@ -61,12 +61,13 @@ export async function POST(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    
+
     const data = {
       customerName: formData.get("customerName") as string,
       customerEmail: formData.get("customerEmail") as string,
       customerPhone: (formData.get("customerPhone") as string) || undefined,
-      categoryId: formData.get("categoryId") as string,
+      customerOrganization: (formData.get("customerOrganization") as string) || undefined,
+      requestTypeId: formData.get("requestTypeId") as string,
       priority: formData.get("priority") as string,
       subject: formData.get("subject") as string,
       description: formData.get("description") as string,
@@ -97,7 +98,8 @@ export async function POST(request: NextRequest) {
       customerName: validationResult.data.customerName,
       customerEmail: validationResult.data.customerEmail,
       customerPhone: validationResult.data.customerPhone,
-      categoryId: validationResult.data.categoryId,
+      customerOrganization: validationResult.data.customerOrganization,
+      requestTypeId: validationResult.data.requestTypeId,
       priority: validationResult.data.priority as "URGENT" | "HIGH" | "MEDIUM" | "LOW",
       subject: validationResult.data.subject,
       description: validationResult.data.description,
