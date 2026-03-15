@@ -11,7 +11,6 @@ export const ticketFormSchema = z.object({
   }),
   subject: z.string().min(5, "제목은 5자 이상이어야 합니다"),
   description: z.string().min(20, "내용은 20자 이상이어야 합니다"),
-  captchaToken: z.string().min(1, "CAPTCHA를 완료해주세요"),
 });
 
 export type TicketFormValues = z.infer<typeof ticketFormSchema>;
