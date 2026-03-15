@@ -15,8 +15,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
   const isLoginPage = pathname === "/admin/login";
+  const isPasswordChangePage = pathname === "/admin/change-password";
 
-  if (isLoginPage) {
+  if (isLoginPage || isPasswordChangePage) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         {children}
