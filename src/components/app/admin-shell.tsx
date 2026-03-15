@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogOut, Users, FileText, LayoutDashboard, Inbox, Users2, GitBranch, Mail, Palette, ClipboardList, Shield, Brain, Calendar } from "lucide-react";
@@ -12,6 +12,8 @@ import { useBranding } from "@/lib/branding/context";
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const branding = useBranding();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
   const isLoginPage = pathname === "/admin/login";
 
   if (isLoginPage) {
@@ -71,65 +73,69 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
           </NavLink>
 
-          <div className="pt-4 mt-4 border-t border-border">
-            <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">설정</p>
-            <NavLink href="/admin/settings/request-types">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="h-4 w-4" />
-                <span>문의 유형</span>
-              </div>
-            </NavLink>
-            <NavLink href="/admin/settings/saml">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                <span>SAML SSO</span>
-              </div>
-            </NavLink>
-            <NavLink href="/admin/settings/git">
-              <div className="flex items-center gap-2">
-                <GitBranch className="h-4 w-4" />
-                <span>Git 연동</span>
-              </div>
-            </NavLink>
-            <NavLink href="/admin/settings/email">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                <span>이메일 연동</span>
-              </div>
-            </NavLink>
-            <NavLink href="/admin/settings/branding">
-              <div className="flex items-center gap-2">
-                <Palette className="h-4 w-4" />
-                <span>브랜딩</span>
-              </div>
-            </NavLink>
-            <NavLink href="/admin/settings/llm">
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4" />
-                <span>AI 연동</span>
-              </div>
-            </NavLink>
-          </div>
+          {isAdmin && (
+            <div className="pt-4 mt-4 border-t border-border">
+              <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">설정</p>
+              <NavLink href="/admin/settings/request-types">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="h-4 w-4" />
+                  <span>문의 유형</span>
+                </div>
+              </NavLink>
+              <NavLink href="/admin/settings/saml">
+                <div className="flex items-center gap-2">
+                  <Shield className="h-4 w-4" />
+                  <span>SAML SSO</span>
+                </div>
+              </NavLink>
+              <NavLink href="/admin/settings/git">
+                <div className="flex items-center gap-2">
+                  <GitBranch className="h-4 w-4" />
+                  <span>Git 연동</span>
+                </div>
+              </NavLink>
+              <NavLink href="/admin/settings/email">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span>이메일 연동</span>
+                </div>
+              </NavLink>
+              <NavLink href="/admin/settings/branding">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4" />
+                  <span>브랜딩</span>
+                </div>
+              </NavLink>
+              <NavLink href="/admin/settings/llm">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  <span>AI 연동</span>
+                </div>
+              </NavLink>
+            </div>
+          )}
 
-          <div className="pt-4 mt-4 border-t border-border">
-            <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">로그</p>
-            <NavLink href="/admin/audit-logs">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>감사 로그</span>
-              </div>
-            </NavLink>
-          </div>
+          {isAdmin && (
+            <div className="pt-4 mt-4 border-t border-border">
+              <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">로그</p>
+              <NavLink href="/admin/audit-logs">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  <span>감사 로그</span>
+                </div>
+              </NavLink>
+            </div>
+          )}
         </nav>
         <div className="p-4 border-t border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                A
+                {session?.user?.name?.[0] || "U"}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">Admin</span>
-                <span className="text-xs text-muted-foreground">관리자</span>
+                <span className="text-sm font-medium">{session?.user?.name || "User"}</span>
+                <span className="text-xs text-muted-foreground">{isAdmin ? "관리자" : "상담원"}</span>
               </div>
             </div>
             <div className="flex items-center gap-1">

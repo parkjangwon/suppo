@@ -18,9 +18,6 @@ export default async function AdminAgentsPage() {
   }
 
   const isAdmin = session.user.role === "ADMIN";
-  if (!isAdmin) {
-    redirect("/admin/dashboard");
-  }
 
   if (!process.env.DATABASE_URL) {
     return (
@@ -37,6 +34,8 @@ export default async function AdminAgentsPage() {
     );
   }
 
+  const now = new Date();
+
   const [agents, categories, teams] = await Promise.all([
     prisma.agent.findMany({
       include: {
@@ -50,6 +49,19 @@ export default async function AdminAgentsPage() {
             team: {
               select: { id: true, name: true },
             },
+          },
+        },
+        absences: {
+          where: {
+            startDate: { lte: now },
+            endDate: { gte: now },
+          },
+          take: 1,
+          select: {
+            id: true,
+            type: true,
+            startDate: true,
+            endDate: true,
           },
         },
         _count: {
@@ -93,6 +105,7 @@ export default async function AdminAgentsPage() {
         initialAgents={agents}
         categories={categories}
         teams={teams}
+        isAdmin={isAdmin}
       />
     </div>
   );

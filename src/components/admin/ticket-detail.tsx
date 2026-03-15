@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommentSection } from "./comment-section";
+import { GitIntegrationSection } from "@/components/ticket/git-integration-section";
 import { toast } from "sonner";
 
 interface TicketDetailProps {
@@ -289,6 +290,14 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
           </Card>
         </div>
       </div>
+
+      <GitIntegrationSection
+        ticketId={ticket.id}
+        ticketNumber={ticket.ticketNumber}
+        ticketSubject={ticket.subject}
+        ticketDescription={ticket.description}
+        initialLinks={ticket.gitLinks || []}
+      />
     </div>
   );
 }
