@@ -78,6 +78,12 @@ interface AgentItem {
   _count?: {
     assignedTickets: number;
   };
+  absences?: Array<{
+    id: string;
+    type: string;
+    startDate: Date;
+    endDate: Date;
+  }>;
 }
 
 interface TeamItem {
@@ -89,6 +95,7 @@ interface AgentListProps {
   initialAgents: AgentItem[];
   categories: CategoryItem[];
   teams?: TeamItem[];
+  isAdmin?: boolean;
 }
 
 interface AgentFormState {
@@ -113,7 +120,7 @@ const EMPTY_FORM: AgentFormState = {
   leaderTeamId: "",
 };
 
-export function AgentList({ initialAgents, categories, teams = [] }: AgentListProps) {
+export function AgentList({ initialAgents, categories, teams = [], isAdmin = false }: AgentListProps) {
   const [agents, setAgents] = useState(initialAgents);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -366,10 +373,12 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
             className="pl-10"
           />
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)} size="lg" className="gap-2">
-          <Plus className="w-4 h-4" />
-          상담원 추가
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setIsCreateDialogOpen(true)} size="lg" className="gap-2">
+            <Plus className="w-4 h-4" />
+            상담원 추가
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -407,42 +416,44 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
                     )}
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openEditDialog(agent)}>
-                      정보 수정
-                    </DropdownMenuItem>
-                    {agent.isActive ? (
-                      <DropdownMenuItem
-                        onClick={() => handleDeactivate(agent)}
-                        className="text-amber-600"
-                      >
-                        비활성화
+                {isAdmin && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openEditDialog(agent)}>
+                        정보 수정
                       </DropdownMenuItem>
-                    ) : (
+                      {agent.isActive ? (
+                        <DropdownMenuItem
+                          onClick={() => handleDeactivate(agent)}
+                          className="text-amber-600"
+                        >
+                          비활성화
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => {
+                            /* 활성화 로직 */
+                          }}
+                          className="text-emerald-600"
+                        >
+                          활성화
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => {
-                          /* 활성화 로직 */
-                        }}
-                        className="text-emerald-600"
+                        onClick={() => handleDelete(agent)}
+                        className="text-destructive"
                       >
-                        활성화
+                        삭제
                       </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => handleDelete(agent)}
-                      className="text-destructive"
-                    >
-                      삭제
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </CardHeader>
             <CardContent className="pt-0 space-y-3">
@@ -468,6 +479,14 @@ export function AgentList({ initialAgents, categories, teams = [] }: AgentListPr
                 >
                   {agent.isActive ? "활성" : "비활성"}
                 </Badge>
+                {agent.absences && agent.absences.length > 0 && (
+                  <Badge
+                    variant="outline"
+                    className="bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-200"
+                  >
+                    부재중
+                  </Badge>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-sm">
