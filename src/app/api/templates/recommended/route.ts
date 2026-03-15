@@ -79,10 +79,14 @@ export async function GET(request: NextRequest) {
         })
       : [];
 
+    const orderedRecentTemplates = recentlyUsedIds
+      .map(id => recentTemplates.find(t => t.id === id))
+      .filter((t): t is NonNullable<typeof t> => t !== undefined);
+
     return NextResponse.json({
       recommended: recommendedTemplates,
       general: generalTemplates,
-      recent: recentTemplates
+      recent: orderedRecentTemplates
     });
   } catch (error) {
     console.error("Recommended templates GET error:", error);
