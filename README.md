@@ -246,8 +246,8 @@ Crinity Helpdesk는 **최소한의 환경 변수**만 `.env` 파일에서 관리
 이 값들은 애플리케이션 시작 시 반드시 필요하며, 데이터베이스 연결 및 핵심 보안 기능에 사용됩니다.
 
 ```bash
-# Database (필수)
-DATABASE_URL="postgresql://user:password@localhost:5432/crinity"
+# Database (필수) - SQLite 데이터베이스 파일 경로
+DATABASE_URL="file:./prisma/dev.db"
 
 # Auth (필수) - 세션 암호화용, 최소 32자 권장
 AUTH_SECRET="your-secret-key-min-32-characters"
@@ -276,15 +276,6 @@ INITIAL_ADMIN_PASSWORD="admin1234"
 | **SAML SSO** | `/admin/settings/saml` | 기업 SSO 연동 설정 |
 | **문의 유형** | `/admin/settings/request-types` | 티켓 문의 유형 관리 |
 | **Git 연동** | `/admin/settings/git` | GitHub/GitLab 토큰 설정 |
-
-### Docker Compose 전용 (선택)
-
-```bash
-# PostgreSQL (Docker Compose 사용 시에만 필요)
-POSTGRES_USER=user
-POSTGRES_PASSWORD=pass
-POSTGRES_DB=crinity
-```
 
 ---
 
