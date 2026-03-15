@@ -37,7 +37,7 @@
 - **고객 중심**: 고객이 쉽게 문의하고 추적할 수 있는 직관적인 인터페이스
 - **효율적 운영**: 자동 할당과 로드밸런싱으로 상담원 업무 분배
 - **AI 활용**: LLM 연동을 통한 고객 행동 분석 및 인사이트 제공
-- **보안 강화**: 감사로그, CAPTCHA, Rate Limiting, Signed Cookie
+- **보안 강화**: 감사로그, Rate Limiting, Signed Cookie
 - **확장성**: Git 연동, 이메일 알림, 첨부파일 지원, SAML SSO
 
 ---
@@ -78,7 +78,6 @@
 | 기능 | 설명 |
 |------|-------------|
 | **티켓 작성** | 이름, 이메일, 전화번호, 소속, 문의 유형(RequestType), 우선순위, 제목, 내용, 첨부파일 |
-| **CAPTCHA** | Cloudflare Turnstile로 봇 방지 |
 | **Rate Limiting** | IP당 분당 5회 제한 |
 | **첨부파일** | 최대 10MB, 20개, 이미지/문서/압축파일 지원 |
 | **티켓 조회** | 티켓번호 + 이메일 인증, Signed Cookie 발급 |
@@ -280,9 +279,6 @@ AWS_ACCESS_KEY_ID="your-access-key"
 AWS_SECRET_ACCESS_KEY="your-secret-key"
 AWS_REGION="ap-northeast-2"
 AWS_S3_BUCKET_NAME="crinity-uploads"
-
-# CAPTCHA
-TURNSTILE_SECRET_KEY="your-turnstile-secret"
 
 # LLM (선택)
 OLLAMA_URL="http://localhost:11434"
