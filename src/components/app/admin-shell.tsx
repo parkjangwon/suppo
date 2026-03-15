@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LogOut, Users, FileText, LayoutDashboard, Inbox, Users2, GitBranch, Mail, Palette, ClipboardList, Shield, Brain, Calendar } from "lucide-react";
+import { LogOut, Users, FileText, LayoutDashboard, Inbox, Users2, GitBranch, Mail, Palette, ClipboardList, Shield, Brain, Calendar, FileCode } from "lucide-react";
 import { useBranding } from "@/lib/branding/context";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -108,17 +108,27 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </div>
               </NavLink>
               <NavLink href="/admin/settings/llm">
-                <div className="flex items-center gap-2">
-                  <Brain className="h-4 w-4" />
-                  <span>AI 연동</span>
-                </div>
-              </NavLink>
-            </div>
-          )}
-
-          {isAdmin && (
-            <div className="pt-4 mt-4 border-t border-border">
-              <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">로그</p>
+                 <div className="flex items-center gap-2">
+                   <Brain className="h-4 w-4" />
+                   <span>AI 연동</span>
+                 </div>
+               </NavLink>
+             </div>
+           )}
+ 
+           <div className="pt-4 mt-4 border-t border-border">
+             <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">도구</p>
+             <NavLink href="/admin/templates">
+               <div className="flex items-center gap-2">
+                 <FileCode className="h-4 w-4" />
+                 <span>응답 템플릿</span>
+               </div>
+             </NavLink>
+           </div>
+ 
+           {isAdmin && (
+             <div className="pt-4 mt-4 border-t border-border">
+               <p className="px-3 text-xs font-semibold text-muted-foreground mb-2">로그</p>
               <NavLink href="/admin/audit-logs">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />

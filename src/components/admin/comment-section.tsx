@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { AttachmentUpload } from "@/components/ticket/attachment-upload";
+import { TemplateSelector } from "./template-selector";
 import { Paperclip, Image as ImageIcon, FileText, Download } from "lucide-react";
 
 export interface Comment {
@@ -25,6 +26,7 @@ interface CommentSectionProps {
   ticketId: string;
   comments: Comment[];
   canEdit: boolean;
+  requestTypeId?: string | null;
 }
 
 function isImageFile(mimeType?: string | null): boolean {
@@ -40,7 +42,7 @@ function getFileIcon(mimeType?: string | null) {
   return <FileText className="h-4 w-4" />;
 }
 
-export function CommentSection({ ticketId, comments, canEdit }: CommentSectionProps) {
+export function CommentSection({ ticketId, comments, canEdit, requestTypeId }: CommentSectionProps) {
   const router = useRouter();
   const [reply, setReply] = useState("");
   const [isInternal, setIsInternal] = useState(false);
@@ -188,17 +190,24 @@ export function CommentSection({ ticketId, comments, canEdit }: CommentSectionPr
               />
             </div>
             
-            <div className="flex items-center justify-between pt-2 border-t">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="internal"
-                  aria-label="내부 메모로 저장"
-                  checked={isInternal}
-                  onCheckedChange={(checked) => setIsInternal(checked === true)}
+             <div className="flex items-center justify-between pt-2 border-t">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="internal"
+                    aria-label="낶부 메모로 저장"
+                    checked={isInternal}
+                    onCheckedChange={(checked) => setIsInternal(checked === true)}
+                  />
+                  <Label htmlFor="internal" className="text-sm cursor-pointer">
+                    낶부 메모로 저장
+                  </Label>
+                </div>
+                <TemplateSelector
+                  requestTypeId={requestTypeId}
+                  onSelect={(content) => setReply((prev) => prev + (prev ? "\n\n" : "") + content)}
+                  disabled={loading}
                 />
-                <Label htmlFor="internal" className="text-sm cursor-pointer">
-                  내부 메모로 저장
-                </Label>
               </div>
               <Button 
                 onClick={submitReply} 
@@ -206,8 +215,8 @@ export function CommentSection({ ticketId, comments, canEdit }: CommentSectionPr
               >
                 {loading ? "전송중..." : "전송"}
               </Button>
-            </div>
-          </CardContent>
+             </div>
+           </CardContent>
         </Card>
       )}
     </div>

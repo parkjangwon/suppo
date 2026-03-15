@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { parseProvider, validateRepoFullName } from "@/lib/git/provider";
+import { createAuditLog } from "@/lib/audit/logger";
 
 function validateIssueUrl(url: string): boolean {
   try {
@@ -152,6 +153,26 @@ export async function POST(request: Request) {
         repoFullName,
         issueNumber: Number(body.issueNumber),
         issueUrl: body.issueUrl.trim()
+      }
+    });
+
+    await createAuditLog({
+      actorId: session.user.id,
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      actorName: session.user.name || "Unknown",
+      actorEmail: session.user.email || "Unknown",
+      action: "CREATE",
+      resourceType: "git_link",
+      resourceId: link.id,
+      description: `Git 이슈 연결: ${provider} ${repoFullName}#${body.issueNumber}`,
+      newValue: {
+        provider,
+        repoFullName,
+        issueNumber: body.issueNumber,
+        issueUrl: body.issueUrl.trim()
+      },
+      metadata: {
+        ticketId: body.ticketId
       }
     });
 

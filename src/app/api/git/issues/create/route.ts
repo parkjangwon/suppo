@@ -6,6 +6,7 @@ import { parseProvider, validateRepoFullName } from "@/lib/git/provider";
 import { GitHubProvider } from "@/lib/git/providers/github";
 import { GitLabProvider } from "@/lib/git/providers/gitlab";
 import { CodeCommitProvider } from "@/lib/git/providers/codecommit";
+import { createAuditLog } from "@/lib/audit/logger";
 
 function createProviderClient(provider: "GITHUB" | "GITLAB" | "CODECOMMIT", token: string) {
   switch (provider) {
@@ -133,6 +134,27 @@ export async function POST(request: Request) {
       repoFullName,
       title,
       body: description
+    });
+
+    await createAuditLog({
+      actorId: session.user.id,
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      actorName: session.user.name || "Unknown",
+      actorEmail: session.user.email || "Unknown",
+      action: "CREATE",
+      resourceType: "git_issue",
+      resourceId: String(issue.number),
+      description: `Git 이슈 생성: ${provider} ${repoFullName}#${issue.number}`,
+      newValue: {
+        provider,
+        repoFullName,
+        issueNumber: issue.number,
+        issueUrl: issue.url,
+        title
+      },
+      metadata: {
+        ticketId: body.ticketId
+      }
     });
 
     return NextResponse.json({ issue }, { status: 201 });
