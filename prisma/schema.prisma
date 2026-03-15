@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -118,8 +118,8 @@ model Ticket {
   resolvedAt        DateTime?
   closedAt          DateTime?
   reopenedCount     Int            @default(0)
-  tags              String[]       @default([])
-  searchVector      Unsupported("tsvector")?
+  tags              String?        @default("[]")
+  searchVector      String?
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   createdBy         String?
@@ -258,8 +258,8 @@ model Customer {
   email          String   @unique
   name           String
   phone          String?
-  memo           String?  @db.Text
-  analysis       String?  @db.Text
+  memo           String?
+  analysis       String?
   analyzedAt     DateTime?
   ticketCount    Int      @default(0)
   lastTicketAt   DateTime?
@@ -372,7 +372,7 @@ model TicketTransfer {
 model ResponseTemplate {
   id          String   @id @default(cuid())
   title       String
-  content     String   @db.Text
+  content     String
   variables   Json?    // 사용 가능한 변수 목록 [{"name": "customer.name", "description": "고객 이름"}]
   categoryId  String?
   createdById String
@@ -449,7 +449,7 @@ model SAMLProvider {
   idpEntityId       String   // Identity Provider Entity ID
   idpSsoUrl         String   // SSO URL
   idpSloUrl         String?  // Single Logout URL (optional)
-  idpCertificate    String   @db.Text // X.509 Certificate
+  idpCertificate    String // X.509 Certificate
   
   // SP Configuration (자동 생성)
   spAcsUrl          String   // Assertion Consumer Service URL
@@ -491,7 +491,7 @@ model SystemBranding {
 
   // Feature Flags
   showPoweredBy     Boolean  @default(true) // "Powered by Crinity" 표시 여부
-  customCss         String?  @db.Text // 커스텀 CSS
+  customCss         String? // 커스텀 CSS
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -555,7 +555,7 @@ model LLMSettings {
   
   // Analysis Settings
   analysisEnabled     Boolean  @default(false)
-  analysisPrompt      String?  @db.Text
+  analysisPrompt      String?
   
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -699,7 +699,7 @@ model BusinessCalendar {
   timezone      String     @default("Asia/Seoul")
   workStartHour Int        @default(9) // 24시간 형식
   workEndHour   Int        @default(18)
-  workDays      Int[]      @default([1, 2, 3, 4, 5]) // 0=일, 1=월, ..., 6=토
+  workDays      String?    @default("[1,2,3,4,5]") // 0=일, 1=월, ..., 6=토
   isActive      Boolean    @default(true)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -713,7 +713,7 @@ model Holiday {
   id          String   @id @default(cuid())
   calendarId  String
   name        String
-  date        DateTime @db.Date
+  date        DateTime
   isRecurring Boolean  @default(false) // 매년 반복
   createdAt   DateTime @default(now())
 
@@ -729,7 +729,7 @@ model EmailThreadMapping {
   ticketId        String
   messageId       String   @unique // 이메일 Message-ID 헤더
   inReplyTo       String? // In-Reply-To 헤더
-  references      String[] // References 헤더 배열
+  references      String?  // References 헤더 배열 (JSON)
   subject         String
   fromAddress     String
   toAddress       String
