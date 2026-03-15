@@ -183,12 +183,20 @@ function isTicketNumberConflict(error: unknown): boolean {
 }
 
 async function buildCandidates(db: CandidateQueryClient, categoryId: string): Promise<CandidateAgent[]> {
+  const now = new Date();
+
   const agents = await db.agent.findMany({
     where: {
       isActive: true,
       role: "AGENT",
       categories: {
         some: { categoryId }
+      },
+      absences: {
+        none: {
+          startDate: { lte: now },
+          endDate: { gte: now }
+        }
       }
     },
     select: {
