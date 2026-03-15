@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19">
   <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma" alt="Prisma">
-  <img src="https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite" alt="SQLite">
 </p>
 
 ---
@@ -56,7 +56,7 @@
 - **Server Actions**
 - **NextAuth.js v5** (Auth.js)
 - **Prisma ORM**
-- **PostgreSQL 16**
+- **SQLite 3**
 
 ### AI 및 연동
 - **Ollama** (로컬 LLM)
@@ -66,7 +66,7 @@
 - **GitHub/GitLab API** (이슈 연동)
 
 ### 인프라
-- **Docker & Docker Compose**
+- **Docker** (선택사항, 배포용)
 - **pnpm** (패키지 매니저)
 
 ---
@@ -160,7 +160,7 @@ crinity-helpdesk/
 │   └── types/                 # TypeScript 타입
 ├── scripts/                   # 유틸리티 스크립트
 ├── tests/                     # 테스트 파일
-└── docker-compose.yml         # Docker 설정
+└── Dockerfile                 # Docker 배포 설정
 ```
 
 ---
@@ -171,27 +171,10 @@ crinity-helpdesk/
 
 - **Node.js** 20.x 이상
 - **pnpm** 10.x 이상
-- **Docker** (선택사항)
-- **PostgreSQL** 16 (로컬 설치 시)
+- **Docker** (선택사항, 컨테이너 배포 시)
+- **SQLite** 3 (내장, 별도 설치 불필요)
 
-### 방법 1: Docker Compose (권장)
-
-```bash
-# 1. 저장소 클론
-git clone <repository-url>
-cd crinity-helpdesk
-
-# 2. 환경 변수 설정
-cp .env.example .env
-
-# 3. Docker Compose 실행
-docker compose up --build
-
-# 4. 브라우저 접속
-open http://localhost:3000
-```
-
-### 방법 2: 로컬 개발
+### 로컬 개발 환경 설정
 
 ```bash
 # 1. 의존성 설치
