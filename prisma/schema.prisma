@@ -105,7 +105,7 @@ model Ticket {
   customerOrganization String?
   subject           String
   description       String
-  categoryId        String
+  categoryId        String?
   priority          TicketPriority
   status            TicketStatus   @default(OPEN)
   assigneeId        String?
@@ -125,7 +125,7 @@ model Ticket {
   createdBy         String?
   updatedBy         String?
 
-  category      Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   assignee      Agent?          @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   team          Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
   requestType   RequestType?    @relation(fields: [requestTypeId], references: [id], onDelete: SetNull)

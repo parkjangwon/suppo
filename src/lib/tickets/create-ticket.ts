@@ -182,16 +182,18 @@ function isTicketNumberConflict(error: unknown): boolean {
   return false;
 }
 
-async function buildCandidates(db: CandidateQueryClient, categoryId: string): Promise<CandidateAgent[]> {
+async function buildCandidates(db: CandidateQueryClient, categoryId: string | null): Promise<CandidateAgent[]> {
   const now = new Date();
 
   const agents = await db.agent.findMany({
     where: {
       isActive: true,
       role: "AGENT",
-      categories: {
-        some: { categoryId }
-      },
+      ...(categoryId ? {
+        categories: {
+          some: { categoryId }
+        }
+      } : {}),
       absences: {
         none: {
           startDate: { lte: now },
@@ -250,9 +252,9 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
           throw new Error("Invalid request type");
         }
 
-        const categoryId = requestType.categoryId || input.requestTypeId;
+        const categoryId = requestType.categoryId ?? null;
         const candidates = await buildCandidates(tx, categoryId);
-        const assignee = pickAssignee(candidates, categoryId);
+        const assignee = pickAssignee(candidates, categoryId ?? undefined);
 
         const customer = await tx.customer.upsert({
           where: { email: input.customerEmail },
