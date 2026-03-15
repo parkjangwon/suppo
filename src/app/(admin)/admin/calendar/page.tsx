@@ -118,7 +118,7 @@ export default function CalendarPage() {
 
   const fetchAgents = async () => {
     try {
-      const res = await fetch("/api/admin/agents");
+      const res = await fetch("/api/agents");
       if (!res.ok) throw new Error("Failed to fetch agents");
       const data = await res.json();
       setAgents(data);
