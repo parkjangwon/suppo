@@ -75,7 +75,6 @@ const absenceTypeColors: Record<string, string> = {
 };
 
 export default function CalendarPage() {
-  const [mounted, setMounted] = useState(false);
   const { data: session } = useSession();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [absences, setAbsences] = useState<Absence[]>([]);
@@ -83,25 +82,6 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAbsence, setEditingAbsence] = useState<Absence | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isAdmin = session?.user?.role === "ADMIN";
-
-  if (!mounted) {
-    return (
-      <div className="container mx-auto py-8 px-4">
-        <Card>
-          <CardContent className="flex items-center justify-center min-h-[400px]">
-            <div className="text-muted-foreground">로딩 중...</div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const [formData, setFormData] = useState({
     agentId: "",
     title: "",
@@ -110,6 +90,8 @@ export default function CalendarPage() {
     startDate: "",
     endDate: "",
   });
+
+  const isAdmin = session?.user?.role === "ADMIN";
 
   useEffect(() => {
     if (!session) return;
