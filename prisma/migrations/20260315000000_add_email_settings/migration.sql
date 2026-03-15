@@ -11,7 +11,7 @@ CREATE TABLE "EmailSettings" (
     "smtpUser" TEXT,
     "smtpPassword" TEXT,
     "fromEmail" TEXT NOT NULL DEFAULT 'no-reply@crinity.io',
-    "fromName" TEXT NOT NULL DEFAULT 'Crinity Ticket',
+    "fromName" TEXT NOT NULL DEFAULT 'Crinity Helpdesk',
     "sesAccessKey" TEXT,
     "sesSecretKey" TEXT,
     "sesRegion" TEXT NOT NULL DEFAULT 'ap-northeast-2',

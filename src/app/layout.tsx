@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Crinity Ticket",
-  description: "Crinity ticket management system"
+  title: "Crinity Helpdesk",
+  description: "Crinity helpdesk system"
 };
 
 export default function RootLayout({

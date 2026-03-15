@@ -1,4 +1,4 @@
-# Crinity Ticket System - 실무 수준 기능 구현 완료
+# Crinity Helpdesk System - 실무 수준 기능 구현 완료
 
 ## 구현된 기능 요약
 

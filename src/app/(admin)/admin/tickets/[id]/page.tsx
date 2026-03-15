@@ -8,7 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "티켓 상세 | Crinity Ticket",
+  title: "티켓 상세 | Crinity Helpdesk",
   description: "티켓 상세 정보 및 관리",
 };
 

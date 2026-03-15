@@ -1,7 +1,7 @@
-# Crinity Ticket System
+# Crinity Helpdesk System
 
 <p align="center">
-  <strong>현대적인 고객 지원 티켓 관리 시스템</strong>
+  <strong>현대적인 고객 지원 헬프데스크 시스템</strong>
 </p>
 
 <p align="center">
@@ -30,7 +30,7 @@
 
 ## 🎯 프로젝트 개요
 
-**Crinity Ticket System**은 SaaS 제품에 대한 기술지원 및 VOC(Voice of Customer) 처리를 위한 종합 티켓 관리 솔루션입니다. 고객이 웹 페이지에서 문의를 작성하면 상담원에게 자동 할당되어 효율적으로 처리되는 구조입니다.
+**Crinity Helpdesk System**은 SaaS 제품에 대한 기술지원 및 VOC(Voice of Customer) 처리를 위한 종합 헬프데스크 솔루션입니다. 고객이 웹 페이지에서 문의를 작성하면 상담원에게 자동 할당되어 효율적으로 처리되는 구조입니다.
 
 ### 핵심 가치
 
@@ -131,7 +131,7 @@
 ## 📁 프로젝트 구조
 
 ```
-crinity-ticket/
+crinity-helpdesk/
 ├── prisma/
 │   ├── schema.prisma          # 데이터베이스 스키마
 │   └── migrations/            # 마이그레이션 파일
@@ -180,7 +180,7 @@ crinity-ticket/
 ```bash
 # 1. 저장소 클론
 git clone <repository-url>
-cd crinity-ticket
+cd crinity-helpdesk
 
 # 2. 환경 변수 설정
 cp .env.example .env
@@ -354,4 +354,4 @@ pnpm test tests/unit/assignment/pick-assignee.spec.ts
 
 ---
 
-**Crinity Ticket System** - 효율적인 고객 지원을 위한 티켓 관리 솔루션
+**Crinity Helpdesk System** - 효율적인 고객 지원을 위한 티켓 관리 솔루션

@@ -437,7 +437,7 @@ model SystemBranding {
   secondaryColor    String   @default("#3b82f6") // 보조 색상
 
   // Text Customization
-  homepageTitle     String   @default("Crinity Ticket") // 홈페이지 메인 제목
+  homepageTitle     String   @default("Crinity Helpdesk") // 홈페이지 메인 제목
   homepageSubtitle  String   @default("민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.") // 홈페이지 부제목
   adminPanelTitle   String   @default("Crinity Admin") // 관리자 패널 제목
   appTitle          String   @default("고객 지원 센터") // 앱 제목
@@ -474,7 +474,7 @@ model EmailSettings {
   
   // Sender Settings
   fromEmail           String   @default("no-reply@crinity.io")
-  fromName            String   @default("Crinity Ticket")
+  fromName            String   @default("Crinity Helpdesk")
   
   // AWS SES Settings
   sesAccessKey        String?
