@@ -14,7 +14,7 @@ export interface Ticket {
   customerEmail: string;
   status: string;
   priority: string;
-  category: { name: string };
+  category: { name: string } | null;
   assignee: { name: string } | null;
   createdAt: Date | string;
 }
@@ -131,7 +131,7 @@ export function TicketList({
                     {priorityLabels[ticket.priority]}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-sm">{ticket.category.name}</td>
+                <td className="px-4 py-3 text-sm">{ticket.category?.name || "-"}</td>
                 <td className="px-4 py-3 text-sm">
                   {ticket.assignee?.name || (
                     <span className="text-gray-400">미할당</span>
