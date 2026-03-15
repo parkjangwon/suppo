@@ -267,7 +267,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
             <CardContent className="space-y-4">
               <div>
                 <div className="text-sm font-medium text-muted-foreground">카테고리</div>
-                <div>{ticket.category.name}</div>
+                <div>{ticket.category?.name || "-"}</div>
               </div>
               <div>
                 <div className="text-sm font-medium text-muted-foreground">생성일</div>
