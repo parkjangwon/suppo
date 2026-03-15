@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { AuthProvider } from "@/components/app/auth-provider";
 
 export const metadata: Metadata = {
   title: "Crinity Helpdesk",
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

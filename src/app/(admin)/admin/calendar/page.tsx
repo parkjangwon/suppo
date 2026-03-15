@@ -23,7 +23,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Edit } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Agent {
@@ -76,16 +75,32 @@ const absenceTypeColors: Record<string, string> = {
 };
 
 export default function CalendarPage() {
+  const [mounted, setMounted] = useState(false);
   const { data: session } = useSession();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAbsence, setEditingAbsence] = useState<Absence | null>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isAdmin = session?.user?.role === "ADMIN";
+
+  if (!mounted) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <Card>
+          <CardContent className="flex items-center justify-center min-h-[400px]">
+            <div className="text-muted-foreground">로딩 중...</div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const [formData, setFormData] = useState({
     agentId: "",
@@ -97,11 +112,12 @@ export default function CalendarPage() {
   });
 
   useEffect(() => {
+    if (!session) return;
     fetchAbsences();
     if (isAdmin) {
       fetchAgents();
     }
-  }, [currentDate, isAdmin]);
+  }, [currentDate, isAdmin, session]);
 
   const fetchAbsences = async () => {
     try {
@@ -270,63 +286,71 @@ export default function CalendarPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
-            {weekDays.map((day) => (
-              <div
-                key={day}
-                className="bg-muted p-3 text-center text-sm font-medium"
-              >
-                {day}
-              </div>
-            ))}
-            {calendarDays.map((day, idx) => {
-              const dayAbsences = getAbsencesForDate(day);
-              const isCurrentMonth = isSameMonth(day, currentDate);
-              const isToday = isSameDay(day, new Date());
-
-              return (
-                <div
-                  key={idx}
-                  className={`bg-background min-h-[100px] p-2 ${
-                    isCurrentMonth ? "" : "bg-muted/50"
-                  } ${isToday ? "ring-2 ring-primary ring-inset" : ""}`}
-                  onClick={() => openCreateDialog(day)}
-                >
-                  <div className={`text-sm font-medium mb-1 ${isCurrentMonth ? "" : "text-muted-foreground"}`}>
-                    {format(day, "d")}
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-muted-foreground">로딩 중...</div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
+                {weekDays.map((day) => (
+                  <div
+                    key={day}
+                    className="bg-muted p-3 text-center text-sm font-medium"
+                  >
+                    {day}
                   </div>
-                  <div className="space-y-1">
-                    {dayAbsences.slice(0, 3).map((absence) => (
-                      <div
-                        key={absence.id}
-                        className={`text-xs px-2 py-1 rounded border ${absenceTypeColors[absence.type]} truncate cursor-pointer hover:opacity-80`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditDialog(absence);
-                        }}
-                      >
-                        {absence.agent.name} - {absenceTypeLabels[absence.type]}
-                      </div>
-                    ))}
-                    {dayAbsences.length > 3 && (
-                      <div className="text-xs text-muted-foreground text-center">
-                        +{dayAbsences.length - 3} more
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                ))}
+                {calendarDays.map((day, idx) => {
+                  const dayAbsences = getAbsencesForDate(day);
+                  const isCurrentMonth = isSameMonth(day, currentDate);
+                  const isToday = isSameDay(day, new Date());
 
-          <div className="mt-6 flex flex-wrap gap-4">
-            {Object.entries(absenceTypeLabels).map(([type, label]) => (
-              <div key={type} className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded border ${absenceTypeColors[type]}`} />
-                <span className="text-sm text-muted-foreground">{label}</span>
+                  return (
+                    <div
+                      key={idx}
+                      className={`bg-background min-h-[100px] p-2 ${
+                        isCurrentMonth ? "" : "bg-muted/50"
+                      } ${isToday ? "ring-2 ring-primary ring-inset" : ""}`}
+                      onClick={() => openCreateDialog(day)}
+                    >
+                      <div className={`text-sm font-medium mb-1 ${isCurrentMonth ? "" : "text-muted-foreground"}`}>
+                        {format(day, "d")}
+                      </div>
+                      <div className="space-y-1">
+                        {dayAbsences.slice(0, 3).map((absence) => (
+                          <div
+                            key={absence.id}
+                            className={`text-xs px-2 py-1 rounded border ${absenceTypeColors[absence.type]} truncate cursor-pointer hover:opacity-80`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditDialog(absence);
+                            }}
+                          >
+                            {absence.agent.name} - {absenceTypeLabels[absence.type]}
+                          </div>
+                        ))}
+                        {dayAbsences.length > 3 && (
+                          <div className="text-xs text-muted-foreground text-center">
+                            +{dayAbsences.length - 3} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+
+              <div className="mt-6 flex flex-wrap gap-4">
+                {Object.entries(absenceTypeLabels).map(([type, label]) => (
+                  <div key={type} className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded border ${absenceTypeColors[type]}`} />
+                    <span className="text-sm text-muted-foreground">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
