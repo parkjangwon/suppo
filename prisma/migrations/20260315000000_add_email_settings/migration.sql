@@ -10,7 +10,7 @@ CREATE TABLE "EmailSettings" (
     "smtpSecure" BOOLEAN NOT NULL DEFAULT false,
     "smtpUser" TEXT,
     "smtpPassword" TEXT,
-    "fromEmail" TEXT NOT NULL DEFAULT 'no-reply@crinity.io',
+    "fromEmail" TEXT NOT NULL DEFAULT 'no-reply@company.com',
     "fromName" TEXT NOT NULL DEFAULT 'Crinity Helpdesk',
     "sesAccessKey" TEXT,
     "sesSecretKey" TEXT,

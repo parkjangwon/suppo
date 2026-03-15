@@ -38,7 +38,7 @@ export function EmailSettingsForm() {
     smtpPort: 587,
     smtpSecure: false,
     smtpUser: "",
-    fromEmail: "no-reply@crinity.io",
+    fromEmail: "no-reply@company.com",
     fromName: "Crinity Helpdesk",
     sesAccessKey: "",
     sesRegion: "ap-northeast-2",
