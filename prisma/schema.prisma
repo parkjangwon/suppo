@@ -337,9 +337,12 @@ model TicketTransfer {
 model ResponseTemplate {
   id          String   @id @default(cuid())
   title       String
-  content     String
+  content     String   @db.Text
+  variables   Json?    // 사용 가능한 변수 목록 [{"name": "customer.name", "description": "고객 이름"}]
   categoryId  String?
   createdById String
+  isShared    Boolean  @default(true)
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -348,6 +351,7 @@ model ResponseTemplate {
 
   @@index([categoryId])
   @@index([createdById])
+  @@index([sortOrder])
 }
 
 model TicketActivity {
