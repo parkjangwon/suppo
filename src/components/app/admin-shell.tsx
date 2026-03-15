@@ -12,7 +12,7 @@ import { useBranding } from "@/lib/branding/context";
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const branding = useBranding();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
   const isLoginPage = pathname === "/admin/login";
   const isPasswordChangePage = pathname === "/admin/change-password";
@@ -24,6 +24,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  const isLoading = status === "loading";
+  const userName = session?.user?.name;
+  const userRole = session?.user?.role;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -142,11 +146,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
-                {session?.user?.name?.[0] || "U"}
+                {isLoading ? "⋯" : userName?.[0] || "?"}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{session?.user?.name || "User"}</span>
-                <span className="text-xs text-muted-foreground">{isAdmin ? "관리자" : "상담원"}</span>
+                <span className="text-sm font-medium">{isLoading ? "로딩 중..." : userName || "알 수 없음"}</span>
+                <span className="text-xs text-muted-foreground">{userRole === "ADMIN" ? "관리자" : "상담원"}</span>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -155,6 +159,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 size="icon"
                 onClick={() => signOut({ callbackUrl: "/admin/login" })}
                 title="로그아웃"
+                disabled={isLoading}
               >
                 <LogOut className="h-4 w-4" />
               </Button>
