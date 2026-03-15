@@ -31,7 +31,6 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
       priority: "MEDIUM",
-      captchaToken: process.env.NODE_ENV === "test" ? "test-token" : "",
     },
   });
 
@@ -221,31 +220,6 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
         <Label className="text-slate-700">첨부파일</Label>
         <AttachmentUpload files={files} onChange={setFiles} />
       </div>
-
-      {process.env.NODE_ENV !== "production" && (
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-          <p className="text-sm text-blue-700 mb-2">
-            개발 환경에서는 아래 버튼을 클릭하여 캡챠를 우회할 수 있습니다.
-          </p>
-          <button 
-            type="button" 
-            onClick={() => {
-              setValue("captchaToken", "dev-token-bypass");
-              alert("개발용 캡챠 토큰이 설정되었습니다. 티켓을 제출하세요.");
-            }}
-            className="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-            style={{ 
-              backgroundColor: branding.secondaryColor,
-              color: "white"
-            }}
-          >
-            개발 환경 캡챠 우회하기
-          </button>
-        </div>
-      )}
-      {errors.captchaToken && (
-        <p className="text-sm text-red-500">CAPTCHA를 완료해주세요</p>
-      )}
 
       {submitError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl">

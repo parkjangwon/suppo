@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/security/rate-limit";
-import { verifyCaptcha } from "@/lib/security/captcha";
 import { ticketFormSchema } from "@/lib/validation/ticket";
 import { processAttachments, AttachmentError } from "@/lib/storage/attachment-service";
 import { createTicket } from "@/lib/tickets/create-ticket";
@@ -71,7 +70,6 @@ export async function POST(request: NextRequest) {
       priority: formData.get("priority") as string,
       subject: formData.get("subject") as string,
       description: formData.get("description") as string,
-      captchaToken: formData.get("captchaToken") as string,
     };
 
     const validationResult = ticketFormSchema.safeParse(data);
@@ -79,15 +77,6 @@ export async function POST(request: NextRequest) {
     if (!validationResult.success) {
       return NextResponse.json(
         { error: "입력값이 올바르지 않습니다.", details: validationResult.error.format() },
-        { status: 400 }
-      );
-    }
-
-    const isValidCaptcha = await verifyCaptcha(validationResult.data.captchaToken);
-    
-    if (!isValidCaptcha) {
-      return NextResponse.json(
-        { error: "CAPTCHA 검증에 실패했습니다." },
         { status: 400 }
       );
     }
