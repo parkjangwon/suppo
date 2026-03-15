@@ -32,6 +32,9 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
         where: { id },
         include: {
           category: true,
+          requestType: {
+            select: { id: true, name: true },
+          },
           assignee: {
             select: { id: true, name: true },
           },
