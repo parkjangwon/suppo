@@ -2,6 +2,7 @@ import {
   type CreateIssueInput,
   type GitIssueProvider,
   type GitIssueSummary,
+  type IssueDetail,
   type SearchIssuesInput,
   resolveLimit,
   validateRepoFullName
@@ -81,6 +82,50 @@ export class GitLabProvider implements GitIssueProvider {
       title: data.title,
       state: data.state,
       url: data.web_url
+    };
+  }
+
+  async getIssue(repoFullName: string, issueNumber: number, signal?: AbortSignal): Promise<IssueDetail> {
+    const repoPath = validateRepoFullName(repoFullName);
+    const projectPath = encodeURIComponent(repoPath);
+    const url = `${GITLAB_API_BASE}/projects/${projectPath}/issues/${issueNumber}`;
+
+    const response = await fetch(url, {
+      headers: this.getHeaders(),
+      signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitLab getIssue failed with status ${response.status}`);
+    }
+
+    const data = (await response.json()) as {
+      state: string;
+      assignees: Array<{ username: string; avatar_url: string }>;
+      labels: string[];
+      milestone: {
+        title: string;
+        due_date: string | null;
+        open_issues_count: number;
+        closed_issues_count: number;
+      } | null;
+      updated_at: string;
+    };
+
+    return {
+      state: data.state,
+      assignees: data.assignees.map((a) => ({ login: a.username, avatarUrl: a.avatar_url })),
+      labels: data.labels.map((name) => ({ name, color: "000000" })),
+      milestone: data.milestone
+        ? {
+            title: data.milestone.title,
+            dueOn: data.milestone.due_date,
+            openIssues: data.milestone.open_issues_count,
+            closedIssues: data.milestone.closed_issues_count
+          }
+        : null,
+      hasPR: false,
+      updatedAt: data.updated_at
     };
   }
 
