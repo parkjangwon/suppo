@@ -15,6 +15,10 @@ describe("getStateBadgeClass", () => {
     expect(getStateBadgeClass("closed")).toBe("bg-purple-100 text-purple-700");
   });
 
+  it("opened (GitLab) → green 클래스 반환", () => {
+    expect(getStateBadgeClass("opened")).toBe("bg-green-100 text-green-700");
+  });
+
   it("locked 등 알 수 없는 값 → slate fallback 반환", () => {
     expect(getStateBadgeClass("locked")).toBe("bg-slate-100 text-slate-700");
     expect(getStateBadgeClass("unknown")).toBe("bg-slate-100 text-slate-700");

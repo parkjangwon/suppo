@@ -1,7 +1,7 @@
 // src/components/ticket/issue-detail-helpers.ts
 
 export function getStateBadgeClass(state: string): string {
-  if (state === "open") return "bg-green-100 text-green-700";
+  if (state === "open" || state === "opened") return "bg-green-100 text-green-700";
   if (state === "closed") return "bg-purple-100 text-purple-700";
   return "bg-slate-100 text-slate-700";
 }

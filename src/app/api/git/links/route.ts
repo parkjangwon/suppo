@@ -100,7 +100,9 @@ export async function GET(request: NextRequest) {
     const providerClientCache = new Map<string, GitProviderClient | null>();
 
     async function getProviderClient(provider: string): Promise<GitProviderClient | null> {
-      if (providerClientCache.has(provider)) return providerClientCache.get(provider)!;
+      if (providerClientCache.has(provider)) {
+        return providerClientCache.get(provider) ?? null;
+      }
 
       const credential = await prisma.gitProviderCredential.findUnique({
         where: { provider: provider as "GITHUB" | "GITLAB" | "CODECOMMIT" },

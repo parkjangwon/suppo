@@ -5,10 +5,8 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import { toast } from "sonner";
-import type { IssueDetail } from "@/lib/git/provider";
+import type { IssueDetail, GitProvider } from "@/lib/git/provider";
 import { getStateBadgeClass, getLabelTextColor, formatMilestone } from "./issue-detail-helpers";
-
-type GitProvider = "GITHUB" | "GITLAB" | "CODECOMMIT";
 
 type GitIssue = {
   id: string;
@@ -59,6 +57,7 @@ export function GitIntegrationSection({
   const [error, setError] = useState("");
   const [issueDetails, setIssueDetails] = useState<Record<string, IssueDetail | null | undefined>>({});
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [detailFetchTrigger, setDetailFetchTrigger] = useState(0);
 
   useEffect(() => {
     if (linkedIssues.length === 0) return;
@@ -86,7 +85,7 @@ export function GitIntegrationSection({
       })
       .finally(() => setIsLoadingDetails(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticketId]);
+  }, [ticketId, detailFetchTrigger]);
 
   const disabledActions = useMemo(() => !repoFullName.trim(), [repoFullName]);
 
@@ -112,6 +111,7 @@ export function GitIntegrationSection({
 
     const payload = (await response.json()) as { link: GitLink };
     setLinkedIssues((prev) => [payload.link, ...prev]);
+    setDetailFetchTrigger((n) => n + 1);
   };
 
   const unlinkIssue = async (linkId: string) => {
