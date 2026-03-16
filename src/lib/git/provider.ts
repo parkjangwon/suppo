@@ -20,10 +20,25 @@ export interface CreateIssueInput {
   body?: string;
 }
 
+export interface IssueDetail {
+  state: string;  // 'open' | 'closed' | 'locked' etc, UI handles fallback
+  assignees: { login: string; avatarUrl: string }[];
+  labels: { name: string; color: string }[];  // color: 6-char hex (no #)
+  milestone: {
+    title: string;
+    dueOn: string | null;
+    openIssues: number;
+    closedIssues: number;
+  } | null;
+  hasPR: boolean;
+  updatedAt: string;  // ISO 8601
+}
+
 export interface GitIssueProvider {
   readonly provider: GitProvider;
   searchIssues(input: SearchIssuesInput): Promise<GitIssueSummary[]>;
   createIssue(input: CreateIssueInput): Promise<GitIssueSummary>;
+  getIssue?(repoFullName: string, issueNumber: number, signal?: AbortSignal): Promise<IssueDetail>;
 }
 
 export class GitProviderNotSupportedError extends Error {
