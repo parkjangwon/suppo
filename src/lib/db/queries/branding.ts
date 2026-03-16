@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@/lib/db/client";
 import { SystemBranding } from "@/lib/branding/context";
 
@@ -24,6 +25,7 @@ const defaultBranding: SystemBranding = {
 };
 
 export async function getSystemBranding(): Promise<SystemBranding> {
+  noStore();
   const branding = await prisma.systemBranding.findUnique({
     where: { id: DEFAULT_BRANDING_ID },
   });

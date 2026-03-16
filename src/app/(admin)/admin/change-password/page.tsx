@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { BACKOFFICE_DASHBOARD_PATH } from "@/lib/auth/config";
 
 export default function ChangePasswordPage() {
+  const { update } = useSession();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -53,9 +55,8 @@ export default function ChangePasswordPage() {
 
       setSuccessMessage("비밀번호가 성공적으로 변경되었습니다. 대시보드로 이동합니다.");
 
-      setTimeout(() => {
-        window.location.href = BACKOFFICE_DASHBOARD_PATH;
-      }, 1500);
+      await update();
+      window.location.href = BACKOFFICE_DASHBOARD_PATH;
     } catch {
       setErrorMessage("비밀번호 변경 중 오류가 발생했습니다.");
     } finally {
