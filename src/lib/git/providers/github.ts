@@ -2,6 +2,7 @@ import {
   type CreateIssueInput,
   type GitIssueProvider,
   type GitIssueSummary,
+  type IssueDetail,
   type SearchIssuesInput,
   resolveLimit,
   validateRepoFullName
@@ -94,6 +95,50 @@ export class GitHubProvider implements GitIssueProvider {
       title: data.title,
       state: data.state,
       url: data.html_url
+    };
+  }
+
+  async getIssue(repoFullName: string, issueNumber: number, signal?: AbortSignal): Promise<IssueDetail> {
+    const repo = validateRepoFullName(repoFullName);
+    const url = `${GITHUB_API_BASE}/repos/${repo}/issues/${issueNumber}`;
+
+    const response = await fetch(url, {
+      headers: this.getHeaders(),
+      signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub getIssue failed with status ${response.status}`);
+    }
+
+    const data = (await response.json()) as {
+      state: string;
+      assignees: Array<{ login: string; avatar_url: string }>;
+      labels: Array<{ name: string; color: string }>;
+      milestone: {
+        title: string;
+        due_on: string | null;
+        open_issues: number;
+        closed_issues: number;
+      } | null;
+      pull_request?: unknown;
+      updated_at: string;
+    };
+
+    return {
+      state: data.state,
+      assignees: data.assignees.map((a) => ({ login: a.login, avatarUrl: a.avatar_url })),
+      labels: data.labels,
+      milestone: data.milestone
+        ? {
+            title: data.milestone.title,
+            dueOn: data.milestone.due_on,
+            openIssues: data.milestone.open_issues,
+            closedIssues: data.milestone.closed_issues
+          }
+        : null,
+      hasPR: data.pull_request !== undefined && data.pull_request !== null,
+      updatedAt: data.updated_at
     };
   }
 
