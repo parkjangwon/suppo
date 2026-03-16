@@ -49,7 +49,8 @@ export interface IssueFullDetail extends IssueDetail {
   comments: IssueComment[];   // 처음 3개만
   commentCount: number;       // 전체 코멘트 수 (GitHub에서 전체 보기 N개 표시용)
   linkedPRs: LinkedPR[];
-  issueUrl: string;           // "GitHub에서 전체 보기" 링크 대상
+  // issueUrl은 IssueFullDetail에 포함하지 않는다.
+  // UI는 기존 GitLink.issueUrl (DB 저장값)을 사용한다.
 }
 ```
 
@@ -81,9 +82,10 @@ getIssueFullDetail?(
 ### GitHub `getIssueFullDetail()` 구현
 
 **Round 1 — 병렬 실행:**
-1. `GET /repos/{owner}/{repo}/issues/{number}` — state, labels, assignees, milestone, `comments`(count), `html_url`
+1. `GET /repos/{owner}/{repo}/issues/{number}` — state, labels, assignees, milestone, `comments`(count)
 2. `GET /repos/{owner}/{repo}/issues/{number}/comments?per_page=3` — 처음 3개 코멘트
 3. `GET /repos/{owner}/{repo}/issues/{number}/timeline` — `cross_referenced` 이벤트 중 `source.type === "issue"` && `source.issue.pull_request` 존재하는 것에서 PR 번호 추출
+   - **필수 헤더**: `Accept: application/vnd.github.mockingbird-preview+json` (이 헤더 없이는 `cross_referenced` 이벤트가 반환되지 않음)
 
 **Round 2 — 연결된 PR 번호 확인 후 병렬 실행:**
 - 각 PR 번호에 대해:
@@ -91,10 +93,11 @@ getIssueFullDetail?(
   - `GET /repos/{owner}/{repo}/pulls/{pr_number}/reviews` — 리뷰 결정 계산
 
 **리뷰 상태 계산 로직:**
-1. 리뷰어별 최신 리뷰 상태 추출 (dismissed 제외)
+1. 리뷰어별 최신 리뷰 상태 추출 (state가 `DISMISSED`인 리뷰 제외)
 2. `CHANGES_REQUESTED`가 하나라도 있으면 → `changes_requested`
 3. 모두 `APPROVED`이고 1개 이상이면 → `approved`
-4. PR 객체에 `requested_reviewers`가 있으면 → `review_required`
+4. PR 객체의 `requested_reviewers.length > 0`이면 → `review_required`
+   - **주의**: `requested_reviewers`는 항상 배열로 존재하므로 반드시 `.length > 0` 조건으로 확인
 5. 그 외 → `null`
 
 **PR state 정규화:**
@@ -105,9 +108,13 @@ getIssueFullDetail?(
 ### GitLab `getIssueFullDetail()` 구현
 
 **Round 1 — 병렬 실행 (1라운드로 완결):**
-1. `GET /projects/:encoded_path/issues/:iid` — 기본 정보, `user_notes_count`(코멘트 수), `web_url`
+1. `GET /projects/:encoded_path/issues/:iid` — 기본 정보, `user_notes_count`, `web_url`
 2. `GET /projects/:encoded_path/issues/:iid/notes?per_page=3&sort=asc&order_by=created_at` — 처음 3개 코멘트, `system: false` 필터링
 3. `GET /projects/:encoded_path/issues/:iid/related_merge_requests` — 연결된 MR 목록
+
+**GitLab `commentCount` 처리:**
+- `user_notes_count`는 시스템 노트(상태 변경 이벤트 등)를 포함하여 실제 사람 코멘트 수보다 크게 보일 수 있다.
+- 이 차이는 허용한다. "GitHub에서 전체 보기 (N개)" 링크는 참고 숫자이며, 실제 인간 코멘트 수의 근사값으로 사용한다.
 
 **GitLab MR state 정규화:**
 - `state === "merged"` → `"merged"`
@@ -230,10 +237,11 @@ export function getReviewDecisionText(
 
 | 상황 | 처리 |
 |------|------|
-| 5초 타임아웃 초과 | `fullDetails[linkId] = null` → "상세 정보를 불러올 수 없습니다." |
+| 5초 타임아웃 초과 (Round 1 또는 2 도중 포함) | abort-all: `fullDetails[linkId] = null` → "상세 정보를 불러올 수 없습니다." 타임아웃은 전체 요청을 취소하며 부분 결과를 반환하지 않는다 |
 | provider credential 없음 | 동일 |
-| GitHub API 4xx/5xx | 동일 |
-| PR 상세 fetch 실패 | `linkedPRs: []` 로 부분 성공 처리 (코멘트는 표시) |
+| GitHub API 4xx/5xx (Round 1) | 동일 |
+| `getIssueFullDetail` 미구현 provider (예: CODECOMMIT) | 404 반환 (`{ error: "이 provider는 상세 정보를 지원하지 않습니다." }`) |
+| PR 상세 fetch 실패 (Round 2, 개별 PR) | `linkedPRs: []` 로 부분 성공 처리 — Round 1 데이터(코멘트 등)는 표시하고 PR 섹션만 누락 |
 | GitLab notes fetch 실패 | `comments: []` 로 부분 성공 처리 (MR은 표시) |
 
 ---
@@ -243,9 +251,15 @@ export function getReviewDecisionText(
 ### 단위 테스트
 
 - `tests/unit/git/github-provider-full-detail.spec.ts`
-  - PR 없는 이슈: `linkedPRs: []`
-  - PR 1개 + reviews: state 정규화, 리뷰 상태 계산
-  - 코멘트 3개 매핑
+  - PR 없는 이슈 (timeline 이벤트 없음): `linkedPRs: []`
+  - PR 1개 + reviews: state 정규화 (closed+merged_at → merged), 리뷰 상태 계산
+  - 리뷰 상태 엣지 케이스:
+    - `requested_reviewers: []` && reviews 없음 → `null`
+    - `requested_reviewers: [alice]` && reviews 없음 → `review_required`
+    - reviews: [alice: APPROVED, bob: APPROVED] → `approved`
+    - reviews: [alice: APPROVED, bob: CHANGES_REQUESTED] → `changes_requested`
+  - 코멘트 3개 매핑 (author.login, avatar_url, body, created_at)
+  - timeline API에 mockingbird-preview 헤더 포함 여부 확인
   - signal 전달 확인
 
 - `tests/unit/git/gitlab-provider-full-detail.spec.ts`
@@ -256,6 +270,7 @@ export function getReviewDecisionText(
   - 정상 응답: `{ detail: IssueFullDetail }`
   - linkId가 ticketId에 속하지 않을 때: 404
   - credential 없을 때: `{ error }` 500
+  - `getIssueFullDetail` 미구현 provider: 404
 
 - `tests/unit/components/issue-detail-helpers.spec.ts`
   - `getPRStateBadgeClass` 3가지 state
