@@ -1,7 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { formatDistanceToNow } from "date-fns";
+import { ko } from "date-fns/locale";
+import { toast } from "sonner";
+import type { IssueDetail } from "@/lib/git/provider";
+import { getStateBadgeClass, getLabelTextColor, formatMilestone } from "./issue-detail-helpers";
 
 type GitProvider = "GITHUB" | "GITLAB" | "CODECOMMIT";
 
@@ -20,6 +25,7 @@ type GitLink = {
   issueNumber: number;
   issueUrl: string;
   createdAt: Date;
+  issueDetail?: IssueDetail | null;  // undefined=로딩중, null=실패
 };
 
 interface GitIntegrationSectionProps {
@@ -51,6 +57,36 @@ export function GitIntegrationSection({
   const [isSearching, setIsSearching] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
+  const [issueDetails, setIssueDetails] = useState<Record<string, IssueDetail | null | undefined>>({});
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+
+  useEffect(() => {
+    if (linkedIssues.length === 0) return;
+
+    setIsLoadingDetails(true);
+    fetch(`/api/git/links?ticketId=${ticketId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("failed");
+        return res.json();
+      })
+      .then((data: { links: Array<{ id: string; issueDetail: IssueDetail | null }> }) => {
+        const details: Record<string, IssueDetail | null> = {};
+        for (const link of data.links) {
+          details[link.id] = link.issueDetail;
+        }
+        setIssueDetails(details);
+      })
+      .catch(() => {
+        // 전체 실패 시 모든 이슈를 null로
+        const details: Record<string, null> = {};
+        for (const link of linkedIssues) {
+          details[link.id] = null;
+        }
+        setIssueDetails(details);
+      })
+      .finally(() => setIsLoadingDetails(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticketId]);
 
   const disabledActions = useMemo(() => !repoFullName.trim(), [repoFullName]);
 
@@ -76,6 +112,22 @@ export function GitIntegrationSection({
 
     const payload = (await response.json()) as { link: GitLink };
     setLinkedIssues((prev) => [payload.link, ...prev]);
+  };
+
+  const unlinkIssue = async (linkId: string) => {
+    const response = await fetch(`/api/git/links?id=${linkId}`, { method: "DELETE" });
+    if (!response.ok) {
+      const payload = (await response.json()) as { error?: string };
+      toast.error(payload.error || "연결 해제에 실패했습니다.");
+      return;
+    }
+    setLinkedIssues((prev) => prev.filter((l) => l.id !== linkId));
+    setIssueDetails((prev) => {
+      const next = { ...prev };
+      delete next[linkId];
+      return next;
+    });
+    toast.success("이슈 연결이 해제됐습니다.");
   };
 
   const handleSearch = async () => {
@@ -221,14 +273,75 @@ export function GitIntegrationSection({
           <p className="text-sm text-slate-500">아직 연결된 이슈가 없습니다.</p>
         ) : (
           <ul className="space-y-2 text-sm">
-            {linkedIssues.map((link) => (
-              <li key={link.id} className="flex items-center justify-between gap-3">
-                <a href={link.issueUrl} target="_blank" rel="noreferrer" className="hover:underline">
-                  [{link.provider}] {link.repoFullName} #{link.issueNumber}
-                </a>
-                <span className="rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700">연결됨</span>
-              </li>
-            ))}
+            {linkedIssues.map((link) => {
+              const detail = issueDetails[link.id];
+              return (
+                <li key={link.id} className="space-y-1.5 rounded-md border p-3 text-sm">
+                  {/* 헤더 행: 링크 + state 배지 + 연결 해제 버튼 */}
+                  <div className="flex items-center justify-between gap-3">
+                    <a href={link.issueUrl} target="_blank" rel="noreferrer" className="hover:underline font-medium">
+                      [{link.provider}] {link.repoFullName} #{link.issueNumber}
+                    </a>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {detail !== undefined && detail !== null && (
+                        <span className={`rounded px-2 py-0.5 text-xs font-medium ${getStateBadgeClass(detail.state)}`}>
+                          {detail.state}
+                        </span>
+                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void unlinkIssue(link.id)}
+                      >
+                        연결 해제
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* 상세 정보 영역 */}
+                  {detail === undefined && isLoadingDetails && (
+                    <div className="space-y-1.5 pl-1">
+                      <div className="h-3 w-48 animate-pulse rounded bg-slate-200" />
+                      <div className="h-3 w-32 animate-pulse rounded bg-slate-200" />
+                    </div>
+                  )}
+                  {detail === null && (
+                    <p className="pl-1 text-xs text-slate-400">이슈 정보를 불러올 수 없습니다.</p>
+                  )}
+                  {detail && (
+                    <div className="space-y-1 pl-1 text-xs text-slate-600">
+                      {detail.assignees.length > 0 && (
+                        <p>담당자: {detail.assignees.map((a) => a.login).join(", ")}</p>
+                      )}
+                      {detail.labels.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {detail.labels.map((label) => (
+                            <span
+                              key={label.name}
+                              className="rounded px-1.5 py-0.5 text-xs"
+                              style={{
+                                backgroundColor: `#${label.color}`,
+                                color: getLabelTextColor(label.color)
+                              }}
+                            >
+                              {label.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {detail.milestone && (
+                        <p>마일스톤: {formatMilestone(detail.milestone)}</p>
+                      )}
+                      {detail.hasPR && <p>PR 연결됨</p>}
+                      <p className="text-slate-400">
+                        {formatDistanceToNow(new Date(detail.updatedAt), { addSuffix: true, locale: ko })} 업데이트
+                      </p>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
