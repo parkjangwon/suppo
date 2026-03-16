@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db/client";
 import { parseProvider, validateRepoFullName, type GitProvider } from "@/lib/git/provider";
 import { createAuditLog } from "@/lib/audit/logger";
 import { AuditAction } from "@prisma/client";
+import { decryptToken } from "@/lib/crypto/encrypt";
+import type { IssueDetail } from "@/lib/git/provider";
+import { GitHubProvider } from "@/lib/git/providers/github";
+import { GitLabProvider } from "@/lib/git/providers/gitlab";
 
 function validateIssueUrl(url: string, provider?: GitProvider): boolean {
   try {
@@ -89,7 +93,61 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" }
     });
 
-    return NextResponse.json({ links });
+    // provider별 credential 조회 (중복 fetch 방지)
+    type GitProviderClient = {
+      getIssue?: (repo: string, num: number, signal?: AbortSignal) => Promise<IssueDetail>;
+    };
+    const providerClientCache = new Map<string, GitProviderClient | null>();
+
+    async function getProviderClient(provider: string): Promise<GitProviderClient | null> {
+      if (providerClientCache.has(provider)) return providerClientCache.get(provider)!;
+
+      const credential = await prisma.gitProviderCredential.findUnique({
+        where: { provider: provider as "GITHUB" | "GITLAB" | "CODECOMMIT" },
+        select: { encryptedToken: true }
+      });
+
+      if (!credential) {
+        providerClientCache.set(provider, null);
+        return null;
+      }
+
+      const token = decryptToken(credential.encryptedToken);
+      let client: GitProviderClient | null = null;
+
+      if (provider === "GITHUB") client = new GitHubProvider(token);
+      else if (provider === "GITLAB") client = new GitLabProvider(token);
+      // CODECOMMIT: getIssue 미구현, null 처리
+
+      providerClientCache.set(provider, client);
+      return client;
+    }
+
+    // 각 링크에 대해 issueDetail 병렬 fetch (3초 타임아웃)
+    const detailResults = await Promise.allSettled(
+      links.map(async (link) => {
+        const client = await getProviderClient(link.provider);
+        if (!client?.getIssue) return null;
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 3000);
+        try {
+          return await client.getIssue(link.repoFullName, link.issueNumber, controller.signal);
+        } catch {
+          return null;
+        } finally {
+          clearTimeout(timer);
+        }
+      })
+    );
+
+    const linksWithDetail = links.map((link, index) => {
+      const result = detailResults[index];
+      const issueDetail = result.status === "fulfilled" ? result.value : null;
+      return { ...link, issueDetail };
+    });
+
+    return NextResponse.json({ links: linksWithDetail });
   } catch (error) {
     console.error("Git links GET error:", error);
     return NextResponse.json(
