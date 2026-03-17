@@ -1,0 +1,211 @@
+/**
+ * 파일 업로드 보안
+ * - 파일 확장자 검증
+ * - 파일 매직 넘버(시그니처) 확인
+ * - 악의적인 파일 탐지
+ */
+
+// 허용된 파일 확장자
+const ALLOWED_EXTENSIONS = new Set([
+  ".png", ".jpg", ".jpeg", ".gif", ".webp",
+  ".pdf",
+  ".doc", ".docx",
+  ".xls", ".xlsx",
+  ".txt", ".csv",
+  ".zip",
+]);
+
+// MIME 타입별 매직 넘버 (파일 헤더 시그니처)
+const FILE_SIGNATURES: Record<string, Uint8Array> = {
+  "image/png": new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
+  "image/jpeg": new Uint8Array([0xff, 0xd8, 0xff]),
+  "image/gif": new Uint8Array([0x47, 0x49, 0x46]),
+  "image/webp": new Uint8Array([0x52, 0x49, 0x46, 0x46]), // RIFF...
+  "application/pdf": new Uint8Array([0x25, 0x50, 0x44, 0x46]), // %PDF
+  "application/zip": new Uint8Array([0x50, 0x4b, 0x03, 0x04]), // PK...
+  "application/msword": new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]), // OLE2
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": new Uint8Array([0x50, 0x4b, 0x03, 0x04]), // ZIP-based
+  "application/vnd.ms-excel": new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]), // OLE2
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": new Uint8Array([0x50, 0x4b, 0x03, 0x04]), // ZIP-based
+};
+
+// 위험한 파일 이름 패턴
+const DANGEROUS_FILENAME_PATTERNS = [
+  /\.(exe|bat|cmd|sh|ps1|vbs|js|jar|dll|so|dylib)$/i,
+  /^con$|^prn$|^aux$|^nul$/i, // Windows 예약 파일명
+  /\.+\//, // Path traversal
+  /\.\./, // Directory traversal
+];
+
+// 위험한 파일 내용 패턴
+const MALICIOUS_CONTENT_PATTERNS = [
+  /<script[^>]*>.*?<\/script>/gis,
+  /javascript:/gi,
+  /on\w+\s*=/gi, // onclick=, onload= 등
+  /eval\s*\(/gi,
+  /<\?php/i,
+  /<%\s*/i,
+  /<\!/i,
+];
+
+/**
+ * 파일 확장자 검증
+ */
+export function validateFileExtension(fileName: string): boolean {
+  const extension = fileName.toLowerCase().slice(fileName.lastIndexOf("."));
+  return ALLOWED_EXTENSIONS.has(extension);
+}
+
+/**
+ * 파일 이름 안전성 검증
+ */
+export function validateFileName(fileName: string): { valid: boolean; error?: string } {
+  // 파일 길이 제한
+  if (fileName.length > 255) {
+    return { valid: false, error: "파일 이름이 너무 깁니다" };
+  }
+
+  // 위험한 패턴 검사
+  for (const pattern of DANGEROUS_FILENAME_PATTERNS) {
+    if (pattern.test(fileName)) {
+      return { valid: false, error: "허용되지 않는 파일 이름입니다" };
+    }
+  }
+
+  // null 바이트 검사 (경로 탐색 방지)
+  if (fileName.includes("\0")) {
+    return { valid: false, error: "허용되지 않는 파일 이름입니다" };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * 파일 매직 넘버 확인 (파일 실제 형식 검증)
+ */
+export async function verifyFileSignature(file: File, expectedMimeType: string): Promise<boolean> {
+  try {
+    // 이미지 및 PDF는 항상 검증
+    const alwaysVerify = ["image/", "application/pdf"].some(type => expectedMimeType.startsWith(type));
+    if (!alwaysVerify) {
+      return true; // 다른 파일 형식은 확장자로만 검증
+    }
+
+    const signature = FILE_SIGNATURES[expectedMimeType];
+    if (!signature) {
+      return true; // 알려진 시그니처가 없으면 통과
+    }
+
+    const buffer = await file.slice(0, signature.length).arrayBuffer();
+    const fileHeader = new Uint8Array(buffer);
+
+    // 매직 넘버 비교
+    for (let i = 0; i < signature.length; i++) {
+      if (fileHeader[i] !== signature[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 파일 내용 검사 (스크립트 주입 방지)
+ */
+export async function scanFileContent(file: File): Promise<{ safe: boolean; threat?: string }> {
+  // 이미지 파일은 검사 건너뜀
+  if (file.type.startsWith("image/")) {
+    return { safe: true };
+  }
+
+  // 텍스트 기반 파일만 검사
+  const textMimeTypes = ["text/plain", "text/csv", "application/json"];
+  if (!textMimeTypes.includes(file.type)) {
+    return { safe: true };
+  }
+
+  try {
+    const text = await file.text();
+
+    for (const pattern of MALICIOUS_CONTENT_PATTERNS) {
+      if (pattern.test(text)) {
+        return { safe: false, threat: "악의적인 콘텐츠가 감지되었습니다" };
+      }
+    }
+
+    return { safe: true };
+  } catch {
+    return { safe: true };
+  }
+}
+
+/**
+ * 전체 파일 검증
+ */
+export async function validateFile(file: File): Promise<{ valid: boolean; error?: string }> {
+  // 파일 크기 확인 (10MB 제한)
+  const MAX_SIZE = 10 * 1024 * 1024;
+  if (file.size > MAX_SIZE) {
+    return { valid: false, error: "파일 크기는 10MB를 초과할 수 없습니다" };
+  }
+
+  // 파일 이름 검증
+  const nameValidation = validateFileName(file.name);
+  if (!nameValidation.valid) {
+    return nameValidation;
+  }
+
+  // 파일 확장자 검증
+  if (!validateFileExtension(file.name)) {
+    return { valid: false, error: "허용되지 않는 파일 형식입니다" };
+  }
+
+  // MIME 타입 검증
+  const allowedMimeTypes = [
+    "image/png", "image/jpeg", "image/gif", "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "text/plain", "text/csv",
+    "application/zip",
+  ];
+
+  if (!allowedMimeTypes.includes(file.type)) {
+    return { valid: false, error: "허용되지 않는 파일 형식입니다" };
+  }
+
+  // 파일 매직 넘버 검증
+  const signatureValid = await verifyFileSignature(file, file.type);
+  if (!signatureValid) {
+    return { valid: false, error: "파일 형식이 일치하지 않습니다" };
+  }
+
+  // 악의적인 콘텐츠 검사
+  const contentScan = await scanFileContent(file);
+  if (!contentScan.safe) {
+    return { valid: false, error: contentScan.threat };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * 안전한 파일 이름 생성
+ */
+export function generateSafeFileName(originalName: string, uuid: string): string {
+  const extension = originalName.slice(originalName.lastIndexOf("."));
+  const baseName = originalName.slice(0, originalName.lastIndexOf("."));
+
+  // 위험한 문자 제거
+  const sanitized = baseName
+    .replace(/[<>:"|?*]/g, "")
+    .replace(/\s+/g, "_")
+    .slice(0, 100); // 이름 길이 제한
+
+  return `${uuid}-${sanitized}${extension}`;
+}

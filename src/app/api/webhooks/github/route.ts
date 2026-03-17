@@ -10,12 +10,26 @@ export async function POST(request: NextRequest) {
   try {
     const event = request.headers.get("x-github-event");
     const signature = request.headers.get("x-hub-signature-256");
-    const body = await request.json();
+    const contentType = request.headers.get("content-type");
+
+    // 콘텐츠 타입 검증
+    if (!contentType?.includes("application/json")) {
+      return NextResponse.json(
+        { error: "Invalid content type" },
+        { status: 400 }
+      );
+    }
+
+    // 본문을 문자열로 읽어서 시그니처 검증
+    const bodyText = await request.text();
 
     // 시그니처 검증
-    if (!verifyGitHubSignature(body, signature)) {
+    if (!(await verifyGitHubSignature(bodyText, signature))) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
+
+    // JSON 파싱
+    const body = JSON.parse(bodyText);
 
     switch (event) {
       case "push":
@@ -42,24 +56,64 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GitHub 시그니처 검증
+ * GitHub 시그니처 검증 - HMAC-SHA256
  */
-function verifyGitHubSignature(
-  body: unknown,
+async function verifyGitHubSignature(
+  body: string,
   signature: string | null
-): boolean {
+): Promise<boolean> {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (!secret) {
-    console.warn("GITHUB_WEBHOOK_SECRET not set");
-    return true; // 개발 환경에서는 무시
+    console.error("GITHUB_WEBHOOK_SECRET not set - webhook verification disabled");
+    // 보안을 위해 개발 환경에서도 검증 실패 처리
+    return false;
   }
 
-  if (!signature) return false;
+  if (!signature) {
+    console.error("Missing x-hub-signature-256 header");
+    return false;
+  }
 
-  // TODO: crypto 모듈로 HMAC 검증 구현
-  // const expected = crypto.createHmac("sha256", secret).update(JSON.stringify(body)).digest("hex");
-  // return signature === `sha256=${expected}`;
-  return true;
+  // 시그니처 형식 검증: sha256=hex
+  const shaPrefix = "sha256=";
+  if (!signature.startsWith(shaPrefix)) {
+    console.error("Invalid signature format");
+    return false;
+  }
+
+  const signatureHash = signature.slice(shaPrefix.length);
+
+  try {
+    // Web Crypto API를 사용한 HMAC-SHA256 검증
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(secret);
+    const messageData = encoder.encode(body);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      keyData,
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
+    );
+
+    const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+    const signatureArray = Array.from(new Uint8Array(signatureBuffer));
+    const expectedSignatureHex = signatureArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    const isValid = expectedSignatureHex === signatureHash;
+
+    if (!isValid) {
+      console.error("GitHub webhook signature verification failed");
+    }
+
+    return isValid;
+  } catch (error) {
+    console.error("Error verifying GitHub signature:", error);
+    return false;
+  }
 }
 
 /**
