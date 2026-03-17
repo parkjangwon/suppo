@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
-import { TicketDetail } from "@/components/admin/ticket-detail";
+import { TicketDetailExtended as TicketDetail } from "@/components/admin/ticket-detail-extended";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";

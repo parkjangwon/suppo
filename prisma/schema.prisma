@@ -30,6 +30,7 @@ enum AgentRole {
 enum AuthorType {
   CUSTOMER
   AGENT
+  SYSTEM
 }
 
 enum ActivityAction {
@@ -38,6 +39,8 @@ enum ActivityAction {
   STATUS_CHANGED
   TRANSFERRED
   PRIORITY_CHANGED
+  MERGED
+  UNMERGED
 }
 
 enum GitProvider {
@@ -96,48 +99,55 @@ enum GitEventType {
 }
 
 model Ticket {
-  id                String         @id @default(cuid())
-  ticketNumber      String         @unique
-  customerId        String?
-  customerName      String
-  customerEmail     String
-  customerPhone     String?
+  id                   String             @id @default(cuid())
+  ticketNumber         String             @unique
+  customerId           String?
+  customerName         String
+  customerEmail        String
+  customerPhone        String?
   customerOrganization String?
-  subject           String
-  description       String
-  categoryId        String?
-  priority          TicketPriority
-  status            TicketStatus   @default(OPEN)
-  assigneeId        String?
-  requestTypeId     String?
-  teamId            String?
-  source            RequestTypeChannel @default(WEB)
-  environment       String?
-  serviceModule     String?
-  firstResponseAt   DateTime?
-  resolvedAt        DateTime?
-  closedAt          DateTime?
-  reopenedCount     Int            @default(0)
-  tags              String?        @default("[]")
-  searchVector      String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  createdBy         String?
-  updatedBy         String?
+  subject              String
+  description          String
+  categoryId           String?
+  priority             TicketPriority
+  status               TicketStatus       @default(OPEN)
+  assigneeId           String?
+  requestTypeId        String?
+  teamId               String?
+  source               RequestTypeChannel @default(WEB)
+  environment          String?
+  serviceModule        String?
+  firstResponseAt      DateTime?
+  resolvedAt           DateTime?
+  closedAt             DateTime?
+  reopenedCount        Int                @default(0)
+  tags                 String?            @default("[]")
+  searchVector         String?
+  summary              String?
+  summaryUpdatedAt     DateTime?
+  mergedIntoId         String?
+  mergedFromTickets    TicketMerge[]      @relation("TicketTarget")
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  createdBy            String?
+  updatedBy            String?
 
-  category      Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  assignee      Agent?          @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
-  team          Team?           @relation(fields: [teamId], references: [id], onDelete: SetNull)
-  requestType   RequestType?    @relation(fields: [requestTypeId], references: [id], onDelete: SetNull)
-  customer      Customer?       @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: SetNull)
-  comments      Comment[]
-  attachments   Attachment[]
-  gitLinks      GitLink[]
-  gitEvents     GitEvent[]
-  transfers     TicketTransfer[]
-  activities    TicketActivity[]
-  slaClocks     SLAClock[]
+  category          Category?              @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  assignee          Agent?                 @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  team              Team?                  @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  requestType       RequestType?           @relation(fields: [requestTypeId], references: [id], onDelete: SetNull)
+  customer          Customer?              @relation("CustomerTickets", fields: [customerId], references: [id], onDelete: SetNull)
+  comments          Comment[]
+  attachments       Attachment[]
+  gitLinks          GitLink[]
+  gitEvents         GitEvent[]
+  transfers         TicketTransfer[]
+  activities        TicketActivity[]
+  slaClocks         SLAClock[]
   customFieldValues CustomFieldValue[]
+  satisfactions     CustomerSatisfaction[]
+  timeEntries       TimeEntry[]
+  mergedFrom        TicketMerge[]          @relation("TicketSource")
 
   @@index([categoryId])
   @@index([assigneeId])
@@ -148,55 +158,58 @@ model Ticket {
   @@index([customerId])
   @@index([createdAt])
   @@index([searchVector])
+  @@index([mergedIntoId])
 }
 
 model Agent {
-  id             String       @id @default(cuid())
-  name           String
-  email          String       @unique
-  phone          String?
-  role           AgentRole    @default(AGENT)
-  isActive       Boolean      @default(true)
-  maxTickets     Int          @default(10)
-  avatarUrl      String?
-  authProvider   AuthProvider @default(CREDENTIALS)
-  passwordHash   String?
+  id                String       @id @default(cuid())
+  name              String
+  email             String       @unique
+  phone             String?
+  role              AgentRole    @default(AGENT)
+  isActive          Boolean      @default(true)
+  maxTickets        Int          @default(10)
+  avatarUrl         String?
+  authProvider      AuthProvider @default(CREDENTIALS)
+  passwordHash      String?
   passwordChangedAt DateTime?
-  isInitialPassword Boolean   @default(false)
-  lastAssignedAt DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isInitialPassword Boolean      @default(false)
+  lastAssignedAt    DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
-  assignedTickets   Ticket[]           @relation("TicketAssignee")
-  categories        AgentCategory[]
-  authoredComments  Comment[]          @relation("CommentAuthor")
-  createdTemplates  ResponseTemplate[] @relation("TemplateCreator")
-  activityEntries   TicketActivity[]   @relation("ActivityActor")
-  transfersFrom     TicketTransfer[]   @relation("TransferFromAgent")
-  transfersTo       TicketTransfer[]   @relation("TransferToAgent")
-  teamMemberships   TeamMember[]
-  savedFilters      SavedFilter[]      @relation("FilterCreator")
-  absences          AgentAbsence[]     @relation("AgentAbsenceToAgent")
-  createdAbsences   AgentAbsence[]     @relation("AbsenceCreator")
+  assignedTickets  Ticket[]           @relation("TicketAssignee")
+  categories       AgentCategory[]
+  authoredComments Comment[]          @relation("CommentAuthor")
+  createdTemplates ResponseTemplate[] @relation("TemplateCreator")
+  activityEntries  TicketActivity[]   @relation("ActivityActor")
+  transfersFrom    TicketTransfer[]   @relation("TransferFromAgent")
+  transfersTo      TicketTransfer[]   @relation("TransferToAgent")
+  teamMemberships  TeamMember[]
+  savedFilters     SavedFilter[]      @relation("FilterCreator")
+  absences         AgentAbsence[]     @relation("AgentAbsenceToAgent")
+  createdAbsences  AgentAbsence[]     @relation("AbsenceCreator")
+  timeEntries      TimeEntry[]        @relation("TimeEntries")
+  automationRules  AutomationRule[]   @relation("AutomationCreator")
 
   @@index([isActive])
 }
 
 model AgentAbsence {
-  id          String            @id @default(cuid())
+  id          String      @id @default(cuid())
   agentId     String
   title       String
   description String?
-  type        AbsenceType       @default(VACATION)
+  type        AbsenceType @default(VACATION)
   startDate   DateTime
   endDate     DateTime
-  isAllDay    Boolean           @default(true)
+  isAllDay    Boolean     @default(true)
   createdById String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  agent       Agent             @relation("AgentAbsenceToAgent", fields: [agentId], references: [id], onDelete: Cascade)
-  createdBy   Agent             @relation("AbsenceCreator", fields: [createdById], references: [id])
+  agent     Agent @relation("AgentAbsenceToAgent", fields: [agentId], references: [id], onDelete: Cascade)
+  createdBy Agent @relation("AbsenceCreator", fields: [createdById], references: [id])
 
   @@index([agentId])
   @@index([startDate, endDate])
@@ -255,17 +268,17 @@ model AuditLog {
 }
 
 model Customer {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String
-  phone          String?
-  memo           String?
-  analysis       String?
-  analyzedAt     DateTime?
-  ticketCount    Int      @default(0)
-  lastTicketAt   DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  phone        String?
+  memo         String?
+  analysis     String?
+  analyzedAt   DateTime?
+  ticketCount  Int       @default(0)
+  lastTicketAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   tickets Ticket[] @relation("CustomerTickets")
 
@@ -349,8 +362,8 @@ model GitLink {
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
-  @@index([ticketId])
   @@unique([provider, repoFullName, issueNumber])
+  @@index([ticketId])
 }
 
 model TicketTransfer {
@@ -371,18 +384,18 @@ model TicketTransfer {
 }
 
 model ResponseTemplate {
-  id             String   @id @default(cuid())
-  title          String
-  content        String
-  variables      Json?    // 사용 가능한 변수 목록 [{"name": "customer.name", "description": "고객 이름"}]
-  categoryId     String?
-  requestTypeId  String?  // 추천 대상 문의 유형
-  createdById    String
-  isShared       Boolean  @default(true)
-  isRecommended  Boolean  @default(false) // 추천 여부
-  sortOrder      Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  content       String
+  variables     Json? // 사용 가능한 변수 목록 [{"name": "customer.name", "description": "고객 이름"}]
+  categoryId    String?
+  requestTypeId String? // 추천 대상 문의 유형
+  createdById   String
+  isShared      Boolean  @default(true)
+  isRecommended Boolean  @default(false) // 추천 여부
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   requestType RequestType? @relation(fields: [requestTypeId], references: [id], onDelete: SetNull)
@@ -445,23 +458,23 @@ model EmailDelivery {
 
 // SAML SSO Provider Configuration
 model SAMLProvider {
-  id                String   @id @default(cuid())
-  name              String   // 회사명 (예: "ACME Corp")
-  domain            String   @unique // 이메일 도메인 (예: "acme.com")
-  isActive          Boolean  @default(true)
-  
+  id       String  @id @default(cuid())
+  name     String // 회사명 (예: "ACME Corp")
+  domain   String  @unique // 이메일 도메인 (예: "acme.com")
+  isActive Boolean @default(true)
+
   // IdP Configuration
-  idpEntityId       String   // Identity Provider Entity ID
-  idpSsoUrl         String   // SSO URL
-  idpSloUrl         String?  // Single Logout URL (optional)
-  idpCertificate    String // X.509 Certificate
-  
+  idpEntityId    String // Identity Provider Entity ID
+  idpSsoUrl      String // SSO URL
+  idpSloUrl      String? // Single Logout URL (optional)
+  idpCertificate String // X.509 Certificate
+
   // SP Configuration (자동 생성)
-  spAcsUrl          String   // Assertion Consumer Service URL
-  spEntityId        String   // Service Provider Entity ID
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  spAcsUrl   String // Assertion Consumer Service URL
+  spEntityId String // Service Provider Entity ID
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([domain])
   @@index([isActive])
@@ -469,101 +482,101 @@ model SAMLProvider {
 
 // System Branding Configuration (시스템 브랜딩 설정 - 단일 고객용)
 model SystemBranding {
-  id                String   @id @default("default") // 단일 레코드만 사용
+  id String @id @default("default") // 단일 레코드만 사용
 
   // Branding Settings
-  companyName       String   @default("Crinity") // 회사명
-  logoUrl           String?  // 로고 이미지 URL
-  faviconUrl        String?  // 파비콘 URL
+  companyName String  @default("Crinity") // 회사명
+  logoUrl     String? // 로고 이미지 URL
+  faviconUrl  String? // 파비콘 URL
 
   // Colors
-  primaryColor      String   @default("#0f172a") // 기본 색상
-  secondaryColor    String   @default("#3b82f6") // 보조 색상
+  primaryColor   String @default("#0f172a") // 기본 색상
+  secondaryColor String @default("#3b82f6") // 보조 색상
 
   // Text Customization
-  homepageTitle     String   @default("Crinity Helpdesk") // 홈페이지 메인 제목
-  homepageSubtitle  String   @default("민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.") // 홈페이지 부제목
-  adminPanelTitle   String   @default("Crinity Admin") // 관리자 패널 제목
-  appTitle          String   @default("고객 지원 센터") // 앱 제목
-  welcomeMessage    String   @default("무엇을 도와드릴까요?") // 환영 메시지
-  footerText        String   @default("© 2024 All rights reserved.") // 푸터 텍스트
+  homepageTitle    String @default("Crinity Helpdesk") // 홈페이지 메인 제목
+  homepageSubtitle String @default("민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.") // 홈페이지 부제목
+  adminPanelTitle  String @default("Crinity Admin") // 관리자 패널 제목
+  appTitle         String @default("고객 지원 센터") // 앱 제목
+  welcomeMessage   String @default("무엇을 도와드릴까요?") // 환영 메시지
+  footerText       String @default("© 2024 All rights reserved.") // 푸터 텍스트
 
   // Footer Contact Information
-  footerPhone       String?  // 푸터 전화번호
-  footerEmail       String?  // 푸터 이메일
-  footerHomepage    String?  // 푸터 홈페이지 URL
-  footerAddress     String?  // 푸터 주소
+  footerPhone    String? // 푸터 전화번호
+  footerEmail    String? // 푸터 이메일
+  footerHomepage String? // 푸터 홈페이지 URL
+  footerAddress  String? // 푸터 주소
 
   // Feature Flags
-  showPoweredBy     Boolean  @default(true) // "Powered by Crinity" 표시 여부
-  customCss         String? // 커스텀 CSS
+  showPoweredBy Boolean @default(true) // "Powered by Crinity" 표시 여부
+  customCss     String? // 커스텀 CSS
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Email Settings (이메일 서버 설정)
 model EmailSettings {
-  id                  String   @id @default("default")
-  
+  id String @id @default("default")
+
   // Email Provider
-  provider            String   @default("nodemailer") // nodemailer, ses, resend
-  
+  provider String @default("nodemailer") // nodemailer, ses, resend
+
   // SMTP Settings (for nodemailer)
-  smtpHost            String?
-  smtpPort            Int      @default(587)
-  smtpSecure          Boolean  @default(false)
-  smtpUser            String?
-  smtpPassword        String?
-  
+  smtpHost     String?
+  smtpPort     Int     @default(587)
+  smtpSecure   Boolean @default(false)
+  smtpUser     String?
+  smtpPassword String?
+
   // Sender Settings
-  fromEmail           String   @default("no-reply@company.com")
-  fromName            String   @default("Crinity Helpdesk")
-  
+  fromEmail String @default("no-reply@company.com")
+  fromName  String @default("Crinity Helpdesk")
+
   // AWS SES Settings
-  sesAccessKey        String?
-  sesSecretKey        String?
-  sesRegion           String   @default("ap-northeast-2")
-  
+  sesAccessKey String?
+  sesSecretKey String?
+  sesRegion    String  @default("ap-northeast-2")
+
   // Resend API Key
-  resendApiKey        String?
-  
+  resendApiKey String?
+
   // Notification Settings
-  notificationsEnabled Boolean  @default(true)
-  notifyOnNewTicket   Boolean  @default(true)
-  notifyOnAssign      Boolean  @default(true)
-  notifyOnComment     Boolean  @default(true)
+  notificationsEnabled Boolean @default(true)
+  notifyOnNewTicket    Boolean @default(true)
+  notifyOnAssign       Boolean @default(true)
+  notifyOnComment      Boolean @default(true)
   notifyOnStatusChange Boolean @default(true)
-  notificationEmail   String?
-  
+  notificationEmail    String?
+
   // Test Settings
-  testMode            Boolean  @default(false)
-  
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  testMode Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // LLM Settings (AI 분석 설정)
 model LLMSettings {
-  id                  String   @id @default("default")
-  
+  id String @id @default("default")
+
   // Provider Selection
-  provider            String   @default("ollama") // ollama, gemini
-  
+  provider String @default("ollama") // ollama, gemini
+
   // Ollama Settings
-  ollamaUrl           String   @default("http://localhost:11434")
-  ollamaModel         String   @default("llama3.2")
-  
+  ollamaUrl   String @default("http://localhost:11434")
+  ollamaModel String @default("llama3.2")
+
   // Gemini Settings
-  geminiApiKey        String?
-  geminiModel         String   @default("gemini-1.5-flash")
-  
+  geminiApiKey String?
+  geminiModel  String  @default("gemini-1.5-flash")
+
   // Analysis Settings
-  analysisEnabled     Boolean  @default(false)
-  analysisPrompt      String?
-  
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  analysisEnabled Boolean @default(false)
+  analysisPrompt  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Team (팀/그룹 관리)
@@ -597,23 +610,23 @@ model TeamMember {
 
 // Request Type (문의 유형 관리)
 model RequestType {
-  id              String              @id @default(cuid())
-  name            String              @unique
-  description     String?
-  channel         RequestTypeChannel  @default(WEB)
-  defaultPriority TicketPriority      @default(MEDIUM)
-  defaultTeamId   String?
-  categoryId      String?             @unique // Link to Category for agent specialization
-  autoAssignEnabled Boolean           @default(true)
-  isActive        Boolean             @default(true)
-  sortOrder       Int                 @default(0)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  id                String             @id @default(cuid())
+  name              String             @unique
+  description       String?
+  channel           RequestTypeChannel @default(WEB)
+  defaultPriority   TicketPriority     @default(MEDIUM)
+  defaultTeamId     String?
+  categoryId        String?            @unique // Link to Category for agent specialization
+  autoAssignEnabled Boolean            @default(true)
+  isActive          Boolean            @default(true)
+  sortOrder         Int                @default(0)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
-  tickets          Ticket[]
+  tickets           Ticket[]
   responseTemplates ResponseTemplate[]
-  defaultTeam      Team?    @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
-  category         Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  defaultTeam       Team?              @relation(fields: [defaultTeamId], references: [id], onDelete: SetNull)
+  category          Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([isActive])
   @@index([sortOrder])
@@ -622,17 +635,17 @@ model RequestType {
 
 // Custom Field (커스텀 필드 정의)
 model CustomFieldDefinition {
-  id          String           @id @default(cuid())
-  key         String           @unique
+  id          String          @id @default(cuid())
+  key         String          @unique
   name        String
   description String?
   fieldType   CustomFieldType
   options     Json? // SELECT/MULTI_SELECT용 옵션 배열
-  isRequired  Boolean          @default(false)
-  isActive    Boolean          @default(true)
-  sortOrder   Int              @default(0)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  isRequired  Boolean         @default(false)
+  isActive    Boolean         @default(true)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   values CustomFieldValue[]
 
@@ -644,7 +657,7 @@ model CustomFieldValue {
   id        String   @id @default(cuid())
   ticketId  String
   fieldId   String
-  value     String   // JSON으로 저장된 값
+  value     String // JSON으로 저장된 값
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -658,15 +671,15 @@ model CustomFieldValue {
 
 // SLA Policy (SLA 정책)
 model SLAPolicy {
-  id                  String           @id @default(cuid())
-  name                String
-  description         String?
-  priority            TicketPriority
-  firstResponseHours  Float // 첫 응답 시간 (시간)
-  resolutionHours     Float // 해결 시간 (시간)
-  isActive            Boolean          @default(true)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  id                 String         @id @default(cuid())
+  name               String
+  description        String?
+  priority           TicketPriority
+  firstResponseHours Float // 첫 응답 시간 (시간)
+  resolutionHours    Float // 해결 시간 (시간)
+  isActive           Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   clocks SLAClock[]
 
@@ -675,19 +688,19 @@ model SLAPolicy {
 }
 
 model SLAClock {
-  id              String         @id @default(cuid())
-  ticketId        String
-  policyId        String
-  target          SLATarget
-  status          SLAClockStatus @default(RUNNING)
-  startedAt       DateTime       @default(now())
-  pausedAt        DateTime?
-  totalPausedMinutes Int         @default(0)
-  deadlineAt      DateTime
-  breachedAt      DateTime?
-  warningSentAt   DateTime?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id                 String         @id @default(cuid())
+  ticketId           String
+  policyId           String
+  target             SLATarget
+  status             SLAClockStatus @default(RUNNING)
+  startedAt          DateTime       @default(now())
+  pausedAt           DateTime?
+  totalPausedMinutes Int            @default(0)
+  deadlineAt         DateTime
+  breachedAt         DateTime?
+  warningSentAt      DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 
   ticket Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   policy SLAPolicy @relation(fields: [policyId], references: [id], onDelete: Restrict)
@@ -700,15 +713,15 @@ model SLAClock {
 
 // Business Calendar (업무 시간/휴일 관리)
 model BusinessCalendar {
-  id            String     @id @default(cuid())
+  id            String   @id @default(cuid())
   name          String
-  timezone      String     @default("Asia/Seoul")
-  workStartHour Int        @default(9) // 24시간 형식
-  workEndHour   Int        @default(18)
-  workDays      String?    @default("[1,2,3,4,5]") // 0=일, 1=월, ..., 6=토
-  isActive      Boolean    @default(true)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  timezone      String   @default("Asia/Seoul")
+  workStartHour Int      @default(9) // 24시간 형식
+  workEndHour   Int      @default(18)
+  workDays      String?  @default("[1,2,3,4,5]") // 0=일, 1=월, ..., 6=토
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   holidays Holiday[]
 
@@ -731,19 +744,19 @@ model Holiday {
 
 // Email Thread Mapping (이메일 스레딩)
 model EmailThreadMapping {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   ticketId        String
-  messageId       String   @unique // 이메일 Message-ID 헤더
+  messageId       String    @unique // 이메일 Message-ID 헤더
   inReplyTo       String? // In-Reply-To 헤더
-  references      String?  // References 헤더 배열 (JSON)
+  references      String? // References 헤더 배열 (JSON)
   subject         String
   fromAddress     String
   toAddress       String
-  receivedAt      DateTime @default(now())
+  receivedAt      DateTime  @default(now())
   processedAt     DateTime?
-  isProcessed     Boolean  @default(false)
+  isProcessed     Boolean   @default(false)
   processingError String?
-  createdAt       DateTime @default(now())
+  createdAt       DateTime  @default(now())
 
   @@index([ticketId])
   @@index([messageId])
@@ -754,21 +767,21 @@ model EmailThreadMapping {
 
 // Git Event (Git 웹훅 이벤트)
 model GitEvent {
-  id              String      @id @default(cuid())
-  ticketId        String
-  provider        GitProvider
-  eventType       GitEventType
-  repoFullName    String
-  ref             String? // 브랜치/태그명
-  commitSha       String?
-  commitMessage   String?
-  authorName      String?
-  authorEmail     String?
-  prNumber        Int?
-  prTitle         String?
-  prUrl           String?
-  occurredAt      DateTime // 실제 Git 이벤트 발생 시간
-  createdAt       DateTime @default(now())
+  id            String       @id @default(cuid())
+  ticketId      String
+  provider      GitProvider
+  eventType     GitEventType
+  repoFullName  String
+  ref           String? // 브랜치/태그명
+  commitSha     String?
+  commitMessage String?
+  authorName    String?
+  authorEmail   String?
+  prNumber      Int?
+  prTitle       String?
+  prUrl         String?
+  occurredAt    DateTime // 실제 Git 이벤트 발생 시간
+  createdAt     DateTime     @default(now())
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
@@ -780,16 +793,16 @@ model GitEvent {
 
 // Saved Filter (저장된 필터/뷰)
 model SavedFilter {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
   filterConfig Json // 필터 설정 JSON
-  sortConfig  Json? // 정렬 설정 JSON
-  isDefault   Boolean  @default(false)
-  isShared    Boolean  @default(false) // 팀원과 공유
-  createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sortConfig   Json? // 정렬 설정 JSON
+  isDefault    Boolean  @default(false)
+  isShared     Boolean  @default(false) // 팀원과 공유
+  createdById  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   createdBy Agent @relation("FilterCreator", fields: [createdById], references: [id], onDelete: Cascade)
 
@@ -799,22 +812,94 @@ model SavedFilter {
 
 // Git Operation Queue (Git 연동 실패 시 재시도)
 model GitOperationQueue {
-  id            String      @id @default(cuid())
-  operation     String      // CREATE_ISSUE, LINK_ISSUE, etc.
-  provider      GitProvider
-  payload       Json        // 요청 데이터
-  status        String      @default("PENDING") // PENDING, PROCESSING, SUCCESS, FAILED
-  retryCount    Int         @default(0)
-  maxRetries    Int         @default(3)
-  errorCode     String?     // TIMEOUT, AUTH_FAILED, RATE_LIMIT, etc.
-  errorMessage  String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  processedAt   DateTime?
+  id           String      @id @default(cuid())
+  operation    String // CREATE_ISSUE, LINK_ISSUE, etc.
+  provider     GitProvider
+  payload      Json // 요청 데이터
+  status       String      @default("PENDING") // PENDING, PROCESSING, SUCCESS, FAILED
+  retryCount   Int         @default(0)
+  maxRetries   Int         @default(3)
+  errorCode    String? // TIMEOUT, AUTH_FAILED, RATE_LIMIT, etc.
+  errorMessage String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  processedAt  DateTime?
 
   @@index([status])
   @@index([retryCount])
   @@index([createdAt])
 }
 
+// Ticket Merge (티켓 병합)
+model TicketMerge {
+  id             String   @id @default(cuid())
+  sourceTicketId String
+  targetTicketId String
+  mergedAt       DateTime @default(now())
+  mergedBy       String
 
+  sourceTicket Ticket @relation("TicketSource", fields: [sourceTicketId], references: [id], onDelete: Cascade)
+  targetTicket Ticket @relation("TicketTarget", fields: [targetTicketId], references: [id], onDelete: Cascade)
+
+  @@index([sourceTicketId])
+  @@index([targetTicketId])
+  @@index([mergedAt])
+}
+
+// Time Entry (시간 추적)
+model TimeEntry {
+  id        String    @id @default(cuid())
+  ticketId  String
+  agentId   String
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  duration  Int?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  agent  Agent  @relation("TimeEntries", fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([agentId])
+  @@index([startTime])
+}
+
+// Automation Rule (자동화 규칙)
+model AutomationRule {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  conditions  Json // { status, priority, categoryId, assigneeId, teamId, ... }
+  actions     Json // { setStatus, setAssignee, addTag, sendNotification, ... }
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0) // 우선순위 (높을수록 먼저 실행)
+  triggerOn   String?  @default("TICKET_CREATED") // TICKET_CREATED, TICKET_UPDATED, TICKET_COMMENT, TICKET_ASSIGNED
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy Agent @relation("AutomationCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@index([priority])
+  @@index([triggerOn])
+}
+
+// Customer Satisfaction Survey (CSAT) (고객 만족도 조사)
+model CustomerSatisfaction {
+  id            String   @id @default(cuid())
+  ticketId      String   @unique
+  ticketNumber  String
+  customerId    String?
+  customerEmail String
+  rating        Int // 1~5점
+  comment       String?
+  submittedAt   DateTime @default(now())
+
+  ticket Ticket? @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([customerId])
+}

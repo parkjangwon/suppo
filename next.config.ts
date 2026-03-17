@@ -11,23 +11,24 @@ const nextConfig: NextConfig = {
     const isDevelopment = process.env.NODE_ENV === "development";
 
     // Content Security Policy
-    // 개발 환경에서는 eval을 허용하지 않고, 프로덕션에서는 더 엄격한 정책
+    // 개발 환경에서는 더 완화한 정책 적용
     const cspDirectives = {
       "default-src": ["'self'"],
       "script-src": isDevelopment
         ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
-        : ["'self'"],
+        : ["'self'", "'unsafe-inline'"],
       "style-src": ["'self'", "'unsafe-inline'"],
       "img-src": ["'self'", "data:", "https:", "blob:"],
-      "font-src": ["'self'"],
-      "connect-src": ["'self'", "https://api.github.com", "https://api.gitlab.com"],
+      "font-src": ["'self'", "https:"],
+      "connect-src": ["'self'", "https:", "ws:"],
       "media-src": ["'self'"],
       "object-src": ["'none'"],
       "frame-src": ["'none'"],
       "base-uri": ["'self'"],
       "form-action": ["'self'"],
       "frame-ancestors": ["'none'"],
-      "navigate-to": ["'self'"],
+      // navigate-to는 비표준 디렉티브 - 제거
+      // "navigate-to": isDevelopment ? [] : ["'self'"],
       "report-uri": isDevelopment ? [] : ["/api/security/csp-report"],
       "report-to": isDevelopment ? [] : ["csp-endpoint"],
     };

@@ -5,7 +5,8 @@ import {
   renderStatusChangedEmail,
   renderTicketAssignedEmail,
   renderTicketCreatedCustomerEmail,
-  renderTicketCreatedNotificationEmail
+  renderTicketCreatedNotificationEmail,
+  renderCSATSurveyEmail
 } from "@/lib/email/renderers";
 
 type EmailDeliveryStatus = "PENDING" | "SENT" | "FAILED";
@@ -184,4 +185,30 @@ export async function enqueueStatusChangedEmail(
       db
     );
   }, "Failed to enqueue status-changed email");
+}
+
+export async function enqueueCSATSurveyEmail(
+  ticketId: string,
+  ticketNumber: string,
+  ticketSubject: string,
+  customerEmail: string,
+  customerName: string,
+  db: EmailQueueDbClient = prisma
+): Promise<void> {
+  await enqueueSafely(async () => {
+    const email = renderCSATSurveyEmail({
+      ticketNumber,
+      customerName,
+      ticketSubject
+    });
+
+    await enqueueEmail(
+      {
+        to: customerEmail,
+        subject: email.subject,
+        body: email.body
+      },
+      db
+    );
+  }, "Failed to enqueue CSAT survey email");
 }

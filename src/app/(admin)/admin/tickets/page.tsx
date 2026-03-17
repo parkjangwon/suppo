@@ -48,9 +48,9 @@ export default async function TicketsPage({
   }
   if (search) {
     where.OR = [
-      { ticketNumber: { contains: search, mode: "insensitive" } },
-      { subject: { contains: search, mode: "insensitive" } },
-      { customerEmail: { contains: search, mode: "insensitive" } },
+      { ticketNumber: { contains: search } },
+      { subject: { contains: search } },
+      { customerEmail: { contains: search } },
     ];
   }
 

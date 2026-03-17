@@ -1,5 +1,6 @@
 import { prisma } from "../client";
 import { TicketStatus, TicketPriority, Prisma } from "@prisma/client";
+import { enqueueCSATSurveyEmail } from "@/lib/email/enqueue";
 
 export interface GetAdminTicketsParams {
   status?: TicketStatus;
@@ -44,9 +45,9 @@ export async function getAdminTickets(params: GetAdminTicketsParams) {
 
   if (search) {
     where.OR = [
-      { ticketNumber: { contains: search, mode: "insensitive" } },
-      { subject: { contains: search, mode: "insensitive" } },
-      { customerEmail: { contains: search, mode: "insensitive" } },
+      { ticketNumber: { contains: search } },
+      { subject: { contains: search } },
+      { customerEmail: { contains: search } },
     ];
   }
 
@@ -109,9 +110,16 @@ export async function updateTicketStatus(id: string, status: TicketStatus, actor
   const oldTicket = await prisma.ticket.findUnique({ where: { id } });
   if (!oldTicket) throw new Error("Ticket not found");
 
+  const updateData: any = { status };
+
+  // RESOLVED일 경우 해결일 설정
+  if (status === "RESOLVED" && !oldTicket.resolvedAt) {
+    updateData.resolvedAt = new Date();
+  }
+
   const ticket = await prisma.ticket.update({
     where: { id },
-    data: { status },
+    data: updateData,
   });
 
   await prisma.ticketActivity.create({
@@ -124,6 +132,17 @@ export async function updateTicketStatus(id: string, status: TicketStatus, actor
       newValue: status,
     },
   });
+
+  // RESOLVED 상태로 변경 시 CSAT 설문 이메일 발송 (이전 상태가 RESOLVED가 아닌 경우)
+  if (status === "RESOLVED" && oldTicket.status !== "RESOLVED") {
+    await enqueueCSATSurveyEmail(
+      id,
+      ticket.ticketNumber,
+      ticket.subject,
+      ticket.customerEmail,
+      ticket.customerName
+    );
+  }
 
   return ticket;
 }

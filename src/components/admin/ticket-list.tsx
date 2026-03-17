@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TicketFilters } from "./ticket-filters";
+import { SavedFilters } from "./saved-filters";
 
 export interface Ticket {
   id: string;
@@ -69,10 +70,24 @@ export function TicketList({
 
   return (
     <div className="space-y-4">
-      <TicketFilters
-        categories={categories}
-        agents={agents}
-      />
+      <div className="flex justify-between items-start">
+        <TicketFilters
+          categories={categories}
+          agents={agents}
+        />
+        <SavedFilters
+          currentFilter={{}}
+          onApplyFilter={(filter) => {
+            const params = new URLSearchParams();
+            if (filter.status) params.set("status", filter.status);
+            if (filter.priority) params.set("priority", filter.priority);
+            if (filter.categoryId) params.set("categoryId", filter.categoryId);
+            if (filter.assigneeId) params.set("assigneeId", filter.assigneeId);
+            if (filter.search) params.set("search", filter.search);
+            router.push(`/admin/tickets?${params.toString()}`);
+          }}
+        />
+      </div>
 
       <div className="rounded-md border">
         <table className="w-full">
