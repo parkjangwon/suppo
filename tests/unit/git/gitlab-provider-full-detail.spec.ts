@@ -84,7 +84,10 @@ describe("GitLabProvider.getIssueFullDetail()", () => {
   });
 
   it("이슈 API 실패 시 에러를 throw한다", async () => {
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 });
+    mockFetch
+      .mockResolvedValueOnce({ ok: false, status: 404 })
+      .mockResolvedValueOnce({ ok: true, json: async () => [] }) // notes (not reached)
+      .mockResolvedValueOnce({ ok: true, json: async () => [] }); // MRs (not reached)
     await expect(provider.getIssueFullDetail!("group/project", 99)).rejects.toThrow("404");
   });
 });
