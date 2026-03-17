@@ -26,3 +26,18 @@ export function formatMilestone(milestone: {
   if (total === 0) return milestone.title;
   return `${milestone.title} (${milestone.closedIssues}/${total} 완료)`;
 }
+
+export function getPRStateBadgeClass(state: 'open' | 'merged' | 'closed'): string {
+  if (state === 'open') return 'bg-blue-100 text-blue-700';
+  if (state === 'merged') return 'bg-purple-100 text-purple-700';
+  return 'bg-slate-100 text-slate-500';
+}
+
+export function getReviewDecisionText(
+  decision: 'approved' | 'changes_requested' | 'review_required' | null
+): string | null {
+  if (decision === 'approved') return '✓ approved';
+  if (decision === 'changes_requested') return '✗ changes requested';
+  if (decision === 'review_required') return '○ review required';
+  return null;
+}

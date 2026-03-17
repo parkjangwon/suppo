@@ -3,7 +3,9 @@ import { describe, it, expect } from "vitest";
 import {
   getStateBadgeClass,
   getLabelTextColor,
-  formatMilestone
+  formatMilestone,
+  getPRStateBadgeClass,
+  getReviewDecisionText
 } from "@/components/ticket/issue-detail-helpers";
 
 describe("getStateBadgeClass", () => {
@@ -54,5 +56,37 @@ describe("formatMilestone", () => {
   it("openIssues + closedIssues === 0이면 제목만 반환한다", () => {
     expect(formatMilestone({ title: "v2.0", dueOn: null, openIssues: 0, closedIssues: 0 }))
       .toBe("v2.0");
+  });
+});
+
+describe("getPRStateBadgeClass", () => {
+  it("open → blue 클래스 반환", () => {
+    expect(getPRStateBadgeClass("open")).toBe("bg-blue-100 text-blue-700");
+  });
+
+  it("merged → purple 클래스 반환", () => {
+    expect(getPRStateBadgeClass("merged")).toBe("bg-purple-100 text-purple-700");
+  });
+
+  it("closed → slate 클래스 반환", () => {
+    expect(getPRStateBadgeClass("closed")).toBe("bg-slate-100 text-slate-500");
+  });
+});
+
+describe("getReviewDecisionText", () => {
+  it("approved → '✓ approved'", () => {
+    expect(getReviewDecisionText("approved")).toBe("✓ approved");
+  });
+
+  it("changes_requested → '✗ changes requested'", () => {
+    expect(getReviewDecisionText("changes_requested")).toBe("✗ changes requested");
+  });
+
+  it("review_required → '○ review required'", () => {
+    expect(getReviewDecisionText("review_required")).toBe("○ review required");
+  });
+
+  it("null → null 반환", () => {
+    expect(getReviewDecisionText(null)).toBeNull();
   });
 });
