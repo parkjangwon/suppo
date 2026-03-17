@@ -8,7 +8,7 @@ coverage/
 test-results/
 playwright-report/
 
-# Next.js
+# Next.js 
 .next/
 out/
 
