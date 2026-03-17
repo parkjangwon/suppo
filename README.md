@@ -176,7 +176,25 @@ crinity-helpdesk/
 - **Docker** (선택사항, 컨테이너 배포 시)
 - **SQLite** 3 (내장, 별도 설치 불필요)
 
-### 로컬 개발 환경 설정
+---
+
+### ⚡ 간편 설치 (권장)
+
+```bash
+./install.sh
+pnpm dev
+```
+
+`install.sh` 이 한 번에 처리합니다:
+- `.env.example` → `.env` 복사 후 `openssl rand -base64 32` 으로 시크릿 3개 자동 생성
+- `pnpm install`
+- `prisma migrate deploy` + `prisma db seed` (초기 관리자 계정 생성)
+
+`.env` 파일이 이미 존재하면 덮어쓰지 않습니다.
+
+---
+
+### 🔧 수동 설치
 
 ```bash
 # 1. 의존성 설치
@@ -184,39 +202,26 @@ pnpm install
 
 # 2. 환경 변수 설정
 cp .env.example .env
+# .env 파일을 열어 AUTH_SECRET, TICKET_ACCESS_SECRET, GIT_TOKEN_ENCRYPTION_KEY 를
+# openssl rand -base64 32 결과로 각각 채워넣습니다
 
-# 3. Prisma 클라이언트 생성
-pnpm prisma generate
+# 3. 데이터베이스 마이그레이션 + 초기 데이터
+pnpm prisma migrate deploy
+pnpm prisma db seed
 
-# 4. 데이터베이스 마이그레이션
-pnpm prisma migrate dev
-
-# 5. 관리자 계정 생성
-npx tsx scripts/seed-admin.ts
-
-# 6. 개발 서버 실행
+# 4. 개발 서버 실행
 pnpm dev
-
-# 7. 브라우저 접속
-open http://localhost:3000
 ```
+
+브라우저에서 `http://localhost:3000` 접속
+
+---
 
 ### 초기 관리자 계정
 
-`.env` 파일의 `INITIAL_ADMIN_EMAIL`과 `INITIAL_ADMIN_PASSWORD`로 관리자 계정이 생성됩니다:
+`.env`의 `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` 값으로 계정이 생성됩니다 (기본값: `admin@crinity.io` / `admin1234`).
 
-```bash
-# .env
-INITIAL_ADMIN_EMAIL=admin@crinity.io
-INITIAL_ADMIN_PASSWORD=admin1234
-```
-
-시드 스크립트 실행:
-```bash
-npx tsx scripts/seed-admin.ts
-```
-
-> **보안 주의**: 최초 로그인 시 반드시 비밀번호를 변경해야 합니다. 시스템이 자동으로 비밀번호 변경 페이지로 리다이렉트합니다.
+> **보안 주의**: 최초 로그인 시 반드시 비밀번호를 변경하세요. 시스템이 자동으로 비밀번호 변경 페이지로 리다이렉트합니다.
 
 ---
 
