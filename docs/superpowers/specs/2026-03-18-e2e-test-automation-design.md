@@ -51,7 +51,6 @@ test-report/           ← 실행 결과 저장 디렉토리
   - 이름(`customerName`), 이메일(`customerEmail`), 제목(`subject`), 내용(`description`)
   - 문의 유형(`requestTypeId`) — 라벨: "문의 유형" (카테고리가 아님)
   - 우선순위(`priority`)
-- CAPTCHA 버튼("개발용 토큰 채우기") — 존재 여부 먼저 확인 후 클릭, 없으면 건너뜀
 - 제출 → `/ticket/submitted?id=CRN-...` URL 및 티켓 번호 확인
 - Prisma로 DB에서 티켓 레코드 존재 직접 확인 (fixtures에서 PrismaClient 공유)
 - `afterEach`에서 생성된 티켓 삭제
@@ -176,7 +175,6 @@ test.step("단계명", async () => {    onStepEnd(step, result)
 ## 제약 사항
 
 - 개발 서버(`pnpm dev`)가 실행 중이어야 함 (`webServer` 설정으로 자동 시작)
-- CAPTCHA: 개발 환경에서 "개발용 토큰 채우기" 버튼 존재 시 클릭하여 우회
 - Rate Limit: 빠른 반복 실행 시 API 429 오류 발생 가능 — 서버 재시작 또는 1분 대기
 - 공개/관리자 테스트는 서로 다른 브라우저 컨텍스트 사용 (쿠키 간섭 방지)
 - `ticket_access` 쿠키는 조회 API 응답에서 자동 설정 — 별도 처리 불필요
