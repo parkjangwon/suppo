@@ -85,7 +85,7 @@ export const updateTicketSchema = z.object({
 });
 
 export const lookupTicketSchema = z.object({
-  ticketNumber: z.string().min(1).regex(/^(TKT-)?\d{4}-\d+$/, "유효한 티켓 번호 형식이 아닙니다"),
+  ticketNumber: z.string().min(1).regex(/^CRN-[A-Za-z0-9_-]+$/, "유효한 티켓 번호 형식이 아닙니다"),
   email: z.string().email("유효한 이메일 주소를 입력해주세요"),
 });
 
@@ -173,8 +173,8 @@ export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown): T {
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0];
-      throw new Error(firstError.message);
+      const firstError = error.issues[0];
+      throw new Error(firstError?.message ?? "유효하지 않은 입력입니다.");
     }
     throw error;
   }

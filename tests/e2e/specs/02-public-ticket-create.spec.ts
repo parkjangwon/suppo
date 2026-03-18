@@ -24,7 +24,7 @@ test.afterAll(async () => {
 test("고객이 티켓을 생성하고 티켓 번호를 받는다", async ({ page }, testInfo) => {
   await test.step("티켓 생성 폼 접근", async () => {
     await page.goto("/ticket/new");
-    await expect(page.getByRole("heading")).toBeVisible();
+    await expect(page.locator("h1").first()).toBeVisible();
     await captureStep(page, testInfo, "티켓 생성 폼 접근");
   });
 
