@@ -222,6 +222,9 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                 requestTypeId={ticket.requestTypeId}
                 onAiSuggestion={handleAiSuggestion}
                 isGeneratingSuggestion={isGeneratingSuggestion}
+                currentAgentId={currentAgentId}
+                isAdmin={isAdmin}
+                ticketAssigneeId={ticket.assigneeId}
               />
             </TabsContent>
 

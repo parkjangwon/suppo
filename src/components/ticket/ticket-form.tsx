@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { ticketFormSchema, TicketFormValues } from "@/lib/validation/ticket";
 import { AttachmentUpload } from "./attachment-upload";
+import { KnowledgeSuggestions } from "./knowledge-suggestions";
 import { useBranding } from "@/lib/branding/context";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
@@ -26,6 +27,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<TicketFormValues>({
     resolver: zodResolver(ticketFormSchema),
@@ -33,6 +35,9 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       priority: "MEDIUM",
     },
   });
+
+  const subject = watch("subject");
+  const description = watch("description");
 
   const onSubmit = async (data: TicketFormValues) => {
     setIsSubmitting(true);
@@ -82,9 +87,6 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
             type="text"
             {...register("customerName")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-offset-0 focus:border-transparent outline-none transition-all"
-            style={{ 
-              focusRing: branding.primaryColor 
-            }}
             placeholder="홍길동"
           />
           {errors.customerName && (
@@ -215,6 +217,8 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
           <p className="text-sm text-red-500">{errors.description.message}</p>
         )}
       </div>
+
+      <KnowledgeSuggestions subject={subject || ""} description={description || ""} />
 
       <div className="space-y-2">
         <Label className="text-slate-700">첨부파일</Label>

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LogOut, Users, FileText, LayoutDashboard, Inbox, Users2, GitBranch, Mail, Palette, ClipboardList, Shield, Brain, Calendar, FileCode } from "lucide-react";
+import { LogOut, Users, FileText, LayoutDashboard, Inbox, Users2, GitBranch, Mail, Palette, ClipboardList, Shield, Brain, Calendar, FileCode, BarChart3, BookOpen } from "lucide-react";
 import { useBranding } from "@/lib/branding/context";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -45,6 +45,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span>대시보드</span>
+            </div>
+          </NavLink>
+          <NavLink href="/admin/analytics">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span>분석 및 리포트</span>
+            </div>
+          </NavLink>
+          <NavLink href="/admin/knowledge">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              <span>지식</span>
             </div>
           </NavLink>
           <NavLink href="/admin/tickets">

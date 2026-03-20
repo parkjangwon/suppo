@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { formatPhoneNumber } from "@/lib/utils/phone-format";
+import { CustomerInsightsPanel } from "@/components/admin/customer-insights-panel";
 
 interface Ticket {
   id: string;
@@ -232,14 +233,23 @@ export default function CustomerDetailPage() {
 
           <Card>
             <CardHeader>
+              <CardTitle className="text-lg">통계 인사이트</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CustomerInsightsPanel customerId={id} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle className="text-lg">티켓 이력</CardTitle>
             </CardHeader>
             <CardContent>
               {customer.tickets.length > 0 ? (
                 <div className="space-y-4">
                   {customer.tickets.map((ticket) => (
-                    <Link 
-                      key={ticket.id} 
+                    <Link
+                      key={ticket.id}
                       href={`/admin/tickets/${ticket.id}`}
                       className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >

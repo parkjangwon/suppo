@@ -185,11 +185,14 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
                 </CardContent>
               </Card>
 
-              <CommentSection 
-                ticketId={ticket.id} 
-                comments={ticket.comments} 
+              <CommentSection
+                ticketId={ticket.id}
+                comments={ticket.comments}
                 canEdit={canEdit}
                 requestTypeId={ticket.requestTypeId}
+                currentAgentId={currentAgentId}
+                isAdmin={isAdmin}
+                ticketAssigneeId={ticket.assigneeId}
               />
             </TabsContent>
             

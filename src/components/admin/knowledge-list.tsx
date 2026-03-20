@@ -1,0 +1,283 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Plus, Search, Pencil, Trash2, ExternalLink, BarChart3 } from "lucide-react";
+import { toast } from "sonner";
+import { CategoryManager } from "./category-manager";
+
+interface KnowledgeListProps {
+  articles: any[];
+  categories: any[];
+  currentUserId: string;
+  isAdmin: boolean;
+}
+
+export function KnowledgeList({
+  articles,
+  categories,
+  currentUserId,
+  isAdmin,
+}: KnowledgeListProps) {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  const filteredArticles = articles.filter((article) => {
+    const matchesSearch =
+      searchQuery === "" ||
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "all" || article.categoryId === selectedCategory;
+
+    const matchesStatus =
+      selectedStatus === "all" ||
+      (selectedStatus === "published" && article.isPublished) ||
+      (selectedStatus === "draft" && !article.isPublished);
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  const handleDelete = async (id: string) => {
+    setIsDeleting(id);
+    try {
+      const response = await fetch(`/api/admin/knowledge/articles/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete article");
+      }
+
+      toast.success("문서가 삭제되었습니다");
+      router.refresh();
+    } catch (error) {
+      toast.error("삭제 중 오류가 발생했습니다");
+    } finally {
+      setIsDeleting(null);
+    }
+  };
+
+  const canEdit = (article: any) => {
+    return isAdmin || article.authorId === currentUserId;
+  };
+
+  const canDelete = (article: any) => {
+    return isAdmin || article.authorId === currentUserId;
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex gap-2 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="문서 검색..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="카테고리" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">모든 카테고리</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="상태" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">모든 상태</SelectItem>
+              <SelectItem value="published">게시됨</SelectItem>
+              <SelectItem value="draft">초안</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/admin/knowledge/contributors">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              기여자 통계
+            </Link>
+          </Button>
+          <CategoryManager categories={categories} />
+          <Button asChild>
+            <Link href="/admin/knowledge/new">
+              <Plus className="h-4 w-4 mr-2" />
+              새 문서
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>제목</TableHead>
+              <TableHead>카테고리</TableHead>
+              <TableHead>상태</TableHead>
+              <TableHead>조회수</TableHead>
+              <TableHead>작성자</TableHead>
+              <TableHead>수정일</TableHead>
+              <TableHead className="w-[150px]">작업</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredArticles.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                  문서가 없습니다
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredArticles.map((article) => (
+                <TableRow key={article.id}>
+                  <TableCell className="font-medium">
+                    <div className="max-w-xs truncate" title={article.title}>
+                      {article.title}
+                    </div>
+                    {article.excerpt && (
+                      <div className="text-xs text-gray-500 truncate max-w-xs">
+                        {article.excerpt}
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{article.category?.name}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    {article.isPublished ? (
+                      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                        게시됨
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">초안</Badge>
+                    )}
+                    {!article.isPublic && article.isPublished && (
+                      <Badge variant="outline" className="ml-1">
+                        남부
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>{article.viewCount.toLocaleString()}</TableCell>
+                  <TableCell>{article.author?.name}</TableCell>
+                  <TableCell>
+                    {new Date(article.updatedAt).toLocaleDateString("ko-KR")}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        asChild
+                        title="미리보기"
+                      >
+                        <Link href={`/knowledge/${article.slug}`} target="_blank">
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {canEdit(article) && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          asChild
+                          title="수정"
+                        >
+                          <Link href={`/admin/knowledge/${article.id}/edit`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
+                      {canDelete(article) && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-600 hover:text-red-700"
+                              title="삭제"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>문서 삭제</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                &quot;{article.title}&quot; 문서를 삭제하시겠습니까?
+                                이 작업은 되돌릴 수 없습니다.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>취소</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(article.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                                disabled={isDeleting === article.id}
+                              >
+                                {isDeleting === article.id ? "삭제 중..." : "삭제"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="text-sm text-gray-500">
+        총 {filteredArticles.length}개 문서
+      </div>
+    </div>
+  );
+}

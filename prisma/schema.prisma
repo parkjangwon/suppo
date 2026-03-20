@@ -185,11 +185,13 @@ model Agent {
   transfersFrom    TicketTransfer[]   @relation("TransferFromAgent")
   transfersTo      TicketTransfer[]   @relation("TransferToAgent")
   teamMemberships  TeamMember[]
-  savedFilters     SavedFilter[]      @relation("FilterCreator")
-  absences         AgentAbsence[]     @relation("AgentAbsenceToAgent")
-  createdAbsences  AgentAbsence[]     @relation("AbsenceCreator")
-  timeEntries      TimeEntry[]        @relation("TimeEntries")
-  automationRules  AutomationRule[]   @relation("AutomationCreator")
+  savedFilters           SavedFilter[]      @relation("FilterCreator")
+  absences               AgentAbsence[]     @relation("AgentAbsenceToAgent")
+  createdAbsences        AgentAbsence[]     @relation("AbsenceCreator")
+  timeEntries            TimeEntry[]        @relation("TimeEntries")
+  automationRules        AutomationRule[]   @relation("AutomationCreator")
+  authoredKnowledge      KnowledgeArticle[] @relation("KnowledgeArticleAuthor")
+  editedKnowledge        KnowledgeArticle[] @relation("KnowledgeArticleLastEditor")
 
   @@index([isActive])
 }
@@ -323,6 +325,7 @@ model Comment {
   content     String
   isInternal  Boolean    @default(false)
   createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   ticket      Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   author      Agent?       @relation("CommentAuthor", fields: [authorId], references: [id], onDelete: SetNull)
@@ -901,4 +904,62 @@ model CustomerSatisfaction {
 
   @@index([ticketId])
   @@index([customerId])
+}
+
+model KnowledgeCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles KnowledgeArticle[]
+
+  @@index([sortOrder, isActive])
+}
+
+model KnowledgeArticle {
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  content        String
+  excerpt        String?
+  categoryId     String
+  authorId       String
+  lastEditedById String?
+  viewCount      Int       @default(0)
+  isPublished    Boolean   @default(false)
+  isPublic       Boolean   @default(false)
+  publishedAt    DateTime?
+  tags           Json?     @default("[]")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  category     KnowledgeCategory          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author       Agent                      @relation("KnowledgeArticleAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  lastEditedBy Agent?                     @relation("KnowledgeArticleLastEditor", fields: [lastEditedById], references: [id], onDelete: SetNull)
+  feedback     KnowledgeArticleFeedback[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([lastEditedById])
+  @@index([isPublished, isPublic])
+  @@index([publishedAt])
+}
+
+model KnowledgeArticleFeedback {
+  id           String   @id @default(cuid())
+  articleId    String
+  sessionToken String
+  wasHelpful   Boolean
+  comment      String?
+  createdAt    DateTime @default(now())
+
+  article KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, sessionToken])
+  @@index([articleId, wasHelpful])
 }
