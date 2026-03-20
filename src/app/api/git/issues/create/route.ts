@@ -5,17 +5,14 @@ import { decryptToken } from "@/lib/crypto/encrypt";
 import { parseProvider, validateRepoFullName } from "@/lib/git/provider";
 import { GitHubProvider } from "@/lib/git/providers/github";
 import { GitLabProvider } from "@/lib/git/providers/gitlab";
-import { CodeCommitProvider } from "@/lib/git/providers/codecommit";
 import { createAuditLog } from "@/lib/audit/logger";
 
-function createProviderClient(provider: "GITHUB" | "GITLAB" | "CODECOMMIT", token: string) {
+function createProviderClient(provider: "GITHUB" | "GITLAB", token: string) {
   switch (provider) {
     case "GITHUB":
       return new GitHubProvider(token);
     case "GITLAB":
       return new GitLabProvider(token);
-    case "CODECOMMIT":
-      return new CodeCommitProvider();
     default:
       throw new Error(`Unsupported provider: ${provider}`);
   }

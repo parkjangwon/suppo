@@ -34,7 +34,7 @@ export default async function GitSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Git 설정</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          GitHub/GitLab/CodeCommit 연동 설정
+          GitHub/GitLab 연동 설정
         </p>
       </div>
 

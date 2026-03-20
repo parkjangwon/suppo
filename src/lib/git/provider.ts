@@ -1,4 +1,4 @@
-export type GitProvider = "GITHUB" | "GITLAB" | "CODECOMMIT";
+export type GitProvider = "GITHUB" | "GITLAB";
 
 export interface GitIssueSummary {
   id: string;
@@ -77,7 +77,7 @@ export class GitProviderNotSupportedError extends Error {
 export function parseProvider(provider: string): GitProvider {
   const normalized = provider.toUpperCase();
 
-  if (normalized === "GITHUB" || normalized === "GITLAB" || normalized === "CODECOMMIT") {
+  if (normalized === "GITHUB" || normalized === "GITLAB") {
     return normalized;
   }
 

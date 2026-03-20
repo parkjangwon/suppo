@@ -42,8 +42,7 @@ interface GitIntegrationSectionProps {
 
 const providerOptions: { value: GitProvider; label: string }[] = [
   { value: "GITHUB", label: "GitHub" },
-  { value: "GITLAB", label: "GitLab" },
-  { value: "CODECOMMIT", label: "CodeCommit" }
+  { value: "GITLAB", label: "GitLab" }
 ];
 
 export function GitIntegrationSection({

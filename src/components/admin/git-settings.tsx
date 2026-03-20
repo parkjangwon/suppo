@@ -16,10 +16,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Github, Gitlab, Code, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Github, Gitlab, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface GitCredential {
-  provider: "GITHUB" | "GITLAB" | "CODECOMMIT";
+  provider: "GITHUB" | "GITLAB";
   createdAt: string;
   updatedAt: string;
 }
@@ -45,14 +45,6 @@ const providerInfo = {
     scopeInfo: "api, read_repository, write_repository",
     description: "API 접근 및 리포지토리 읽기/쓰기 권한이 필요합니다.",
   },
-  CODECOMMIT: {
-    name: "CodeCommit",
-    icon: Code,
-    color: "bg-blue-600 text-white",
-    tokenUrl: "https://console.aws.amazon.com/iam/home#/security_credentials",
-    scopeInfo: "AWS Access Key ID + Secret",
-    description: "AWS IAM 사용자의 액세스 키와 시크릿 키가 필요합니다.",
-  },
 };
 
 export function GitSettings({ initialCredentials }: GitSettingsProps) {
@@ -61,7 +53,6 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<keyof typeof providerInfo | null>(null);
   const [token, setToken] = useState("");
-  const [secretKey, setSecretKey] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleSave = async () => {
@@ -98,7 +89,6 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
       ]);
       setIsDialogOpen(false);
       setToken("");
-      setSecretKey("");
       setSelectedProvider(null);
       router.refresh();
     } catch (error) {
@@ -129,7 +119,6 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
   const openAddDialog = (provider: keyof typeof providerInfo) => {
     setSelectedProvider(provider);
     setToken("");
-    setSecretKey("");
     setIsDialogOpen(true);
   };
 
@@ -240,18 +229,6 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                   {providerInfo[selectedProvider].description}
                 </p>
               </div>
-
-              {selectedProvider === "CODECOMMIT" && (
-                <div className="space-y-2">
-                  <Label>시크릿 키 (Secret Key)</Label>
-                  <Input
-                    type="password"
-                    value={secretKey}
-                    onChange={(e) => setSecretKey(e.target.value)}
-                    placeholder="AWS Secret Access Key"
-                  />
-                </div>
-              )}
 
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
                 <p className="text-xs text-amber-800 dark:text-amber-200">

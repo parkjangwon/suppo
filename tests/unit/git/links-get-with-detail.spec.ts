@@ -56,11 +56,7 @@ vi.mock("@/lib/git/providers/gitlab", () => ({
   }))
 }));
 
-vi.mock("@/lib/git/providers/codecommit", () => ({
-  CodeCommitProvider: vi.fn().mockImplementation(() => ({
-    provider: "CODECOMMIT"
-  }))
-}));
+
 
 describe("GET /api/git/links — issueDetail 포함", () => {
   beforeEach(() => {

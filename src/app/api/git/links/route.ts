@@ -19,8 +19,6 @@ function validateIssueUrl(url: string, provider?: GitProvider): boolean {
       case "GITLAB":
         return (parsed.hostname === "gitlab.com" || parsed.hostname.endsWith(".gitlab.com")) && 
                parsed.protocol === "https:";
-      case "CODECOMMIT":
-        return parsed.hostname.includes("console.aws.amazon.com") && parsed.protocol === "https:";
       default:
         return parsed.protocol === "https:" || parsed.protocol === "http:";
     }
@@ -105,7 +103,7 @@ export async function GET(request: NextRequest) {
       }
 
       const credential = await prisma.gitProviderCredential.findUnique({
-        where: { provider: provider as "GITHUB" | "GITLAB" | "CODECOMMIT" },
+        where: { provider: provider as "GITHUB" | "GITLAB" },
         select: { encryptedToken: true }
       });
 
@@ -119,7 +117,6 @@ export async function GET(request: NextRequest) {
 
       if (provider === "GITHUB") client = new GitHubProvider(token);
       else if (provider === "GITLAB") client = new GitLabProvider(token);
-      // CODECOMMIT: getIssue 미구현, null 처리
 
       providerClientCache.set(provider, client);
       return client;
@@ -383,7 +380,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    if (!validateIssueUrl(body.issueUrl.trim(), link.provider)) {
+    if (!validateIssueUrl(body.issueUrl.trim(), link.provider as GitProvider)) {
       return NextResponse.json(
         { error: `Invalid issueUrl for ${link.provider}.` },
         { status: 400 }

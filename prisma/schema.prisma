@@ -46,7 +46,6 @@ enum ActivityAction {
 enum GitProvider {
   GITHUB
   GITLAB
-  CODECOMMIT
 }
 
 enum AuthProvider {
