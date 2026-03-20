@@ -72,6 +72,33 @@ enum SLAClockStatus {
   STOPPED
 }
 
+enum ReportType {
+  OPERATIONAL
+  CUSTOMER
+}
+
+enum ReportFormat {
+  EXCEL
+  PDF
+}
+
+enum ReportFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+enum ReportRunStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum ReportTriggerSource {
+  MANUAL
+  SCHEDULED
+}
+
 enum RequestTypeChannel {
   WEB
   EMAIL
@@ -196,6 +223,8 @@ model Agent {
   editedKnowledge        KnowledgeArticle[] @relation("KnowledgeArticleLastEditor")
   ticketPresences        TicketPresence[]
   commentLocks           TicketCommentLock[]
+  reportSchedules        ReportSchedule[]      @relation("ReportScheduleCreator")
+  generatedReports       GeneratedReport[]     @relation("GeneratedReportRequester")
 
   @@index([isActive])
 }
@@ -997,4 +1026,62 @@ model TicketCommentLock {
 
   @@index([agentId, expiresAt])
   @@index([expiresAt])
+}
+
+// Report Schedule (보고서 자동 생성 스케줄)
+model ReportSchedule {
+  id          String          @id @default(cuid())
+  name        String
+  reportType  ReportType
+  frequency   ReportFrequency
+  dayOfWeek   Int?            // 0-6 (일-토), WEEKLY용
+  dayOfMonth  Int?            // 1-31, MONTHLY용
+  timezone    String          @default("Asia/Seoul")
+  hour        Int             @default(9)
+  minute      Int             @default(0)
+  formats     Json            // ["EXCEL", "PDF"]
+  recipients  Json            // ["email1@...", "email2@..."]
+  filters     Json?           // { status: "...", categoryId: "..." }
+  isActive    Boolean         @default(true)
+  createdById String
+  lastRunAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  createdBy      Agent            @relation("ReportScheduleCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  generatedReports GeneratedReport[]
+
+  @@index([createdById])
+  @@index([isActive, frequency])
+}
+
+// Generated Report (생성된 보고서)
+model GeneratedReport {
+  id              String              @id @default(cuid())
+  scheduleId      String?
+  requestedById   String?
+  triggerSource   ReportTriggerSource
+  reportType      ReportType
+  format          ReportFormat
+  status          ReportRunStatus     @default(PENDING)
+  periodStart     DateTime
+  periodEnd       DateTime
+  periodKey       String
+  parameters      Json?
+  fileName        String?
+  storageKey      String?
+  mimeType        String?
+  sizeBytes       Int?
+  errorMessage    String?
+  generatedAt     DateTime?
+  emailedAt       DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  schedule    ReportSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
+  requestedBy Agent?          @relation("GeneratedReportRequester", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([scheduleId, createdAt])
+  @@unique([scheduleId, reportType, format, periodKey])
 }
