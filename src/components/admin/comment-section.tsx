@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { AttachmentUpload } from "@/components/ticket/attachment-upload";
 import { TemplateSelector } from "./template-selector";
-import { Paperclip, Image as ImageIcon, FileText, Download } from "lucide-react";
+import { Paperclip, Image as ImageIcon, FileText, Download, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export interface Comment {
   id: string;
@@ -27,6 +28,8 @@ interface CommentSectionProps {
   comments: Comment[];
   canEdit: boolean;
   requestTypeId?: string | null;
+  onAiSuggestion?: () => Promise<string | null>;
+  isGeneratingSuggestion?: boolean;
 }
 
 function isImageFile(mimeType?: string | null): boolean {
@@ -42,12 +45,26 @@ function getFileIcon(mimeType?: string | null) {
   return <FileText className="h-4 w-4" />;
 }
 
-export function CommentSection({ ticketId, comments, canEdit, requestTypeId }: CommentSectionProps) {
+export function CommentSection({ ticketId, comments, canEdit, requestTypeId, onAiSuggestion, isGeneratingSuggestion }: CommentSectionProps) {
   const router = useRouter();
   const [reply, setReply] = useState("");
   const [isInternal, setIsInternal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+
+  async function handleAiSuggestion() {
+    if (!onAiSuggestion) return;
+    
+    try {
+      const suggestion = await onAiSuggestion();
+      if (suggestion) {
+        setReply((prev) => prev + (prev ? "\n\n" : "") + suggestion);
+        toast.success("AI 답변 제안이 입력되었습니다.");
+      }
+    } catch (error) {
+      toast.error("AI 답변 생성 중 오류가 발생했습니다.");
+    }
+  }
 
   async function submitReply() {
     if (!reply.trim() && files.length === 0) return;
@@ -191,35 +208,47 @@ export function CommentSection({ ticketId, comments, canEdit, requestTypeId }: C
             </div>
             
              <div className="flex items-center justify-between pt-2 border-t">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="internal"
-                    aria-label="내부 메모로 저장"
-                    checked={isInternal}
-                    onCheckedChange={(checked) => setIsInternal(checked === true)}
-                  />
-                  <Label htmlFor="internal" className="text-sm cursor-pointer">
-                    내부 메모로 저장
-                  </Label>
-                </div>
-                <TemplateSelector
-                  requestTypeId={requestTypeId}
-                  onSelect={(content) => setReply((prev) => prev + (prev ? "\n\n" : "") + content)}
-                  disabled={loading}
-                />
-              </div>
-              <Button 
-                onClick={submitReply} 
-                disabled={loading || (!reply.trim() && files.length === 0)}
-              >
-                {loading ? "전송중..." : "전송"}
-              </Button>
-             </div>
-           </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-}
+               <div className="flex items-center gap-4">
+                 <div className="flex items-center gap-2">
+                   <Checkbox
+                     id="internal"
+                     aria-label="남부 메모로 저장"
+                     checked={isInternal}
+                     onCheckedChange={(checked) => setIsInternal(checked === true)}
+                   />
+                   <Label htmlFor="internal" className="text-sm cursor-pointer">
+                     내부 메모로 저장
+                   </Label>
+                 </div>
+                 <TemplateSelector
+                   requestTypeId={requestTypeId}
+                   onSelect={(content) => setReply((prev) => prev + (prev ? "\n\n" : "") + content)}
+                   disabled={loading}
+                 />
+                 {onAiSuggestion && (
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={handleAiSuggestion}
+                     disabled={isGeneratingSuggestion || loading}
+                     className="gap-2"
+                   >
+                     <Sparkles className="h-4 w-4" />
+                     {isGeneratingSuggestion ? "생성 중..." : "AI 답변 제안"}
+                   </Button>
+                 )}
+               </div>
+               <Button 
+                 onClick={submitReply} 
+                 disabled={loading || (!reply.trim() && files.length === 0)}
+               >
+                 {loading ? "전송중..." : "전송"}
+               </Button>
+               </div>
+            </CardContent>
+         </Card>
+       )}
+     </div>
+   );
+ }
 

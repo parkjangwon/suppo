@@ -89,18 +89,21 @@ export function LLMSettingsForm() {
     setIsTestingConnection(true);
     setTestConnectionMessage(null);
 
-    const abortController = new AbortController();
-    const timeout = setTimeout(() => abortController.abort(), 5000);
-
     try {
-      const url = settings.ollamaUrl.replace(/\/$/, "");
-      const response = await fetch(`${url}/api/tags`, {
-        method: "GET",
-        signal: abortController.signal,
+      const response = await fetch("/api/llm/ollama", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: settings.ollamaUrl,
+          model: settings.ollamaModel,
+          prompt: "test",
+          stream: false,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Ollama server returned ${response.status}`);
+        const error = await response.text();
+        throw new Error(error);
       }
 
       setTestConnectionMessage("연결 성공: Ollama 서버가 응답했습니다.");
@@ -108,7 +111,6 @@ export function LLMSettingsForm() {
       console.error("Failed to test Ollama connection:", error);
       setTestConnectionMessage("연결 실패: Ollama 서버에 접근할 수 없습니다.");
     } finally {
-      clearTimeout(timeout);
       setIsTestingConnection(false);
     }
   };

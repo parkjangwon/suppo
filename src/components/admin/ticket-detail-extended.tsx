@@ -16,14 +16,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { CommentSection } from "./comment-section";
 import { GitIntegrationSection } from "@/components/ticket/git-integration-section";
 import { LinkedIssuesReadonly } from "@/components/ticket/linked-issues-readonly";
 import { TicketSummary } from "./ticket-summary";
 import { CSATTab } from "@/components/admin/csat-tab";
 import { toast } from "sonner";
-import { Sparkles } from "lucide-react";
 
 interface TicketDetailProps {
   ticket: any;
@@ -51,8 +49,6 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
-  const [showAiSuggestion, setShowAiSuggestion] = useState(false);
-  const [aiSuggestion, setAiSuggestion] = useState("");
 
   const canEdit = isAdmin || ticket.assigneeId === currentAgentId;
 
@@ -86,7 +82,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
     }
   };
 
-  const handleAiSuggestion = async () => {
+  const handleAiSuggestion = async (): Promise<string | null> => {
     setIsGeneratingSuggestion(true);
     try {
       const response = await fetch(`/api/tickets/${ticket.id}/suggest-response`, {
@@ -98,11 +94,10 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
       }
 
       const data = await response.json();
-      setAiSuggestion(data.suggestion);
-      setShowAiSuggestion(true);
-      toast.success("AI 답변 제안이 생성되었습니다.");
+      return data.suggestion;
     } catch (error) {
       toast.error("AI 답변 생성 중 오류가 발생했습니다.");
+      return null;
     } finally {
       setIsGeneratingSuggestion(false);
     }
@@ -122,16 +117,6 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAiSuggestion}
-            disabled={isGeneratingSuggestion}
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {isGeneratingSuggestion ? "생성 중..." : "AI 답변 제안"}
-          </Button>
-
           <Select
             disabled={isUpdating || !canEdit}
             value={ticket.status}
@@ -230,45 +215,13 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                 </CardContent>
               </Card>
 
-              {/* AI 제안 표시 */}
-              {showAiSuggestion && aiSuggestion && (
-                <Card className="border-primary/50 bg-primary/5">
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-center">
-                      <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        AI 답변 제안
-                      </CardTitle>
-                      <button
-                        onClick={() => setShowAiSuggestion(false)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="whitespace-pre-wrap text-sm">{aiSuggestion}</div>
-                    <div className="mt-2 flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(aiSuggestion);
-                          toast.success("클립보드에 복사되었습니다.");
-                        }}
-                      >
-                        복사
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
               <CommentSection
                 ticketId={ticket.id}
                 comments={ticket.comments}
                 canEdit={canEdit}
                 requestTypeId={ticket.requestTypeId}
+                onAiSuggestion={handleAiSuggestion}
+                isGeneratingSuggestion={isGeneratingSuggestion}
               />
             </TabsContent>
 
