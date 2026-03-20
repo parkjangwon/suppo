@@ -11,7 +11,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Calendar } from "lucide-react";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 interface TicketFiltersProps {
   categories: { id: string; name: string }[];
@@ -21,8 +30,14 @@ interface TicketFiltersProps {
 export function TicketFilters({ categories, agents }: TicketFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(
+    searchParams.get("dateFrom") ? new Date(searchParams.get("dateFrom")!) : undefined
+  );
+  const [dateTo, setDateTo] = useState<Date | undefined>(
+    searchParams.get("dateTo") ? new Date(searchParams.get("dateTo")!) : undefined
+  );
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -42,6 +57,14 @@ export function TicketFilters({ categories, agents }: TicketFiltersProps) {
     router.push(`?${createQueryString(name, value === "all" ? "" : value)}`);
   };
 
+  const handleDateChange = (name: "dateFrom" | "dateTo", date: Date | undefined) => {
+    if (date) {
+      router.push(`?${createQueryString(name, date.toISOString().split("T")[0])}`);
+    } else {
+      router.push(`?${createQueryString(name, "")}`);
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     handleFilterChange("search", search);
@@ -49,6 +72,8 @@ export function TicketFilters({ categories, agents }: TicketFiltersProps) {
 
   const clearFilters = () => {
     setSearch("");
+    setDateFrom(undefined);
+    setDateTo(undefined);
     router.push("?");
   };
 
@@ -79,6 +104,58 @@ export function TicketFilters({ categories, agents }: TicketFiltersProps) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "justify-start text-left font-normal",
+                !dateFrom && "text-muted-foreground"
+              )}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              {dateFrom ? format(dateFrom, "yyyy.MM.dd", { locale: ko }) : "시작일"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <CalendarComponent
+              mode="single"
+              selected={dateFrom}
+              onSelect={(date) => {
+                setDateFrom(date);
+                handleDateChange("dateFrom", date);
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "justify-start text-left font-normal",
+                !dateTo && "text-muted-foreground"
+              )}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              {dateTo ? format(dateTo, "yyyy.MM.dd", { locale: ko }) : "종료일"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <CalendarComponent
+              mode="single"
+              selected={dateTo}
+              onSelect={(date) => {
+                setDateTo(date);
+                handleDateChange("dateTo", date);
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+
         <Select
           value={searchParams.get("status") || "all"}
           onValueChange={(value) => handleFilterChange("status", value)}

@@ -16,7 +16,7 @@ export async function seedAdmin() {
     data: {
       name: "Admin",
       email: "admin@crinity.io",
-      passwordHash: await bcrypt.hash("wkddnjs1!", 10),
+      passwordHash: await bcrypt.hash("admin1234", 10),
       role: "ADMIN",
       isActive: true,
     },

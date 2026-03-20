@@ -27,6 +27,8 @@ export default async function TicketsPage({
   const categoryId = typeof params.categoryId === "string" ? params.categoryId : undefined;
   const assigneeId = typeof params.assigneeId === "string" ? params.assigneeId : undefined;
   const search = typeof params.search === "string" ? params.search : undefined;
+  const dateFrom = typeof params.dateFrom === "string" ? params.dateFrom : undefined;
+  const dateTo = typeof params.dateTo === "string" ? params.dateTo : undefined;
 
   const where: Prisma.TicketWhereInput = {};
 
@@ -52,6 +54,15 @@ export default async function TicketsPage({
       { subject: { contains: search } },
       { customerEmail: { contains: search } },
     ];
+  }
+  if (dateFrom || dateTo) {
+    where.createdAt = {};
+    if (dateFrom) {
+      where.createdAt.gte = new Date(dateFrom);
+    }
+    if (dateTo) {
+      where.createdAt.lte = new Date(dateTo + "T23:59:59.999Z");
+    }
   }
 
   const tickets = await prisma.ticket.findMany({

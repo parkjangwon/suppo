@@ -11,6 +11,8 @@ import { AttachmentUpload } from "@/components/ticket/attachment-upload";
 import { TemplateSelector } from "./template-selector";
 import { KnowledgeAssistant } from "./knowledge-assistant";
 import { CommentThread } from "./comment-thread";
+import { CommentLockBanner } from "./comment-lock-banner";
+import { useCommentLock } from "@/hooks/use-comment-lock";
 import { Paperclip, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
@@ -54,6 +56,7 @@ export function CommentSection({
   const [isInternal, setIsInternal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const { lock, isLockedByMe, isLocked, acquireLock, releaseLock } = useCommentLock({ ticketId });
 
   async function handleAiSuggestion() {
     if (!onAiSuggestion) return;
@@ -91,6 +94,7 @@ export function CommentSection({
       setReply("");
       setIsInternal(false);
       setFiles([]);
+      await releaseLock();
       router.refresh();
     }
     setLoading(false);
@@ -119,15 +123,26 @@ export function CommentSection({
             <CardTitle>응답 작성</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <CommentLockBanner
+              lock={lock}
+              isLockedByMe={isLockedByMe}
+              onRelease={releaseLock}
+            />
             <Label htmlFor="reply" className="sr-only">
               응답 작성
             </Label>
             <Textarea
               id="reply"
               aria-label="응답 작성"
-              placeholder="응답을 입력하세요..."
+              placeholder={isLocked && !isLockedByMe ? "다른 상담원이 편집 중입니다..." : "응답을 입력하세요..."}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
+              onFocus={async () => {
+                if (!isLocked || isLockedByMe) {
+                  await acquireLock();
+                }
+              }}
+              disabled={isLocked && !isLockedByMe}
               rows={4}
             />
 
@@ -186,7 +201,7 @@ export function CommentSection({
               </div>
               <Button
                 onClick={submitReply}
-                disabled={loading || (!reply.trim() && files.length === 0)}
+                disabled={loading || (isLocked && !isLockedByMe) || (!reply.trim() && files.length === 0)}
               >
                 {loading ? "전송중..." : "전송"}
               </Button>

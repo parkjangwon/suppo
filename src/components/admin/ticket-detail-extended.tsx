@@ -21,6 +21,8 @@ import { GitIntegrationSection } from "@/components/ticket/git-integration-secti
 import { LinkedIssuesReadonly } from "@/components/ticket/linked-issues-readonly";
 import { TicketSummary } from "./ticket-summary";
 import { CSATTab } from "@/components/admin/csat-tab";
+import { TicketViewingIndicator } from "./ticket-viewing-indicator";
+import { useTicketPresence } from "@/hooks/use-ticket-presence";
 import { toast } from "sonner";
 
 interface TicketDetailProps {
@@ -49,6 +51,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
+  const { viewers } = useTicketPresence({ ticketId: ticket.id });
 
   const canEdit = isAdmin || ticket.assigneeId === currentAgentId;
 
@@ -106,14 +109,15 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">{ticket.subject}</h1>
             <Badge variant="outline">{ticket.ticketNumber}</Badge>
           </div>
           <p className="text-sm text-muted-foreground">
             생성일: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
           </p>
+          <TicketViewingIndicator viewers={viewers} />
         </div>
 
         <div className="flex flex-wrap gap-2">

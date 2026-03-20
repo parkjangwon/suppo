@@ -147,6 +147,8 @@ model Ticket {
   satisfactions     CustomerSatisfaction[]
   timeEntries       TimeEntry[]
   mergedFrom        TicketMerge[]          @relation("TicketSource")
+  presences         TicketPresence[]
+  commentLock       TicketCommentLock?
 
   @@index([categoryId])
   @@index([assigneeId])
@@ -192,6 +194,8 @@ model Agent {
   automationRules        AutomationRule[]   @relation("AutomationCreator")
   authoredKnowledge      KnowledgeArticle[] @relation("KnowledgeArticleAuthor")
   editedKnowledge        KnowledgeArticle[] @relation("KnowledgeArticleLastEditor")
+  ticketPresences        TicketPresence[]
+  commentLocks           TicketCommentLock[]
 
   @@index([isActive])
 }
@@ -962,4 +966,35 @@ model KnowledgeArticleFeedback {
 
   @@unique([articleId, sessionToken])
   @@index([articleId, wasHelpful])
+}
+
+// Ticket Presence (상담원 티켓 조회 상태)
+model TicketPresence {
+  id         String   @id @default(cuid())
+  ticketId   String
+  agentId    String
+  lastSeenAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  agent  Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, agentId])
+  @@index([ticketId, lastSeenAt])
+  @@index([agentId, lastSeenAt])
+}
+
+// Ticket Comment Lock (댓글 동시 편집 방지)
+model TicketCommentLock {
+  id        String   @id @default(cuid())
+  ticketId  String   @unique
+  agentId   String
+  acquiredAt DateTime @default(now())
+  expiresAt DateTime
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  agent  Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, expiresAt])
+  @@index([expiresAt])
 }
