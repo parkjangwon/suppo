@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommentSection } from "./comment-section";
+import { TicketKnowledgeLinks } from "./ticket-knowledge-links";
 import { GitIntegrationSection } from "@/components/ticket/git-integration-section";
 import { LinkedIssuesReadonly } from "@/components/ticket/linked-issues-readonly";
 import { TicketSummary } from "./ticket-summary";
@@ -97,6 +98,14 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
       }
 
       const data = await response.json();
+
+      if (data.referencedArticles && data.referencedArticles.length > 0) {
+        const titles = data.referencedArticles
+          .map((a: { id: string; title: string }) => a.title)
+          .join(", ");
+        toast.info(`참고 문서: ${titles}`, { duration: 5000 });
+      }
+
       return data.suggestion;
     } catch (error) {
       toast.error("AI 답변 생성 중 오류가 발생했습니다.");
@@ -335,6 +344,8 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
           </Card>
         </div>
       </div>
+
+      <TicketKnowledgeLinks ticketId={ticket.id} canEdit={canEdit} />
 
       {isAdmin ? (
         <GitIntegrationSection

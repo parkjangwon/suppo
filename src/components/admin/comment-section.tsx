@@ -150,6 +150,7 @@ export function CommentSection({
               onInsertContent={(content) =>
                 setReply((prev) => prev + (prev ? "\n\n" : "") + content)
               }
+              ticketId={ticketId}
             />
 
             <div className="space-y-3">

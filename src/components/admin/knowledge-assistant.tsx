@@ -12,6 +12,7 @@ interface KnowledgeAssistantProps {
   onInsertContent: (content: string) => void;
   ticketSubject?: string;
   ticketDescription?: string;
+  ticketId?: string;
 }
 
 interface Article {
@@ -32,6 +33,7 @@ export function KnowledgeAssistant({
   onInsertContent,
   ticketSubject,
   ticketDescription,
+  ticketId,
 }: KnowledgeAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -72,9 +74,23 @@ export function KnowledgeAssistant({
     }
   }, [isOpen, ticketSubject, query, searchArticles]);
 
-  const handleInsert = (article: Article) => {
+  const handleInsert = async (article: Article) => {
     const content = `[${article.title}]\n\n${article.content}\n\n참고: ${article.category.name} 도움말`;
     onInsertContent(content);
+
+    // 티켓-지식 링크 자동 생성 (AGENT_INSERT)
+    if (ticketId) {
+      try {
+        await fetch(`/api/tickets/${ticketId}/knowledge-links`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ articleId: article.id, linkType: "AGENT_INSERT" }),
+        });
+      } catch {
+        // 링크 생성 실패는 조용히 처리 (삽입 자체는 성공)
+      }
+    }
+
     toast.success("내용이 삽입되었습니다.");
   };
 

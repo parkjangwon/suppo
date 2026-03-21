@@ -26,6 +26,7 @@ interface SystemBranding {
   footerHomepage?: string;
   footerAddress?: string;
   showPoweredBy: boolean;
+  knowledgeEnabled: boolean;
   customCss?: string;
 }
 
@@ -46,6 +47,7 @@ const defaultFormData: SystemBranding = {
   footerHomepage: "",
   footerAddress: "",
   showPoweredBy: true,
+  knowledgeEnabled: true,
   customCss: "",
 };
 
@@ -85,6 +87,7 @@ export function BrandingForm() {
           footerHomepage: data.footerHomepage || "",
           footerAddress: data.footerAddress || "",
           showPoweredBy: data.showPoweredBy ?? true,
+          knowledgeEnabled: data.knowledgeEnabled ?? true,
           customCss: data.customCss || "",
         });
       }
@@ -539,6 +542,22 @@ export function BrandingForm() {
           <CardTitle>고급 설정</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="knowledgeEnabled"
+              checked={formData.knowledgeEnabled}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, knowledgeEnabled: checked }))
+              }
+            />
+            <div>
+              <Label htmlFor="knowledgeEnabled">지식 찾기 공개 포털 노출</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                비활성화 시 고객 포털에서 지식 찾기 메뉴와 페이지가 숨겨집니다.
+              </p>
+            </div>
+          </div>
+
           <div className="flex items-center space-x-2">
             <Switch
               id="showPoweredBy"

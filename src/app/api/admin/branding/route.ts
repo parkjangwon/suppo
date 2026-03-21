@@ -81,6 +81,7 @@ export async function PUT(request: NextRequest) {
         footerHomepage: body.footerHomepage || null,
         footerAddress: body.footerAddress || null,
         showPoweredBy: body.showPoweredBy ?? true,
+        knowledgeEnabled: body.knowledgeEnabled ?? true,
         customCss: body.customCss || null,
       },
       create: {
@@ -101,6 +102,7 @@ export async function PUT(request: NextRequest) {
         footerHomepage: body.footerHomepage || null,
         footerAddress: body.footerAddress || null,
         showPoweredBy: body.showPoweredBy ?? true,
+        knowledgeEnabled: body.knowledgeEnabled ?? true,
         customCss: body.customCss || null,
       },
     });

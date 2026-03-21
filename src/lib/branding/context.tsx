@@ -19,6 +19,7 @@ export interface SystemBranding {
   footerHomepage?: string;
   footerAddress?: string;
   showPoweredBy: boolean;
+  knowledgeEnabled: boolean;
   customCss?: string;
 }
 
@@ -35,6 +36,7 @@ const defaultBranding: SystemBranding = {
   welcomeMessage: "무엇을 도와드릴까요?",
   footerText: "© 2024 Crinity. All rights reserved.",
   showPoweredBy: true,
+  knowledgeEnabled: true,
   customCss: undefined,
 };
 
