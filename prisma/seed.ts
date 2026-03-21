@@ -3,7 +3,7 @@ import {
   seedDefaultCategories,
   seedInitialAdmin,
   seedSampleAgents,
-} from "../src/lib/system/seed-functions";
+} from "@/lib/system/seed-functions";
 
 const prisma = new PrismaClient();
 
