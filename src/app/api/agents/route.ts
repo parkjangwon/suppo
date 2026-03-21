@@ -1,10 +1,18 @@
+import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { hash } from "bcryptjs";
 
 import { getBackofficeSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/client";
 import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
 import { createAuditLog } from "@/lib/audit/logger";
+
+function generateTempPassword(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  const bytes = randomBytes(10);
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+}
 
 const createAgentSchema = z.object({
   name: z.string().trim().min(1, "이름을 입력해주세요"),
@@ -94,6 +102,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const tempPassword = generateTempPassword();
+    const passwordHash = await hash(tempPassword, 10);
+
     const agent = await prisma.agent.create({
       data: {
         name: parsed.data.name,
@@ -101,6 +112,8 @@ export async function POST(request: NextRequest) {
         phone: parsed.data.phone ? formatPhoneNumberInput(parsed.data.phone) : undefined,
         role: parsed.data.role,
         maxTickets: parsed.data.maxTickets,
+        passwordHash,
+        isInitialPassword: true,
         categories: {
           create: parsed.data.categories.map((categoryId) => ({ categoryId }))
         },
@@ -146,7 +159,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ agent }, { status: 201 });
+    return NextResponse.json({ agent, tempPassword }, { status: 201 });
   } catch (error) {
     if (isUniqueError(error)) {
       return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });

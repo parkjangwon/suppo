@@ -39,6 +39,9 @@ import {
   Inbox,
   AlertCircle,
   Phone,
+  KeyRound,
+  Copy,
+  Check,
 } from "lucide-react";
 import { formatPhoneNumberInput } from "@/lib/utils/phone-format";
 import {
@@ -128,6 +131,8 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
   const [createForm, setCreateForm] = useState<AgentFormState>(EMPTY_FORM);
   const [editingAgent, setEditingAgent] = useState<AgentItem | null>(null);
   const [editForm, setEditForm] = useState<AgentFormState>(EMPTY_FORM);
+  const [tempPasswordInfo, setTempPasswordInfo] = useState<{ agentName: string; tempPassword: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const filteredAgents = useMemo(() => {
     if (!searchQuery.trim()) return agents;
@@ -201,7 +206,11 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       setAgents((prev) => [...prev, data.agent]);
       setCreateForm(EMPTY_FORM);
       setIsCreateDialogOpen(false);
-      toast.success("상담원이 추가되었습니다");
+      if (data.tempPassword) {
+        setTempPasswordInfo({ agentName: data.agent.name, tempPassword: data.tempPassword });
+      } else {
+        toast.success("상담원이 추가되었습니다");
+      }
     } catch {
       toast.error("상담원 추가 중 오류가 발생했습니다");
     } finally {
@@ -291,6 +300,32 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       toast.success("상담원이 삭제되었습니다");
     } catch {
       toast.error("삭제 처리 중 오류가 발생했습니다");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleResetPassword = async (agent: AgentItem) => {
+    const confirmed = window.confirm(
+      `"${agent.name}" 상담원의 비밀번호를 초기화하시겠습니까?\n새 임시 비밀번호가 생성됩니다.`
+    );
+    if (!confirmed) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/agents/${agent.id}/reset-password`, {
+        method: "POST",
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error ?? "비밀번호 초기화에 실패했습니다");
+        return;
+      }
+
+      setTempPasswordInfo({ agentName: agent.name, tempPassword: data.tempPassword });
+    } catch {
+      toast.error("비밀번호 초기화 중 오류가 발생했습니다");
     } finally {
       setIsSaving(false);
     }
@@ -426,6 +461,13 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEditDialog(agent)}>
                         정보 수정
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleResetPassword(agent)}
+                        className="text-blue-600 dark:text-blue-400"
+                      >
+                        <KeyRound className="w-3 h-3 mr-2" />
+                        비밀번호 초기화
                       </DropdownMenuItem>
                       {agent.isActive ? (
                         <DropdownMenuItem
@@ -723,6 +765,65 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             </Button>
             <Button onClick={handleCreate} disabled={isSaving}>
               {isSaving ? "추가 중..." : "추가하기"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!tempPasswordInfo}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTempPasswordInfo(null);
+            setCopied(false);
+          }
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-blue-500" />
+              임시 비밀번호 발급
+            </DialogTitle>
+            <DialogDescription>
+              <strong>{tempPasswordInfo?.agentName}</strong> 상담원의 임시 비밀번호입니다.
+              이 화면을 닫으면 다시 확인할 수 없습니다.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+              <code className="flex-1 text-lg font-mono font-semibold tracking-widest select-all">
+                {tempPasswordInfo?.tempPassword}
+              </code>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0"
+                onClick={() => {
+                  if (tempPasswordInfo?.tempPassword) {
+                    navigator.clipboard.writeText(tempPasswordInfo.tempPassword);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }
+                }}
+              >
+                {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              상담원에게 이 비밀번호를 전달해주세요. 첫 로그인 시 비밀번호 변경이 강제됩니다.
+            </p>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              onClick={() => {
+                setTempPasswordInfo(null);
+                setCopied(false);
+              }}
+            >
+              확인
             </Button>
           </div>
         </DialogContent>
