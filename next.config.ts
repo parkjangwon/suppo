@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "600mb",
+    },
+  },
   async headers() {
     const isDevelopment = process.env.NODE_ENV === "development";
 

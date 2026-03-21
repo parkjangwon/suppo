@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { createBackupZip } from "@/lib/system/backup";
-import { prisma } from "@/lib/db/client";
+import { createAuditLog } from "@/lib/audit/logger";
+
+export const runtime = "nodejs";
 
 export async function GET(_request: NextRequest) {
   const session = await auth();
@@ -16,16 +18,14 @@ export async function GET(_request: NextRequest) {
       .replace(/[:.]/g, "-")
       .slice(0, 19);
 
-    await prisma.auditLog.create({
-      data: {
-        actorId: session.user.id!,
-        actorEmail: session.user.email!,
-        actorName: session.user.name ?? "",
-        actorType: "AGENT",
-        action: "EXPORT",
-        resourceType: "SYSTEM",
-        description: "전체 데이터 백업 다운로드",
-      },
+    await createAuditLog({
+      actorId: session.user.id!,
+      actorEmail: session.user.email!,
+      actorName: session.user.name ?? "",
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      action: "EXPORT",
+      resourceType: "SYSTEM",
+      description: "전체 데이터 백업 다운로드",
     });
 
     return new NextResponse(zipBuffer, {

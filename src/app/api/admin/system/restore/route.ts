@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { restoreFromZip } from "@/lib/system/restore";
-import { prisma } from "@/lib/db/client";
+import { restoreFromZip, RestoreValidationError } from "@/lib/system/restore";
+import { createAuditLog } from "@/lib/audit/logger";
+
+export const runtime = "nodejs";
 
 const MAX_SIZE = 600 * 1024 * 1024; // 600 MB
 
@@ -34,16 +36,14 @@ export async function POST(request: NextRequest) {
 
     const result = await restoreFromZip(zipBuffer);
 
-    await prisma.auditLog.create({
-      data: {
-        actorId: session.user.id!,
-        actorEmail: session.user.email!,
-        actorName: session.user.name ?? "",
-        actorType: "AGENT",
-        action: "SETTINGS_CHANGE",
-        resourceType: "SYSTEM",
-        description: `전체 데이터 복구 완료 (백업 스키마: ${result.backupSchemaVersion})`,
-      },
+    await createAuditLog({
+      actorId: session.user.id!,
+      actorEmail: session.user.email!,
+      actorName: session.user.name ?? "",
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      action: "SETTINGS_CHANGE",
+      resourceType: "SYSTEM",
+      description: `전체 데이터 복구 완료 (백업 스키마: ${result.backupSchemaVersion})`,
     });
 
     return NextResponse.json({
@@ -51,9 +51,10 @@ export async function POST(request: NextRequest) {
       schemaVersionMatch: result.schemaVersionMatch,
     });
   } catch (error) {
+    if (error instanceof RestoreValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     console.error("Restore failed:", error);
-    const message =
-      error instanceof Error ? error.message : "복구 실패";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ error: "복구 실패" }, { status: 500 });
   }
 }

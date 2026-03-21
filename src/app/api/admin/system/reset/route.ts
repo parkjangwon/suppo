@@ -5,9 +5,11 @@ import {
   validateResetCategories,
   type ResetCategory,
 } from "@/lib/system/reset";
-import { prisma } from "@/lib/db/client";
+import { createAuditLog } from "@/lib/audit/logger";
 
-const VALID_CATEGORIES = new Set([
+export const runtime = "nodejs";
+
+const VALID_CATEGORIES = new Set<ResetCategory>([
   "tickets",
   "agents",
   "settings",
@@ -23,9 +25,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const categories: ResetCategory[] = (body.categories ?? []).filter(
-      (c: string) => VALID_CATEGORIES.has(c)
+    const rawCategories: string[] = body.categories ?? [];
+
+    const unknownCategories = rawCategories.filter(
+      (c) => !VALID_CATEGORIES.has(c as ResetCategory)
     );
+    if (unknownCategories.length > 0) {
+      return NextResponse.json(
+        { error: `알 수 없는 초기화 항목: ${unknownCategories.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    const categories = rawCategories as ResetCategory[];
 
     if (categories.length === 0) {
       return NextResponse.json(
@@ -41,17 +53,14 @@ export async function POST(request: NextRequest) {
 
     await resetCategories(categories);
 
-    // audit log는 초기화 후 새로 기록
-    await prisma.auditLog.create({
-      data: {
-        actorId: session.user.id!,
-        actorEmail: session.user.email!,
-        actorName: session.user.name ?? "",
-        actorType: "AGENT",
-        action: "SETTINGS_CHANGE",
-        resourceType: "SYSTEM",
-        description: `시스템 초기화: ${categories.join(", ")}`,
-      },
+    await createAuditLog({
+      actorId: session.user.id!,
+      actorEmail: session.user.email!,
+      actorName: session.user.name ?? "",
+      actorType: session.user.role as "ADMIN" | "AGENT",
+      action: "SETTINGS_CHANGE",
+      resourceType: "SYSTEM",
+      description: `시스템 초기화: ${categories.join(", ")}`,
     });
 
     return NextResponse.json({ success: true });

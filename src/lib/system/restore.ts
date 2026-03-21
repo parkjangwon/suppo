@@ -3,6 +3,13 @@ import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/db/client";
 
+export class RestoreValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RestoreValidationError";
+  }
+}
+
 const UPLOAD_DIR =
   process.env.UPLOAD_DIR ?? path.join(process.cwd(), "public", "uploads");
 
@@ -28,10 +35,10 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
 
   // manifest 검증
   const manifestFile = zip.file("manifest.json");
-  if (!manifestFile) throw new Error("유효하지 않은 백업 파일: manifest.json 없음");
+  if (!manifestFile) throw new RestoreValidationError("유효하지 않은 백업 파일: manifest.json 없음");
   const manifest = JSON.parse(await manifestFile.async("text"));
   if (manifest.version !== "1.0")
-    throw new Error(`지원하지 않는 백업 버전: ${manifest.version}`);
+    throw new RestoreValidationError(`지원하지 않는 백업 버전: ${manifest.version}`);
 
   // 현재 스키마 버전
   const migrations = await prisma.$queryRaw<{ migration_name: string }[]>`
