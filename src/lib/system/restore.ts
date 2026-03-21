@@ -113,9 +113,6 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
       await tx.category.deleteMany();
 
       // ── 삽입: 부모 먼저 (삭제 역순) ─────────────────────────
-      const cm = <T>(rows: T[]) =>
-        rows.length ? { data: rows as never } : null;
-
       if (get("category").length)
         await tx.category.createMany({ data: get("category") as never });
       if (get("emailSettings").length)
@@ -204,8 +201,6 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
         await tx.knowledgeArticle.createMany({ data: get("knowledgeArticle") as never });
       if (get("knowledgeArticleFeedback").length)
         await tx.knowledgeArticleFeedback.createMany({ data: get("knowledgeArticleFeedback") as never });
-
-      void cm; // unused helper suppression
     },
     { timeout: 60000 }
   );
@@ -224,6 +219,7 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
     if (relativePath.startsWith("attachments/") && !file.dir) {
       const relPath = relativePath.replace(/^attachments\//, "");
       const destPath = path.join(tmpDir, relPath);
+      if (!destPath.startsWith(path.resolve(tmpDir))) continue;
       await fs.mkdir(path.dirname(destPath), { recursive: true });
       const content = await file.async("nodebuffer");
       await fs.writeFile(destPath, content);

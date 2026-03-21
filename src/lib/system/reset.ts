@@ -83,19 +83,8 @@ export async function resetCategories(
         await tx.customer.deleteMany();
       }
 
-      // ── agents ──────────────────────────────────────────────
-      // (tickets 먼저 삭제 필요 — FK dependency에서 강제됨)
-      if (set.has("agents")) {
-        await tx.savedFilter.deleteMany();
-        await tx.agentAbsence.deleteMany();
-        await tx.agentCategory.deleteMany();
-        await tx.teamMember.deleteMany();
-        await tx.team.deleteMany();
-        // 전체 삭제 (초기 admin은 이후 seedInitialAdmin에서 재생성)
-        await tx.agent.deleteMany();
-      }
-
       // ── settings ────────────────────────────────────────────
+      // (agents 전에 먼저 삭제 필요 — responseTemplate.createdById → Agent FK)
       if (set.has("settings")) {
         await tx.notificationSetting.deleteMany(); // global key-value store
         await tx.automationRule.deleteMany();
@@ -111,6 +100,18 @@ export async function resetCategories(
         await tx.lLMSettings.deleteMany();
         await tx.emailSettings.deleteMany();
         await tx.category.deleteMany();
+      }
+
+      // ── agents ──────────────────────────────────────────────
+      // (tickets + settings 먼저 삭제 필요 — FK dependency에서 강제됨)
+      if (set.has("agents")) {
+        await tx.savedFilter.deleteMany();
+        await tx.agentAbsence.deleteMany();
+        await tx.agentCategory.deleteMany();
+        await tx.teamMember.deleteMany();
+        await tx.team.deleteMany();
+        // 전체 삭제 (초기 admin은 이후 seedInitialAdmin에서 재생성)
+        await tx.agent.deleteMany();
       }
     },
     { timeout: 30000 }

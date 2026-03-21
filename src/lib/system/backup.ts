@@ -15,8 +15,7 @@ function bigIntReplacer(_key: string, value: unknown): unknown {
 /** 디렉토리를 JSZip 폴더에 재귀적으로 추가 */
 async function addDirToZip(
   zipFolder: JSZip,
-  dirPath: string,
-  basePath: string
+  dirPath: string
 ): Promise<void> {
   try {
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
@@ -24,14 +23,16 @@ async function addDirToZip(
       const fullPath = path.join(dirPath, entry.name);
       if (entry.isDirectory()) {
         const sub = zipFolder.folder(entry.name)!;
-        await addDirToZip(sub, fullPath, basePath);
+        await addDirToZip(sub, fullPath);
       } else {
         const content = await fs.readFile(fullPath);
         zipFolder.file(entry.name, content);
       }
     }
-  } catch {
-    // uploads 디렉토리가 없으면 건너뜀
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== "ENOENT") throw err;
+    // ENOENT: 디렉토리 없음 → 정상적으로 건너뜀
   }
 }
 
@@ -118,7 +119,7 @@ export async function createBackupZip(): Promise<Buffer> {
   }
 
   const attachmentsFolder = zip.folder("attachments")!;
-  await addDirToZip(attachmentsFolder, UPLOAD_DIR, UPLOAD_DIR);
+  await addDirToZip(attachmentsFolder, UPLOAD_DIR);
 
   return zip.generateAsync({
     type: "nodebuffer",
