@@ -152,7 +152,45 @@ SAMLProvider 1--1 Domain (SAML 인증 설정)
 - 프로덕션에서는 반드시 Secure 플래그 활성화
 - 토큰 탈취 대비 짧은 만료 시간 (24h)
 
-### 3. 이메일 발송 (Outbox 패턴)
+### 3. 상담원 비밀번호 관리
+
+**파일:**
+- `src/app/api/agents/route.ts` — 상담원 생성 (임시 비밀번호 자동 발급)
+- `src/app/api/agents/[id]/reset-password/route.ts` — 관리자 비밀번호 초기화
+- `src/app/api/admin/change-password/route.ts` — 본인 비밀번호 변경
+- `src/app/(admin)/admin/change-password/page.tsx` — 초기 비밀번호 변경 UI
+
+**흐름:**
+1. 관리자가 상담원 생성 → 10자 랜덤 임시 비밀번호 자동 생성 → 화면에 1회만 표시 (복사 가능)
+2. 상담원이 임시 비밀번호로 로그인 → `isInitialPassword: true` → 미들웨어가 `/admin/change-password`로 리다이렉트
+3. 현재 비밀번호(임시) + 새 비밀번호 입력 → DB 업데이트: `isInitialPassword: false`
+4. 자동 `signOut` → 로그인 페이지 → 새 비밀번호로 로그인 → 대시보드
+
+**관리자 비밀번호 초기화:** 상담원 목록 드롭다운 → "비밀번호 초기화" → 새 임시 비밀번호 발급 + 1회 표시
+
+**주의사항:**
+- `isInitialPassword: true`이면 미들웨어가 모든 `/admin/*` 접근을 change-password로 강제 리다이렉트
+- change-password 페이지에는 "다른 계정으로 로그인" 탈출 링크가 있음 (세션 꼬임 대비)
+- **임시 비밀번호 분실 시:** 관리자가 "비밀번호 초기화" 버튼으로 새 임시 비밀번호 재발급
+
+### 4. 지식베이스 (Knowledge Base) 기능
+
+**파일:**
+- `src/lib/knowledge/search.ts` — RAG-lite 키워드 검색
+- `src/app/api/knowledge/[articleId]/feedback/route.ts` — 사용자 피드백 (유용함/아님)
+- `src/app/api/tickets/[id]/knowledge-links/route.ts` — 티켓-지식 연결 CRUD
+- `src/app/api/tickets/[id]/suggest-response/route.ts` — AI 답변 제안 (지식베이스 주입)
+- `src/app/api/admin/analytics/knowledge/route.ts` — 기여자 통계/ROI 분석
+
+**활성화 설정:** `/admin/settings` → 브랜딩 → "지식베이스 사용" 토글 (`knowledgeEnabled` in `SystemBranding`)
+
+**피드백 쿠키:** `kb-session` 쿠키로 비로그인 사용자 중복 피드백 방지
+
+**관련 DB 모델:**
+- `TicketKnowledgeLink` — 티켓↔지식 연결, `linkType`: `AI_SUGGESTION | AGENT_INSERT | MANUAL_LINK`
+- `KnowledgeArticleFeedback` — 사용자 피드백 (쿠키 ID 기반 dedup)
+
+### 5. 이메일 발송 (Outbox 패턴)
 
 **파일:**
 
@@ -206,13 +244,15 @@ SAMLProvider 1--1 Domain (SAML 인증 설정)
 
 ```bash
 # schema.prisma 수정 후 반드시 실행
-pnpm prisma generate
+pnpm prisma migrate dev --name <설명>
+pnpm prisma generate   # ← 이걸 빠뜨리면 런타임에서 "Cannot read properties of undefined" 발생
 ```
 
 **함정:**
 
-- `@prisma/client` import 시 타입 에러 → generate 미실행
+- `prisma.someNewModel.findMany` 에서 `Cannot read properties of undefined` → `prisma generate` 미실행
 - 마이그레이션 충돌 → `migrate dev` vs `migrate deploy` 구분
+- **마이그레이션 후 dev 서버 재시작 필요** (Turbopack이 새 Prisma Client를 캐시할 수 있음)
 
 ### 2. 환경 변수
 
@@ -229,7 +269,48 @@ TICKET_ACCESS_SECRET  # 티켓 접근 토큰
 - `.env` 파일 누락 → 앱 실행 불가
 - 프로덕션에 기본값 사용 → 보안 취약
 
-### 3. Rate Limiting
+### 3. 미들웨어 Edge Runtime 제약
+
+**⚠️ 미들웨어(`src/middleware.ts`)는 Edge Runtime에서 실행됨 — Prisma Client 사용 불가**
+
+```ts
+// ❌ 절대 금지: 미들웨어에서 Prisma 쿼리
+export default auth((request) => {
+  const result = await prisma.agent.findUnique(...); // PrismaClientValidationError!
+});
+
+// ✅ 올바른 방법: JWT 토큰에 담긴 값만 사용
+const user = request.auth?.user as { isInitialPassword?: boolean };
+```
+
+**영향 범위:**
+- `src/middleware.ts` 자체
+- `auth.ts`의 JWT callback — 미들웨어가 `auth()` 래퍼를 호출하므로, JWT callback 내부에서
+  `shouldFetch`가 `true`가 되면 Prisma 쿼리가 Edge Runtime에서 실행됨
+
+**현재 `shouldFetch` 조건 (`src/auth.ts`):**
+
+```ts
+const shouldFetch = !token.role || !token.agentId || (trigger === "update");
+```
+
+- `trigger === "update"` 는 API Route(Node.js)에서 `session.update()` 호출 시에만 발생 → 안전
+- `!token.role || !token.agentId` 는 최초 로그인 직후에만 true → 실질적으로 미들웨어에서는 false
+- **절대 `token.someField === someValue` 같은 조건을 추가하지 말 것** — 미들웨어에서 Prisma 실행됨
+
+### 4. NextAuth JWT 스테일(Stale) 토큰
+
+**현상:** DB의 값이 바뀌어도 JWT 쿠키가 갱신되지 않아 구 값이 유지됨
+
+**예시:** 상담원 비밀번호 변경 후 `isInitialPassword: false`로 바뀌었지만 JWT에는 아직 `true`
+
+**해결 방법:**
+1. 변경 완료 후 반드시 `signOut()` 호출 → JWT 쿠키 삭제 → 재로그인 시 최신 DB 값으로 새 JWT 발급
+2. 또는 `session.update()` 후 충분한 딜레이를 준 뒤 네비게이션 — 단, 타이밍 이슈 가능성 있음
+
+**현재 구현:** 초기 비밀번호 변경 페이지(`/admin/change-password`)에서 `signOut({ callbackUrl: '/admin/login' })` 사용
+
+### 5. Rate Limiting
 
 **현재 구현:** 메모리 기반 (IP별)
 
@@ -525,9 +606,13 @@ SELECT * FROM "TenantBranding" WHERE domain = 'acme.com' AND "isActive" = true;
 
 ## 📝 변경 이력
 
-| 날짜       | 변경 내용      | 담당자   |
-| ---------- | -------------- | -------- |
-| 2024-03-14 | 초기 버전 완성 | AI Agent |
+| 날짜       | 변경 내용                                                              | 담당자   |
+| ---------- | ---------------------------------------------------------------------- | -------- |
+| 2024-03-14 | 초기 버전 완성                                                         | AI Agent |
+| 2026-03-21 | 지식베이스 기능 구현 (RAG-lite, 피드백, 티켓 연결, 기여자 분석)       | AI Agent |
+| 2026-03-21 | 상담원 비밀번호 관리 구현 (임시 비밀번호 자동 발급, 관리자 초기화)    | AI Agent |
+| 2026-03-21 | Edge Runtime 제약 및 JWT Stale 토큰 주의사항 추가                      | AI Agent |
+| 2026-03-21 | Prisma generate 누락 시 런타임 오류 상세 설명 추가                     | AI Agent |
 
 ---
 
