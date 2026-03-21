@@ -34,6 +34,8 @@ const CATEGORY_LABELS: Record<ResetCategory, string> = {
   audit_logs: "감사 로그",
 };
 
+const TOTAL_CATEGORIES = Object.keys(CATEGORY_LABELS).length;
+
 /** agents 선택 시 tickets/knowledge/settings 강제, settings 선택 시 tickets 강제 */
 function enforceDependencies(
   prev: Set<ResetCategory>,
@@ -100,6 +102,22 @@ export function SystemManagement() {
   const [restoreFile, setRestoreFile] = useState<File | null>(null);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+  // key를 변경하면 input이 remount되어 선택된 파일이 초기화됨
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const handleRestoreFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setRestoreFile(file);
+  };
+
+  const handleRestoreClick = () => {
+    if (!restoreFile) return;
+    if (!restoreFile.name.toLowerCase().endsWith(".zip")) {
+      toast.error("ZIP 파일만 업로드할 수 있습니다.");
+      return;
+    }
+    setRestoreDialogOpen(true);
+  };
 
   const handleRestore = async () => {
     if (!restoreFile) return;
@@ -124,6 +142,9 @@ export function SystemManagement() {
       }, 2000);
     } catch (err) {
       toast.error("복구 실패: " + (err instanceof Error ? err.message : "오류"));
+      // 오류 시 파일 선택 초기화
+      setRestoreFile(null);
+      setFileInputKey((k) => k + 1);
     } finally {
       setRestoreLoading(false);
     }
@@ -137,9 +158,8 @@ export function SystemManagement() {
   const [confirmText, setConfirmText] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
 
-  const allSelected =
-    selectedCategories.size ===
-    (Object.keys(CATEGORY_LABELS) as ResetCategory[]).length;
+  const allSelected = selectedCategories.size === TOTAL_CATEGORIES;
+  const someSelected = selectedCategories.size > 0 && !allSelected;
 
   const toggleAll = () => {
     if (allSelected) {
@@ -169,10 +189,10 @@ export function SystemManagement() {
       if (!res.ok) throw new Error(json.error ?? "초기화 실패");
       toast.success("초기화가 완료되었습니다.");
       setSelectedCategories(new Set());
+      setResetLoading(false);
       window.location.reload();
     } catch (err) {
       toast.error("초기화 실패: " + (err instanceof Error ? err.message : "오류"));
-    } finally {
       setResetLoading(false);
     }
   };
@@ -192,14 +212,8 @@ export function SystemManagement() {
         </CardHeader>
         <CardContent>
           <Button onClick={handleBackup} disabled={backupLoading}>
-            {backupLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                백업 생성 중...
-              </>
-            ) : (
-              "백업 다운로드"
-            )}
+            {backupLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {backupLoading ? "백업 생성 중..." : "백업 다운로드"}
           </Button>
         </CardContent>
       </Card>
@@ -224,15 +238,16 @@ export function SystemManagement() {
           </Alert>
           <div className="flex items-center gap-3">
             <Input
+              key={fileInputKey}
               type="file"
               accept=".zip"
-              onChange={(e) => setRestoreFile(e.target.files?.[0] ?? null)}
+              onChange={handleRestoreFileChange}
               className="max-w-xs"
             />
             <Button
               variant="destructive"
               disabled={!restoreFile || restoreLoading}
-              onClick={() => setRestoreDialogOpen(true)}
+              onClick={handleRestoreClick}
             >
               {restoreLoading ? "복구 중..." : "복구 시작"}
             </Button>
@@ -263,7 +278,7 @@ export function SystemManagement() {
             <div className="flex items-center gap-2">
               <Checkbox
                 id="select-all"
-                checked={allSelected}
+                checked={allSelected ? true : someSelected ? "indeterminate" : false}
                 onCheckedChange={(checked) => {
                   if (checked !== "indeterminate") toggleAll();
                 }}
