@@ -34,7 +34,15 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
   const [content, setContent] = useState(article?.content || "");
   const [excerpt, setExcerpt] = useState(article?.excerpt || "");
   const [categoryId, setCategoryId] = useState(article?.categoryId || "");
-  const [tags, setTags] = useState<string[]>(article?.tags || []);
+  const [tags, setTags] = useState<string[]>(() => {
+    const raw = article?.tags;
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === "string") {
+      try { return JSON.parse(raw); } catch { return []; }
+    }
+    return [];
+  });
   const [newTag, setNewTag] = useState("");
   const [isPublic, setIsPublic] = useState(article?.isPublic ?? true);
   const [isPublishing, setIsPublishing] = useState(false);
