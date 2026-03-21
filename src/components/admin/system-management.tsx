@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Download, Upload, RotateCcw, AlertTriangle } from "lucide-react";
+import { Download, Upload, RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -192,7 +192,14 @@ export function SystemManagement() {
         </CardHeader>
         <CardContent>
           <Button onClick={handleBackup} disabled={backupLoading}>
-            {backupLoading ? "백업 생성 중..." : "백업 다운로드"}
+            {backupLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                백업 생성 중...
+              </>
+            ) : (
+              "백업 다운로드"
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -284,12 +291,12 @@ export function SystemManagement() {
             </div>
             {selectedCategories.has("agents") && (
               <p className="text-sm text-muted-foreground ml-6">
-                * '상담원 계정' 초기화는 '티켓 및 고객 데이터', '지식 베이스', '설정'도 함께 초기화합니다.
+                * <strong>상담원 계정</strong> 초기화는 <strong>티켓 및 고객 데이터</strong>, <strong>지식 베이스</strong>, <strong>설정</strong>도 함께 초기화합니다.
               </p>
             )}
             {!selectedCategories.has("agents") && selectedCategories.has("settings") && (
               <p className="text-sm text-muted-foreground ml-6">
-                * '설정' 초기화는 '티켓 및 고객 데이터'도 함께 초기화합니다.
+                * <strong>설정</strong> 초기화는 <strong>티켓 및 고객 데이터</strong>도 함께 초기화합니다.
               </p>
             )}
           </div>
