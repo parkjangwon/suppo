@@ -198,7 +198,7 @@ Expected: 오류 없이 완료.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add prisma/seed.ts prisma/seed-functions.ts
+git add prisma/seed.ts src/lib/system/seed-functions.ts
 git commit -m "refactor: extract seed logic into seed-functions.ts for reuse"
 ```
 
