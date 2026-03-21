@@ -255,7 +255,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       if (HAS_DATABASE && token.sub) {
-        const shouldFetch = !token.role || !token.agentId || (trigger === "update");
+        const shouldFetch = !token.role || !token.agentId || (trigger === "update") || (token.isInitialPassword === true);
         if (shouldFetch) {
           const agent = await prisma.agent.findUnique({
             where: { id: token.sub },

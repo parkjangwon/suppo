@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { BACKOFFICE_LOGIN_PATH } from "@/lib/auth/config";
 
+const handleSignOut = () => signOut({ callbackUrl: BACKOFFICE_LOGIN_PATH });
+
 export default function ChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -70,6 +72,13 @@ export default function ChangePasswordPage() {
           <CardDescription>
             최초 로그인을 환영합니다! 보안을 위해 새로운 비밀번호를 설정해주세요.
           </CardDescription>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground mt-1"
+          >
+            다른 계정으로 로그인
+          </button>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
