@@ -166,9 +166,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(absence, { status: 201 });
   } catch (error) {
-    console.error("Failed to create absence:", error);
+    console.error("Failed to create absence:", JSON.stringify(error, null, 2));
+    const message = error instanceof Error ? error.message : "일정 등록 중 오류가 발생했습니다.";
     return NextResponse.json(
-      { error: "일정 등록 중 오류가 발생했습니다." },
+      { error: message },
       { status: 500 }
     );
   }

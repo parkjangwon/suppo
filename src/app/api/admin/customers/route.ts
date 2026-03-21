@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
     const where = params.search
       ? {
           OR: [
-            { email: { contains: params.search, mode: "insensitive" as const } },
-            { name: { contains: params.search, mode: "insensitive" as const } },
+            { email: { contains: params.search } },
+            { name: { contains: params.search } },
           ],
         }
       : undefined;

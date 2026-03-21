@@ -67,9 +67,9 @@ export async function getKnowledgeArticles(
 
   if (filters.search) {
     where.OR = [
-      { title: { contains: filters.search, mode: "insensitive" } },
-      { content: { contains: filters.search, mode: "insensitive" } },
-      { excerpt: { contains: filters.search, mode: "insensitive" } },
+      { title: { contains: filters.search } },
+      { content: { contains: filters.search } },
+      { excerpt: { contains: filters.search } },
     ];
   }
 

@@ -61,37 +61,31 @@ export async function GET(request: NextRequest) {
         {
           searchVector: {
             contains: params.query,
-            mode: "insensitive",
           },
         },
         {
           ticketNumber: {
             contains: params.query,
-            mode: "insensitive",
           },
         },
         {
           customerName: {
             contains: params.query,
-            mode: "insensitive",
           },
         },
         {
           customerEmail: {
             contains: params.query,
-            mode: "insensitive",
           },
         },
         {
           subject: {
             contains: params.query,
-            mode: "insensitive",
           },
         },
         {
           description: {
             contains: params.query,
-            mode: "insensitive",
           },
         },
       ];
