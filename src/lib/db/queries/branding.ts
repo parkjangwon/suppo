@@ -21,6 +21,7 @@ const defaultBranding: SystemBranding = {
   footerHomepage: undefined,
   footerAddress: undefined,
   showPoweredBy: true,
+  knowledgeEnabled: true,
   customCss: undefined,
 };
 
@@ -51,6 +52,7 @@ export async function getSystemBranding(): Promise<SystemBranding> {
     footerHomepage: branding.footerHomepage || undefined,
     footerAddress: branding.footerAddress || undefined,
     showPoweredBy: branding.showPoweredBy,
+    knowledgeEnabled: branding.knowledgeEnabled,
     customCss: branding.customCss || undefined,
   };
 }

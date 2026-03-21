@@ -176,6 +176,7 @@ model Ticket {
   mergedFrom        TicketMerge[]          @relation("TicketSource")
   presences         TicketPresence[]
   commentLock       TicketCommentLock?
+  knowledgeLinks    TicketKnowledgeLink[]
 
   @@index([categoryId])
   @@index([assigneeId])
@@ -225,6 +226,7 @@ model Agent {
   commentLocks           TicketCommentLock[]
   reportSchedules        ReportSchedule[]      @relation("ReportScheduleCreator")
   generatedReports       GeneratedReport[]     @relation("GeneratedReportRequester")
+  knowledgeLinks         TicketKnowledgeLink[]
 
   @@index([isActive])
 }
@@ -543,7 +545,8 @@ model SystemBranding {
   footerAddress  String? // 푸터 주소
 
   // Feature Flags
-  showPoweredBy Boolean @default(true) // "Powered by Crinity" 표시 여부
+  showPoweredBy     Boolean @default(true) // "Powered by Crinity" 표시 여부
+  knowledgeEnabled  Boolean @default(true) // 지식 찾기 공개 포털 노출 여부
   customCss     String? // 커스텀 CSS
 
   createdAt DateTime @default(now())
@@ -975,6 +978,7 @@ model KnowledgeArticle {
   author       Agent                      @relation("KnowledgeArticleAuthor", fields: [authorId], references: [id], onDelete: Restrict)
   lastEditedBy Agent?                     @relation("KnowledgeArticleLastEditor", fields: [lastEditedById], references: [id], onDelete: SetNull)
   feedback     KnowledgeArticleFeedback[]
+  ticketLinks  TicketKnowledgeLink[]
 
   @@index([categoryId])
   @@index([authorId])
@@ -1084,4 +1088,22 @@ model GeneratedReport {
   @@index([status, createdAt])
   @@index([scheduleId, createdAt])
   @@unique([scheduleId, reportType, format, periodKey])
+}
+
+// Ticket-Knowledge Link (티켓-지식 연결)
+model TicketKnowledgeLink {
+  id        String   @id @default(cuid())
+  ticketId  String
+  articleId String
+  agentId   String
+  linkType  String   // "AI_SUGGESTION" | "AGENT_INSERT" | "MANUAL_LINK"
+  createdAt DateTime @default(now())
+
+  ticket  Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  article KnowledgeArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  agent   Agent            @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, articleId])
+  @@index([articleId])
+  @@index([agentId])
 }

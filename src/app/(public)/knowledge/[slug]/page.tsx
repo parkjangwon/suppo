@@ -5,7 +5,9 @@ import { prisma } from "@/lib/db/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ThumbsUp, ThumbsDown, Eye, Calendar, Ticket } from "lucide-react";
+import { ChevronLeft, Eye, Ticket } from "lucide-react";
+import { ArticleFeedback } from "@/components/knowledge/article-feedback";
+import { getSystemBranding } from "@/lib/db/queries/branding";
 
 interface KnowledgeArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -30,6 +32,11 @@ export async function generateMetadata({ params }: KnowledgeArticlePageProps): P
 
 export default async function KnowledgeArticlePage({ params }: KnowledgeArticlePageProps) {
   const { slug } = await params;
+
+  const branding = await getSystemBranding();
+  if (!branding.knowledgeEnabled) {
+    notFound();
+  }
 
   const article = await prisma.knowledgeArticle.findUnique({
     where: { slug },
@@ -130,16 +137,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
                   <p className="text-sm text-gray-600 mb-4">
                     이 문서가 도움이 되었나요?
                   </p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <ThumbsUp className="h-4 w-4 mr-2" />
-                      도움이 되었어요
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <ThumbsDown className="h-4 w-4 mr-2" />
-                      도움이 필요해요
-                    </Button>
-                  </div>
+                  <ArticleFeedback articleId={article.id} />
                 </div>
               </CardContent>
             </Card>

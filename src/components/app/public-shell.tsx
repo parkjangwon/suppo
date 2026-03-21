@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useBranding } from "@/lib/branding/context";
-import { Phone, Mail, Globe, MapPin } from "lucide-react";
+import { Phone, Mail, Globe, MapPin, BookOpen } from "lucide-react";
 import { formatPhoneNumber } from "@/lib/utils/phone-format";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -39,6 +39,12 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
+            {branding.knowledgeEnabled && (
+              <NavLink href="/knowledge">
+                <BookOpen className="h-4 w-4 mr-1 inline-block" />
+                지식 찾기
+              </NavLink>
+            )}
             <NavLink href="/ticket/new">티켓 작성</NavLink>
             <NavLink href="/ticket/lookup">티켓 조회</NavLink>
           </nav>
@@ -132,6 +138,13 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
                     홈
                   </Link>
                 </li>
+                {branding.knowledgeEnabled && (
+                  <li>
+                    <Link href="/knowledge" className="text-sm hover:text-white transition-colors">
+                      지식 찾기
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link href="/ticket/new" className="text-sm hover:text-white transition-colors">
                     티켓 작성

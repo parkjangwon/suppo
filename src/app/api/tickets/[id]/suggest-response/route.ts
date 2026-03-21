@@ -5,7 +5,7 @@ import { generateResponseSuggestion } from "@/lib/ai/suggestion-engine";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,8 +13,10 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const ticket = await prisma.ticket.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         category: true,
         requestType: true,
@@ -29,7 +31,7 @@ export async function POST(
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    const suggestion = await generateResponseSuggestion({
+    const result = await generateResponseSuggestion({
       customerName: ticket.customerName,
       customerEmail: ticket.customerEmail,
       ticketNumber: ticket.ticketNumber,
@@ -38,18 +40,50 @@ export async function POST(
       category: ticket.category?.name,
       requestType: ticket.requestType?.name,
       priority: ticket.priority,
-      comments: ticket.comments.map(c => ({
+      comments: ticket.comments.map((c) => ({
         content: c.content,
         authorType: c.authorType,
         createdAt: c.createdAt,
       })),
     });
 
-    if (!suggestion) {
+    if (!result) {
       return NextResponse.json({ error: "AI not available" }, { status: 503 });
     }
 
-    return NextResponse.json({ suggestion });
+    // 기여 문서 TicketKnowledgeLink 자동 생성 (AI_SUGGESTION)
+    const agentId = (session.user as { id?: string }).id;
+    let referencedArticles: { id: string; title: string }[] = [];
+
+    if (result.referencedArticleIds.length > 0) {
+      const articles = await prisma.knowledgeArticle.findMany({
+        where: { id: { in: result.referencedArticleIds } },
+        select: { id: true, title: true },
+      });
+      referencedArticles = articles;
+
+      if (agentId) {
+        await Promise.allSettled(
+          result.referencedArticleIds.map((articleId) =>
+            prisma.ticketKnowledgeLink.upsert({
+              where: { ticketId_articleId: { ticketId: id, articleId } },
+              create: {
+                ticketId: id,
+                articleId,
+                agentId,
+                linkType: "AI_SUGGESTION",
+              },
+              update: {},
+            })
+          )
+        );
+      }
+    }
+
+    return NextResponse.json({
+      suggestion: result.suggestion,
+      referencedArticles,
+    });
   } catch (error) {
     console.error("Failed to generate response suggestion:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
