@@ -175,12 +175,12 @@ export function CommentSection({
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="internal"
-                    aria-label="남부 메모로 저장"
+                    aria-label="내부 메모로 저장"
                     checked={isInternal}
                     onCheckedChange={(checked) => setIsInternal(checked === true)}
                   />
                   <Label htmlFor="internal" className="text-sm cursor-pointer">
-                    남부 메모로 저장
+                    내부 메모로 저장
                   </Label>
                 </div>
                 <TemplateSelector

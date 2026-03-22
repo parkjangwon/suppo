@@ -170,7 +170,7 @@ export function CommentThread({
                     variant="destructive"
                     className="text-xs bg-amber-500 hover:bg-amber-600"
                   >
-                    남부 메모
+                    내부 메모
                   </Badge>
                 )}
                 {wasEdited && !isEditing && (

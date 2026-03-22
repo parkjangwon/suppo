@@ -200,7 +200,7 @@ export function KnowledgeList({
                     )}
                     {!article.isPublic && article.isPublished && (
                       <Badge variant="outline" className="ml-1">
-                        남부
+                        내부
                       </Badge>
                     )}
                   </TableCell>
