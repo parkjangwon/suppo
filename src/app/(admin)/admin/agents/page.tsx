@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AgentList } from "@/components/admin/agent-list";
+import { AgentAiSection } from "@/components/admin/agent-ai-section";
 import { prisma } from "@/lib/db/client";
 
 export const dynamic = "force-dynamic";
@@ -35,6 +36,9 @@ export default async function AdminAgentsPage() {
   }
 
   const now = new Date();
+
+  const llmSettings = await prisma.lLMSettings.findFirst();
+  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
 
   const [agents, categories, teams] = await Promise.all([
     prisma.agent.findMany({
@@ -100,6 +104,8 @@ export default async function AdminAgentsPage() {
           </p>
         </div>
       </div>
+
+      {isAdmin && analysisEnabled && <AgentAiSection />}
 
       <AgentList
         initialAgents={agents}
