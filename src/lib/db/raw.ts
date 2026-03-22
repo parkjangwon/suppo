@@ -16,6 +16,11 @@ function createLibsqlClient() {
     return null;
   }
 
+  // Next.js 빌드 단계에서는 연결하지 않음 (sqld 없는 환경에서 libsql 내부 오류 방지)
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return null;
+  }
+
   return createClient({
     url,
     authToken: process.env.DATABASE_AUTH_TOKEN,
