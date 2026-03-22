@@ -51,7 +51,7 @@ export function TicketLookupForm() {
       )}
       
       <div className="space-y-2">
-        <Label htmlFor="ticketNumber" className="text-slate-700">{copy.ticketLookupTitle}</Label>
+        <Label htmlFor="ticketNumber" className="text-slate-700">{copy.formTicketNumber}</Label>
         <input
           id="ticketNumber"
           type="text"

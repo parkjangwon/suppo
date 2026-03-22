@@ -31,6 +31,7 @@ export interface PublicCopy {
   formSubject: string;
   formDescription: string;
   formAttachments: string;
+  formTicketNumber: string;
   formSubmit: string;
   formSubmitting: string;
   formPlaceholders: {
@@ -83,6 +84,7 @@ const PUBLIC_COPY: Record<PublicLocale, PublicCopy> = {
     formSubject: "제목",
     formDescription: "내용",
     formAttachments: "첨부파일",
+    formTicketNumber: "티켓 번호",
     formSubmit: "티켓 제출",
     formSubmitting: "제출 중...",
     formPlaceholders: {
@@ -138,6 +140,7 @@ const PUBLIC_COPY: Record<PublicLocale, PublicCopy> = {
     formSubject: "Subject",
     formDescription: "Description",
     formAttachments: "Attachments",
+    formTicketNumber: "Ticket number",
     formSubmit: "Submit ticket",
     formSubmitting: "Submitting...",
     formPlaceholders: {
