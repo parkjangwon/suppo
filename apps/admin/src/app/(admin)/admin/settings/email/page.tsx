@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { EmailSettingsForm } from "@/components/admin/email-settings-form";
 
 export const metadata: Metadata = {
@@ -10,8 +11,17 @@ export const metadata: Metadata = {
 export default async function EmailSettingsPage() {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     redirect("/admin/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    return (
+      <AdminOnlyPageState
+        title="이메일 연동"
+        description="이메일 발송 계정과 알림 정책은 관리자만 변경할 수 있습니다."
+      />
+    );
   }
 
   return (

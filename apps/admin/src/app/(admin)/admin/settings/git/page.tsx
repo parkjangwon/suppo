@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { GitSettings } from "@/components/admin/git-settings";
 
 export const metadata: Metadata = {
@@ -17,7 +18,12 @@ export default async function GitSettingsPage() {
 
   const isAdmin = session.user.role === "ADMIN";
   if (!isAdmin) {
-    redirect("/admin/dashboard");
+    return (
+      <AdminOnlyPageState
+        title="Git 설정"
+        description="외부 저장소 연동 정보는 관리자만 관리할 수 있습니다."
+      />
+    );
   }
 
   const credentials = await prisma.gitProviderCredential.findMany({

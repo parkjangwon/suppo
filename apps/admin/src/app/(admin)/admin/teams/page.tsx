@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { TeamList } from "@/components/admin/team-list";
 
 export const metadata: Metadata = {
@@ -17,7 +18,12 @@ export default async function TeamsPage() {
 
   const isAdmin = session.user.role === "ADMIN";
   if (!isAdmin) {
-    redirect("/admin/dashboard");
+    return (
+      <AdminOnlyPageState
+        title="팀 관리"
+        description="팀 구성과 배정 정책은 관리자만 변경할 수 있습니다."
+      />
+    );
   }
 
   const teams = await prisma.team.findMany({

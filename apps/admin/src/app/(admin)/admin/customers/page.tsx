@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { CustomerList } from "@/components/admin/customer-list";
 import { prisma } from "@crinity/db";
 
@@ -19,7 +20,12 @@ export default async function AdminCustomersPage() {
 
   const isAdmin = session.user.role === "ADMIN";
   if (!isAdmin) {
-    redirect("/admin/dashboard");
+    return (
+      <AdminOnlyPageState
+        title="고객 관리"
+        description="고객 목록과 메모 관리는 관리자만 접근할 수 있습니다."
+      />
+    );
   }
 
   if (!process.env.DATABASE_URL) {

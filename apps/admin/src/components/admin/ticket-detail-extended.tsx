@@ -25,6 +25,8 @@ import { TicketSummary } from "./ticket-summary";
 import { CSATTab } from "@/components/admin/csat-tab";
 import { TicketViewingIndicator } from "./ticket-viewing-indicator";
 import { useTicketPresence } from "@/hooks/use-ticket-presence";
+import { CustomerSnapshotCard } from "./customer-snapshot-card";
+import { TicketWorkspaceSummary } from "./ticket-workspace-summary";
 import { toast } from "sonner";
 
 interface TicketDetailProps {
@@ -200,6 +202,14 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
         </div>
       </div>
 
+      <TicketWorkspaceSummary
+        statusLabel={statusMap[ticket.status]?.label || ticket.status || "-"}
+        priorityLabel={priorityMap[ticket.priority]?.label || ticket.priority || "-"}
+        assigneeName={assignee?.name || "미할당"}
+        requestTypeName={ticket.requestType?.name || "-"}
+        canEdit={canEdit}
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
           {/* AI 요약 */}
@@ -332,6 +342,10 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
               )}
             </CardContent>
           </Card>
+
+          {ticket.customerId ? (
+            <CustomerSnapshotCard customerId={ticket.customerId} />
+          ) : null}
 
           <Card>
             <CardHeader>

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { BrandingForm } from "@/components/admin/branding-form";
 
 export const metadata: Metadata = {
@@ -10,8 +11,17 @@ export const metadata: Metadata = {
 export default async function BrandingSettingsPage() {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     redirect("/admin/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    return (
+      <AdminOnlyPageState
+        title="브랜딩 설정"
+        description="서비스 로고와 고객 포털 브랜딩 변경은 관리자만 수행할 수 있습니다."
+      />
+    );
   }
 
   return (

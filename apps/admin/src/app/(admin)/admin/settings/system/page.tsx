@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { SystemManagement } from "@/components/admin/system-management";
 
 export const metadata: Metadata = {
@@ -9,8 +10,17 @@ export const metadata: Metadata = {
 
 export default async function SystemSettingsPage() {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     redirect("/admin/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    return (
+      <AdminOnlyPageState
+        title="시스템 관리"
+        description="백업, 복구, 초기화와 같은 시스템 작업은 관리자만 실행할 수 있습니다."
+      />
+    );
   }
 
   return (

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { AuditLogList } from "@/components/admin/audit-log-list";
 import { prisma } from "@crinity/db";
 
@@ -19,7 +20,12 @@ export default async function AdminAuditLogsPage() {
 
   const isAdmin = session.user.role === "ADMIN";
   if (!isAdmin) {
-    redirect("/admin/dashboard");
+    return (
+      <AdminOnlyPageState
+        title="감사 로그"
+        description="시스템 감사 로그는 관리자만 조회할 수 있습니다."
+      />
+    );
   }
 
   const llmSettings = await prisma.lLMSettings.findFirst();

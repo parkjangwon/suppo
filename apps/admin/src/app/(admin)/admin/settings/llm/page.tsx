@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { LLMSettingsForm } from "@/components/admin/llm-settings-form";
 
 export const metadata: Metadata = {
@@ -10,8 +11,17 @@ export const metadata: Metadata = {
 export default async function LLMSettingsPage() {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     redirect("/admin/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    return (
+      <AdminOnlyPageState
+        title="AI 연동"
+        description="LLM 제공자와 분석 정책 변경은 관리자만 수행할 수 있습니다."
+      />
+    );
   }
 
   return (

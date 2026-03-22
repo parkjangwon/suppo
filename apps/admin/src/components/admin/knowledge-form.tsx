@@ -48,6 +48,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const isPublished = article?.isPublished ?? false;
 
   const generateSlug = (text: string) => {
     return text
@@ -250,6 +251,16 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
                 <p className="text-xs text-gray-500">
                   /knowledge/{slug || "문서-url"} 에서 접근할 수 있습니다
                 </p>
+              </div>
+
+              <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">
+                {isPublished && isPublic
+                  ? "현재 게시된 공개 문서입니다. 고객 포털에서 공개 링크로 접근할 수 있습니다."
+                  : isPublished && !isPublic
+                    ? "현재 게시된 내부 문서입니다. 상담원/관리자용으로만 유지되며 고객 포털에는 노출되지 않습니다."
+                    : isPublic
+                      ? "현재 초안 상태입니다. 게시하면 고객 포털에서 공개 링크로 접근할 수 있습니다."
+                      : "현재 초안 상태의 내부 문서입니다. 게시 전까지 고객 포털에는 노출되지 않습니다."}
               </div>
 
               <div className="space-y-2">

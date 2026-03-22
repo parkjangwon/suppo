@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components
 import { Switch } from "@crinity/ui/components/ui/switch";
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
 import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
+import { toast } from "sonner";
 
 interface SystemBranding {
   companyName: string;
@@ -121,7 +122,7 @@ export function BrandingForm() {
       return data.url;
     } catch (error) {
       console.error("Upload error:", error);
-      alert("파일 업로드에 실패했습니다.");
+      toast.error("파일 업로드에 실패했습니다.");
       return null;
     }
   };
@@ -186,7 +187,7 @@ export function BrandingForm() {
       });
 
       if (response.ok) {
-        alert("브랜딩 설정이 저장되었습니다.");
+        toast.success("브랜딩 설정이 저장되었습니다.");
       } else {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
         console.error("Server error:", errorData);
@@ -194,7 +195,7 @@ export function BrandingForm() {
       }
     } catch (error) {
       console.error("Failed to save branding:", error);
-      alert("저장에 실패했습니다.");
+      toast.error("브랜딩 설정 저장에 실패했습니다.");
     } finally {
       setIsSaving(false);
     }

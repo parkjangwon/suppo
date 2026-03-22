@@ -1,0 +1,36 @@
+import Link from "next/link";
+import { ShieldAlert } from "lucide-react";
+import { Button } from "@crinity/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+
+interface AdminOnlyPageStateProps {
+  title: string;
+  description: string;
+}
+
+export function AdminOnlyPageState({
+  title,
+  description,
+}: AdminOnlyPageStateProps) {
+  return (
+    <div className="container mx-auto max-w-3xl px-4 py-12">
+      <Card>
+        <CardHeader className="space-y-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+            <ShieldAlert className="h-6 w-6" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-muted-foreground">관리자 전용 페이지</p>
+            <CardTitle className="text-2xl">{title}</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+          <Button asChild>
+            <Link href="/admin/dashboard">대시보드로 돌아가기</Link>
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

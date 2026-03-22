@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { CustomFieldList } from "@/components/admin/custom-field-list";
 import { CustomFieldDialog } from "@/components/admin/custom-field-dialog";
 
@@ -17,7 +18,12 @@ export default async function CustomFieldsPage() {
   }
 
   if (session.user.role !== "ADMIN") {
-    redirect("/admin/tickets");
+    return (
+      <AdminOnlyPageState
+        title="커스텀 필드 관리"
+        description="티켓 스키마를 바꾸는 커스텀 필드 설정은 관리자만 변경할 수 있습니다."
+      />
+    );
   }
 
   const customFields = await prisma.customFieldDefinition.findMany({

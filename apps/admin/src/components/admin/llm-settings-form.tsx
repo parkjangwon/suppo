@@ -8,6 +8,8 @@ import { Input } from "@crinity/ui/components/ui/input";
 import { Label } from "@crinity/ui/components/ui/label";
 import { Switch } from "@crinity/ui/components/ui/switch";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
+import { toast } from "sonner";
+import { DEFAULT_LLM_SETTINGS } from "@/lib/settings/default-llm-settings";
 
 interface LLMSettings {
   provider: string;
@@ -34,13 +36,7 @@ function normalizeSettings(data: Partial<LLMSettings>): LLMSettings {
 }
 
 const DEFAULT_SETTINGS: LLMSettings = {
-  provider: "ollama",
-  ollamaUrl: "http://localhost:11434",
-  ollamaModel: "llama3.2",
-  geminiApiKey: "",
-  geminiModel: "gemini-1.5-flash",
-  analysisEnabled: false,
-  analysisPrompt: "",
+  ...DEFAULT_LLM_SETTINGS,
 };
 
 export function LLMSettingsForm() {
@@ -87,12 +83,12 @@ export function LLMSettingsForm() {
         throw new Error("Failed to save LLM settings");
       }
 
-      alert("LLM 설정이 저장되었습니다.");
+      toast.success("LLM 설정이 저장되었습니다.");
       setGeminiApiKey("");
       await fetchSettings();
     } catch (error) {
       console.error("Failed to save LLM settings:", error);
-      alert("저장에 실패했습니다.");
+      toast.error("LLM 설정 저장에 실패했습니다.");
     } finally {
       setIsSaving(false);
     }
@@ -183,7 +179,7 @@ export function LLMSettingsForm() {
                   onChange={(event) =>
                     setSettings({ ...settings, ollamaModel: event.target.value })
                   }
-                  placeholder="llama3.2"
+                  placeholder={DEFAULT_LLM_SETTINGS.ollamaModel}
                 />
               </div>
 

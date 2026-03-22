@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { RequestTypeList } from "@/components/admin/request-type-list";
 
 export const metadata: Metadata = {
@@ -12,8 +13,17 @@ export const metadata: Metadata = {
 export default async function RequestTypesPage() {
   const session = await auth();
 
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user) {
     redirect("/admin/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    return (
+      <AdminOnlyPageState
+        title="문의 유형 설정"
+        description="문의 유형과 자동 분류 정책은 관리자만 변경할 수 있습니다."
+      />
+    );
   }
 
   const [requestTypes, teams] = await Promise.all([

@@ -605,7 +605,7 @@ model LLMSettings {
 
   // Ollama Settings
   ollamaUrl   String @default("http://localhost:11434")
-  ollamaModel String @default("llama3.2")
+  ollamaModel String @default("gemma3:4b")
 
   // Gemini Settings
   geminiApiKey String?

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { createAuditLog } from "@/lib/audit/logger";
+import { DEFAULT_LLM_SETTINGS } from "@/lib/settings/default-llm-settings";
 
 const DEFAULT_SETTINGS_ID = "default";
 const MASKED_API_KEY = "****";
@@ -9,13 +10,7 @@ const MASKED_API_KEY = "****";
 function getDefaultSettings() {
   return {
     id: DEFAULT_SETTINGS_ID,
-    provider: "ollama",
-    ollamaUrl: "http://localhost:11434",
-    ollamaModel: "llama3.2",
-    geminiApiKey: "",
-    geminiModel: "gemini-1.5-flash",
-    analysisEnabled: false,
-    analysisPrompt: "",
+    ...DEFAULT_LLM_SETTINGS,
     hasGeminiApiKey: false,
   };
 }
@@ -63,10 +58,10 @@ export async function PUT(request: NextRequest) {
 
     const data: Record<string, unknown> = {
       provider,
-      ollamaUrl: body.ollamaUrl || "http://localhost:11434",
-      ollamaModel: body.ollamaModel || "llama3.2",
-      geminiModel: body.geminiModel || "gemini-1.5-flash",
-      analysisEnabled: body.analysisEnabled ?? false,
+      ollamaUrl: body.ollamaUrl || DEFAULT_LLM_SETTINGS.ollamaUrl,
+      ollamaModel: body.ollamaModel || DEFAULT_LLM_SETTINGS.ollamaModel,
+      geminiModel: body.geminiModel || DEFAULT_LLM_SETTINGS.geminiModel,
+      analysisEnabled: body.analysisEnabled ?? DEFAULT_LLM_SETTINGS.analysisEnabled,
       analysisPrompt: body.analysisPrompt || null,
     };
 

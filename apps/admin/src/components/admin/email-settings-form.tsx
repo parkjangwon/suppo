@@ -7,6 +7,7 @@ import { Label } from "@crinity/ui/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Switch } from "@crinity/ui/components/ui/switch";
 import { Loader2, Mail, Bell, Server } from "lucide-react";
+import { toast } from "sonner";
 
 interface EmailSettings {
   provider: string;
@@ -88,16 +89,16 @@ export function EmailSettingsForm() {
       });
 
       if (response.ok) {
-        alert("이메일 설정이 저장되었습니다.");
+        toast.success("이메일 설정이 저장되었습니다.");
         setSmtpPassword("");
         setSesSecretKey("");
-        fetchSettings();
+        await fetchSettings();
       } else {
         throw new Error("Failed to save");
       }
     } catch (error) {
       console.error("Failed to save email settings:", error);
-      alert("저장에 실패했습니다.");
+      toast.error("이메일 설정 저장에 실패했습니다.");
     } finally {
       setIsSaving(false);
     }
