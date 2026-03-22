@@ -20,6 +20,11 @@ export default auth((request) => {
     return new NextResponse(null, { status: 404 });
   }
 
+  // Public 컨테이너: 인증 불필요 — 그대로 통과
+  if (APP_TYPE === "public") {
+    return NextResponse.next();
+  }
+
   // Admin 컨테이너: public 전용 경로를 public 컨테이너로 보냄
   if (APP_TYPE === "admin" && PUBLIC_ONLY.some(p => nextUrl.pathname.startsWith(p))) {
     return NextResponse.redirect(PUBLIC_URL + nextUrl.pathname + nextUrl.search);
