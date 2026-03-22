@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { KnowledgeList } from "@/components/admin/knowledge-list";
+import { getPublicAppUrl } from "@crinity/shared/utils/public-app-url";
 
 export const metadata: Metadata = {
   title: "지식 관리 | Crinity",
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 
 export default async function KnowledgePage() {
   const session = await auth();
+  const publicBaseUrl = getPublicAppUrl();
 
   if (!session?.user) {
     redirect("/admin/login");
@@ -58,6 +60,7 @@ export default async function KnowledgePage() {
             categories={categories}
             currentUserId={session.user.id}
             isAdmin={session.user.role === "ADMIN"}
+            publicBaseUrl={publicBaseUrl}
           />
         </CardContent>
       </Card>

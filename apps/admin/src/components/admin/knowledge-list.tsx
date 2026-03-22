@@ -41,6 +41,7 @@ interface KnowledgeListProps {
   categories: any[];
   currentUserId: string;
   isAdmin: boolean;
+  publicBaseUrl: string;
 }
 
 export function KnowledgeList({
@@ -48,6 +49,7 @@ export function KnowledgeList({
   categories,
   currentUserId,
   isAdmin,
+  publicBaseUrl,
 }: KnowledgeListProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,6 +100,10 @@ export function KnowledgeList({
 
   const canDelete = (article: any) => {
     return isAdmin || article.authorId === currentUserId;
+  };
+
+  const canOpenPublicLink = (article: any) => {
+    return article.isPublished && article.isPublic;
   };
 
   return (
@@ -211,16 +217,27 @@ export function KnowledgeList({
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        asChild
-                        title="미리보기"
-                      >
-                        <Link href={`/knowledge/${article.slug}`} target="_blank">
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
+                      {canOpenPublicLink(article) ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="공개 링크"
+                          asChild
+                        >
+                          <a
+                            href={`${publicBaseUrl}/knowledge/${article.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="공개 링크"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      ) : (
+                        <Badge variant="outline" className="text-xs text-gray-500">
+                          공개 안 됨
+                        </Badge>
+                      )}
                       {canEdit(article) && (
                         <Button
                           variant="ghost"
