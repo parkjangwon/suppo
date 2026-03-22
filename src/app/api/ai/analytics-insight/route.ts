@@ -6,7 +6,6 @@ import {
   AnalyticsMetrics,
 } from "@/lib/ai/analytics-insight";
 import { getPeriodFromPreset } from "@/lib/reports/date-range";
-import type { DatePreset } from "@/lib/db/queries/admin-analytics/contracts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +15,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const preset: DatePreset = ["7d", "30d", "90d"].includes(body.preset)
+    const validPresets: Array<"7d" | "30d" | "90d"> = ["7d", "30d", "90d"];
+    const preset: "7d" | "30d" | "90d" = validPresets.includes(body.preset)
       ? body.preset
       : "30d";
 
@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
           status: { in: ["RESOLVED", "CLOSED"] },
         },
       }),
-      prisma.cSATResponse.aggregate({
-        _avg: { score: true },
-        _count: { id: true },
-        where: { createdAt: { gte: from, lte: to } },
+      prisma.customerSatisfaction.aggregate({
+        _avg: { rating: true },
+        _count: true,
+        where: { submittedAt: { gte: from, lte: to } },
       }),
       prisma.ticket.groupBy({
         by: ["categoryId"],
@@ -67,37 +67,36 @@ export async function POST(request: NextRequest) {
 
     // 카테고리 이름 조회
     const categoryIds = categories
-      .map((c) => c.categoryId)
+      .map((c: { categoryId: string | null }) => c.categoryId)
       .filter(Boolean) as string[];
     const categoryNames = await prisma.category.findMany({
       where: { id: { in: categoryIds } },
       select: { id: true, name: true },
     });
     const categoryMap = Object.fromEntries(
-      categoryNames.map((c) => [c.id, c.name]),
+      categoryNames.map((c: { id: string; name: string }) => [c.id, c.name]),
     );
-    const topCategories = categories.map((c) => ({
+    const topCategories = categories.map((c: { categoryId: string | null; _count: { id: number } }) => ({
       name: categoryMap[c.categoryId!] ?? "미분류",
       count: c._count.id,
     }));
 
     // 상담원 이름 조회
-    const agentIds = agentStats.map((a) => a.assigneeId).filter(Boolean) as string[];
+    const agentIds = agentStats.map((a: { assigneeId: string | null }) => a.assigneeId).filter(Boolean) as string[];
     const agentNames = await prisma.agent.findMany({
       where: { id: { in: agentIds } },
       select: { id: true, name: true },
     });
-    const agentMap = Object.fromEntries(agentNames.map((a) => [a.id, a.name]));
-    const sortedAgents = agentStats.map((a) => ({
+    const agentMap = Object.fromEntries(agentNames.map((a: { id: string; name: string }) => [a.id, a.name]));
+    const sortedAgents = agentStats.map((a: { assigneeId: string | null; _count: { id: number } }) => ({
       name: agentMap[a.assigneeId!] ?? "미배정",
       resolved: a._count.id,
       csatAvg: null,
     }));
 
-    const totalSent = await prisma.cSATResponse.count({
-      where: { createdAt: { gte: from, lte: to } },
+    const totalSent = await prisma.customerSatisfaction.count({
+      where: { submittedAt: { gte: from, lte: to } },
     });
-    const totalTicketsForRate = totalTickets || 1;
 
     const metrics: AnalyticsMetrics = {
       preset,
@@ -106,8 +105,8 @@ export async function POST(request: NextRequest) {
       resolutionRate: totalTickets > 0 ? (resolvedTickets / totalTickets) * 100 : 0,
       avgFirstResponseMinutes: null,
       avgResolutionMinutes: null,
-      csatAvg: csatAgg._avg.score,
-      csatResponseRate: (totalSent / totalTicketsForRate) * 100,
+      csatAvg: csatAgg._avg.rating,
+      csatResponseRate: totalTickets > 0 ? (totalSent / totalTickets) * 100 : 0,
       topCategories,
       topAgents: sortedAgents.slice(0, 3),
       bottomAgents: sortedAgents.slice(-3).reverse(),

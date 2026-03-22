@@ -2,31 +2,17 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 import { DatePreset } from "@/lib/db/queries/admin-analytics/contracts";
-import { AgentPerformanceTable } from "@/components/admin/analytics/tables/agent-performance-table";
 import { CategoryFrequencyChart } from "@/components/admin/analytics/charts/category-frequency-chart";
 import { CSATTrendChart } from "@/components/admin/analytics/charts/csat-trend-chart";
+import { AgentPerformanceTable } from "@/components/admin/analytics/tables/agent-performance-table";
 import { RepeatInquiriesTable } from "@/components/admin/analytics/tables/repeat-inquiries-table";
 import { VIPCustomersTable } from "@/components/admin/analytics/tables/vip-customers-table";
 import { useAnalyticsData } from "./use-analytics-data";
@@ -37,8 +23,6 @@ const PRESETS: { value: DatePreset; label: string }[] = [
   { value: "30d", label: "최근 30일" },
   { value: "90d", label: "최근 90일" },
 ];
-
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
 interface Props {
   analysisEnabled: boolean;
@@ -130,7 +114,7 @@ export function AnalyticsContent({ analysisEnabled }: Props) {
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CSATTrendChart data={data.csatTrend} />
-                <CategoryFrequencyChart data={data.categoryFrequency.categories} />
+                <CategoryFrequencyChart data={data.categoryFrequency} />
               </div>
             </TabsContent>
 
