@@ -18,7 +18,7 @@ export function CSATTrendChart({ data }: CSATTrendChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>CSAT 추이</CardTitle>
+        <CardTitle>고객 만족도 추이</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64">

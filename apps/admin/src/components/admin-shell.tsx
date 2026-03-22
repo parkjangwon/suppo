@@ -65,12 +65,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <span>티켓 목록</span>
             </div>
           </NavLink>
-          <NavLink href="/admin/teams">
-            <div className="flex items-center gap-2">
-              <Users2 className="h-4 w-4" />
-              <span>팀 관리</span>
-            </div>
-          </NavLink>
           <NavLink href="/admin/agents">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -83,12 +77,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <span>일정 관리</span>
             </div>
           </NavLink>
-          <NavLink href="/admin/customers">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>고객 관리</span>
-            </div>
-          </NavLink>
+
+          {isAdmin && (
+            <>
+              <NavLink href="/admin/teams">
+                <div className="flex items-center gap-2">
+                  <Users2 className="h-4 w-4" />
+                  <span>팀 관리</span>
+                </div>
+              </NavLink>
+              <NavLink href="/admin/customers">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  <span>고객 관리</span>
+                </div>
+              </NavLink>
+            </>
+          )}
 
           {isAdmin && (
             <div className="pt-4 mt-4 border-t border-border">

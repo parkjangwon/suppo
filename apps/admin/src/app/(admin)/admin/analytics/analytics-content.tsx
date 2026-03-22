@@ -97,7 +97,7 @@ export function AnalyticsContent({ analysisEnabled }: Props) {
               }
             />
             <KPICard
-              title="CSAT 평균"
+              title="고객 만족도 평균"
               value={data.kpi.avgCsat ? data.kpi.avgCsat.toFixed(1) : "-"}
             />
             <KPICard title="반복 고객" value={data.kpi.repeatCustomers} />

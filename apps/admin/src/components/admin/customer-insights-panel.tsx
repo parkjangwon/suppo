@@ -83,7 +83,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
         <StatCard title="오픈 티켓" value={data.stats.openTickets} />
         <StatCard title="해결됨" value={data.stats.resolvedTickets} />
         <StatCard
-          title="CSAT"
+          title="고객 만족도"
           value={data.stats.avgCsat ? data.stats.avgCsat.toFixed(1) : "-"}
         />
       </div>
@@ -109,7 +109,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
         </div>
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">CSAT 응답 수:</span>
+            <span className="text-muted-foreground">고객 만족도 응답 수:</span>
             <span>{data.stats.csatResponses}건</span>
           </div>
           <div className="flex justify-between">
