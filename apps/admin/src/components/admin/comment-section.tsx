@@ -146,7 +146,7 @@ export function CommentSection({
                 }
               }}
               disabled={isLocked && !isLockedByMe}
-              rows={4}
+              rows={6}
             />
 
             <KnowledgeAssistant
