@@ -26,6 +26,13 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+
+# Certificates
+certs/
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
 
 # Database
 *.db
