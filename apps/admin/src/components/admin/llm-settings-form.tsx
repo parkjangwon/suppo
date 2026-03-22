@@ -20,6 +20,19 @@ interface LLMSettings {
   hasGeminiApiKey?: boolean;
 }
 
+function normalizeSettings(data: Partial<LLMSettings>): LLMSettings {
+  return {
+    provider: data.provider ?? DEFAULT_SETTINGS.provider,
+    ollamaUrl: data.ollamaUrl ?? DEFAULT_SETTINGS.ollamaUrl,
+    ollamaModel: data.ollamaModel ?? DEFAULT_SETTINGS.ollamaModel,
+    geminiApiKey: data.geminiApiKey ?? DEFAULT_SETTINGS.geminiApiKey,
+    geminiModel: data.geminiModel ?? DEFAULT_SETTINGS.geminiModel,
+    analysisEnabled: data.analysisEnabled ?? DEFAULT_SETTINGS.analysisEnabled,
+    analysisPrompt: data.analysisPrompt ?? DEFAULT_SETTINGS.analysisPrompt,
+    hasGeminiApiKey: data.hasGeminiApiKey,
+  };
+}
+
 const DEFAULT_SETTINGS: LLMSettings = {
   provider: "ollama",
   ollamaUrl: "http://localhost:11434",
@@ -47,7 +60,7 @@ export function LLMSettingsForm() {
       const response = await fetch("/api/admin/settings/llm");
       if (response.ok) {
         const data = await response.json();
-        setSettings(data);
+        setSettings(normalizeSettings(data));
       }
     } catch (error) {
       console.error("Failed to fetch LLM settings:", error);
