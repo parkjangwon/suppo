@@ -20,7 +20,14 @@ export default async function TemplatesPage() {
 
   const [templates, categories, requestTypes] = await Promise.all([
     prisma.responseTemplate.findMany({
-      where: isAdmin ? {} : { createdById: session.user.id },
+      where: isAdmin
+        ? {}
+        : {
+            OR: [
+              { createdById: session.user.id },
+              { isShared: true },
+            ],
+          },
       include: {
         category: {
           select: { id: true, name: true },
