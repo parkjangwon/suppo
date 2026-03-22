@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashboardAiSection } from "@/components/admin/dashboard-ai-section";
 
 export const metadata: Metadata = {
   title: "운영 대시보드 | Crinity",
@@ -14,6 +15,9 @@ export default async function DashboardPage() {
   if (!session?.user) {
     redirect("/admin/login");
   }
+
+  const llmSettings = await prisma.lLMSettings.findFirst();
+  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -70,6 +74,8 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-2xl font-bold mb-6">운영 대시보드</h1>
+
+      {analysisEnabled && <DashboardAiSection />}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <Card>
