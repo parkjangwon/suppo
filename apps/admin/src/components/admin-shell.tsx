@@ -31,6 +31,7 @@ import {
   Shield,
   Users,
   Users2,
+  Workflow,
   X,
 } from "lucide-react";
 import { useBranding } from "@crinity/shared/branding/context";
@@ -50,6 +51,7 @@ const NAV_ICONS: Record<AdminNavItemKey, React.ComponentType<{ className?: strin
   git: GitBranch,
   email: Mail,
   branding: Palette,
+  operations: Workflow,
   llm: Brain,
   system: Settings,
   templates: FileCode,

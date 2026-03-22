@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@crinity/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -14,11 +14,16 @@ import { Bookmark, Save } from "lucide-react";
 import { toast } from "sonner";
 
 interface FilterConfig {
+  queue?: string;
   status?: string;
   priority?: string;
   categoryId?: string;
   assigneeId?: string;
   search?: string;
+  customerSegment?: string;
+  slaState?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 interface SortConfig {

@@ -1,4 +1,5 @@
 import { prisma } from "./client";
+import { resolveDatabaseUrl } from "./resolve-database-url";
 
 type LibsqlClient = {
   execute: (sql: string, args?: any[]) => Promise<{ rows: unknown[] }>;
@@ -7,15 +8,6 @@ type LibsqlClient = {
 const globalForLibsql = globalThis as unknown as {
   libsql: LibsqlClient | null | undefined;
 };
-
-function resolveDatabaseUrl(): string {
-  const configuredUrl = process.env.DATABASE_URL?.trim();
-  if (configuredUrl) {
-    return configuredUrl;
-  }
-
-  return `file:${require("node:path").resolve(process.cwd(), "../../packages/db/dev.db")}`;
-}
 
 function createLibsqlClient() {
   const url = resolveDatabaseUrl();

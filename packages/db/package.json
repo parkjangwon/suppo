@@ -5,7 +5,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
-    "./raw": "./src/raw.ts"
+    "./raw": "./src/raw.ts",
+    "./resolve-database-url": "./src/resolve-database-url.ts"
   },
   "scripts": {
     "generate": "prisma generate --schema=./prisma/schema.prisma",

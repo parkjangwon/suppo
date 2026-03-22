@@ -30,6 +30,7 @@ interface Customer {
   ticketCount: number;
   memo: string | null;
   analysis: string | null;
+  analyzedAt?: string | null;
   tickets: Ticket[];
 }
 
@@ -245,6 +246,32 @@ export default function CustomerDetailPage() {
               <CardTitle className="text-lg">티켓 이력</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-6 rounded-lg border border-border/60 bg-muted/20 p-4">
+                <div className="mb-3 text-sm font-medium">고객 360 타임라인</div>
+                <div className="space-y-3">
+                  <TimelineItem
+                    title="고객 프로필"
+                    description={`${customer.name} 고객이 ${customer.ticketCount}개의 티켓과 연결되어 있습니다.`}
+                  />
+                  {customer.memo ? (
+                    <TimelineItem title="관리자 메모" description={customer.memo} />
+                  ) : null}
+                  {customer.analyzedAt ? (
+                    <TimelineItem
+                      title="AI 고객 분석"
+                      description={`${new Date(customer.analyzedAt).toLocaleString("ko-KR")} 기준으로 고객 분석이 갱신되었습니다.`}
+                    />
+                  ) : null}
+                  {customer.tickets.slice(0, 3).map((ticket) => (
+                    <TimelineItem
+                      key={ticket.id}
+                      title={`최근 티켓 ${ticket.ticketNumber}`}
+                      description={`${ticket.subject} · ${format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
               {customer.tickets.length > 0 ? (
                 <div className="space-y-4">
                   {customer.tickets.map((ticket) => (
@@ -276,6 +303,18 @@ export default function CustomerDetailPage() {
             </CardContent>
           </Card>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function TimelineItem({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex gap-3">
+      <div className="mt-1 h-2.5 w-2.5 rounded-full bg-primary" />
+      <div>
+        <div className="text-sm font-medium">{title}</div>
+        <div className="text-sm text-muted-foreground">{description}</div>
       </div>
     </div>
   );

@@ -26,6 +26,7 @@ import { CSATTab } from "@/components/admin/csat-tab";
 import { TicketViewingIndicator } from "./ticket-viewing-indicator";
 import { useTicketPresence } from "@/hooks/use-ticket-presence";
 import { CustomerSnapshotCard } from "./customer-snapshot-card";
+import { TicketRelationsPanel } from "./ticket-relations-panel";
 import { TicketWorkspaceSummary } from "./ticket-workspace-summary";
 import { toast } from "sonner";
 
@@ -376,6 +377,8 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
           </Card>
         </div>
       </div>
+
+      <TicketRelationsPanel ticketId={ticket.id} />
 
       <TicketKnowledgeLinks ticketId={ticket.id} canEdit={canEdit} />
 

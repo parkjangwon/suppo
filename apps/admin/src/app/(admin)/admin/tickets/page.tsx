@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { TicketList } from "@/components/admin/ticket-list";
 import { Prisma, TicketStatus, TicketPriority } from "@prisma/client";
+import { getVIPCustomers } from "@/lib/db/queries/admin-analytics/vip-customers";
 
 export const metadata: Metadata = {
   title: "티켓 목록 | Crinity",
@@ -29,41 +30,102 @@ export default async function TicketsPage({
   const search = typeof params.search === "string" ? params.search : undefined;
   const dateFrom = typeof params.dateFrom === "string" ? params.dateFrom : undefined;
   const dateTo = typeof params.dateTo === "string" ? params.dateTo : undefined;
+  const queue = typeof params.queue === "string" ? params.queue : undefined;
+  const customerSegment = typeof params.customerSegment === "string" ? params.customerSegment : undefined;
+  const slaState = typeof params.slaState === "string" ? params.slaState : undefined;
 
-  const where: Prisma.TicketWhereInput = {};
+  const andFilters: Prisma.TicketWhereInput[] = [];
 
   if (status && status !== "all") {
-    where.status = status as TicketStatus;
+    andFilters.push({ status: status as TicketStatus });
   }
   if (priority && priority !== "all") {
-    where.priority = priority as TicketPriority;
+    andFilters.push({ priority: priority as TicketPriority });
   }
   if (categoryId && categoryId !== "all") {
-    where.categoryId = categoryId;
+    andFilters.push({ categoryId });
   }
   if (assigneeId && assigneeId !== "all") {
     if (assigneeId === "unassigned") {
-      where.assigneeId = null;
+      andFilters.push({ assigneeId: null });
     } else {
-      where.assigneeId = assigneeId;
+      andFilters.push({ assigneeId });
     }
   }
   if (search) {
-    where.OR = [
-      { ticketNumber: { contains: search } },
-      { subject: { contains: search } },
-      { customerEmail: { contains: search } },
-    ];
+    andFilters.push({
+      OR: [
+        { ticketNumber: { contains: search } },
+        { subject: { contains: search } },
+        { customerEmail: { contains: search } },
+      ],
+    });
   }
   if (dateFrom || dateTo) {
-    where.createdAt = {};
+    const createdAt: Prisma.DateTimeFilter = {};
     if (dateFrom) {
-      where.createdAt.gte = new Date(dateFrom);
+      createdAt.gte = new Date(dateFrom);
     }
     if (dateTo) {
-      where.createdAt.lte = new Date(dateTo + "T23:59:59.999Z");
+      createdAt.lte = new Date(dateTo + "T23:59:59.999Z");
+    }
+    andFilters.push({ createdAt });
+  }
+
+  if (queue === "today") {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    andFilters.push({
+      status: { in: ["OPEN", "IN_PROGRESS", "WAITING"] },
+      createdAt: { gte: startOfDay },
+    });
+  }
+
+  if (customerSegment === "vip") {
+    const now = new Date();
+    const from = new Date(now);
+    from.setDate(from.getDate() - 90);
+    const vipCustomers = await getVIPCustomers({ from, to: now });
+    const customerIds = vipCustomers.customers
+      .map((customer) => customer.customerId)
+      .filter((value): value is string => Boolean(value));
+    const customerEmails = vipCustomers.customers.map((customer) => customer.customerEmail);
+
+    const vipConditions: Prisma.TicketWhereInput[] = [];
+    if (customerIds.length > 0) {
+      vipConditions.push({ customerId: { in: customerIds } });
+    }
+    if (customerEmails.length > 0) {
+      vipConditions.push({ customerEmail: { in: customerEmails } });
+    }
+    if (vipConditions.length > 0) {
+      andFilters.push({ OR: vipConditions });
     }
   }
+
+  if (slaState === "warning") {
+    andFilters.push({
+      slaClocks: {
+        some: {
+          status: { in: ["RUNNING", "PAUSED"] },
+          warningSentAt: { not: null },
+          breachedAt: null,
+        },
+      },
+    });
+  }
+
+  if (slaState === "breached") {
+    andFilters.push({
+      slaClocks: {
+        some: {
+          breachedAt: { not: null },
+        },
+      },
+    });
+  }
+
+  const where: Prisma.TicketWhereInput = andFilters.length > 0 ? { AND: andFilters } : {};
 
   const tickets = await prisma.ticket.findMany({
     where,
@@ -98,6 +160,19 @@ export default async function TicketsPage({
         tickets={tickets}
         categories={categories}
         agents={agents}
+        currentAgentId={session.user.agentId ?? undefined}
+        currentFilter={{
+          queue,
+          status,
+          priority,
+          categoryId,
+          assigneeId,
+          search,
+          customerSegment,
+          slaState,
+          dateFrom,
+          dateTo,
+        }}
       />
     </div>
   );

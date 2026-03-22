@@ -1,25 +1,9 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { PrismaClient } from "@prisma/client";
+import { resolveDatabaseUrl } from "./resolve-database-url";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
-
-function resolveDatabaseUrl(): string {
-  const configuredUrl = process.env.DATABASE_URL?.trim();
-  if (configuredUrl) {
-    return configuredUrl;
-  }
-
-  const appScopedPath = path.resolve(process.cwd(), "../../packages/db/dev.db");
-  if (existsSync(appScopedPath)) {
-    return `file:${appScopedPath}`;
-  }
-
-  const repoScopedPath = path.resolve(process.cwd(), "packages/db/dev.db");
-  return `file:${repoScopedPath}`;
-}
 
 function createPrismaClient(): PrismaClient {
   const url = resolveDatabaseUrl();
@@ -40,6 +24,12 @@ function createPrismaClient(): PrismaClient {
       url,
       authToken: process.env.DATABASE_AUTH_TOKEN
     });
+  } else {
+    prismaOptions.datasources = {
+      db: {
+        url
+      }
+    };
   }
 
   return new PrismaClient(prismaOptions);

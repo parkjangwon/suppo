@@ -6,6 +6,7 @@ import { Badge } from "@crinity/ui/components/ui/badge";
 import { Button } from "@crinity/ui/components/ui/button";
 import { TicketFilters } from "./ticket-filters";
 import { SavedFilters } from "./saved-filters";
+import { TicketQueueBar } from "./ticket-queue-bar";
 
 export interface Ticket {
   id: string;
@@ -55,10 +56,25 @@ export function TicketList({
   tickets,
   categories,
   agents,
+  currentAgentId,
+  currentFilter,
 }: {
   tickets: Ticket[];
   categories: { id: string; name: string }[];
   agents: { id: string; name: string }[];
+  currentAgentId?: string;
+  currentFilter: {
+    queue?: string;
+    status?: string;
+    priority?: string;
+    categoryId?: string;
+    assigneeId?: string;
+    search?: string;
+    customerSegment?: string;
+    slaState?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
 }) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,19 +87,27 @@ export function TicketList({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
-        <TicketFilters
-          categories={categories}
-          agents={agents}
-        />
+        <div className="space-y-3">
+          <TicketQueueBar currentAgentId={currentAgentId} />
+          <TicketFilters
+            categories={categories}
+            agents={agents}
+          />
+        </div>
         <SavedFilters
-          currentFilter={{}}
+          currentFilter={currentFilter}
           onApplyFilter={(filter) => {
             const params = new URLSearchParams();
+            if (filter.queue) params.set("queue", filter.queue);
             if (filter.status) params.set("status", filter.status);
             if (filter.priority) params.set("priority", filter.priority);
             if (filter.categoryId) params.set("categoryId", filter.categoryId);
             if (filter.assigneeId) params.set("assigneeId", filter.assigneeId);
             if (filter.search) params.set("search", filter.search);
+            if (filter.customerSegment) params.set("customerSegment", filter.customerSegment);
+            if (filter.slaState) params.set("slaState", filter.slaState);
+            if (filter.dateFrom) params.set("dateFrom", filter.dateFrom);
+            if (filter.dateTo) params.set("dateTo", filter.dateTo);
             router.push(`/admin/tickets?${params.toString()}`);
           }}
         />

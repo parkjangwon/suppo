@@ -12,6 +12,7 @@ export type AdminNavItemKey =
   | "git"
   | "email"
   | "branding"
+  | "operations"
   | "llm"
   | "system"
   | "templates"
@@ -45,6 +46,7 @@ const NAV_ITEMS: Array<AdminNavItem & { section: AdminNavSectionKey; adminOnly?:
   { key: "git", href: "/admin/settings/git", label: "Git 연동", section: "settings", adminOnly: true },
   { key: "email", href: "/admin/settings/email", label: "이메일 연동", section: "settings", adminOnly: true },
   { key: "branding", href: "/admin/settings/branding", label: "브랜딩", section: "settings", adminOnly: true },
+  { key: "operations", href: "/admin/settings/operations", label: "운영 정책", section: "settings", adminOnly: true },
   { key: "llm", href: "/admin/settings/llm", label: "AI 연동", section: "settings", adminOnly: true },
   { key: "system", href: "/admin/settings/system", label: "시스템", section: "settings", adminOnly: true },
   { key: "templates", href: "/admin/templates", label: "응답 템플릿", section: "tools" },
