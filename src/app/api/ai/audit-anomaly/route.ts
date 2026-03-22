@@ -26,8 +26,12 @@ export async function POST(request: NextRequest) {
     }
     if (action && action !== "ALL") where.action = action;
     if (resourceType && resourceType !== "ALL") where.resourceType = resourceType;
-    if (startDate) where.createdAt = { ...where.createdAt, gte: new Date(startDate) };
-    if (endDate) where.createdAt = { ...where.createdAt, lte: new Date(endDate) };
+
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate);
+      if (endDate) where.createdAt.lte = new Date(endDate);
+    }
 
     const logs = await prisma.auditLog.findMany({
       where,
