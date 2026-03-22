@@ -22,6 +22,9 @@ export default async function AdminAuditLogsPage() {
     redirect("/admin/dashboard");
   }
 
+  const llmSettings = await prisma.lLMSettings.findFirst();
+  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
+
   const limit = 20;
   const [total, logs] = await Promise.all([
     prisma.auditLog.count(),
@@ -57,7 +60,7 @@ export default async function AdminAuditLogsPage() {
         </div>
       </div>
 
-      <AuditLogList initialLogs={serializedLogs} initialPagination={initialPagination} />
+      <AuditLogList initialLogs={serializedLogs} initialPagination={initialPagination} analysisEnabled={analysisEnabled} />
     </div>
   );
 }

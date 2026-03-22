@@ -27,6 +27,7 @@ import {
 import { Search, Download, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import { AiInsightPanel } from "./ai-insight-panel";
 
 interface AuditLog {
   id: string;
@@ -65,9 +66,10 @@ const RESOURCE_TYPES = [
 interface AuditLogListProps {
   initialLogs: AuditLog[];
   initialPagination: Pagination;
+  analysisEnabled: boolean;
 }
 
-export function AuditLogList({ initialLogs, initialPagination }: AuditLogListProps) {
+export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }: AuditLogListProps) {
   const [logs, setLogs] = useState<AuditLog[]>(initialLogs);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
@@ -207,6 +209,17 @@ export function AuditLogList({ initialLogs, initialPagination }: AuditLogListPro
           엑셀 다운로드
         </Button>
       </div>
+
+      {analysisEnabled && (
+        <AiInsightPanel
+          title="AI 이상 패턴 탐지"
+          fetchFn={() =>
+            fetch("/api/ai/audit-anomaly", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ search, action, resourceType, startDate, endDate }) })
+              .then(async (res) => { if (!res.ok) throw new Error("fetch failed"); return (await res.json()).result as string | null; })
+          }
+          description="현재 필터 조건의 감사 로그에서 비정상 패턴을 AI가 탐지합니다."
+        />
+      )}
 
       <Card>
         <div className="overflow-x-auto">
