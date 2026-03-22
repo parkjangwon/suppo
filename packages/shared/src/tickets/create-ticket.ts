@@ -186,12 +186,12 @@ async function buildCandidates(db: CandidateQueryClient, categoryId: string | nu
   const now = new Date();
 
   const agents = await db.agent.findMany({
-    where: {
-      isActive: true,
-      role: "AGENT",
-      ...(categoryId ? {
-        categories: {
-          some: { categoryId }
+      where: {
+        isActive: true,
+        role: { in: ["AGENT", "TEAM_LEAD"] },
+        ...(categoryId ? {
+          categories: {
+            some: { categoryId }
         }
       } : {}),
       absences: {

@@ -28,6 +28,7 @@ import {
 } from "@crinity/ui/components/ui/select";
 import { Separator } from "@crinity/ui/components/ui/separator";
 import { toast } from "sonner";
+import { getBackofficeRoleLabel, type BackofficeRole } from "@crinity/shared/auth/config";
 import {
   Users,
   Plus,
@@ -62,7 +63,7 @@ interface AgentItem {
   name: string;
   email: string;
   phone?: string | null;
-  role: "ADMIN" | "AGENT";
+  role: BackofficeRole;
   isActive: boolean;
   maxTickets: number;
   categories: Array<{
@@ -105,7 +106,7 @@ interface AgentFormState {
   name: string;
   email: string;
   phone: string;
-  role: "ADMIN" | "AGENT";
+  role: BackofficeRole;
   maxTickets: number;
   categories: string[];
   teams: string[];
@@ -502,14 +503,14 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge
                   variant={agent.role === "ADMIN" ? "default" : "secondary"}
-                  className={agent.role === "ADMIN" ? "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20" : ""}
+                  className={getRoleBadgeClass(agent.role)}
                 >
                   {agent.role === "ADMIN" ? (
                     <Shield className="w-3 h-3 mr-1" />
                   ) : (
                     <User className="w-3 h-3 mr-1" />
                   )}
-                  {agent.role === "ADMIN" ? "관리자" : "상담원"}
+                  {getBackofficeRoleLabel(agent.role)}
                 </Badge>
                 <Badge
                   variant={agent.isActive ? "default" : "secondary"}
@@ -651,15 +652,17 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                 <Select
                   value={createForm.role}
                   onValueChange={(value) =>
-                    setCreateForm((prev) => ({ ...prev, role: value as "ADMIN" | "AGENT" }))
+                    setCreateForm((prev) => ({ ...prev, role: value as BackofficeRole }))
                   }
                 >
                   <SelectTrigger id="role">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="AGENT">상담원</SelectItem>
                     <SelectItem value="ADMIN">관리자</SelectItem>
+                    <SelectItem value="TEAM_LEAD">팀장</SelectItem>
+                    <SelectItem value="AGENT">상담원</SelectItem>
+                    <SelectItem value="VIEWER">읽기전용</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -881,15 +884,17 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                 <Select
                   value={editForm.role}
                   onValueChange={(value) =>
-                    setEditForm((prev) => ({ ...prev, role: value as "ADMIN" | "AGENT" }))
+                    setEditForm((prev) => ({ ...prev, role: value as BackofficeRole }))
                   }
                 >
                   <SelectTrigger id="edit-role">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="AGENT">상담원</SelectItem>
                     <SelectItem value="ADMIN">관리자</SelectItem>
+                    <SelectItem value="TEAM_LEAD">팀장</SelectItem>
+                    <SelectItem value="AGENT">상담원</SelectItem>
+                    <SelectItem value="VIEWER">읽기전용</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1001,6 +1006,20 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       </Dialog>
     </div>
   );
+}
+
+function getRoleBadgeClass(role: BackofficeRole) {
+  switch (role) {
+    case "ADMIN":
+      return "bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20";
+    case "TEAM_LEAD":
+      return "bg-sky-500/10 text-sky-700 dark:text-sky-300 hover:bg-sky-500/20";
+    case "VIEWER":
+      return "bg-slate-500/10 text-slate-700 dark:text-slate-300 hover:bg-slate-500/20";
+    case "AGENT":
+    default:
+      return "";
+  }
 }
 
 export type { AgentListProps };

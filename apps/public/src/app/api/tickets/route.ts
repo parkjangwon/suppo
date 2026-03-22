@@ -3,6 +3,7 @@ import { checkRateLimit } from "@crinity/shared/security/rate-limit";
 import { ticketFormSchema } from "@crinity/shared/validation/ticket";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
 import { createTicket } from "@crinity/shared/tickets/create-ticket";
+import { classifyTicket } from "@crinity/shared/ai/classifier";
 import { prisma } from "@crinity/db";
 
 export async function POST(request: NextRequest) {
@@ -51,6 +52,40 @@ export async function POST(request: NextRequest) {
       description: validationResult.data.description,
     });
 
+    try {
+      const [availableCategories, availableTeams] = await Promise.all([
+        prisma.category.findMany(),
+        prisma.team.findMany({ where: { isActive: true } }),
+      ]);
+
+      const classification = await classifyTicket(
+        validationResult.data.subject,
+        validationResult.data.description,
+        availableCategories,
+        availableTeams
+      );
+
+      if (classification) {
+        const tags = [
+          "ai:auto-classified",
+          ...(classification.teamId ? [`team:${classification.teamId}`] : []),
+          ...(classification.categoryId ? [`category:${classification.categoryId}`] : []),
+        ];
+
+        await prisma.ticket.update({
+          where: { id: result.ticket.id },
+          data: {
+            priority: classification.priority,
+            teamId: classification.teamId ?? undefined,
+            categoryId: classification.categoryId ?? undefined,
+            tags: JSON.stringify(tags),
+          },
+        });
+      }
+    } catch (classificationError) {
+      console.error("Failed to auto-classify ticket:", classificationError);
+    }
+
     if (files.length > 0) {
       try {
         const processedAttachments = await processAttachments(files, result.ticket.id);
@@ -84,4 +119,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

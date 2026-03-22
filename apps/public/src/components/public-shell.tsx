@@ -3,11 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { useBranding } from "@crinity/shared/branding/context";
+import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 import { Phone, Mail, Globe, MapPin, BookOpen } from "lucide-react";
 import { formatPhoneNumber } from "@crinity/shared/utils/phone-format";
+import { PublicLocaleSwitcher } from "./public-locale-switcher";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
   const branding = useBranding();
+  const copy = usePublicCopy();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
@@ -39,14 +42,15 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
+            <PublicLocaleSwitcher />
             {branding.knowledgeEnabled && (
               <NavLink href="/knowledge">
                 <BookOpen className="h-4 w-4 mr-1 inline-block" />
-                지식 찾기
+                {copy.navKnowledge}
               </NavLink>
             )}
-            <NavLink href="/ticket/new">티켓 작성</NavLink>
-            <NavLink href="/ticket/lookup">티켓 조회</NavLink>
+            <NavLink href="/ticket/new">{copy.navNewTicket}</NavLink>
+            <NavLink href="/ticket/lookup">{copy.navLookupTicket}</NavLink>
           </nav>
         </div>
       </header>
@@ -84,7 +88,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             </div>
             
             <div>
-              <h4 className="font-semibold text-white mb-4">고객 지원</h4>
+              <h4 className="font-semibold text-white mb-4">{copy.footerSupport}</h4>
               <ul className="space-y-3">
                 {branding.footerPhone && (
                   <li>
@@ -117,7 +121,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
                       className="flex items-center gap-2 text-sm hover:text-white transition-colors"
                     >
                       <Globe className="h-4 w-4" />
-                      홈페이지
+                      {copy.footerHomepage}
                     </a>
                   </li>
                 )}
@@ -131,28 +135,28 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             </div>
             
             <div>
-              <h4 className="font-semibold text-white mb-4">바로가기</h4>
+              <h4 className="font-semibold text-white mb-4">{copy.footerQuickLinks}</h4>
               <ul className="space-y-2">
                 <li>
                   <Link href="/" className="text-sm hover:text-white transition-colors">
-                    홈
+                    {copy.footerHome}
                   </Link>
                 </li>
                 {branding.knowledgeEnabled && (
                   <li>
                     <Link href="/knowledge" className="text-sm hover:text-white transition-colors">
-                      지식 찾기
+                      {copy.navKnowledge}
                     </Link>
                   </li>
                 )}
                 <li>
                   <Link href="/ticket/new" className="text-sm hover:text-white transition-colors">
-                    티켓 작성
+                    {copy.navNewTicket}
                   </Link>
                 </li>
                 <li>
                   <Link href="/ticket/lookup" className="text-sm hover:text-white transition-colors">
-                    티켓 조회
+                    {copy.navLookupTicket}
                   </Link>
                 </li>
               </ul>

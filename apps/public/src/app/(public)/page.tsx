@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useBranding } from "@crinity/shared/branding/context";
+import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 import { ArrowRight, FileText, Search, BookOpen } from "lucide-react";
 
 export default function PublicHomePage() {
   const branding = useBranding();
+  const copy = usePublicCopy();
 
   return (
     <div className="flex flex-col">
@@ -31,7 +33,7 @@ export default function PublicHomePage() {
                   style={{ backgroundColor: branding.primaryColor }}
                 >
                   <BookOpen className="h-5 w-5" />
-                  지식 찾기
+                  {copy.homeKnowledgeCta}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               )}
@@ -44,14 +46,14 @@ export default function PublicHomePage() {
                 }}
               >
                 <FileText className="h-5 w-5" />
-                티켓 작성
+                {copy.homeNewTicketCta}
               </Link>
               <Link
                 href="/ticket/lookup"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-medium rounded-xl border-2 transition-all hover:shadow-md hover:-translate-y-0.5 border-slate-300 text-slate-600"
               >
                 <Search className="h-5 w-5" />
-                티켓 조회
+                {copy.homeLookupTicketCta}
               </Link>
             </div>
           </div>
@@ -66,23 +68,23 @@ export default function PublicHomePage() {
               <FeatureCard
                 href="/knowledge"
                 icon={<BookOpen className="h-6 w-6" />}
-                title="지식 찾기"
-                description="자주 묻는 질문과 도움말을 검색하여 즉시 해결하세요."
+                title={copy.homeFeatureKnowledgeTitle}
+                description={copy.homeFeatureKnowledgeDescription}
                 color={branding.primaryColor}
               />
             )}
             <FeatureCard
               href="/ticket/new"
               icon={<FileText className="h-6 w-6" />}
-              title="간편한 문의"
-              description="몇 가지 정보만 입력하면 빠르게 문의를 등록할 수 있습니다."
+              title={copy.homeFeatureNewTicketTitle}
+              description={copy.homeFeatureNewTicketDescription}
               color={branding.secondaryColor}
             />
             <FeatureCard
               href="/ticket/lookup"
               icon={<Search className="h-6 w-6" />}
-              title="실시간 조회"
-              description="티켓 번호로 언제 어디서나 문의 상태를 확인하세요."
+              title={copy.homeFeatureLookupTitle}
+              description={copy.homeFeatureLookupDescription}
               color={branding.primaryColor}
             />
           </div>

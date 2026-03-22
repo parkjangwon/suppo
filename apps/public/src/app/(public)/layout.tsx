@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
 import { PublicShell } from "@/components/public-shell";
 import { BrandingProvider } from "@crinity/shared/branding/context";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { PublicCopyProvider } from "@crinity/shared/i18n/public-context";
+import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,10 +21,14 @@ export default async function PublicLayout({
   children: React.ReactNode;
 }>) {
   const branding = await getSystemBranding();
+  const locale = (await cookies()).get("crinity-locale")?.value;
+  const copy = getPublicCopy(locale);
 
   return (
     <BrandingProvider branding={branding}>
-      <PublicShell>{children}</PublicShell>
+      <PublicCopyProvider value={copy}>
+        <PublicShell>{children}</PublicShell>
+      </PublicCopyProvider>
     </BrandingProvider>
   );
 }

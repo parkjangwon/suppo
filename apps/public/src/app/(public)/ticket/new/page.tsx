@@ -1,6 +1,8 @@
+import { cookies } from "next/headers";
 import { TicketForm } from "@/components/ticket/ticket-form";
 import { prisma } from "@crinity/db";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 
 export async function generateMetadata() {
   const branding = await getSystemBranding();
@@ -19,6 +21,8 @@ async function listActiveRequestTypes() {
 
 export default async function NewTicketPage() {
   const branding = await getSystemBranding();
+  const locale = (await cookies()).get("crinity-locale")?.value;
+  const copy = getPublicCopy(locale);
 
   let requestTypes: Awaited<ReturnType<typeof listActiveRequestTypes>> = [];
   try {
@@ -36,10 +40,10 @@ export default async function NewTicketPage() {
               className="text-3xl md:text-4xl font-bold mb-4"
               style={{ color: branding.primaryColor }}
             >
-              문의하기
+              {copy.newTicketTitle}
             </h1>
             <p className="text-slate-600">
-              궁금한 점이나 문제가 있으신가요? 아래 양식을 작성해 주시면 신속하게 답변해 드리겠습니다.
+              {copy.newTicketDescription}
             </p>
           </div>
 

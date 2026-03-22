@@ -22,7 +22,7 @@ const createAgentSchema = z.object({
     .min(3, "이메일을 입력해주세요")
     .refine((value) => value.includes("@"), "유효한 이메일을 입력해주세요"),
   phone: z.string().trim().optional(),
-  role: z.enum(["ADMIN", "AGENT"]),
+  role: z.enum(["ADMIN", "TEAM_LEAD", "AGENT", "VIEWER"]),
   maxTickets: z.number().int().min(1).max(200),
   categories: z.array(z.string().trim().min(1)).default([]),
   teams: z.array(z.string().trim().min(1)).default([]),
@@ -55,7 +55,9 @@ export async function GET(request: NextRequest) {
   const agents = await prisma.agent.findMany({
     where: {
       ...(active === "true" ? { isActive: true } : {}),
-      ...(role === "ADMIN" || role === "AGENT" ? { role } : {})
+      ...(role === "ADMIN" || role === "TEAM_LEAD" || role === "AGENT" || role === "VIEWER"
+        ? { role }
+        : {})
     },
     include: {
       categories: {

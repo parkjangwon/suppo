@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@crinity/ui/components/ui/dialog";
 import { cn } from "@crinity/shared/utils";
+import { getBackofficeRoleLabel, type BackofficeRole } from "@crinity/shared/auth/config";
 import {
   BarChart3,
   BookOpen,
@@ -77,8 +78,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   const isLoading = status === "loading";
   const userName = session?.user?.name;
-  const userRole = session?.user?.role;
-  const navSections = getAdminNavSections(isAdmin);
+  const userRole = session?.user?.role as BackofficeRole | undefined;
+  const navSections = getAdminNavSections(userRole);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -229,7 +230,7 @@ function SidebarUserSummary({
               {isLoading ? "로딩 중..." : userName || "알 수 없음"}
             </span>
             <span className="text-xs text-muted-foreground">
-              {userRole === "ADMIN" ? "관리자" : "상담원"}
+              {userRole ? getBackofficeRoleLabel(userRole as BackofficeRole) : "상담원"}
             </span>
           </div>
         </div>

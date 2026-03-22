@@ -4,7 +4,7 @@ import type { Session } from "next-auth";
 export const BACKOFFICE_LOGIN_PATH = "/admin/login";
 export const BACKOFFICE_DASHBOARD_PATH = "/admin/dashboard";
 
-export type BackofficeRole = "ADMIN" | "AGENT";
+export type BackofficeRole = "ADMIN" | "TEAM_LEAD" | "AGENT" | "VIEWER";
 
 export interface BackofficeSession {
   user: {
@@ -17,7 +17,21 @@ export interface BackofficeSession {
 }
 
 export function isBackofficeRole(value: unknown): value is BackofficeRole {
-  return value === "ADMIN" || value === "AGENT";
+  return value === "ADMIN" || value === "TEAM_LEAD" || value === "AGENT" || value === "VIEWER";
+}
+
+export function getBackofficeRoleLabel(role: BackofficeRole): string {
+  switch (role) {
+    case "ADMIN":
+      return "관리자";
+    case "TEAM_LEAD":
+      return "팀장";
+    case "VIEWER":
+      return "읽기전용";
+    case "AGENT":
+    default:
+      return "상담원";
+  }
 }
 
 if (typeof window === "undefined" && !process.env.AUTH_SECRET) {

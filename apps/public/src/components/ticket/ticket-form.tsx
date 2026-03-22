@@ -8,6 +8,7 @@ import { ticketFormSchema, TicketFormValues } from "@crinity/shared/validation/t
 import { AttachmentUpload } from "./attachment-upload";
 import { KnowledgeSuggestions } from "./knowledge-suggestions";
 import { useBranding } from "@crinity/shared/branding/context";
+import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 import { Label } from "@crinity/ui/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
@@ -19,6 +20,7 @@ interface TicketFormProps {
 export function TicketForm({ requestTypes }: TicketFormProps) {
   const router = useRouter();
   const branding = useBranding();
+  const copy = usePublicCopy();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
@@ -80,14 +82,14 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="customerName" className="text-slate-700">
-            이름 <span className="text-red-500">*</span>
+            {copy.formName} <span className="text-red-500">*</span>
           </Label>
           <input
             id="customerName"
             type="text"
             {...register("customerName")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-offset-0 focus:border-transparent outline-none transition-all"
-            placeholder="홍길동"
+            placeholder={copy.formPlaceholders.name}
           />
           {errors.customerName && (
             <p className="text-sm text-red-500">{errors.customerName.message}</p>
@@ -96,14 +98,14 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="customerEmail" className="text-slate-700">
-            이메일 <span className="text-red-500">*</span>
+            {copy.formEmail} <span className="text-red-500">*</span>
           </Label>
           <input
             id="customerEmail"
             type="email"
             {...register("customerEmail")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
-            placeholder="hong@example.com"
+            placeholder={copy.formPlaceholders.email}
           />
           {errors.customerEmail && (
             <p className="text-sm text-red-500">{errors.customerEmail.message}</p>
@@ -114,7 +116,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="customerPhone" className="text-slate-700">
-            전화번호
+            {copy.formPhone}
           </Label>
           <input
             id="customerPhone"
@@ -126,20 +128,20 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
               register("customerPhone").onChange(e);
             }}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
-            placeholder="010-1234-5678"
+            placeholder={copy.formPlaceholders.phone}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="customerOrganization" className="text-slate-700">
-            소속/회사
+            {copy.formOrganization}
           </Label>
           <input
             id="customerOrganization"
             type="text"
             {...register("customerOrganization")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
-            placeholder="회사명 또는 소속 기관"
+            placeholder={copy.formPlaceholders.organization}
           />
         </div>
       </div>
@@ -147,14 +149,14 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="requestTypeId" className="text-slate-700">
-            문의 유형 <span className="text-red-500">*</span>
+            {copy.formRequestType} <span className="text-red-500">*</span>
           </Label>
           <select
             id="requestTypeId"
             {...register("requestTypeId")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all bg-white"
           >
-            <option value="">선택해주세요</option>
+            <option value="">{copy.formPlaceholders.requestType}</option>
             {requestTypes.map((type) => (
               <option key={type.id} value={type.id}>
                 {type.name}
@@ -168,17 +170,17 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="priority" className="text-slate-700">
-            우선순위 <span className="text-red-500">*</span>
+            {copy.formPriority} <span className="text-red-500">*</span>
           </Label>
           <select
             id="priority"
             {...register("priority")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all bg-white"
           >
-            <option value="LOW">낮음</option>
-            <option value="MEDIUM">보통</option>
-            <option value="HIGH">높음</option>
-            <option value="URGENT">긴급</option>
+            <option value="LOW">{copy.priorities.LOW}</option>
+            <option value="MEDIUM">{copy.priorities.MEDIUM}</option>
+            <option value="HIGH">{copy.priorities.HIGH}</option>
+            <option value="URGENT">{copy.priorities.URGENT}</option>
           </select>
           {errors.priority && (
             <p className="text-sm text-red-500">{errors.priority.message}</p>
@@ -188,14 +190,14 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="subject" className="text-slate-700">
-          제목 <span className="text-red-500">*</span>
+          {copy.formSubject} <span className="text-red-500">*</span>
         </Label>
         <input
           id="subject"
           type="text"
           {...register("subject")}
           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
-          placeholder="문의 제목을 입력해주세요"
+          placeholder={copy.formPlaceholders.subject}
         />
         {errors.subject && (
           <p className="text-sm text-red-500">{errors.subject.message}</p>
@@ -204,14 +206,14 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="description" className="text-slate-700">
-          내용 <span className="text-red-500">*</span>
+          {copy.formDescription} <span className="text-red-500">*</span>
         </Label>
         <textarea
           id="description"
           {...register("description")}
           rows={5}
           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all resize-y"
-          placeholder="문의 내용을 상세히 입력해주세요 (최소 20자)"
+          placeholder={copy.formPlaceholders.description}
         />
         {errors.description && (
           <p className="text-sm text-red-500">{errors.description.message}</p>
@@ -221,7 +223,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       <KnowledgeSuggestions subject={subject || ""} description={description || ""} />
 
       <div className="space-y-2">
-        <Label className="text-slate-700">첨부파일</Label>
+        <Label className="text-slate-700">{copy.formAttachments}</Label>
         <AttachmentUpload files={files} onChange={setFiles} />
       </div>
 
@@ -240,10 +242,10 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
         {isSubmitting ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />
-            제출 중...
+            {copy.formSubmitting}
           </>
         ) : (
-          "티켓 제출"
+          copy.formSubmit
         )}
       </button>
     </form>

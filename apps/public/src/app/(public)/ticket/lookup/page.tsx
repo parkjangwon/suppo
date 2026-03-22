@@ -1,5 +1,7 @@
+import { cookies } from "next/headers";
 import { TicketLookupForm } from "@/components/ticket/ticket-lookup-form";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 import { Search } from "lucide-react";
 
 export async function generateMetadata() {
@@ -11,6 +13,8 @@ export async function generateMetadata() {
 
 export default async function TicketLookupPage() {
   const branding = await getSystemBranding();
+  const locale = (await cookies()).get("crinity-locale")?.value;
+  const copy = getPublicCopy(locale);
 
   return (
     <div className="py-12 md:py-20">
@@ -30,10 +34,10 @@ export default async function TicketLookupPage() {
               className="text-3xl md:text-4xl font-bold mb-4"
               style={{ color: branding.primaryColor }}
             >
-              티켓 조회
+              {copy.ticketLookupTitle}
             </h1>
             <p className="text-slate-600">
-              티켓 번호와 이메일을 입력하여 문의 내역을 확인하세요.
+              {copy.ticketLookupDescription}
             </p>
           </div>
 

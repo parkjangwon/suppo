@@ -15,7 +15,7 @@ const updateAgentSchema = z.object({
     .refine((value) => value.includes("@"), "유효한 이메일을 입력해주세요")
     .optional(),
   phone: z.string().trim().optional(),
-  role: z.enum(["ADMIN", "AGENT"]).optional(),
+  role: z.enum(["ADMIN", "TEAM_LEAD", "AGENT", "VIEWER"]).optional(),
   maxTickets: z.number().int().min(1).max(200).optional(),
   isActive: z.boolean().optional(),
   categories: z.array(z.string().trim().min(1)).optional(),
