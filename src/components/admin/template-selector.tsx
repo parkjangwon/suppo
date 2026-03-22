@@ -13,6 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Sparkles, History, Star, Loader2 } from "lucide-react";
+import { renderTemplate, TemplateContext } from "@/lib/templates/renderer";
 
 interface Template {
   id: string;
@@ -27,6 +28,7 @@ interface TemplateSelectorProps {
   requestTypeId?: string | null;
   onSelect: (content: string) => void;
   disabled?: boolean;
+  templateContext?: TemplateContext;
 }
 
 interface GroupedTemplates {
@@ -39,6 +41,7 @@ export function TemplateSelector({
   requestTypeId,
   onSelect,
   disabled,
+  templateContext,
 }: TemplateSelectorProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -89,7 +92,10 @@ export function TemplateSelector({
   }
 
   function handleSelect(template: Template) {
-    onSelect(template.content);
+    const content = templateContext
+      ? renderTemplate(template.content, templateContext)
+      : template.content;
+    onSelect(content);
     setOpen(false);
 
     fetch("/api/templates/use", {

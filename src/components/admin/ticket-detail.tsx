@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommentSection } from "./comment-section";
+import { TemplateContext } from "@/lib/templates/renderer";
 import { GitIntegrationSection } from "@/components/ticket/git-integration-section";
 import { LinkedIssuesReadonly } from "@/components/ticket/linked-issues-readonly";
 import { toast } from "sonner";
@@ -48,6 +49,22 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
   const [isUpdating, setIsUpdating] = useState(false);
 
   const canEdit = isAdmin || ticket.assigneeId === currentAgentId;
+
+  const assignee = agents.find((a) => a.id === ticket.assigneeId);
+  const templateContext: TemplateContext = {
+    ticket: {
+      ticketNumber: ticket.ticketNumber ?? "",
+      subject: ticket.subject ?? "",
+      status: ticket.status ?? "",
+      priority: ticket.priority ?? "",
+    },
+    customer: {
+      name: ticket.customerName ?? "",
+      email: ticket.customerEmail ?? "",
+    },
+    category: { name: ticket.category?.name ?? ticket.requestType?.name ?? "" },
+    agent: { name: assignee?.name ?? "" },
+  };
 
   const handleUpdate = async (field: string, value: string | null) => {
     if (!canEdit && field !== "assigneeId") {
@@ -193,6 +210,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
                 currentAgentId={currentAgentId}
                 isAdmin={isAdmin}
                 ticketAssigneeId={ticket.assigneeId}
+                templateContext={templateContext}
               />
             </TabsContent>
             

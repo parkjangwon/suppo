@@ -55,7 +55,7 @@ export function TicketLookupForm() {
           type="text"
           value={ticketNumber}
           onChange={(e) => setTicketNumber(e.target.value)}
-          placeholder="CRN-YYYYMMDD-XXXX"
+          placeholder="CRN-XXXXXXXXXX"
           className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all uppercase"
           required
         />

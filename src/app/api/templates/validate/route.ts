@@ -1,27 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/client";
-import { renderTemplate, extractTemplateVariables } from "@/lib/templates/renderer";
+import { renderTemplate, extractTemplateVariables, TemplateContext } from "@/lib/templates/renderer";
 import { Prisma } from "@prisma/client";
-
-interface TemplateContext {
-  ticket: {
-    ticketNumber: string;
-    subject: string;
-    status: string;
-    priority: string;
-  };
-  customer: {
-    name: string;
-    email: string;
-  };
-  category: {
-    name: string;
-  };
-  agent: {
-    name: string;
-  };
-}
 
 function buildTemplateContext(
   ticket: Prisma.TicketGetPayload<{

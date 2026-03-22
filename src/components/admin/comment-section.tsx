@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AttachmentUpload } from "@/components/ticket/attachment-upload";
 import { TemplateSelector } from "./template-selector";
+import { TemplateContext } from "@/lib/templates/renderer";
 import { KnowledgeAssistant } from "./knowledge-assistant";
 import { CommentThread } from "./comment-thread";
 import { CommentLockBanner } from "./comment-lock-banner";
@@ -38,6 +39,7 @@ interface CommentSectionProps {
   currentAgentId: string;
   isAdmin: boolean;
   ticketAssigneeId: string | null;
+  templateContext?: TemplateContext;
 }
 
 export function CommentSection({
@@ -50,6 +52,7 @@ export function CommentSection({
   currentAgentId,
   isAdmin,
   ticketAssigneeId,
+  templateContext,
 }: CommentSectionProps) {
   const router = useRouter();
   const [reply, setReply] = useState("");
@@ -186,6 +189,7 @@ export function CommentSection({
                     setReply((prev) => prev + (prev ? "\n\n" : "") + content)
                   }
                   disabled={loading}
+                  templateContext={templateContext}
                 />
                 {onAiSuggestion && (
                   <Button
