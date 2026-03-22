@@ -11,6 +11,7 @@ coverage/
 test-results/
 playwright-report/
 test-report/
+.playwright-mcp/
 
 # Next.js 
 .next/
@@ -30,6 +31,8 @@ dist/
 
 # Certificates
 certs/
+docker/certs/*.crt
+docker/certs/*.key
 
 # TypeScript build cache
 tsconfig.tsbuildinfo
@@ -73,4 +76,9 @@ uploads/
 .claude/
 .omx/
 .superpowers/
+.superset/
 public/uploads/
+
+# Docker env
+docker/env/.env.production
+docker/env/.env.production.local

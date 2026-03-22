@@ -15,7 +15,7 @@ vi.mock("@/auth", () => ({
   })
 }));
 
-vi.mock("@/lib/db/client", () => ({
+vi.mock("@crinity/db", () => ({
   prisma: {
     ticket: {
       findUnique: vi.fn().mockResolvedValue({ assigneeId: "agent-1" })
@@ -29,7 +29,7 @@ vi.mock("@/lib/db/client", () => ({
   }
 }));
 
-vi.mock("@/lib/crypto/encrypt", () => ({
+vi.mock("@crinity/shared/crypto/encrypt", () => ({
   decryptToken: vi.fn().mockReturnValue("plain-token")
 }));
 

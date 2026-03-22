@@ -1,0 +1,89 @@
+services:
+  sqld:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/sqld
+    environment:
+      SQLD_NODE: primary
+      SQLD_HTTP_LISTEN_ADDR: "0.0.0.0:8889"
+    expose:
+      - "8889"
+
+  migrate:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: migrator
+    restart: "no"
+    depends_on:
+      - sqld
+    environment:
+      DATABASE_URL: http://sqld:8889
+
+  public:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: runner
+      args:
+        APP_NAME: public
+    image: crinity-public:latest
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: http://sqld:8889
+      PUBLIC_URL: ${PUBLIC_URL}
+      ADMIN_URL: ${ADMIN_URL}
+      AUTH_URL: ${PUBLIC_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET}
+      GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY}
+    volumes:
+      - uploads:/app/apps/public/public/uploads
+    expose:
+      - "3000"
+
+  admin:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: runner
+      args:
+        APP_NAME: admin
+    image: crinity-admin:latest
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: http://sqld:8889
+      PUBLIC_URL: ${PUBLIC_URL}
+      ADMIN_URL: ${ADMIN_URL}
+      AUTH_URL: ${ADMIN_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET}
+      GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+    volumes:
+      - uploads:/app/apps/admin/public/uploads
+    expose:
+      - "3000"
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - public
+      - admin
+
+volumes:
+  db_data:
+  uploads:

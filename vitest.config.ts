@@ -6,7 +6,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src")
+      "@": path.resolve(__dirname, "./apps/admin/src"),
+      "@crinity/db": path.resolve(__dirname, "./packages/db/src/index.ts"),
+      "@crinity/ui": path.resolve(__dirname, "./packages/ui/src"),
+      "@crinity/shared": path.resolve(__dirname, "./packages/shared/src")
     }
   },
   test: {

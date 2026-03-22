@@ -13,14 +13,14 @@ test.afterAll(async () => {
 
 test("관리자가 올바른 자격증명으로 로그인하여 대시보드에 진입한다", async ({ page }, testInfo) => {
   await test.step("로그인 페이지 접근", async () => {
-    await page.goto("/admin/login");
+    await page.goto("http://127.0.0.1:3001/admin/login");
     await expect(page.getByText("관리 콘솔")).toBeVisible();
     await captureStep(page, testInfo, "로그인 페이지 접근");
   });
 
   await test.step("자격증명 입력", async () => {
     await page.getByLabel("이메일").fill("admin@crinity.io");
-    await page.getByLabel("비밀번호").fill("wkddnjs1!");
+    await page.getByLabel("비밀번호").fill("admin1234");
     await captureStep(page, testInfo, "자격증명 입력");
   });
 
@@ -33,7 +33,7 @@ test("관리자가 올바른 자격증명으로 로그인하여 대시보드에 
 
 test("잘못된 자격증명으로 로그인 시 오류 메시지가 표시된다", async ({ page }, testInfo) => {
   await test.step("로그인 페이지 접근", async () => {
-    await page.goto("/admin/login");
+    await page.goto("http://127.0.0.1:3001/admin/login");
     await captureStep(page, testInfo, "로그인 페이지 접근");
   });
 

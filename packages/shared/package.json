@@ -1,0 +1,28 @@
+{
+  "name": "@crinity/shared",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@crinity/db": "workspace:*",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "jsonwebtoken": "^9.0.3",
+    "nanoid": "^5.1.6",
+    "next": "^15.3.1",
+    "next-auth": "5.0.0-beta.30",
+    "tailwind-merge": "^3.5.0",
+    "uuid": "^13.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/react": "^19.1.2",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0"
+  }
+}

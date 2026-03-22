@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@crinity/db": ["../../packages/db/src/index.ts"],
+      "@crinity/ui": ["../../packages/ui/src"],
+      "@crinity/ui/*": ["../../packages/ui/src/*", "../../packages/ui/*"],
+      "@crinity/shared": ["../../packages/shared/src"],
+      "@crinity/shared/*": ["../../packages/shared/src/*"]
+    }
+  },
+  "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

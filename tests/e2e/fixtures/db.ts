@@ -1,8 +1,20 @@
 // tests/e2e/fixtures/db.ts
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import path from "node:path";
 
-const prisma = new PrismaClient();
+const databaseUrl = `file:${path.resolve(
+  process.cwd(),
+  "packages/db/dev.db"
+)}`;
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: databaseUrl
+    }
+  }
+});
 
 export { prisma };
 

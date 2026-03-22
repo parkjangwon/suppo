@@ -32,16 +32,16 @@ test.afterAll(async () => {
 
 test("관리자가 티켓 상세에서 답변을 작성하고 상태를 변경한다", async ({ page }, testInfo) => {
   await test.step("관리자 로그인", async () => {
-    await page.goto("/admin/login");
+    await page.goto("http://127.0.0.1:3001/admin/login");
     await page.getByLabel("이메일").fill("admin@crinity.io");
-    await page.getByLabel("비밀번호").fill("wkddnjs1!");
+    await page.getByLabel("비밀번호").fill("admin1234");
     await page.getByRole("button", { name: "로그인" }).click();
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
     await captureStep(page, testInfo, "관리자 로그인");
   });
 
   await test.step("티켓 상세 페이지 접근", async () => {
-    await page.goto(`/admin/tickets/${ticketId}`);
+    await page.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
     await expect(page.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
     await captureStep(page, testInfo, "티켓 상세 페이지 접근");
   });

@@ -1374,24 +1374,25 @@ git commit -m "feat: 감사 로그 AI 이상탐지 — 프롬프트 빌더 + API
 
 ## Task 7: 전체 테스트 + 타입 체크
 
-- [ ] **Step 1: 유닛 테스트 전체 실행**
+- [x] **Step 1: 유닛 테스트 전체 실행**
 
 ```bash
 pnpm test
 ```
-Expected: 기존 67개 + 신규 12개 = 79개 이상 PASS
+결과: 17 test files, 79 tests PASS ✅
 
-- [ ] **Step 2: 타입 체크**
+- [x] **Step 2: 타입 체크**
 
 ```bash
 pnpm tsc --noEmit 2>&1 | grep -v ".next/types"
 ```
-Expected: 수정한 파일 관련 에러 없음
+결과: AI 패널 관련 파일 타입 에러 없음 ✅ (기존 Next.js 15 params Promise 이슈는 별도)
 
-- [ ] **Step 3: 최종 커밋**
+- [x] **Step 3: 최종 커밋**
 
-```bash
-git add -A
-git commit -m "chore: AI 인사이트 패널 전체 구현 완료"
-git push origin master
-```
+커밋: e46d278 — Docker 멀티컨테이너 통합 테스트 버그 7건 수정 + 테스트 리포트
+
+**Docker 멀티컨테이너 통합 테스트 결과 (2026-03-22)**
+- TC 16개: PASS 13 / WARN 2 (기존 Recharts SSR 이슈) / FAIL 0
+- 발견 및 수정된 버그 7건 (nginx, .env, Dockerfile, PrismaLibSql, NextAuth, seed, analytics API)
+- 테스트 리포트: `docs/test-report-ai-insight-panels-2026-03-22.xlsx`

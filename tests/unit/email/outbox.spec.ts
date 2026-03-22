@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { enqueueEmail } from "@/lib/email/enqueue";
-import { processOutbox } from "@/lib/email/process-outbox";
+import { enqueueEmail } from "@crinity/shared/email/enqueue";
+import { processOutbox } from "@crinity/shared/email/process-outbox";
 
 function createDbMock() {
   return {

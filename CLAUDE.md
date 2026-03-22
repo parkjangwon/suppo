@@ -6,52 +6,63 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development
-pnpm dev          # Start dev server (Turbopack)
-pnpm build        # Production build
-pnpm lint         # ESLint
+pnpm dev:admin    # Admin app (localhost:3001)
+pnpm dev:public   # Public app (localhost:3000)
+
+# Build
+pnpm build:admin
+pnpm build:public
+pnpm lint
 
 # Testing
 pnpm test         # Vitest unit tests
-pnpm test:e2e     # Playwright E2E tests (starts dev server automatically)
+pnpm test:e2e     # Playwright E2E tests (starts admin + public automatically)
 
 # Database
-pnpm prisma migrate dev --name <name>  # Create migration
-pnpm prisma generate                   # Regenerate Prisma client after schema change
-pnpm prisma studio                     # Open Prisma Studio
-pnpm prisma db seed                    # Seed database
+pnpm --filter=@crinity/db generate
+pnpm --filter=@crinity/db migrate:dev --name <name>
+pnpm --filter=@crinity/db migrate:deploy
+pnpm --filter=@crinity/db studio
+pnpm --filter=@crinity/db seed
 
 # Initial setup
-./install.sh      # One-shot: copies .env, installs deps, migrates, seeds
+pnpm install
+pnpm --filter=@crinity/db generate
+pnpm --filter=@crinity/db migrate:dev --name init
+pnpm --filter=@crinity/db seed
+
+# Docker deployment
+docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
 ```
 
 ## Architecture
 
-Full-stack SaaS helpdesk built with **Next.js 15 App Router + React 19 + TypeScript**, using **SQLite + Prisma** as the database. UI is **shadcn/ui** (Radix UI primitives) with Tailwind CSS. Authentication is **NextAuth.js v5** (Credentials, Google, GitHub, SAML/BoxyHQ).
+Full-stack SaaS helpdesk built as a **pnpm workspace monorepo** with **Next.js 15 App Router + React 19 + TypeScript**. Local development uses **SQLite + Prisma**, and production targets **LibSQL/sqld**. UI is **shadcn/ui** (Radix UI primitives) with Tailwind CSS. Authentication is **NextAuth.js v5** (Credentials, Google, GitHub, SAML/BoxyHQ).
 
-### Route Groups
+### Apps And Packages
 
-- `src/app/(public)/` — Customer-facing: landing, ticket creation/lookup, knowledge base
-- `src/app/(admin)/admin/` — Agent/admin dashboard: tickets, customers, settings, reports
-- `src/app/api/` — API routes for comments, tickets, auth, git, AI, etc.
-- `src/app/survey/` — CSAT survey flow
+- `apps/public/src/` — Customer-facing app: landing, ticket creation/lookup, knowledge base, survey
+- `apps/admin/src/` — Agent/admin app: dashboard, tickets, customers, settings, reports
+- `packages/db/` — Prisma schema, migrations, client factory, raw DB helper
+- `packages/shared/src/` — Shared auth, security, storage, tickets, knowledge, branding logic
+- `packages/ui/src/components/ui/` — Shared shadcn/ui components
 
-### Core Business Logic (`src/lib/`)
+### Core Business Logic
 
 | Directory | Purpose |
 |-----------|---------|
-| `assignment/` | Auto-assignment algorithm (specialty matching + load balancing) |
-| `tickets/` | Ticket CRUD, status transitions, SLA integration |
-| `email/` | Email service with Outbox pattern for reliable delivery |
-| `ai/` | Customer analysis via Ollama (local) or Google Gemini |
-| `llm/` | LLM provider abstraction (Ollama, Gemini) |
-| `git/` | GitHub/GitLab issue linking (tokens encrypted with AES) |
-| `templates/` | Response templates with variable substitution + conditional rendering |
-| `audit/` | Audit logging for all admin actions |
-| `sla/` | SLA clock with pause/resume |
-| `security/` | Rate limiting, JWT ticket access tokens |
-| `storage/` | Local (dev) / AWS S3 (prod) file storage |
-| `reports/` | Excel export via ExcelJS |
-| `knowledge/` | Knowledge base articles |
+| `packages/shared/src/assignment/` | Auto-assignment algorithm |
+| `packages/shared/src/tickets/` | Shared ticket creation/access logic |
+| `packages/shared/src/email/` | Shared email queue/outbox logic |
+| `apps/admin/src/lib/ai/` | Admin AI features and insight generation |
+| `apps/admin/src/lib/git/` | GitHub/GitLab issue linking |
+| `apps/admin/src/lib/templates/` | Response template rendering/scoring |
+| `apps/admin/src/lib/audit/` | Audit logging |
+| `apps/admin/src/lib/sla/` | SLA clock logic |
+| `packages/shared/src/security/` | Rate limiting, ticket access, upload validation |
+| `packages/shared/src/storage/` | Local/S3 storage helpers |
+| `apps/admin/src/lib/reports/` | Analytics/report generation |
+| `packages/shared/src/knowledge/` | Shared knowledge base logic |
 
 ### Key Patterns
 
@@ -64,7 +75,9 @@ Full-stack SaaS helpdesk built with **Next.js 15 App Router + React 19 + TypeScr
 
 ### Path Aliases
 
-`@/*` maps to `./src/*` (configured in `tsconfig.json`).
+- In `apps/admin`, `@/*` maps to `apps/admin/src/*`
+- In `apps/public`, `@/*` maps to `apps/public/src/*`
+- Shared packages are imported via `@crinity/db`, `@crinity/shared/*`, `@crinity/ui/*`
 
 ## Testing
 
@@ -87,5 +100,6 @@ All other configuration (email provider, LLM settings, Git integration, branding
 
 - UI labels and in-app text are in **Korean**
 - Dark mode is supported (Next Themes + Tailwind CSS variables)
-- `next.config.ts` contains strict CSP headers — new external resources must be added there
+- App CSP headers live in `apps/admin/next.config.ts` and `apps/public/next.config.ts`
+- Docker deployment assets live under `docker/`
 - E2E tests run sequentially (`workers: 1`) — do not parallelize without verifying DB isolation

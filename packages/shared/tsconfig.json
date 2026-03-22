@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@crinity/db": ["../db/src/index.ts"],
+      "@crinity/shared": ["./src"],
+      "@crinity/shared/*": ["./src/*"],
+      "@/auth": ["../../apps/admin/src/auth.ts"]
+    }
+  },
+  "include": ["src"]
+}

@@ -1,13 +1,13 @@
 # Crinity Helpdesk System
 
 <p align="center">
-  <strong>현대적인 고객 지원 헬프데스크 시스템</strong>
+  <strong>pnpm workspace 기반 Public/Admin 분리형 헬프데스크 시스템</strong>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js 15">
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma" alt="Prisma">
   <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite" alt="SQLite">
   <img src="https://img.shields.io/badge/LibSQL-blue?style=flat-square" alt="LibSQL">
@@ -15,460 +15,270 @@
 
 ---
 
-## 📋 목차
+## 개요
 
-- [프로젝트 개요](#-프로젝트-개요)
-- [기술 스택](#-기술-스택)
-- [주요 기능](#-주요-기능)
-- [아키텍처](#-아키텍처)
-- [프로젝트 구조](#-프로젝트-구조)
-- [시작하기](#-시작하기)
-- [환경 변수](#-환경-변수)
-- [배포](#-배포)
-- [데이터베이스](#-데이터베이스)
-- [기여하기](#-기여하기)
-- [라이선스](#-라이선스)
+Crinity Helpdesk System은 고객용 공개 채널과 관리자용 백오피스를 분리한 헬프데스크 애플리케이션입니다.
 
----
+- `apps/public`: 고객 티켓 생성, 조회, 지식베이스, 설문
+- `apps/admin`: 상담원/관리자 대시보드, 티켓 처리, 분석, 설정
+- `packages/db`: Prisma + LibSQL/SQLite 클라이언트 및 마이그레이션
+- `packages/shared`: 인증, 보안, 이메일, 티켓, 지식베이스 등 공용 비즈니스 로직
+- `packages/ui`: 공용 shadcn/ui 컴포넌트
 
-## 🎯 프로젝트 개요
+로컬 개발은 SQLite 파일 DB를 사용하고, 운영은 LibSQL/sqld 멀티 컨테이너 구성을 기준으로 합니다.
 
-**Crinity Helpdesk System**은 SaaS 제품에 대한 기술지원 및 VOC(Voice of Customer) 처리를 위한 종합 헬프데스크 솔루션입니다. 고객이 웹 페이지에서 문의를 작성하면 상담원에게 자동 할당되어 효율적으로 처리되는 구조입니다.
+## 핵심 기능
 
-### 핵심 가치
+- 고객용 티켓 생성, 티켓 조회, 공개 댓글, 지식베이스, CSAT 설문
+- 관리자용 대시보드, 티켓 목록/상세, 댓글/내부 메모, 담당자 변경, 검색/필터
+- 상담원 자동 할당, presence 표시, comment lock
+- 이메일 Outbox 패턴, GitHub/GitLab 이슈 연동, SAML SSO, 감사 로그
+- AI 설정/인사이트, 파일 업로드, 브랜딩, 문의 유형/템플릿 관리
 
-- **고객 중심**: 고객이 쉽게 문의하고 추적할 수 있는 직관적인 인터페이스
-- **효율적 운영**: 자동 할당과 로드밸런싱으로 상담원 업무 분배
-- **AI 활용**: LLM 연동을 통한 고객 행동 분석 및 인사이트 제공
-- **보안 강화**: 감사로그, Rate Limiting, Signed Cookie
-- **확장성**: Git 연동, 이메일 알림, 첨부파일 지원, SAML SSO
+## 기술 스택
 
----
+- Frontend: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, shadcn/ui
+- Backend: Next.js Route Handlers, NextAuth.js v5, Prisma ORM
+- Database: SQLite (로컬), LibSQL/sqld (운영)
+- Infra: pnpm workspaces, Docker, Docker Compose, Nginx
+- Integrations: Ollama, Gemini, SMTP/SES/Resend, S3, GitHub/GitLab, BoxyHQ SAML
 
-## 🛠 기술 스택
+## 모노레포 구조
 
-### 프론트엔드
-- **Next.js 15** (App Router)
-- **React 19**
-- **TypeScript**
-- **Tailwind CSS**
-- **shadcn/ui** (Radix UI 기반)
-
-### 백엔드
-- **Next.js API Routes**
-- **Server Actions**
-- **NextAuth.js v5** (Auth.js)
-- **Prisma ORM**
-
-### 데이터베이스
-- **SQLite 3** (로컬 개발)
-- **LibSQL** (프로덕션, 멀티컨테이너)
-
-### AI 및 연동
-- **Ollama** (로컬 LLM)
-- **Google Gemini API**
-- **AWS S3** (파일 저장)
-- **SMTP/SES/Resend** (이메일 발송)
-- **GitHub/GitLab API** (이슈 연동)
-
-### 인프라
-- **Docker** (프로덕션 배포)
-- **Docker Compose** (멀티컨테이너 오케스트레이션)
-- **Nginx** (리버스 프록시, SSL)
-- **pnpm** (패키지 매니저)
-
----
-
-## ✨ 주요 기능
-
-### 1. 고객용 기능 (Public)
-
-| 기능 | 설명 |
-|------|-------------|
-| **티켓 작성** | 이름, 이메일, 전화번호, 소속, 문의 유형(RequestType), 우선순위, 제목, 내용, 첨부파일 |
-| **Rate Limiting** | IP당 분당 5회 제한 |
-| **첨부파일** | 최대 10MB, 20개, 이미지/문서/압축파일 지원 |
-| **티켓 조회** | 티켓번호 + 이메일 인증, Signed Cookie 발급 |
-| **대화 스레드** | 상태 및 대화 내역 확인, 추가 메시지 작성 |
-
-### 2. 관리자용 기능 (Admin)
-
-| 기능 | 설명 |
-|------|-------------|
-| **대시보드** | 오늘/주/월 통계, 상태별 현황, 상담원별 처리 현황 |
-| **티켓 목록** | 필터(상태/카테고리/우선순위/담당자), 검색, 정렬 |
-| **티켓 상세** | 상태/우선순위/담당자 변경, 코멘트, 내부 메모 |
-| **자동 할당** | 카테고리 전문성 + 로드밸런싱 알고리즘 |
-| **티켓 양도** | 다른 상담원으로 양도, 사유 기록 |
-| **상담원 관리** | CRUD, 전화번호 관리, 비활성화 시 자동 재할당 |
-| **고객 관리** | 고객 프로필, 티켓 이력, 메모, AI 분석 |
-| **응답 템플릿** | 자주 사용하는 응답 템플릿 관리, 변수 치환({{ticket.id}}, {{customer.name}} 등), 조건 렌더링, 문의 유형별 추천, 사용 권한 검증, 변수 미리보기/검증 |
-| **Git 연동** | GitHub/GitLab 이슈 연결/생성, 감사 로깅, 링크 해제/수정, 중복 방지, Provider별 URL 검증, Webhook 상태 동기화 |
-
-### 3. 설정 기능
-
-| 기능 | 설명 |
-|------|-------------|
-| **이메일 설정** | SMTP/SES/Resend 프로바이더 설정 |
-| **AI 설정** | Ollama/Gemini LLM 설정, 고객 분석 활성화 |
-| **브랜딩** | 도메인별 커스텀 로고, 색상, 파비콘 설정 |
-| **SAML SSO** | 기업 SSO 연동 (BoxyHQ) |
-| **문의 유형** | 카테고리별 기본 담당 팀, 우선순위 설정 |
-| **SLA 정책** | 서비스 레벨 계약 설정, WAITING 상태에서 자동 일시정지 |
-
-### 4. 감사 및 보안
-
-| 기능 | 설명 |
-|------|-------------|
-| **감사로그** | 모든 관리자/상담원 행동 기록, XLSX 내보내기 |
-| **활동 로그** | 티켓 상태 변경, 할당, 양도 이력 |
-| **보안** | 티켓 접근 토큰, 민감 데이터 암호화 |
-
-### 5. 시스템 기능
-
-| 기능 | 설명 |
-|------|-------------|
-| **이메일 알림** | 티켓 접수/할당/응답/상태변경 시 알림, 스레딩 헤더 지원 |
-| **Outbox 패턴** | 이메일 발송 실패 시 재시도 (최대 3회) |
-| **AI 고객 분석** | 티켓 히스토리 기반 고객 패턴 분석 |
-| **파일 저장** | 개발: 로컬, 프로덕션: AWS S3 |
-| **응답 템플릿** | 변수 치환({{ticket.id}}, {{customer.name}} 등), 문의 유형별 추천, 사용 기록 감사 로그, 템플릿 사용 권한 검증, 변수 미리보기/검증, 점수 기반 추천 알고리즘 |
-| **Git 연동** | 이슈 연결/생성 시 감사 로깅, webhook 지원, 링크 해제/수정 API, 중복 방지, Provider별 URL 검증, Git Operation Queue (재시도 메커니즘), 티켓 상태 자동 동기화 |
-
----
-
-## 🏗 아키텍처
-
-### 로컬 개발
-```
-┌─────────────────────────────────┐
-│  Next.js App (pnpm dev)         │
-│  - SQLite (dev.db)              │
-└─────────────────────────────────┘
-```
-
-### 프로덕션 (Docker Compose)
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Nginx (SSL)                             │
-│  ┌──────────────────────┐  ┌──────────────────────┐       │
-│  │   helpdesk.com       │  │   admin.com          │       │
-│  └──────────┬───────────┘  └──────────┬───────────┘       │
-│             │                        │                      │
-│             ▼                        ▼                      │
-│  ┌──────────────────────┐  ┌──────────────────────┐       │
-│  │   Public App (xN)    │  │   Admin App          │       │
-│  │   APP_TYPE=public    │  │   APP_TYPE=admin    │       │
-│  └──────────┬───────────┘  └──────────┬───────────┘       │
-│             │                        │                      │
-│             └────────────┬───────────┘                      │
-│                          ▼                                 │
-│  ┌─────────────────────────────────────────────┐             │
-│  │         LibSQL (sqld)                      │             │
-│  │   HTTP API on :8889 (internal only)       │             │
-│  └─────────────────────────────────────────────┘             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**아키텍처 특징:**
-- **Public 앱**: 수평 확장 가능 (`docker-compose up --scale public=N`)
-- **Admin 앱**: 수평 확장 가능 (`docker-compose up --scale admin=N`)
-- **LibSQL**: 내부 네트워크만 접근, 외부 노출 없음
-- **Nginx**: SSL 종료, 도메인 분리, 600MB 파일 업로드 지원
-
----
-
-## 📁 프로젝트 구조
-
-```
+```text
 crinity-helpdesk/
-├── prisma/
-│   ├── schema.prisma          # 데이터베이스 스키마
-│   └── migrations/            # 마이그레이션 파일
-├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── (public)/          # 고객용 라우트
-│   │   │   ├── page.tsx       # 랜딩 페이지
-│   │   │   └── ticket/        # 티켓 관련 페이지
-│   │   ├── (admin)/           # 관리자용 라우트
-│   │   │   └── admin/         # 관리자 페이지
-│   │   └── api/               # API 엔드포인트
-│   ├── components/
-│   │   ├── ui/                # shadcn/ui 컴포넌트
-│   │   ├── app/               # 앱 쉘 컴포넌트
-│   │   ├── ticket/            # 티켓 관련 컴포넌트
-│   │   └── admin/             # 관리자 컴포넌트
-│   ├── lib/
-│   │   ├── db/                # Prisma/LibSQL 클라이언트 및 쿼리
-│   │   │   ├── client.ts      # Prisma + LibSQL Adapter
-│   │   │   └── raw.ts         # LibSQL Raw Client
-│   │   ├── auth/              # 인증 설정 및 가드
-│   │   ├── audit/             # 감사로깅
-│   │   ├── llm/               # LLM 연동 (Ollama/Gemini)
-│   │   ├── tickets/           # 티켓 서비스
-│   │   ├── assignment/        # 할당 알고리즘
-│   │   ├── email/             # 이메일 발송
-│   │   ├── storage/           # 파일 저장
-│   │   └── utils/             # 유틸리티
-│   └── types/                 # TypeScript 타입
-├── docker-compose.yml          # 프로덕션 배포 설정
-├── Dockerfile                  # 멀티스테이지 빌드
-├── nginx.conf                 # 리버스 프록시 설정
-├── scripts/                   # 유틸리티 스크립트
-├── tests/                     # 테스트 파일
-└── .env.production.example    # 프로덕션 환경변수 템플릿
+├── apps/
+│   ├── admin/
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── lib/
+│   │   │   ├── auth.ts
+│   │   │   ├── auth-edge.ts
+│   │   │   └── middleware.ts
+│   │   ├── next.config.ts
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── public/
+│       ├── src/
+│       │   ├── app/
+│       │   ├── components/
+│       │   └── middleware.ts
+│       ├── next.config.ts
+│       ├── package.json
+│       └── tsconfig.json
+├── packages/
+│   ├── db/
+│   │   ├── prisma/
+│   │   ├── src/client.ts
+│   │   ├── src/raw.ts
+│   │   └── src/index.ts
+│   ├── shared/
+│   │   └── src/
+│   └── ui/
+│       └── src/components/ui/
+├── tests/
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── nginx.conf
+│   ├── certs/
+│   └── env/
+├── pnpm-workspace.yaml
+└── tsconfig.base.json
 ```
 
----
+## 시작하기
 
-## 🚀 시작하기
+### 요구사항
 
-### 사전 요구사항
+- Node.js 22 이상 권장
+- pnpm 10 이상
+- macOS/Linux
 
-- **Node.js** 20.x 이상
-- **pnpm** 10.x 이상
-- **Docker** (프로덕션 배포 시)
-- **Docker Compose** (프로덕션 배포 시)
-
----
-
-### ⚡ 간편 설치 (권장)
+### 설치
 
 ```bash
-./install.sh
-pnpm dev
-```
-
-`install.sh`가 한 번에 처리합니다:
-- `.env.example` → `.env` 복사 후 `openssl rand -base64 32`로 시크릿 3개 자동 생성
-- `pnpm install`
-- `prisma migrate deploy` + `prisma db seed` (초기 관리자 계정 생성)
-
-`.env` 파일이 이미 존재하면 덮어쓰지 않습니다.
-
----
-
-### 🔧 수동 설치
-
-```bash
-# 1. 의존성 설치
 pnpm install
-
-# 2. 환경 변수 설정
-cp .env.example .env
-# .env 파일을 열어 AUTH_SECRET, TICKET_ACCESS_SECRET, GIT_TOKEN_ENCRYPTION_KEY를
-# openssl rand -base64 32 결과로 각각 채워넣습니다
-
-# 3. 데이터베이스 마이그레이션 + 초기 데이터
-pnpm prisma migrate deploy
-pnpm prisma db seed
-
-# 4. 개발 서버 실행
-pnpm dev
+pnpm --filter=@crinity/db generate
+pnpm --filter=@crinity/db migrate:deploy
+pnpm --filter=@crinity/db seed
 ```
 
-브라우저에서 `http://localhost:3000` 접속
+### 개발 서버
 
----
-
-### 로컬 프로덕션 테스트
+공개 앱과 관리자 앱을 각각 실행합니다.
 
 ```bash
-# 빌드 및 실행
-pnpm build
-pnpm start
+pnpm dev:public
+pnpm dev:admin
 ```
 
----
+- Public: `http://localhost:3000`
+- Admin: `http://localhost:3001`
 
-### 초기 관리자 계정
-
-`.env`의 `INITIAL_ADMIN_EMAIL` / `INITIAL_ADMIN_PASSWORD` 값으로 계정이 생성됩니다 (기본값: `admin@crinity.io` / `admin1234`).
-
-> **보안 주의**: 최초 로그인 시 반드시 비밀번호를 변경하세요. 시스템이 자동으로 비밀번호 변경 페이지로 리다이렉트합니다.
-
----
-
-## 🔐 환경 변수
-
-### 설계 철학
-
-Crinity Helpdesk는 **최소한의 환경 변수**만 `.env` 파일에서 관리하고, 나머지 모든 설정은 **웹 관리 콘솔**에서 관리할 수 있도록 설계되었습니다.
-
-### 로컬 개발 (`.env.example`)
+### 빌드
 
 ```bash
-# Database (필수) - 로컬 SQLite
-DATABASE_URL="file:./prisma/dev.db"
+pnpm build:public
+pnpm build:admin
+```
 
-# Auth (필수) - 세션 암호화용, 최소 32자 권장
-AUTH_SECRET="your-secret-key-min-32-characters"
+## 환경 변수
+
+### 루트 `.env`
+
+Playwright나 일부 공통 도구에서 사용합니다.
+
+```bash
+DATABASE_URL="file:./packages/db/dev.db"
+AUTH_SECRET="your-auth-secret"
 AUTH_URL="http://localhost:3000"
-
-# Ticket Access (필수) - 티켓 접근 토큰 서명용, 최소 32자 권장
-TICKET_ACCESS_SECRET="another-secret-key-for-ticket-access"
-
-# Git Integration (필수) - Git 토큰 암호화용, 32바이트 권장
-GIT_TOKEN_ENCRYPTION_KEY="32-byte-encryption-key"
-
-# Initial Admin Account (필수) - 최초 관리자 계정
+TICKET_ACCESS_SECRET="your-ticket-access-secret"
+GIT_TOKEN_ENCRYPTION_KEY="your-32-byte-key"
 INITIAL_ADMIN_EMAIL="admin@crinity.io"
 INITIAL_ADMIN_PASSWORD="admin1234"
 ```
 
-### 프로덕션 (`.env.production.example`)
+### 앱별 `.env.local`
+
+각 앱은 자체 `.env.local`을 사용합니다.
+
+`apps/public/.env.local`
 
 ```bash
-# 도메인
-PUBLIC_URL=https://helpdesk.company.com
-ADMIN_URL=https://admin.company.com
+DATABASE_URL=file:/absolute/path/to/packages/db/dev.db
+TICKET_ACCESS_SECRET=local-dev-ticket-secret
+AUTH_URL=http://localhost:3000
+```
 
-# 인증
-AUTH_SECRET=<32자 이상 랜덤 문자열>
-TICKET_ACCESS_SECRET=<32자 이상 랜덤 문자열>
-GIT_TOKEN_ENCRYPTION_KEY=<32바이트 키>
+`apps/admin/.env.local`
 
-# 초기 관리자
-INITIAL_ADMIN_EMAIL=admin@company.com
-INITIAL_ADMIN_PASSWORD=<초기 비밀번호>
-
-# LibSQL (sqld 컨테이너 내부 주소 — 변경 불필요)
-DATABASE_URL=http://sqld:8889
-DATABASE_AUTH_TOKEN=
+```bash
+DATABASE_URL=file:/absolute/path/to/packages/db/dev.db
+AUTH_SECRET=local-dev-secret-32-chars-minimum
+TICKET_ACCESS_SECRET=local-dev-ticket-secret
+GIT_TOKEN_ENCRYPTION_KEY=local-dev-encryption-key-32bytexx
+INITIAL_ADMIN_EMAIL=admin@crinity.io
+INITIAL_ADMIN_PASSWORD=admin1234
+AUTH_URL=http://localhost:3001
 ```
 
 ### 웹 콘솔에서 관리되는 설정
 
-다음 설정들은 `.env` 파일이 아닌 **관리자 웹 콘솔**에서 관리됩니다:
+- 이메일 설정: `/admin/settings/email`
+- AI/LLM 설정: `/admin/settings/llm`
+- 브랜딩: `/admin/settings/branding`
+- SAML SSO: `/admin/settings/saml`
+- 문의 유형: `/admin/settings/request-types`
+- Git 연동: `/admin/settings/git`
+- 시스템 설정: `/admin/settings/system`
 
-| 설정 카테고리 | 관리 경로 | 설명 |
-|--------------|----------|------|
-| **이메일 설정** | `/admin/settings/email` | SMTP, AWS SES, Resend 설정 |
-| **AI/LLM 설정** | `/admin/settings/llm` | Ollama, Google Gemini API 키 |
-| **브랜딩** | `/admin/settings/branding` | 로고, 색상, 회사명, 푸터 정보 |
-| **SAML SSO** | `/admin/settings/saml` | 기업 SSO 연동 설정 |
-| **문의 유형** | `/admin/settings/request-types` | 티켓 문의 유형 관리 |
-| **Git 연동** | `/admin/settings/git` | GitHub/GitLab 토큰 설정 |
-| **응답 템플릿** | `/admin/templates` | 응답 템플릿 CRUD, 변수 관리, 추천 설정 |
+## 데이터베이스
 
----
+Prisma 스키마와 마이그레이션은 `packages/db/prisma/`에 있습니다.
 
-## 🚢 배포
-
-### 프로덕션 배포 (Docker Compose)
+주요 명령어:
 
 ```bash
-# 1. Docker 이미지 빌드
-docker build -t crinity-helpdesk:latest .
-
-# 2. 프로덕션 환경변수 설정
-cp .env.production.example .env.production
-# .env.production의 값을 실제 값으로 채웁니다
-
-# 3. SSL 인증서 준비
-mkdir -p certs
-# public.crt, public.key, admin.crt, admin.key를 certs/ 폴더에 배치
-
-# 4. 컨테이너 실행
-docker compose -f docker-compose.yml --env-file .env.production up -d
-
-# 5. 마이그레이션 실행 (최초 1회)
-docker compose -f docker-compose.yml --env-file .env.production run --rm migrator
+pnpm --filter=@crinity/db generate
+pnpm --filter=@crinity/db migrate:dev --name <name>
+pnpm --filter=@crinity/db migrate:deploy
+pnpm --filter=@crinity/db seed
+pnpm --filter=@crinity/db studio
 ```
 
-### 수평 확장
+## 테스트
+
+### Unit Test
 
 ```bash
-# Public 앱 3개 인스턴스로 확장
-docker compose -f docker-compose.yml --env-file .env.production up -d --scale public=3
-
-# Admin 앱 2개 인스턴스로 확장
-docker compose -f docker-compose.yml --env-file .env.production up -d --scale admin=2
-```
-
-### 배포 관리
-
-```bash
-# 로그 확인
-docker compose logs -f public
-
-# 컨테이너 재시작
-docker compose restart public
-
-# 컨테이너 중지
-docker compose down
-
-# 볼륨 포함 전체 삭제 (주의!)
-docker compose down -v
-```
-
----
-
-## 🗄 데이터베이스
-
-### 핵심 엔티티
-
-- `Ticket` - 티켓 정보 (소속, 문의 유형 포함)
-- `Agent` - 상담원 정보 (전화번호, 비밀번호 변경 이력 포함)
-- `Customer` - 고객 정보 (AI 분석 포함)
-- `Category` - 티켓 카테고리 (상담원 전문성)
-- `RequestType` - 문의 유형 (티켓 생성 시 선택)
-- `Comment` - 코멘트/댓글
-- `Attachment` - 첨부파일
-- `AuditLog` - 감사로그 (모든 활동 기록)
-- `LLMSettings` - AI 설정
-- `EmailSettings` - 이메일 프로바이더 설정
-- `TicketActivity` - 티켓 활동 로그
-- `TicketTransfer` - 티켓 양도 이력
-- `ResponseTemplate` - 응답 템플릿 (변수 치환, 조건 렌더링)
-- `GitLink` - Git 이슈 연결
-- `EmailDelivery` - 이메일 발송 큐 (Outbox 패턴)
-- `EmailThreadMapping` - 이메일 스레딩 관리
-- `SLAClock` - SLA 시간 추적 (일시정지/재개 지원)
-
-### Prisma 명령어
-
-```bash
-# 마이그레이션 생성
-pnpm prisma migrate dev --name <migration-name>
-
-# 프로덕션 마이그레이션
-pnpm prisma migrate deploy
-
-# Prisma 클라이언트 생성
-pnpm prisma generate
-
-# Prisma Studio 실행
-pnpm prisma studio
-```
-
----
-
-## 🧪 테스트
-
-```bash
-# 모든 테스트
 pnpm test
-
-# E2E 테스트
-pnpm test:e2e
-
-# 특정 테스트 파일
-pnpm test tests/unit/assignment/pick-assignee.spec.ts
 ```
 
----
+Vitest는 admin 앱 alias를 기준으로 동작하고, 공용 패키지 경로는 workspace alias로 해석합니다.
 
-## 🤝 기여하기
+### E2E Test
 
-기여는 언제나 환영합니다! PR을 보내주세요.
+```bash
+pnpm test:e2e
+```
 
----
+Playwright는 public/admin 서버를 자동으로 띄우고 다음 핵심 흐름을 검증합니다.
 
-## 📄 라이선스
+- public 홈 렌더링
+- public 티켓 생성
+- public 티켓 조회
+- admin 로그인
+- admin 티켓 목록/상세
+- ticket presence
+- comment lock
+- 고급 검색 필터
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+결과 체크리스트는 `test-report/` 아래 `.xlsx`로 저장됩니다.
 
----
+## 배포
 
-**Crinity Helpdesk System** - 효율적인 고객 지원을 위한 티켓 관리 솔루션
+운영 배포는 Docker 멀티 스테이지 빌드와 Docker Compose 기준입니다.
+
+```bash
+docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
+```
+
+구성:
+
+- `sqld`: LibSQL 서버
+- `migrate`: Prisma migration 실행
+- `public`: 공개 앱 컨테이너
+- `admin`: 관리자 앱 컨테이너
+- `nginx`: 도메인별 리버스 프록시
+
+### 이미지 빌드 예시
+
+```bash
+docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=public -t crinity-public:latest .
+docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t crinity-admin:latest .
+```
+
+## 라우팅 원칙
+
+### Public 앱
+
+- `/`
+- `/ticket/new`
+- `/ticket/submitted`
+- `/ticket/lookup`
+- `/ticket/[number]`
+- `/knowledge`
+- `/knowledge/[slug]`
+- `/survey/[token]`
+- `/api/tickets`
+- `/api/tickets/lookup`
+- `/api/comments/public`
+
+### Admin 앱
+
+- `/` → `/admin/dashboard` 리다이렉트
+- `/admin/login`
+- `/admin/dashboard`
+- `/admin/tickets`
+- `/admin/tickets/[id]`
+- `/admin/analytics`
+- `/admin/agents`
+- `/admin/customers`
+- `/admin/settings/*`
+- `/api/admin/*`
+- `/api/agents/*`
+- `/api/comments`
+- `/api/tickets/[id]/*`
+
+## 참고 문서
+
+- [AGENTS.md](/Users/pjw/dev/project/crinity/crinity-helpdesk/AGENTS.md)
+- [CLAUDE.md](/Users/pjw/dev/project/crinity/crinity-helpdesk/CLAUDE.md)
+- `docs/superpowers/plans/2026-03-22-monorepo-restructure.md`
+
+## 라이선스
+
+MIT

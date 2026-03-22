@@ -23,9 +23,16 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  webServer: {
-    command: "pnpm dev --port 3000",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: "pnpm --filter=@crinity/public dev",
+      url: "http://127.0.0.1:3000",
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: "pnpm --filter=@crinity/admin dev",
+      url: "http://127.0.0.1:3001",
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });
