@@ -15,9 +15,9 @@ const PUBLIC_ONLY = ["/knowledge", "/tickets", "/survey"];
 export default auth((request) => {
   const { nextUrl } = request;
 
-  // Public 컨테이너: /admin/* 요청을 admin 컨테이너로 보냄
+  // Public 컨테이너: /admin/* 요청을 완전 차단 (관리자 도메인 노출 방지)
   if (APP_TYPE === "public" && nextUrl.pathname.startsWith("/admin")) {
-    return NextResponse.redirect(ADMIN_URL + nextUrl.pathname + nextUrl.search);
+    return new NextResponse(null, { status: 404 });
   }
 
   // Admin 컨테이너: public 전용 경로를 public 컨테이너로 보냄
