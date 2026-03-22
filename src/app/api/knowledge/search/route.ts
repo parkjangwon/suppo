@@ -61,6 +61,7 @@ export async function GET(request: NextRequest) {
         title: article.title,
         slug: article.slug,
         excerpt: article.excerpt,
+        content: article.content,
         category: article.category,
         tags: article.tags as string[],
         viewCount: article.viewCount,
