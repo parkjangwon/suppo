@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { db } from "@/lib/db/raw";
 import { CustomerInsightsResponse } from "./contracts";
 
 export async function getCustomerInsights(customerId: string): Promise<CustomerInsightsResponse | null> {
@@ -64,19 +65,28 @@ export async function getCustomerInsights(customerId: string): Promise<CustomerI
         id: true,
       },
     }),
-    prisma.$queryRaw<{ avgMinutes: number | null }[]>`
-      SELECT AVG((julianday("firstResponseAt") - julianday("createdAt")) * 1440) as "avgMinutes"
-      FROM "Ticket"
-      WHERE "customerId" = ${customerId}
-        AND "firstResponseAt" IS NOT NULL
-    `,
-    prisma.$queryRaw<{ avgHours: number | null }[]>`
-      SELECT AVG((julianday(COALESCE("resolvedAt", "closedAt")) - julianday("createdAt")) * 24) as "avgHours"
-      FROM "Ticket"
-      WHERE "customerId" = ${customerId}
-        AND ("resolvedAt" IS NOT NULL OR "closedAt" IS NOT NULL)
-    `,
+    db.execute({
+      sql: `
+        SELECT AVG((julianday(firstResponseAt) - julianday(createdAt)) * 1440) as avgMinutes
+        FROM Ticket
+        WHERE customerId = ?
+          AND firstResponseAt IS NOT NULL
+      `,
+      args: [customerId],
+    }),
+    db.execute({
+      sql: `
+        SELECT AVG((julianday(COALESCE(resolvedAt, closedAt)) - julianday(createdAt)) * 24) as avgHours
+        FROM Ticket
+        WHERE customerId = ?
+          AND (resolvedAt IS NOT NULL OR closedAt IS NOT NULL)
+      `,
+      args: [customerId],
+    }),
   ]);
+
+  const responseTimeRows = (responseTimeStats as any).rows;
+  const resolutionTimeRows = (resolutionTimeStats as any).rows;
 
   const categoryMap = new Map(
     categoryBreakdown.map((c) => [c.categoryId, c._count.id])
@@ -109,8 +119,8 @@ export async function getCustomerInsights(customerId: string): Promise<CustomerI
       totalTickets: tickets.length,
       openTickets,
       resolvedTickets,
-      avgFirstResponseMinutes: responseTimeStats[0]?.avgMinutes ?? null,
-      avgResolutionHours: resolutionTimeStats[0]?.avgHours ?? null,
+      avgFirstResponseMinutes: responseTimeRows[0]?.avgMinutes ?? null,
+      avgResolutionHours: resolutionTimeRows[0]?.avgHours ?? null,
       avgCsat: csatStats._avg.rating,
       csatResponses: csatStats._count.id,
       lastTicketAt: customer.lastTicketAt,

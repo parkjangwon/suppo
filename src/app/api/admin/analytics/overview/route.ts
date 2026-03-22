@@ -5,6 +5,7 @@ import { getCSATTrend } from "@/lib/db/queries/admin-analytics/csat";
 import { getCategoryFrequency } from "@/lib/db/queries/admin-analytics/categories";
 import { getDateRangeFromPreset } from "@/lib/db/queries/admin-analytics/filters";
 import { prisma } from "@/lib/db/client";
+import { db } from "@/lib/db/raw";
 
 const querySchema = z.object({
   preset: z.enum(["7d", "30d", "90d", "custom"]).default("30d"),
@@ -76,20 +77,26 @@ async function getOverviewKPI(dateRange: { from: Date; to: Date }) {
         },
       },
     }),
-    prisma.$queryRaw<{ avgMinutes: number | null }[]>`
-      SELECT AVG((julianday("firstResponseAt") - julianday("createdAt")) * 1440) as "avgMinutes"
-      FROM "Ticket"
-      WHERE "firstResponseAt" IS NOT NULL
-        AND "createdAt" >= ${dateRange.from.toISOString()}
-        AND "createdAt" <= ${dateRange.to.toISOString()}
-    `,
-    prisma.$queryRaw<{ avgHours: number | null }[]>`
-      SELECT AVG((julianday(COALESCE("resolvedAt", "closedAt")) - julianday("createdAt")) * 24) as "avgHours"
-      FROM "Ticket"
-      WHERE ("resolvedAt" IS NOT NULL OR "closedAt" IS NOT NULL)
-        AND "createdAt" >= ${dateRange.from.toISOString()}
-        AND "createdAt" <= ${dateRange.to.toISOString()}
-    `,
+    db.execute({
+      sql: `
+        SELECT AVG((julianday(firstResponseAt) - julianday(createdAt)) * 1440) as avgMinutes
+        FROM Ticket
+        WHERE firstResponseAt IS NOT NULL
+          AND createdAt >= ?
+          AND createdAt <= ?
+      `,
+      args: [dateRange.from.toISOString(), dateRange.to.toISOString()],
+    }),
+    db.execute({
+      sql: `
+        SELECT AVG((julianday(COALESCE(resolvedAt, closedAt)) - julianday(createdAt)) * 24) as avgHours
+        FROM Ticket
+        WHERE (resolvedAt IS NOT NULL OR closedAt IS NOT NULL)
+          AND createdAt >= ?
+          AND createdAt <= ?
+      `,
+      args: [dateRange.from.toISOString(), dateRange.to.toISOString()],
+    }),
     prisma.customerSatisfaction.aggregate({
       where: {
         submittedAt: {
@@ -101,33 +108,44 @@ async function getOverviewKPI(dateRange: { from: Date; to: Date }) {
         rating: true,
       },
     }),
-    prisma.$queryRaw<{ count: bigint }[]>`
-      SELECT COUNT(DISTINCT "customerEmail") as "count"
-      FROM "Ticket"
-      WHERE "createdAt" >= ${dateRange.from.toISOString()}
-        AND "createdAt" <= ${dateRange.to.toISOString()}
-      GROUP BY "customerEmail"
-      HAVING COUNT(*) >= 2
-    `,
-    prisma.$queryRaw<{ count: bigint }[]>`
-      SELECT COUNT(*) as "count"
-      FROM (
-        SELECT "customerEmail"
-        FROM "Ticket"
-        WHERE "createdAt" <= ${dateRange.to.toISOString()}
-        GROUP BY "customerEmail"
-        HAVING COUNT(*) >= 10
-           OR SUM(CASE WHEN "createdAt" >= ${new Date(dateRange.to.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()} THEN 1 ELSE 0 END) >= 5
-      )
-    `,
+    db.execute({
+      sql: `
+        SELECT COUNT(DISTINCT customerEmail) as count
+        FROM Ticket
+        WHERE createdAt >= ?
+          AND createdAt <= ?
+        GROUP BY customerEmail
+        HAVING COUNT(*) >= 2
+      `,
+      args: [dateRange.from.toISOString(), dateRange.to.toISOString()],
+    }),
+    db.execute({
+      sql: `
+        SELECT COUNT(*) as count
+        FROM (
+          SELECT customerEmail
+          FROM Ticket
+          WHERE createdAt <= ?
+          GROUP BY customerEmail
+          HAVING COUNT(*) >= 10
+             OR SUM(CASE WHEN createdAt >= ? THEN 1 ELSE 0 END) >= 5
+        )
+      `,
+      args: [dateRange.to.toISOString(), new Date(dateRange.to.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()],
+    }),
   ]);
+
+  const responseTimeRows = await (avgResponseAgg as any).rows;
+  const resolutionTimeRows = await (avgResolutionAgg as any).rows;
+  const repeatRows = await (repeatCustomers as any).rows;
+  const vipRows = await (vipCustomers as any).rows;
 
   return {
     totalTickets,
-    avgFirstResponseMinutes: avgResponseAgg[0]?.avgMinutes ?? null,
-    avgResolutionHours: avgResolutionAgg[0]?.avgHours ?? null,
+    avgFirstResponseMinutes: responseTimeRows[0]?.avgMinutes ?? null,
+    avgResolutionHours: resolutionTimeRows[0]?.avgHours ?? null,
     avgCsat: csatAgg._avg.rating,
-    repeatCustomers: Number(repeatCustomers[0]?.count ?? 0),
-    vipCustomers: Number(vipCustomers[0]?.count ?? 0),
+    repeatCustomers: Number(repeatRows[0]?.count ?? 0),
+    vipCustomers: Number(vipRows[0]?.count ?? 0),
   };
 }

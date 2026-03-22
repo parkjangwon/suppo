@@ -20,7 +20,8 @@
 
 ### 프로젝트 특성
 
-- **단일 제품 SaaS**: 멀티테넌트 구조 불필요
+- **LibSQL 기반 멀티 컨테이너 아키텍처**: Public/Admin 분리 + sqld 공유 DB
+- **단일 제품 SaaS**: 단일 코드베이스 + 단일 Docker 이미지
 - **5~15명 상담원** 규모 기준 설계
 - **Next.js 풀스택 모놀리스**: 프론트엔드/백엔드 통합
 - **실시간 기능 없음**: WebSocket 불필요, 폴링으로 충분
@@ -55,11 +56,12 @@
 
 ### 2. 데이터베이스 설계
 
-**Prisma 선택 이유:**
+**LibSQL + Prisma Driver Adapter 선택 이유:**
 
 - Type-safe 쿼리
 - 마이그레이션 관리 용이
-- 풍부한 관계 정의
+- 멀티 클라이언트 동시 접근 지원 (Public/Admin 분리)
+- LibSQL embedded 파일 모드로 로컬 dev 편의성 유지
 
 **중요 테이블 관계:**
 
@@ -581,6 +583,131 @@ SELECT * FROM "TenantBranding" WHERE domain = 'acme.com' AND "isActive" = true;
 
 ---
 
+## 🐳 Docker 배포 (운영 환경)
+
+### 아키텍처
+
+```
+Internet
+    │
+    ▼
+┌─────────────────────────────────┐
+│               Nginx                     │
+│  helpdesk.company.com → public:3000     │
+│  admin.company.com    → admin:3000      │  ← VPN/내부망 only
+└──────────────────┬──────────────────────┘
+                   │
+         ┌─────────┴──────────┐
+         ▼                    ▼
+┌──────────────┐     ┌──────────────┐
+│    Public    │     │    Admin     │
+│  Container   │     │  Container   │
+│  :3000       │     │  :3000       │
+│  APP_TYPE=   │     │  APP_TYPE=   │
+│  public      │     │  admin       │
+│  (N개 가능)  │     │  (1개 고정)  │
+└──────┬───────┘     └──────┬───────┘
+       └──────────┬──────────┘
+                  ▼
+       ┌─────────────────────┐
+       │   sqld Container    │
+       │   LibSQL Server     │
+       │   :8889             │
+       │   (외부 미노출)     │
+       └──────────┬──────────┘
+                  ▼
+          [SQLite 볼륨 db_data]
+
+[uploads 공유 볼륨] ← Public/Admin 양쪽 마운트
+```
+
+### 환경변수
+
+| 변수 | 설명 | Public | Admin |
+|------|------|--------|--------|
+| `APP_TYPE` | 컨테이너 타입 | `public` | `admin` |
+| `DATABASE_URL` | DB 연결 URL | `http://sqld:8889` | 동일 |
+| `PUBLIC_URL` | Public 도메인 | `https://helpdesk.company.com` | 동일 |
+| `ADMIN_URL` | Admin 도메인 | `https://admin.company.com` | 동일 |
+
+### APP_TYPE별 허용 경로
+
+| 경로 | Public | Admin |
+|------|--------|--------|
+| `/admin/*` | 차단 → ADMIN_URL 리다이렉트 | 허용 |
+| `/knowledge/*` | 허용 | 차단 → PUBLIC_URL 리다이렉트 |
+| `/tickets/*` | 허용 | 차단 → PUBLIC_URL 리다이렉트 |
+| `/survey/*` | 허용 | 차단 → PUBLIC_URL 리다이렉트 |
+| `/api/auth/*` | 허용 | 허용 |
+| `/api/tickets/*` | 허용 | 차단 |
+| `/api/knowledge/*` | 허용 | 차단 |
+| `/api/webhooks/email` | 허용 | 차단 |
+| `/api/webhooks/github` | 차단 | 허용 |
+| `/api/admin/*` | 차단 | 허용 |
+
+### 배포 절차
+
+**최초 배포:**
+
+```bash
+# 1. 이미지 빌드
+docker build --target runner  -t crinity-helpdesk:latest .
+docker build --target migrator -t crinity-migrate:latest .
+
+# 2. sqld 먼저 기동
+docker compose up -d sqld
+
+# 3. DB 마이그레이션 실행 (일회성)
+docker run --rm \
+  --network <project>_default \
+  -e DATABASE_URL=http://sqld:8889 \
+  crinity-migrate:latest
+
+# 4. DB 초기 데이터 시드 (관리자 계정 생성)
+docker compose run --rm admin \
+  sh -c "DATABASE_URL=http://sqld:8889 pnpm prisma db seed"
+
+# 5. 전체 스택 기동
+docker compose up -d
+```
+
+**업데이트 배포:**
+
+```bash
+docker build --target runner  -t crinity-helpdesk:latest .
+docker build --target migrator -t crinity-migrate:latest .
+
+# 마이그레이션 (스키마 변경이 없으면 생략 가능)
+docker run --rm --network <project>_default \
+  -e DATABASE_URL=http://sqld:8889 crinity-migrate:latest
+
+# sqld는 재시작하지 않음 (데이터 보존)
+docker compose up -d --no-deps public admin nginx
+```
+
+**수평 확장 (Public만):**
+
+```bash
+docker compose up -d --scale public=3
+```
+
+### 기존 데이터 이전
+
+SQLite → LibSQL 이전 시 백업/복구 기능 활용:
+1. 기존 앱 실행 중 → `/admin/settings/system` → 백업 ZIP 다운로드
+2. sqld 기동 + 새 앱 배포 후 → 같은 페이지에서 복구 ZIP 업로드
+
+백업/복구는 Prisma JSON 방식이므로 DB 드라이버와 무관하게 동작.
+
+### 주의사항
+
+- sqld 포트 8889는 `expose`만 사용, `ports`로 외부 노출 금지
+- uploads 볼륨은 Public/Admin 동일 볼륨 마운트 필수
+- AUTH_SECRET은 Admin/Public 동일 값 사용 (세션 쿠키 공유)
+- 다중 호스트 확장 시 uploads 볼륨 → NFS 또는 S3 전환 필요 (현재 스코프 외)
+
+---
+
 ## 💡 개발 팁
 
 ### 코드 작성 시
@@ -613,6 +740,7 @@ SELECT * FROM "TenantBranding" WHERE domain = 'acme.com' AND "isActive" = true;
 | 2026-03-21 | 상담원 비밀번호 관리 구현 (임시 비밀번호 자동 발급, 관리자 초기화)    | AI Agent |
 | 2026-03-21 | Edge Runtime 제약 및 JWT Stale 토큰 주의사항 추가                      | AI Agent |
 | 2026-03-21 | Prisma generate 누락 시 런타임 오류 상세 설명 추가                     | AI Agent |
+| 2026-03-21 | LibSQL 다중 컨테이너 아키텍처 전환 (SQLite → LibSQL, Public/Admin 분리) | AI Agent |
 
 ---
 

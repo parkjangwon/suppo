@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getRepeatInquiries } from "@/lib/db/queries/admin-analytics/repeat-inquiries";
 import { getVIPCustomers } from "@/lib/db/queries/admin-analytics/vip-customers";
 import { getDateRangeFromPreset } from "@/lib/db/queries/admin-analytics/filters";
+import { db } from "@/lib/db/raw";
 
 const querySchema = z.object({
   preset: z.enum(["7d", "30d", "90d", "custom"]).default("30d"),
@@ -74,29 +75,32 @@ export async function GET(request: NextRequest) {
 }
 
 async function getTopCustomers(dateRange: { from: Date; to: Date }, limit: number) {
-  const { prisma } = await import("@/lib/db/client");
-  
-  const customers = await prisma.$queryRaw<Array<{
+  const customers = await db.execute({
+    sql: `
+      SELECT
+        customerId,
+        customerName,
+        customerEmail,
+        COUNT(*) as ticketCount
+      FROM Ticket
+      WHERE createdAt >= ?
+        AND createdAt <= ?
+      GROUP BY customerId, customerName, customerEmail
+      ORDER BY COUNT(*) DESC
+      LIMIT ?
+    `,
+    args: [dateRange.from.toISOString(), dateRange.to.toISOString(), limit],
+  });
+
+  const typedCustomers = customers.rows as Array<{
     customerId: string | null;
     customerName: string;
     customerEmail: string;
     ticketCount: bigint;
-  }>>`
-    SELECT 
-      "customerId",
-      "customerName",
-      "customerEmail",
-      COUNT(*) as "ticketCount"
-    FROM "Ticket"
-    WHERE "createdAt" >= ${dateRange.from.toISOString()}
-      AND "createdAt" <= ${dateRange.to.toISOString()}
-    GROUP BY "customerId", "customerName", "customerEmail"
-    ORDER BY COUNT(*) DESC
-    LIMIT ${limit}
-  `;
+  }>;
 
   return {
-    customers: customers.map((c) => ({
+    customers: typedCustomers.map((c) => ({
       customerId: c.customerId,
       customerName: c.customerName,
       customerEmail: c.customerEmail,

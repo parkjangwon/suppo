@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { db } from "@/lib/db/raw";
 import { DateRange, CSATBucket, CSATTrendResponse } from "./contracts";
 
 interface RawCSATBucket {
@@ -29,25 +30,29 @@ export async function getCSATTrend(
       break;
   }
 
-  const buckets = await prisma.$queryRaw<RawCSATBucket[]>`
-    SELECT 
-      ${bucketExpression} as "bucket",
-      AVG(rating) as "avgRating",
-      COUNT(*) as "responseCount",
-      SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) as "positiveCount"
-    FROM "CustomerSatisfaction"
-    WHERE "submittedAt" >= ${fromISO}
-      AND "submittedAt" <= ${toISO}
-    GROUP BY ${bucketExpression}
-    ORDER BY ${bucketExpression} ASC
-  `;
+  const buckets = await db.execute({
+    sql: `
+      SELECT
+        ${bucketExpression} as bucket,
+        AVG(rating) as avgRating,
+        COUNT(*) as responseCount,
+        SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) as positiveCount
+      FROM CustomerSatisfaction
+      WHERE submittedAt >= ?
+        AND submittedAt <= ?
+      GROUP BY ${bucketExpression}
+      ORDER BY ${bucketExpression} ASC
+    `,
+    args: [fromISO, toISO],
+  });
+  const typedBuckets: RawCSATBucket[] = buckets.rows as RawCSATBucket[];
 
-  const trend: CSATBucket[] = buckets.map((b) => ({
+  const trend: CSATBucket[] = typedBuckets.map((b) => ({
     bucket: b.bucket,
     avgRating: Number(b.avgRating),
     responseCount: Number(b.responseCount),
-    positiveRate: b.responseCount > 0 
-      ? (Number(b.positiveCount) / Number(b.responseCount)) * 100 
+    positiveRate: b.responseCount > 0
+      ? (Number(b.positiveCount) / Number(b.responseCount)) * 100
       : 0,
   }));
 

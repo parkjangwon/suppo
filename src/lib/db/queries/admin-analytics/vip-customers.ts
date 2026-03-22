@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { db } from "@/lib/db/raw";
 import { DateRange, VIPCustomer, VIPReason, VIPCustomerResponse } from "./contracts";
 
 interface RawVIPData {
@@ -22,27 +23,31 @@ export async function getVIPCustomers(
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   const ninetyDaysISO = ninetyDaysAgo.toISOString();
 
-  const rawData = await prisma.$queryRaw<RawVIPData[]>`
-    SELECT 
-      t."customerId",
-      t."customerEmail",
-      t."customerName",
-      SUM(CASE WHEN t."createdAt" >= ${ninetyDaysISO} THEN 1 ELSE 0 END) as "recentTickets",
-      COUNT(*) as "lifetimeTickets",
-      SUM(CASE 
-        WHEN t."createdAt" >= ${ninetyDaysISO} 
-        AND t."priority" IN ('URGENT', 'HIGH') 
-        THEN 1 ELSE 0 END) as "highPriorityTickets"
-    FROM "Ticket" t
-    WHERE t."createdAt" <= ${toISO}
-    GROUP BY t."customerId", t."customerEmail", t."customerName"
-    HAVING "recentTickets" >= ${minRecentTickets}
-       OR "lifetimeTickets" >= ${minLifetimeTickets}
-       OR "highPriorityTickets" >= ${minHighPriorityTickets}
-    ORDER BY "recentTickets" DESC, "lifetimeTickets" DESC
-  `;
+  const rawData = await db.execute({
+    sql: `
+      SELECT
+        t.customerId,
+        t.customerEmail,
+        t.customerName,
+        SUM(CASE WHEN t.createdAt >= ? THEN 1 ELSE 0 END) as recentTickets,
+        COUNT(*) as lifetimeTickets,
+        SUM(CASE
+          WHEN t.createdAt >= ?
+          AND t.priority IN ('URGENT', 'HIGH')
+          THEN 1 ELSE 0 END) as highPriorityTickets
+      FROM Ticket t
+      WHERE t.createdAt <= ?
+      GROUP BY t.customerId, t.customerEmail, t.customerName
+      HAVING recentTickets >= ?
+         OR lifetimeTickets >= ?
+         OR highPriorityTickets >= ?
+      ORDER BY recentTickets DESC, lifetimeTickets DESC
+    `,
+    args: [ninetyDaysISO, ninetyDaysISO, toISO, minRecentTickets, minLifetimeTickets, minHighPriorityTickets],
+  });
+  const typedRawData: RawVIPData[] = rawData.rows as RawVIPData[];
 
-  const customers: VIPCustomer[] = rawData.map((row) => {
+  const customers: VIPCustomer[] = typedRawData.map((row) => {
     const reasons: VIPReason[] = [];
     if (Number(row.recentTickets) >= minRecentTickets) {
       reasons.push("high-volume");

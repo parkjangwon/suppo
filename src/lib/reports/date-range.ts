@@ -99,3 +99,10 @@ export function getPeriodLabel(range: DateRange): string {
   const to = range.to.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
   return `${from} ~ ${to}`;
 }
+
+// 기간 키 생성 (중복 방지용)
+export function generatePeriodKey(range: DateRange, frequency: ReportFrequency): string {
+  const fromStr = range.from.toISOString().split("T")[0]; // YYYY-MM-DD
+  const toStr = range.to.toISOString().split("T")[0];
+  return `${frequency}_${fromStr}_${toStr}`;
+}

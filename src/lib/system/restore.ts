@@ -13,6 +13,25 @@ export class RestoreValidationError extends Error {
 const UPLOAD_DIR =
   process.env.UPLOAD_DIR ?? path.join(process.cwd(), "public", "uploads");
 
+/**
+ * 현재 스키마 버전을 파일시스템에서 직접 읽어옴.
+ * Prisma Driver Adapter는 $queryRaw를 지원하지 않으므로 이 방식 사용.
+ */
+async function getLatestMigration(): Promise<string> {
+  try {
+    const migrationsDir = path.join(process.cwd(), "prisma", "migrations");
+    const entries = await fs.readdir(migrationsDir, { withFileTypes: true });
+    // YYYYMMDDHHMMSS_ 형식의 마이그레이션 디렉토리 필터링
+    const migrationDirs = entries
+      .filter(e => e.isDirectory() && /^\d{14}_/.test(e.name))
+      .map(e => e.name)
+      .sort();
+    return migrationDirs.at(-1) ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
 /** JSON 문자열의 ISO 날짜를 Date 객체로 변환 */
 function dateReviver(_key: string, value: unknown): unknown {
   if (
@@ -41,13 +60,7 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
     throw new RestoreValidationError(`지원하지 않는 백업 버전: ${manifest.version}`);
 
   // 현재 스키마 버전
-  const migrations = await prisma.$queryRaw<{ migration_name: string }[]>`
-    SELECT migration_name FROM _prisma_migrations
-    WHERE finished_at IS NOT NULL
-    ORDER BY finished_at DESC
-    LIMIT 1
-  `;
-  const currentSchema = migrations[0]?.migration_name ?? "unknown";
+  const currentSchema = await getLatestMigration();
   const schemaVersionMatch = manifest.schemaVersion === currentSchema;
 
   // data/ 폴더의 모든 JSON 파일 파싱

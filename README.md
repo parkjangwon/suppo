@@ -10,6 +10,7 @@
   <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma" alt="Prisma">
   <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite" alt="SQLite">
+  <img src="https://img.shields.io/badge/LibSQL-blue?style=flat-square" alt="LibSQL">
 </p>
 
 ---
@@ -19,9 +20,11 @@
 - [프로젝트 개요](#-프로젝트-개요)
 - [기술 스택](#-기술-스택)
 - [주요 기능](#-주요-기능)
+- [아키텍처](#-아키텍처)
 - [프로젝트 구조](#-프로젝트-구조)
 - [시작하기](#-시작하기)
 - [환경 변수](#-환경-변수)
+- [배포](#-배포)
 - [데이터베이스](#-데이터베이스)
 - [기여하기](#-기여하기)
 - [라이선스](#-라이선스)
@@ -56,7 +59,10 @@
 - **Server Actions**
 - **NextAuth.js v5** (Auth.js)
 - **Prisma ORM**
-- **SQLite 3**
+
+### 데이터베이스
+- **SQLite 3** (로컬 개발)
+- **LibSQL** (프로덕션, 멀티컨테이너)
 
 ### AI 및 연동
 - **Ollama** (로컬 LLM)
@@ -66,7 +72,9 @@
 - **GitHub/GitLab API** (이슈 연동)
 
 ### 인프라
-- **Docker** (선택사항, 배포용)
+- **Docker** (프로덕션 배포)
+- **Docker Compose** (멀티컨테이너 오케스트레이션)
+- **Nginx** (리버스 프록시, SSL)
 - **pnpm** (패키지 매니저)
 
 ---
@@ -94,7 +102,7 @@
 | **티켓 양도** | 다른 상담원으로 양도, 사유 기록 |
 | **상담원 관리** | CRUD, 전화번호 관리, 비활성화 시 자동 재할당 |
 | **고객 관리** | 고객 프로필, 티켓 이력, 메모, AI 분석 |
-| **응답 템플릿** | 자주 사용하는 응답 템플릿 관리, 변수 치환({{ticket.id}}, {{customer.name}} 등), 조걸 렌더링, 문의 유형별 추천, 사용 권한 검증, 변수 미리보기/검증 |
+| **응답 템플릿** | 자주 사용하는 응답 템플릿 관리, 변수 치환({{ticket.id}}, {{customer.name}} 등), 조건 렌더링, 문의 유형별 추천, 사용 권한 검증, 변수 미리보기/검증 |
 | **Git 연동** | GitHub/GitLab 이슈 연결/생성, 감사 로깅, 링크 해제/수정, 중복 방지, Provider별 URL 검증, Webhook 상태 동기화 |
 
 ### 3. 설정 기능
@@ -112,7 +120,7 @@
 
 | 기능 | 설명 |
 |------|-------------|
-| **감사로그** | 모든 관리자/상담원 행동 기록, XLSX 날짜 지원 |
+| **감사로그** | 모든 관리자/상담원 행동 기록, XLSX 내보내기 |
 | **활동 로그** | 티켓 상태 변경, 할당, 양도 이력 |
 | **보안** | 티켓 접근 토큰, 민감 데이터 암호화 |
 
@@ -126,6 +134,47 @@
 | **파일 저장** | 개발: 로컬, 프로덕션: AWS S3 |
 | **응답 템플릿** | 변수 치환({{ticket.id}}, {{customer.name}} 등), 문의 유형별 추천, 사용 기록 감사 로그, 템플릿 사용 권한 검증, 변수 미리보기/검증, 점수 기반 추천 알고리즘 |
 | **Git 연동** | 이슈 연결/생성 시 감사 로깅, webhook 지원, 링크 해제/수정 API, 중복 방지, Provider별 URL 검증, Git Operation Queue (재시도 메커니즘), 티켓 상태 자동 동기화 |
+
+---
+
+## 🏗 아키텍처
+
+### 로컬 개발
+```
+┌─────────────────────────────────┐
+│  Next.js App (pnpm dev)         │
+│  - SQLite (dev.db)              │
+└─────────────────────────────────┘
+```
+
+### 프로덕션 (Docker Compose)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Nginx (SSL)                             │
+│  ┌──────────────────────┐  ┌──────────────────────┐       │
+│  │   helpdesk.com       │  │   admin.com          │       │
+│  └──────────┬───────────┘  └──────────┬───────────┘       │
+│             │                        │                      │
+│             ▼                        ▼                      │
+│  ┌──────────────────────┐  ┌──────────────────────┐       │
+│  │   Public App (xN)    │  │   Admin App          │       │
+│  │   APP_TYPE=public    │  │   APP_TYPE=admin    │       │
+│  └──────────┬───────────┘  └──────────┬───────────┘       │
+│             │                        │                      │
+│             └────────────┬───────────┘                      │
+│                          ▼                                 │
+│  ┌─────────────────────────────────────────────┐             │
+│  │         LibSQL (sqld)                      │             │
+│  │   HTTP API on :8889 (internal only)       │             │
+│  └─────────────────────────────────────────────┘             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**아키텍처 특징:**
+- **Public 앱**: 수평 확장 가능 (`docker-compose up --scale public=N`)
+- **Admin 앱**: 수평 확장 가능 (`docker-compose up --scale admin=N`)
+- **LibSQL**: 내부 네트워크만 접근, 외부 노출 없음
+- **Nginx**: SSL 종료, 도메인 분리, 600MB 파일 업로드 지원
 
 ---
 
@@ -150,7 +199,9 @@ crinity-helpdesk/
 │   │   ├── ticket/            # 티켓 관련 컴포넌트
 │   │   └── admin/             # 관리자 컴포넌트
 │   ├── lib/
-│   │   ├── db/                # Prisma 클라이언트 및 쿼리
+│   │   ├── db/                # Prisma/LibSQL 클라이언트 및 쿼리
+│   │   │   ├── client.ts      # Prisma + LibSQL Adapter
+│   │   │   └── raw.ts         # LibSQL Raw Client
 │   │   ├── auth/              # 인증 설정 및 가드
 │   │   ├── audit/             # 감사로깅
 │   │   ├── llm/               # LLM 연동 (Ollama/Gemini)
@@ -160,9 +211,12 @@ crinity-helpdesk/
 │   │   ├── storage/           # 파일 저장
 │   │   └── utils/             # 유틸리티
 │   └── types/                 # TypeScript 타입
+├── docker-compose.yml          # 프로덕션 배포 설정
+├── Dockerfile                  # 멀티스테이지 빌드
+├── nginx.conf                 # 리버스 프록시 설정
 ├── scripts/                   # 유틸리티 스크립트
 ├── tests/                     # 테스트 파일
-└── Dockerfile                 # Docker 배포 설정
+└── .env.production.example    # 프로덕션 환경변수 템플릿
 ```
 
 ---
@@ -173,8 +227,8 @@ crinity-helpdesk/
 
 - **Node.js** 20.x 이상
 - **pnpm** 10.x 이상
-- **Docker** (선택사항, 컨테이너 배포 시)
-- **SQLite** 3 (내장, 별도 설치 불필요)
+- **Docker** (프로덕션 배포 시)
+- **Docker Compose** (프로덕션 배포 시)
 
 ---
 
@@ -185,8 +239,8 @@ crinity-helpdesk/
 pnpm dev
 ```
 
-`install.sh` 이 한 번에 처리합니다:
-- `.env.example` → `.env` 복사 후 `openssl rand -base64 32` 으로 시크릿 3개 자동 생성
+`install.sh`가 한 번에 처리합니다:
+- `.env.example` → `.env` 복사 후 `openssl rand -base64 32`로 시크릿 3개 자동 생성
 - `pnpm install`
 - `prisma migrate deploy` + `prisma db seed` (초기 관리자 계정 생성)
 
@@ -202,7 +256,7 @@ pnpm install
 
 # 2. 환경 변수 설정
 cp .env.example .env
-# .env 파일을 열어 AUTH_SECRET, TICKET_ACCESS_SECRET, GIT_TOKEN_ENCRYPTION_KEY 를
+# .env 파일을 열어 AUTH_SECRET, TICKET_ACCESS_SECRET, GIT_TOKEN_ENCRYPTION_KEY를
 # openssl rand -base64 32 결과로 각각 채워넣습니다
 
 # 3. 데이터베이스 마이그레이션 + 초기 데이터
@@ -214,6 +268,16 @@ pnpm dev
 ```
 
 브라우저에서 `http://localhost:3000` 접속
+
+---
+
+### 로컬 프로덕션 테스트
+
+```bash
+# 빌드 및 실행
+pnpm build
+pnpm start
+```
 
 ---
 
@@ -231,12 +295,10 @@ pnpm dev
 
 Crinity Helpdesk는 **최소한의 환경 변수**만 `.env` 파일에서 관리하고, 나머지 모든 설정은 **웹 관리 콘솔**에서 관리할 수 있도록 설계되었습니다.
 
-### 필수 설정 (`.env` 파일)
-
-이 값들은 애플리케이션 시작 시 반드시 필요하며, 데이터베이스 연결 및 핵심 보안 기능에 사용됩니다.
+### 로컬 개발 (`.env.example`)
 
 ```bash
-# Database (필수) - SQLite 데이터베이스 파일 경로
+# Database (필수) - 로컬 SQLite
 DATABASE_URL="file:./prisma/dev.db"
 
 # Auth (필수) - 세션 암호화용, 최소 32자 권장
@@ -254,6 +316,27 @@ INITIAL_ADMIN_EMAIL="admin@crinity.io"
 INITIAL_ADMIN_PASSWORD="admin1234"
 ```
 
+### 프로덕션 (`.env.production.example`)
+
+```bash
+# 도메인
+PUBLIC_URL=https://helpdesk.company.com
+ADMIN_URL=https://admin.company.com
+
+# 인증
+AUTH_SECRET=<32자 이상 랜덤 문자열>
+TICKET_ACCESS_SECRET=<32자 이상 랜덤 문자열>
+GIT_TOKEN_ENCRYPTION_KEY=<32바이트 키>
+
+# 초기 관리자
+INITIAL_ADMIN_EMAIL=admin@company.com
+INITIAL_ADMIN_PASSWORD=<초기 비밀번호>
+
+# LibSQL (sqld 컨테이너 내부 주소 — 변경 불필요)
+DATABASE_URL=http://sqld:8889
+DATABASE_AUTH_TOKEN=
+```
+
 ### 웹 콘솔에서 관리되는 설정
 
 다음 설정들은 `.env` 파일이 아닌 **관리자 웹 콘솔**에서 관리됩니다:
@@ -267,6 +350,57 @@ INITIAL_ADMIN_PASSWORD="admin1234"
 | **문의 유형** | `/admin/settings/request-types` | 티켓 문의 유형 관리 |
 | **Git 연동** | `/admin/settings/git` | GitHub/GitLab 토큰 설정 |
 | **응답 템플릿** | `/admin/templates` | 응답 템플릿 CRUD, 변수 관리, 추천 설정 |
+
+---
+
+## 🚢 배포
+
+### 프로덕션 배포 (Docker Compose)
+
+```bash
+# 1. Docker 이미지 빌드
+docker build -t crinity-helpdesk:latest .
+
+# 2. 프로덕션 환경변수 설정
+cp .env.production.example .env.production
+# .env.production의 값을 실제 값으로 채웁니다
+
+# 3. SSL 인증서 준비
+mkdir -p certs
+# public.crt, public.key, admin.crt, admin.key를 certs/ 폴더에 배치
+
+# 4. 컨테이너 실행
+docker compose -f docker-compose.yml --env-file .env.production up -d
+
+# 5. 마이그레이션 실행 (최초 1회)
+docker compose -f docker-compose.yml --env-file .env.production run --rm migrator
+```
+
+### 수평 확장
+
+```bash
+# Public 앱 3개 인스턴스로 확장
+docker compose -f docker-compose.yml --env-file .env.production up -d --scale public=3
+
+# Admin 앱 2개 인스턴스로 확장
+docker compose -f docker-compose.yml --env-file .env.production up -d --scale admin=2
+```
+
+### 배포 관리
+
+```bash
+# 로그 확인
+docker compose logs -f public
+
+# 컨테이너 재시작
+docker compose restart public
+
+# 컨테이너 중지
+docker compose down
+
+# 볼륨 포함 전체 삭제 (주의!)
+docker compose down -v
+```
 
 ---
 
@@ -286,7 +420,7 @@ INITIAL_ADMIN_PASSWORD="admin1234"
 - `EmailSettings` - 이메일 프로바이더 설정
 - `TicketActivity` - 티켓 활동 로그
 - `TicketTransfer` - 티켓 양도 이력
-- `ResponseTemplate` - 응답 템플릿 (변수 치환, 조걸 렌더링)
+- `ResponseTemplate` - 응답 템플릿 (변수 치환, 조건 렌더링)
 - `GitLink` - Git 이슈 연결
 - `EmailDelivery` - 이메일 발송 큐 (Outbox 패턴)
 - `EmailThreadMapping` - 이메일 스레딩 관리

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { db } from "@/lib/db/raw";
 import { DateRange, RepeatInquiry, RepeatPatternType, RepeatInquiryResponse } from "./contracts";
 
 interface RawRepeatInquiry {
@@ -18,24 +19,28 @@ export async function getRepeatInquiries(
   const fromISO = dateRange.from.toISOString();
   const toISO = dateRange.to.toISOString();
 
-  const rawData = await prisma.$queryRaw<RawRepeatInquiry[]>`
-    SELECT 
-      t."customerId",
-      t."customerEmail",
-      t."customerName",
-      COUNT(*) as "ticketCount",
-      COUNT(DISTINCT t."categoryId") as "distinctCategories",
-      MIN(t."createdAt") as "firstTicketAt",
-      MAX(t."createdAt") as "lastTicketAt"
-    FROM "Ticket" t
-    WHERE t."createdAt" >= ${fromISO}
-      AND t."createdAt" <= ${toISO}
-    GROUP BY t."customerId", t."customerEmail", t."customerName"
-    HAVING COUNT(*) >= ${minTickets}
-    ORDER BY COUNT(*) DESC
-  `;
+  const rawData = await db.execute({
+    sql: `
+      SELECT
+        t.customerId,
+        t.customerEmail,
+        t.customerName,
+        COUNT(*) as ticketCount,
+        COUNT(DISTINCT t.categoryId) as distinctCategories,
+        MIN(t.createdAt) as firstTicketAt,
+        MAX(t.createdAt) as lastTicketAt
+      FROM Ticket t
+      WHERE t.createdAt >= ?
+        AND t.createdAt <= ?
+      GROUP BY t.customerId, t.customerEmail, t.customerName
+      HAVING COUNT(*) >= ?
+      ORDER BY COUNT(*) DESC
+    `,
+    args: [fromISO, toISO, minTickets],
+  });
+  const typedRawData: RawRepeatInquiry[] = rawData.rows as RawRepeatInquiry[];
 
-  const customers: RepeatInquiry[] = rawData.map((row) => {
+  const customers: RepeatInquiry[] = typedRawData.map((row) => {
     const distinctCategoriesNum = Number(row.distinctCategories);
     let patternType: RepeatPatternType;
     if (distinctCategoriesNum === 1) {
