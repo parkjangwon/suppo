@@ -113,6 +113,7 @@ pnpm --filter=@crinity/db seed
 ```bash
 pnpm dev:public
 pnpm dev:admin
+pnpm dev:all
 ```
 
 - Public: `http://localhost:3000`
@@ -123,6 +124,8 @@ pnpm dev:admin
 ```bash
 pnpm build:public
 pnpm build:admin
+pnpm build:all
+pnpm start:all
 ```
 
 ## 환경 변수

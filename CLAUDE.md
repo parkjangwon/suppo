@@ -8,10 +8,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Development
 pnpm dev:admin    # Admin app (localhost:3001)
 pnpm dev:public   # Public app (localhost:3000)
+pnpm dev:all      # Admin + Public parallel dev
 
 # Build
 pnpm build:admin
 pnpm build:public
+pnpm build:all
+pnpm start:all    # Built admin + public apps in parallel
 pnpm lint
 
 # Testing

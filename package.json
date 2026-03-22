@@ -4,8 +4,11 @@
   "scripts": {
     "dev:admin": "pnpm --filter=@crinity/admin dev",
     "dev:public": "pnpm --filter=@crinity/public dev",
+    "dev:all": "pnpm -r --parallel --filter=@crinity/public --filter=@crinity/admin dev",
     "build:admin": "pnpm --filter=@crinity/admin build",
     "build:public": "pnpm --filter=@crinity/public build",
+    "build:all": "pnpm build:public && pnpm build:admin",
+    "start:all": "pnpm -r --parallel --filter=@crinity/public --filter=@crinity/admin start",
     "lint": "pnpm -r lint",
     "test": "vitest run",
     "test:e2e": "playwright test"
