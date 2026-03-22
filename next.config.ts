@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  // 멀티 lockfile 환경(monorepo 워크트리)에서 standalone 트레이싱 루트 명시
+  outputFileTracingRoot: path.join(__dirname),
+  // @libsql 플랫폼별 네이티브 바이너리는 동적 require로 로드되어
+  // Next.js 정적 파일 트레이서가 감지하지 못하므로 명시적으로 포함
+  outputFileTracingIncludes: {
+    "/**": [
+      "./node_modules/@libsql/**",
+      "./node_modules/.pnpm/@libsql*/**",
+      "./node_modules/.pnpm/libsql*/**",
+    ],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

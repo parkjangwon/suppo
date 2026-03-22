@@ -1,0 +1,47 @@
+# 의존성 (빌드 스테이지에서 재설치)
+node_modules
+
+# Next.js 빌드 캐시 (Docker 내부에서 새로 빌드)
+.next
+
+# 워크트리 (격리된 브랜치 작업 디렉토리)
+.worktrees
+
+# 개발 데이터베이스
+prisma/dev.db
+prisma/dev.db-shm
+prisma/dev.db-wal
+prisma/*.db
+
+# 환경변수 파일 (docker-compose에서 런타임 주입 — 이미지에 구우면 안 됨)
+.env
+.env.*
+
+# 업로드 파일 (볼륨으로 마운트)
+public/uploads
+
+# 테스트 / 리포트
+tests/e2e/results
+tests/reporter/dist
+playwright-report
+test-results
+
+# Git
+.git
+.gitignore
+
+# IDE / OS
+.vscode
+.idea
+*.DS_Store
+*.swp
+
+# 빌드 메타데이터
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# 인증서 (보안)
+certs/
+
+# 로컬 스크립트
+install.sh

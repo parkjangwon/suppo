@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/client";
+import { db } from "@/lib/db/raw";
 import { DateRange, AgentPerformance, AgentPerformanceResponse } from "./contracts";
 
 interface AgentTicketStats {
@@ -35,30 +36,34 @@ export async function getAgentPerformance(
   const fromISO = dateRange.from.toISOString();
   const toISO = dateRange.to.toISOString();
 
-  const stats = await prisma.$queryRaw<AgentTicketStats[]>`
-    SELECT 
-      t."assigneeId" as "agentId",
-      COUNT(*) as "ticketsHandled",
-      AVG(
-        CASE 
-          WHEN t."firstResponseAt" IS NOT NULL 
-          THEN (julianday(t."firstResponseAt") - julianday(t."createdAt")) * 1440
-          ELSE NULL 
-        END
-      ) as "avgFirstResponseMinutes",
-      AVG(
-        CASE 
-          WHEN t."resolvedAt" IS NOT NULL OR t."closedAt" IS NOT NULL
-          THEN (julianday(COALESCE(t."resolvedAt", t."closedAt")) - julianday(t."createdAt")) * 1440
-          ELSE NULL 
-        END
-      ) as "avgResolutionMinutes"
-    FROM "Ticket" t
-    WHERE t."assigneeId" IN (${agentIds.join(",")})
-      AND t."createdAt" >= ${fromISO}
-      AND t."createdAt" <= ${toISO}
-    GROUP BY t."assigneeId"
-  `;
+  const stats = await db.execute({
+    sql: `
+      SELECT
+        t.assigneeId as agentId,
+        COUNT(*) as ticketsHandled,
+        AVG(
+          CASE
+            WHEN t.firstResponseAt IS NOT NULL
+            THEN (julianday(t.firstResponseAt) - julianday(t.createdAt)) * 1440
+            ELSE NULL
+          END
+        ) as avgFirstResponseMinutes,
+        AVG(
+          CASE
+            WHEN t.resolvedAt IS NOT NULL OR t.closedAt IS NOT NULL
+            THEN (julianday(COALESCE(t.resolvedAt, t.closedAt)) - julianday(t.createdAt)) * 1440
+            ELSE NULL
+          END
+        ) as avgResolutionMinutes
+      FROM Ticket t
+      WHERE t.assigneeId IN (${agentIds.map(() => '?').join(',')})
+        AND t.createdAt >= ?
+        AND t.createdAt <= ?
+      GROUP BY t.assigneeId
+    `,
+    args: [...agentIds, fromISO, toISO],
+  });
+  const typedStats: AgentTicketStats[] = stats.rows as AgentTicketStats[];
 
   const openTicketCounts = await prisma.ticket.groupBy({
     by: ["assigneeId"],
@@ -77,7 +82,7 @@ export async function getAgentPerformance(
     openTicketCounts.map((o) => [o.assigneeId, o._count.id])
   );
 
-  const statsMap = new Map(stats.map((s) => [s.agentId, s]));
+  const statsMap = new Map(typedStats.map((s) => [s.agentId, s]));
 
   const agentStats: AgentPerformance[] = agents.map((agent) => {
     const stat = statsMap.get(agent.id);
