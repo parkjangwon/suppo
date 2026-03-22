@@ -17,7 +17,19 @@ import {
   seedCSAT,
 } from "@/lib/system/seed-functions";
 
-const prisma = new PrismaClient();
+function createClient(): PrismaClient {
+  const url = process.env.DATABASE_URL ?? "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    // LibSQL (sqld) — 어댑터를 통해 연결
+    const { PrismaLibSql } = require("@prisma/adapter-libsql");
+    return new PrismaClient({
+      adapter: new PrismaLibSql({ url, authToken: process.env.DATABASE_AUTH_TOKEN }),
+    });
+  }
+  return new PrismaClient();
+}
+
+const prisma = createClient();
 
 async function main() {
   console.log("🌱 Seeding database...\n");
