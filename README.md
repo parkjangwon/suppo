@@ -82,7 +82,7 @@ crinity-helpdesk/
 ├── docker/
 │   ├── Dockerfile
 │   ├── docker-compose.yml
-│   ├── nginx.conf
+│   ├── nginx.conf.template
 │   ├── certs/
 │   └── env/
 ├── pnpm-workspace.yaml

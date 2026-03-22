@@ -77,12 +77,31 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${NGINX_HTTP_PORT:-80}:${NGINX_HTTP_PORT:-80}"
+      - "${NGINX_HTTPS_PORT:-443}:${NGINX_HTTPS_PORT:-443}"
+    environment:
+      PUBLIC_URL: ${PUBLIC_URL}
+      ADMIN_URL: ${ADMIN_URL}
+      PUBLIC_SERVER_NAME: ${PUBLIC_SERVER_NAME:-}
+      ADMIN_SERVER_NAME: ${ADMIN_SERVER_NAME:-}
+      PUBLIC_CLIENT_MAX_BODY_SIZE: ${PUBLIC_CLIENT_MAX_BODY_SIZE:-600M}
+      ADMIN_CLIENT_MAX_BODY_SIZE: ${ADMIN_CLIENT_MAX_BODY_SIZE:-100M}
+      ENABLE_TLS: ${ENABLE_TLS:-0}
+      NGINX_HTTP_PORT: ${NGINX_HTTP_PORT:-80}
+      NGINX_HTTPS_PORT: ${NGINX_HTTPS_PORT:-443}
+      PUBLIC_TLS_CERT: ${PUBLIC_TLS_CERT:-/etc/nginx/certs/public.crt}
+      PUBLIC_TLS_KEY: ${PUBLIC_TLS_KEY:-/etc/nginx/certs/public.key}
+      ADMIN_TLS_CERT: ${ADMIN_TLS_CERT:-/etc/nginx/certs/admin.crt}
+      ADMIN_TLS_KEY: ${ADMIN_TLS_KEY:-/etc/nginx/certs/admin.key}
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.entrypoint.sh:/docker-entrypoint.d/99-render-nginx.sh:ro
+      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - public
       - admin
+    command:
+      - /bin/sh
+      - /docker-entrypoint.d/99-render-nginx.sh
 
 volumes:
   db_data:
