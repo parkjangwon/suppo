@@ -55,6 +55,10 @@ RUN addgroup --system --gid 1001 nodejs && \
 # 해결: deps의 전체 node_modules(symlink 원본)를 사용하고,
 #       standalone에서는 server.js와 .next/만 선택적으로 복사
 COPY --from=prod-deps /app/node_modules ./node_modules
+# Prisma 클라이언트는 builder 스테이지에서만 생성됨 (prod-deps에는 prisma CLI 없음)
+# pnpm 가상 스토어 경로는 pnpm-lock.yaml에 고정되어 있으므로 직접 복사
+COPY --from=builder /app/node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/.prisma \
+                    ./node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/.prisma
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts

@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       kpi,
       csatTrend: csatTrend.trend,
       csatSummary: csatTrend.summary,
-      categoryFrequency,
+      categoryFrequency: categoryFrequency.categories,
     });
   } catch (error) {
     console.error("Overview analytics API error:", error);

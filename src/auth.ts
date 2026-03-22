@@ -30,19 +30,20 @@ type AuthenticatedAgent = {
 };
 
 async function ensureDefaultAdminSeed() {
-  if (process.env.NODE_ENV === "production") {
-    return;
-  }
+  // production에서는 INITIAL_ADMIN_EMAIL / INITIAL_ADMIN_PASSWORD 환경변수 우선 사용.
+  // 이 변수가 없으면 DEFAULT_ADMIN_* fallback.
+  const adminEmail = process.env.INITIAL_ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL;
+  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD;
 
   const existingAdmin = await prisma.agent.findUnique({
-    where: { email: DEFAULT_ADMIN_EMAIL }
+    where: { email: adminEmail }
   });
-  const passwordHash = await hash(DEFAULT_ADMIN_PASSWORD, 10);
+  const passwordHash = await hash(adminPassword, 10);
 
   if (!existingAdmin) {
     await prisma.agent.create({
       data: {
-        email: DEFAULT_ADMIN_EMAIL,
+        email: adminEmail,
         name: "관리자",
         role: "ADMIN",
         authProvider: "CREDENTIALS",
@@ -198,6 +199,9 @@ if (
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  // nginx 리버스 프록시 환경(Docker)에서 Host 헤더가 내부 호스트와 달라
+  // NextAuth의 UntrustedHost 오류가 발생하므로 trustHost를 활성화함
+  trustHost: true,
   ...(hasOAuthProviders && HAS_DATABASE ? { adapter: PrismaAdapter(prisma) as Adapter } : {}),
   providers,
   callbacks: {

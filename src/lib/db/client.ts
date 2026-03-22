@@ -1,4 +1,3 @@
-import { createClient } from "@libsql/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaClient } from "@prisma/client";
 
@@ -27,11 +26,14 @@ function createPrismaClient() {
   const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
 
   if (isLibsql && !isBuildPhase) {
-    const libsql = createClient({
+    // PrismaLibSql은 config 객체 {url, authToken}를 직접 받음.
+    // createClient()로 생성한 Client 인스턴스를 전달하면 안 됨 —
+    // connect() 시 내부에서 createClient(config)를 재호출하는데 Client.#url이
+    // private이라 url이 undefined가 되어 URL_INVALID 오류 발생.
+    prismaOptions.adapter = new PrismaLibSql({
       url,
       authToken: process.env.DATABASE_AUTH_TOKEN,
     });
-    prismaOptions.adapter = new PrismaLibSql(libsql);
   }
 
   return new PrismaClient(prismaOptions);
