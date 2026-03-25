@@ -18,11 +18,13 @@ import {
   BookOpen,
   Brain,
   Calendar,
+  Check,
   Clock,
   ClipboardList,
   FileCode,
   FileText,
   GitBranch,
+  Globe,
   Inbox,
   LayoutDashboard,
   LogOut,
@@ -37,6 +39,7 @@ import {
   X,
 } from "lucide-react";
 import { useBranding } from "@crinity/shared/branding/context";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { type AdminNavItemKey, getAdminNavSections } from "@/lib/navigation/admin-nav";
 
 const NAV_ICONS: Record<AdminNavItemKey, React.ComponentType<{ className?: string }>> = {
@@ -64,11 +67,23 @@ const NAV_ICONS: Record<AdminNavItemKey, React.ComponentType<{ className?: strin
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const branding = useBranding();
+  const copy = useAdminCopy();
   const { data: session, status } = useSession();
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
+  const [currentLocale, setCurrentLocale] = React.useState<"ko" | "en">("ko");
   const isAdmin = session?.user?.role === "ADMIN";
   const isLoginPage = pathname === "/admin/login";
   const isPasswordChangePage = pathname === "/admin/change-password";
+
+  const handleLocaleChange = async (newLocale: "ko" | "en") => {
+    setCurrentLocale(newLocale);
+    await fetch("/api/admin/locale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale: newLocale }),
+    });
+    window.location.reload();
+  };
 
   if (isLoginPage || isPasswordChangePage) {
     return (
@@ -88,11 +103,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col h-screen sticky top-0">
         <SidebarBrand adminPanelTitle={branding.adminPanelTitle} />
         <SidebarNavigation sections={navSections} pathname={pathname} />
-        <SidebarUserSummary
-          isLoading={isLoading}
-          userName={userName}
-          userRole={userRole}
-        />
+        <div className="flex-1 flex flex-col">
+          <SidebarUserSummary
+            isLoading={isLoading}
+            userName={userName}
+            userRole={userRole}
+          />
+          <div className="px-4 pb-4 border-t">
+            <button
+              onClick={() => handleLocaleChange(currentLocale === "ko" ? "en" : "ko")}
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+            >
+              <Globe className="h-4 w-4" />
+              <span className="ml-2">{currentLocale === "ko" ? "English" : "한국어"}</span>
+              <Check className="h-4 w-4 ml-auto" />
+            </button>
+          </div>
+        </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">

@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
 import { AdminShell } from "@/components/admin-shell";
 import { BrandingProvider } from "@crinity/shared/branding/context";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { AdminCopyProvider } from "@crinity/shared/i18n/admin-context";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,10 +21,14 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }>) {
   const branding = await getSystemBranding();
+  const locale = (await cookies()).get("crinity-locale")?.value;
+  const copy = getAdminCopy(locale);
 
   return (
     <BrandingProvider branding={branding}>
-      <AdminShell>{children}</AdminShell>
+      <AdminCopyProvider value={copy}>
+        <AdminShell>{children}</AdminShell>
+      </AdminCopyProvider>
     </BrandingProvider>
   );
 }
