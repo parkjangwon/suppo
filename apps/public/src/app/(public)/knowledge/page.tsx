@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Badge } from "@crinity/ui/components/ui/badge";
@@ -8,25 +9,33 @@ import { KnowledgeSearchInput } from "@/components/knowledge/knowledge-search-in
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 
-export const metadata: Metadata = {
-  title: "지식 찾기 | Crinity Helpdesk",
-  description: "자주 묻는 질문과 도움말을 찾아보세요",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await cookies()).get("crinity-locale")?.value;
+  const copy = getPublicCopy(locale);
+  return {
+    title: copy.knowledgePageTitle,
+    description: copy.knowledgePageDescription,
+  };
+}
 
 interface KnowledgePageProps {
   searchParams: Promise<{ category?: string; q?: string }>;
 }
 
 export default async function KnowledgePage({ searchParams }: KnowledgePageProps) {
-  const [{ category: categorySlug, q }, branding] = await Promise.all([
+  const [{ category: categorySlug, q }, branding, locale] = await Promise.all([
     searchParams,
     getSystemBranding(),
+    cookies().then((c) => c.get("crinity-locale")?.value),
   ]);
 
   if (!branding.knowledgeEnabled) {
     notFound();
   }
+
+  const copy = getPublicCopy(locale);
 
   const categories = await prisma.knowledgeCategory.findMany({
     where: { isActive: true },
@@ -97,9 +106,9 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto text-center">
-            <h1 className="text-3xl font-bold mb-4">무엇을 도와드릴까요?</h1>
+            <h1 className="text-3xl font-bold mb-4">{copy.knowledgeHeading}</h1>
             <p className="text-gray-600 mb-6">
-              자주 묻는 질문과 도움말을 검색하세요
+              {copy.knowledgeSubheading}
             </p>
             <Suspense>
               <KnowledgeSearchInput defaultValue={q} />
@@ -114,7 +123,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">카테고리</CardTitle>
+                <CardTitle className="text-lg">{copy.knowledgeCategories}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-1">
@@ -126,7 +135,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                         : "hover:bg-gray-100"
                     }`}
                   >
-                    <span>전체</span>
+                    <span>{copy.knowledgeCategoryAll}</span>
                     <Badge variant="secondary">
                       {categories.reduce((s, c) => s + c._count.articles, 0)}
                     </Badge>
@@ -166,7 +175,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
               <div className="flex flex-wrap items-center gap-2">
                 {q && (
                   <div className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
-                    <span>검색: {q}</span>
+                    <span>{copy.knowledgeFilterSearchLabel} {q}</span>
                     <Link
                       href={activeCategory ? `/knowledge?category=${activeCategory.slug}` : "/knowledge"}
                       className="ml-1 hover:text-blue-900"
@@ -177,7 +186,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                 )}
                 {activeCategory && (
                   <div className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                    <span>카테고리: {activeCategory.name}</span>
+                    <span>{copy.knowledgeFilterCategoryLabel} {activeCategory.name}</span>
                     <Link
                       href={q ? `/knowledge?q=${encodeURIComponent(q)}` : "/knowledge"}
                       className="ml-1 hover:text-green-900"
@@ -186,7 +195,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                     </Link>
                   </div>
                 )}
-                <span className="text-sm text-gray-500">{articles.length}건</span>
+                <span className="text-sm text-gray-500">{articles.length}{copy.knowledgeResultCountSuffix}</span>
               </div>
             )}
 
@@ -196,20 +205,22 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <BookOpen className="h-5 w-5" />
-                    {q ? `"${q}" 검색 결과` : activeCategory?.name}
+                    {q
+                      ? `${copy.knowledgeSearchResultsPrefix}"${q}"${copy.knowledgeSearchResultsSuffix}`
+                      : activeCategory?.name}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {articles.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                      <p className="font-medium mb-1">검색 결과가 없습니다</p>
-                      <p className="text-sm">다른 검색어나 카테고리를 시도해보세요.</p>
+                      <p className="font-medium mb-1">{copy.knowledgeNoResults}</p>
+                      <p className="text-sm">{copy.knowledgeNoResultsSubtext}</p>
                       <Link
                         href="/ticket/new"
                         className="inline-block mt-4 text-sm text-blue-600 hover:underline"
                       >
-                        티켓으로 문의하기 →
+                        {copy.knowledgeContactViaTicket}
                       </Link>
                     </div>
                   ) : (
@@ -234,7 +245,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                                 {article.category.name}
                               </Badge>
                               <span className="text-xs text-gray-400">
-                                조회 {article.viewCount.toLocaleString()}
+                                {copy.knowledgeViewCountPrefix}{article.viewCount.toLocaleString()}
                               </span>
                             </div>
                           </div>
@@ -253,13 +264,13 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">
                     <BookOpen className="h-5 w-5" />
-                    인기 문서
+                    {copy.knowledgePopularArticles}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {popularArticles.length === 0 ? (
                     <p className="text-center text-gray-500 py-8">
-                      아직 게시된 문서가 없습니다.
+                      {copy.knowledgeNoArticles}
                     </p>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -284,7 +295,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
                                   {article.category.name}
                                 </Badge>
                                 <span className="text-xs text-gray-500">
-                                  조회 {article.viewCount.toLocaleString()}
+                                  {copy.knowledgeViewCountPrefix}{article.viewCount.toLocaleString()}
                                 </span>
                               </div>
                             </div>
@@ -301,11 +312,11 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
             <Card>
               <CardContent className="py-6">
                 <p className="text-gray-600 text-center">
-                  원하는 내용을 찾지 못하셨나요?{" "}
+                  {copy.knowledgeFooterCtaBefore}
                   <Link href="/ticket/new" className="text-blue-600 hover:underline">
-                    티켓을 생성
+                    {copy.knowledgeFooterCtaLink}
                   </Link>
-                  하여 문의해 주세요.
+                  {copy.knowledgeFooterCtaAfter}
                 </p>
               </CardContent>
             </Card>

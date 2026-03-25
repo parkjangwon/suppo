@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
 import { Button } from "@crinity/ui/components/ui/button";
+import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 
 interface ArticleFeedbackProps {
   articleId: string;
@@ -11,6 +12,7 @@ interface ArticleFeedbackProps {
 export function ArticleFeedback({ articleId }: ArticleFeedbackProps) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const copy = usePublicCopy();
 
   async function handleFeedback(wasHelpful: boolean) {
     if (submitted || loading) return;
@@ -34,7 +36,7 @@ export function ArticleFeedback({ articleId }: ArticleFeedbackProps) {
     return (
       <div className="flex items-center gap-2 text-sm text-green-600">
         <CheckCircle className="h-4 w-4" />
-        피드백을 보내주셔서 감사합니다!
+        {copy.knowledgeFeedbackThanks}
       </div>
     );
   }
@@ -48,7 +50,7 @@ export function ArticleFeedback({ articleId }: ArticleFeedbackProps) {
         onClick={() => handleFeedback(true)}
       >
         <ThumbsUp className="h-4 w-4 mr-2" />
-        도움이 되었어요
+        {copy.knowledgeFeedbackHelpful}
       </Button>
       <Button
         variant="outline"
@@ -57,7 +59,7 @@ export function ArticleFeedback({ articleId }: ArticleFeedbackProps) {
         onClick={() => handleFeedback(false)}
       >
         <ThumbsDown className="h-4 w-4 mr-2" />
-        도움이 필요해요
+        {copy.knowledgeFeedbackNotHelpful}
       </Button>
     </div>
   );

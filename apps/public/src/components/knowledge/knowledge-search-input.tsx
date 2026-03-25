@@ -5,6 +5,7 @@ import { useRef, useTransition } from "react";
 import { Input } from "@crinity/ui/components/ui/input";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
+import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 
 export function KnowledgeSearchInput({ defaultValue }: { defaultValue?: string }) {
   const router = useRouter();
@@ -12,6 +13,7 @@ export function KnowledgeSearchInput({ defaultValue }: { defaultValue?: string }
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isPending, startTransition] = useTransition();
+  const copy = usePublicCopy();
 
   function handleSearch(formData: FormData) {
     const q = (formData.get("q") as string)?.trim();
@@ -35,7 +37,7 @@ export function KnowledgeSearchInput({ defaultValue }: { defaultValue?: string }
         ref={inputRef}
         name="q"
         defaultValue={defaultValue}
-        placeholder="제목, 내용으로 검색..."
+        placeholder={copy.knowledgeSearchPlaceholder}
         className="pl-12 pr-24 h-14 text-lg"
       />
       <Button
@@ -43,7 +45,7 @@ export function KnowledgeSearchInput({ defaultValue }: { defaultValue?: string }
         className="absolute right-2 top-1/2 -translate-y-1/2 h-10"
         disabled={isPending}
       >
-        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "검색"}
+        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : copy.knowledgeSearchButton}
       </Button>
     </form>
   );

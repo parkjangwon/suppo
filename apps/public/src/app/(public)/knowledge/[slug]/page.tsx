@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Button } from "@crinity/ui/components/ui/button";
@@ -8,20 +9,26 @@ import { Badge } from "@crinity/ui/components/ui/badge";
 import { ChevronLeft, Eye, Ticket } from "lucide-react";
 import { ArticleFeedback } from "@/components/knowledge/article-feedback";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 
 interface KnowledgeArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: KnowledgeArticlePageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const [{ slug }, locale] = await Promise.all([
+    params,
+    cookies().then((c) => c.get("crinity-locale")?.value),
+  ]);
+  const copy = getPublicCopy(locale);
+
   const article = await prisma.knowledgeArticle.findUnique({
     where: { slug },
     select: { title: true, excerpt: true },
   });
 
   if (!article) {
-    return { title: "문서를 찾을 수 없습니다" };
+    return { title: copy.knowledgeArticleNotFound };
   }
 
   return {
@@ -31,12 +38,17 @@ export async function generateMetadata({ params }: KnowledgeArticlePageProps): P
 }
 
 export default async function KnowledgeArticlePage({ params }: KnowledgeArticlePageProps) {
-  const { slug } = await params;
+  const [{ slug }, locale] = await Promise.all([
+    params,
+    cookies().then((c) => c.get("crinity-locale")?.value),
+  ]);
 
   const branding = await getSystemBranding();
   if (!branding.knowledgeEnabled) {
     notFound();
   }
+
+  const copy = getPublicCopy(locale);
 
   const article = await prisma.knowledgeArticle.findUnique({
     where: { slug },
@@ -93,7 +105,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
             className="inline-flex items-center text-gray-600 hover:text-gray-900"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            지식 목록으로
+            {copy.knowledgeBackToList}
           </Link>
         </div>
       </div>
@@ -135,7 +147,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
 
                 <div className="mt-8 pt-6 border-t">
                   <p className="text-sm text-gray-600 mb-4">
-                    이 문서가 도움이 되었나요?
+                    {copy.knowledgeArticleHelpfulQuestion}
                   </p>
                   <ArticleFeedback articleId={article.id} />
                 </div>
@@ -146,12 +158,12 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
               <CardContent className="py-6">
                 <div className="text-center">
                   <p className="text-gray-600 mb-4">
-                    원하는 답변을 찾지 못하셨나요?
+                    {copy.knowledgeNoAnswerFound}
                   </p>
                   <Button asChild>
                     <Link href="/ticket/new">
                       <Ticket className="h-4 w-4 mr-2" />
-                      티켓 생성하기
+                      {copy.knowledgeCreateTicketAction}
                     </Link>
                   </Button>
                 </div>
@@ -162,7 +174,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">관련 문서</CardTitle>
+                <CardTitle className="text-lg">{copy.knowledgeRelatedArticles}</CardTitle>
               </CardHeader>
               <CardContent>
                 {relatedArticles.length > 0 ? (
@@ -186,7 +198,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
                   </div>
                 ) : (
                   <p className="text-sm text-gray-500 text-center py-4">
-                    관련 문서가 없습니다
+                    {copy.knowledgeNoRelatedArticles}
                   </p>
                 )}
               </CardContent>
@@ -194,14 +206,14 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
 
             <Card className="mt-6">
               <CardHeader>
-                <CardTitle className="text-lg">문의하기</CardTitle>
+                <CardTitle className="text-lg">{copy.knowledgeContactTitle}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  추가 도움이 필요하시면 언제든지 문의해 주세요.
+                  {copy.knowledgeContactText}
                 </p>
                 <Button variant="outline" className="w-full" asChild>
-                  <Link href="/ticket/new">티켓 생성</Link>
+                  <Link href="/ticket/new">{copy.knowledgeContactTicketButton}</Link>
                 </Button>
               </CardContent>
             </Card>
