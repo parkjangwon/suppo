@@ -3,6 +3,7 @@
 
 import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
 import { prisma } from "@crinity/db";
+import { enqueueSLAWarningEmail, enqueueSLABreachEmail } from "@crinity/shared/email/enqueue";
 
 interface BusinessHours {
   workStartHour: number; // 9 = 9AM
@@ -289,61 +290,81 @@ export async function stopSLAClock(
 export async function checkSLABreaches(): Promise<void> {
   const now = new Date();
 
-  // 마감 임박 클락 조회 (1시간 이내)
-  const warningClocks = await prisma.sLAClock.findMany({
-    where: {
-      status: SLAClockStatus.RUNNING,
-      deadlineAt: {
-        lte: new Date(now.getTime() + 60 * 60 * 1000), // 1시간 후
-        gt: now,
-      },
-      warningSentAt: null,
-    },
-    include: {
-      ticket: {
-        include: {
-          assignee: true,
+  const [emailSettings, warningClocks, breachedClocks] = await Promise.all([
+    prisma.emailSettings.findUnique({
+      where: { id: "default" },
+      select: { notificationEmail: true },
+    }),
+    // 마감 임박 클락 조회 (1시간 이내)
+    prisma.sLAClock.findMany({
+      where: {
+        status: SLAClockStatus.RUNNING,
+        deadlineAt: {
+          lte: new Date(now.getTime() + 60 * 60 * 1000),
+          gt: now,
         },
+        warningSentAt: null,
       },
-      policy: true,
-    },
-  });
+      include: {
+        ticket: { include: { assignee: true } },
+        policy: true,
+      },
+    }),
+    // 위반된 클락 조회
+    prisma.sLAClock.findMany({
+      where: {
+        status: SLAClockStatus.RUNNING,
+        deadlineAt: { lte: now },
+        breachedAt: null,
+      },
+      include: {
+        ticket: { include: { assignee: true } },
+        policy: true,
+      },
+    }),
+  ]);
+
+  const adminEmail = emailSettings?.notificationEmail ?? null;
 
   for (const clock of warningClocks) {
-    // TODO: 알림 발송
+    const minutesRemaining = Math.max(
+      0,
+      Math.floor((clock.deadlineAt.getTime() - now.getTime()) / 60000)
+    );
+    const targetLabel = clock.target === SLATarget.FIRST_RESPONSE ? "첫 응답" : "해결";
+    const assignee = clock.ticket.assignee;
+
+    await enqueueSLAWarningEmail(
+      assignee?.email,
+      adminEmail,
+      clock.ticket.ticketNumber,
+      assignee?.name ?? "담당자",
+      targetLabel,
+      minutesRemaining
+    );
+
     await prisma.sLAClock.update({
       where: { id: clock.id },
       data: { warningSentAt: now },
     });
   }
 
-  // 위반된 클락 조회
-  const breachedClocks = await prisma.sLAClock.findMany({
-    where: {
-      status: SLAClockStatus.RUNNING,
-      deadlineAt: {
-        lte: now,
-      },
-      breachedAt: null,
-    },
-    include: {
-      ticket: {
-        include: {
-          assignee: true,
-        },
-      },
-      policy: true,
-    },
-  });
-
   for (const clock of breachedClocks) {
-    // 위반 처리
     await prisma.sLAClock.update({
       where: { id: clock.id },
       data: { breachedAt: now },
     });
 
-    // TODO: 위반 알림 발송 (관리자에게)
+    const targetLabel = clock.target === SLATarget.FIRST_RESPONSE ? "첫 응답" : "해결";
+    const assignee = clock.ticket.assignee;
+
+    await enqueueSLABreachEmail(
+      assignee?.email,
+      adminEmail,
+      clock.ticket.ticketNumber,
+      assignee?.name ?? "담당자",
+      targetLabel
+    );
   }
 }
 
@@ -385,7 +406,7 @@ export async function getBusinessHours(): Promise<BusinessHours> {
     timezone: calendar.timezone,
     workStartHour: calendar.workStartHour,
     workEndHour: calendar.workEndHour,
-    workDays: calendar.workDays,
+    workDays: JSON.parse(calendar.workDays ?? "[1,2,3,4,5]") as number[],
     holidays: calendar.holidays.map((h) => h.date),
   };
 }

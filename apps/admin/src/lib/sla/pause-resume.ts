@@ -1,5 +1,6 @@
 import { prisma } from "@crinity/db";
-import { SLAClockStatus, TicketStatus } from "@prisma/client";
+import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
+import { enqueueSLABreachEmail } from "@crinity/shared/email/enqueue";
 
 /**
  * 티켓 상태 변경 시 SLA 시계 제어
@@ -78,14 +79,25 @@ async function resumeSLAClock(clockId: string): Promise<void> {
 export async function checkSLABreaches(): Promise<void> {
   const now = new Date();
 
-  const breachedClocks = await prisma.sLAClock.findMany({
-    where: {
-      status: SLAClockStatus.RUNNING,
-      deadlineAt: { lte: now },
-      breachedAt: null,
-    },
-    include: { ticket: true },
-  });
+  const [emailSettings, breachedClocks] = await Promise.all([
+    prisma.emailSettings.findUnique({
+      where: { id: "default" },
+      select: { notificationEmail: true },
+    }),
+    prisma.sLAClock.findMany({
+      where: {
+        status: SLAClockStatus.RUNNING,
+        deadlineAt: { lte: now },
+        breachedAt: null,
+      },
+      include: {
+        ticket: { include: { assignee: true } },
+        policy: true,
+      },
+    }),
+  ]);
+
+  const adminEmail = emailSettings?.notificationEmail ?? null;
 
   for (const clock of breachedClocks) {
     await prisma.sLAClock.update({
@@ -96,9 +108,15 @@ export async function checkSLABreaches(): Promise<void> {
       },
     });
 
-    // TODO: 위반 알림 발송
-    console.log(
-      `SLA Breach: Ticket ${clock.ticket.ticketNumber}`
+    const targetLabel = clock.target === SLATarget.FIRST_RESPONSE ? "첫 응답" : "해결";
+    const assignee = clock.ticket.assignee;
+
+    await enqueueSLABreachEmail(
+      assignee?.email,
+      adminEmail,
+      clock.ticket.ticketNumber,
+      assignee?.name ?? "담당자",
+      targetLabel
     );
   }
 }

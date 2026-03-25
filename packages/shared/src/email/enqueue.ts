@@ -6,7 +6,9 @@ import {
   renderTicketAssignedEmail,
   renderTicketCreatedCustomerEmail,
   renderTicketCreatedNotificationEmail,
-  renderCSATSurveyEmail
+  renderCSATSurveyEmail,
+  renderSLAWarningEmail,
+  renderSLABreachEmail,
 } from "@crinity/shared/email/renderers";
 
 type EmailDeliveryStatus = "PENDING" | "SENT" | "FAILED";
@@ -185,6 +187,41 @@ export async function enqueueStatusChangedEmail(
       db
     );
   }, "Failed to enqueue status-changed email");
+}
+
+export async function enqueueSLAWarningEmail(
+  assigneeEmail: string | null | undefined,
+  adminEmail: string | null | undefined,
+  ticketNumber: string,
+  assigneeName: string,
+  targetLabel: string,
+  minutesRemaining: number,
+  db: EmailQueueDbClient = prisma
+): Promise<void> {
+  const recipients = [assigneeEmail, adminEmail].filter(Boolean) as string[];
+  for (const to of recipients) {
+    await enqueueSafely(async () => {
+      const email = renderSLAWarningEmail({ ticketNumber, assigneeName, targetLabel, minutesRemaining });
+      await enqueueEmail({ to, subject: email.subject, body: email.body }, db);
+    }, `Failed to enqueue SLA warning email to ${to}`);
+  }
+}
+
+export async function enqueueSLABreachEmail(
+  assigneeEmail: string | null | undefined,
+  adminEmail: string | null | undefined,
+  ticketNumber: string,
+  assigneeName: string,
+  targetLabel: string,
+  db: EmailQueueDbClient = prisma
+): Promise<void> {
+  const recipients = [...new Set([assigneeEmail, adminEmail].filter(Boolean) as string[])];
+  for (const to of recipients) {
+    await enqueueSafely(async () => {
+      const email = renderSLABreachEmail({ ticketNumber, assigneeName, targetLabel });
+      await enqueueEmail({ to, subject: email.subject, body: email.body }, db);
+    }, `Failed to enqueue SLA breach email to ${to}`);
+  }
 }
 
 export async function enqueueCSATSurveyEmail(

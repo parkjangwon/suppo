@@ -49,6 +49,12 @@ function getTicketUrl(ticketNumber: string): string {
   return `${normalizedBaseUrl}/ticket/${ticketNumber}`;
 }
 
+function getAdminTicketUrl(ticketNumber: string): string {
+  const baseUrl = process.env.ADMIN_BASE_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3001";
+  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  return `${normalizedBaseUrl}/admin/tickets?q=${ticketNumber}`;
+}
+
 function getSurveyUrl(ticketId: string): string {
   const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
   const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -158,6 +164,55 @@ export function renderStatusChangedEmail(input: StatusChangedInput): RenderedEma
       <p>변경 후: <strong>${input.newStatus}</strong></p>
       <p>상태 확인: <a href="${ticketUrl}">${ticketUrl}</a></p>`
     )
+  };
+}
+
+interface SLAWarningInput {
+  ticketNumber: string;
+  assigneeName: string;
+  targetLabel: string; // "첫 응답" | "해결"
+  minutesRemaining: number;
+}
+
+interface SLABreachInput {
+  ticketNumber: string;
+  assigneeName: string;
+  targetLabel: string;
+}
+
+export function renderSLAWarningEmail(input: SLAWarningInput): RenderedEmail {
+  const ticketUrl = getAdminTicketUrl(input.ticketNumber);
+  const hours = Math.floor(input.minutesRemaining / 60);
+  const minutes = input.minutesRemaining % 60;
+  const timeLabel = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+
+  return {
+    subject: `[SLA 경고] 티켓 #${input.ticketNumber} — ${input.targetLabel} 마감 ${timeLabel} 전`,
+    body: renderShell(
+      "SLA 마감 임박 알림",
+      `<p>${input.assigneeName}님, 안녕하세요.</p>
+      <p>담당 티켓의 SLA 마감 시간이 얼마 남지 않았습니다.</p>
+      <p>티켓 번호: <strong>${input.ticketNumber}</strong></p>
+      <p>SLA 항목: <strong>${input.targetLabel}</strong></p>
+      <p>남은 시간: <strong>${timeLabel}</strong></p>
+      <p>지금 바로 확인하세요: <a href="${ticketUrl}">${ticketUrl}</a></p>`
+    ),
+  };
+}
+
+export function renderSLABreachEmail(input: SLABreachInput): RenderedEmail {
+  const ticketUrl = getAdminTicketUrl(input.ticketNumber);
+
+  return {
+    subject: `[SLA 위반] 티켓 #${input.ticketNumber} — ${input.targetLabel} 마감 초과`,
+    body: renderShell(
+      "SLA 위반 알림",
+      `<p>${input.assigneeName}님, 안녕하세요.</p>
+      <p>담당 티켓의 SLA 마감 시간이 초과되었습니다.</p>
+      <p>티켓 번호: <strong>${input.ticketNumber}</strong></p>
+      <p>SLA 항목: <strong>${input.targetLabel}</strong></p>
+      <p>즉시 확인해 주세요: <a href="${ticketUrl}">${ticketUrl}</a></p>`
+    ),
   };
 }
 
