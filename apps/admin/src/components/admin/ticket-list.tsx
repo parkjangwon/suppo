@@ -4,9 +4,20 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { Button } from "@crinity/ui/components/ui/button";
+import { Checkbox } from "@crinity/ui/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@crinity/ui/components/ui/select";
 import { TicketFilters } from "./ticket-filters";
+import { AdvancedSearch } from "./advanced-search";
 import { SavedFilters } from "./saved-filters";
 import { TicketQueueBar } from "./ticket-queue-bar";
+import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 export interface Ticket {
   id: string;
@@ -78,20 +89,128 @@ export function TicketList({
 }) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
+  const [isAdvancedSearch, setIsAdvancedSearch] = useState(false);
+  const [selectedTicketIds, setSelectedTicketIds] = useState<string[]>([]);
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [bulkPriority, setBulkPriority] = useState("");
+  const [bulkAssigneeId, setBulkAssigneeId] = useState("");
+  const [isApplyingBulk, setIsApplyingBulk] = useState(false);
   const itemsPerPage = 10;
 
   const totalPages = Math.ceil(tickets.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTickets = tickets.slice(startIndex, startIndex + itemsPerPage);
+  const allVisibleSelected =
+    paginatedTickets.length > 0 &&
+    paginatedTickets.every((ticket) => selectedTicketIds.includes(ticket.id));
+
+  const handleAdvancedSearch = (params: URLSearchParams) => {
+    params.delete("cursor");
+    router.push(`/admin/tickets?${params.toString()}`);
+  };
+
+  const toggleTicketSelection = (ticketId: string, checked: boolean) => {
+    setSelectedTicketIds((prev) =>
+      checked ? [...new Set([...prev, ticketId])] : prev.filter((id) => id !== ticketId)
+    );
+  };
+
+  const toggleVisibleTickets = (checked: boolean) => {
+    const visibleIds = paginatedTickets.map((ticket) => ticket.id);
+
+    setSelectedTicketIds((prev) => {
+      if (checked) {
+        return [...new Set([...prev, ...visibleIds])];
+      }
+
+      return prev.filter((id) => !visibleIds.includes(id));
+    });
+  };
+
+  const applyBulkUpdate = async () => {
+    const payload: {
+      ticketIds: string[];
+      status?: string;
+      priority?: string;
+      assigneeId?: string | null;
+    } = {
+      ticketIds: selectedTicketIds,
+    };
+
+    if (bulkStatus) payload.status = bulkStatus;
+    if (bulkPriority) payload.priority = bulkPriority;
+    if (bulkAssigneeId) payload.assigneeId = bulkAssigneeId === "unassigned" ? null : bulkAssigneeId;
+
+    if (!payload.status && !payload.priority && payload.assigneeId === undefined) {
+      toast.error("일괄 변경할 항목을 선택해주세요.");
+      return;
+    }
+
+    setIsApplyingBulk(true);
+    try {
+      const response = await fetch("/api/admin/tickets/bulk", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("bulk update failed");
+      }
+
+      toast.success("일괄 변경이 완료되었습니다.");
+      setSelectedTicketIds([]);
+      setBulkStatus("");
+      setBulkPriority("");
+      setBulkAssigneeId("");
+      router.refresh();
+    } catch (error) {
+      toast.error("일괄 변경에 실패했습니다.");
+    } finally {
+      setIsApplyingBulk(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-start">
-        <div className="space-y-3">
+        <div className="space-y-3 flex-1">
+          <div className="flex items-center gap-2 mb-3">
+            <Button
+              variant={!isAdvancedSearch ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsAdvancedSearch(false)}
+            >
+              <Search className="h-4 w-4 mr-2" />
+              기본 검색
+            </Button>
+            <Button
+              variant={isAdvancedSearch ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsAdvancedSearch(true)}
+            >
+              <Search className="h-4 w-4 mr-2" />
+              고급 검색
+            </Button>
+          </div>
+
           <TicketQueueBar currentAgentId={currentAgentId} />
+
+          {isAdvancedSearch ? (
+            <AdvancedSearch
+              categories={categories}
+              agents={agents}
+              onSearch={handleAdvancedSearch}
+            />
+          ) : null}
+
+          {/* Always show standard filters, but hide basic search when in advanced mode */}
           <TicketFilters
             categories={categories}
             agents={agents}
+            showBasicSearch={!isAdvancedSearch}
           />
         </div>
         <SavedFilters
@@ -113,10 +232,75 @@ export function TicketList({
         />
       </div>
 
+      {selectedTicketIds.length > 0 ? (
+        <div className="rounded-lg border bg-muted/20 p-4">
+          <div className="mb-3 text-sm font-medium">{selectedTicketIds.length}개 티켓 선택됨</div>
+          <div className="grid gap-3 lg:grid-cols-4">
+            <Select value={bulkStatus || "none"} onValueChange={(value) => setBulkStatus(value === "none" ? "" : value)}>
+              <SelectTrigger aria-label="벌크 상태 변경">
+                <SelectValue placeholder="상태 변경" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">상태 변경 안 함</SelectItem>
+                <SelectItem value="OPEN">접수</SelectItem>
+                <SelectItem value="IN_PROGRESS">진행중</SelectItem>
+                <SelectItem value="WAITING">대기중</SelectItem>
+                <SelectItem value="RESOLVED">해결됨</SelectItem>
+                <SelectItem value="CLOSED">종료</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={bulkPriority || "none"} onValueChange={(value) => setBulkPriority(value === "none" ? "" : value)}>
+              <SelectTrigger aria-label="벌크 우선순위 변경">
+                <SelectValue placeholder="우선순위 변경" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">우선순위 변경 안 함</SelectItem>
+                <SelectItem value="URGENT">긴급</SelectItem>
+                <SelectItem value="HIGH">높음</SelectItem>
+                <SelectItem value="MEDIUM">보통</SelectItem>
+                <SelectItem value="LOW">낮음</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={bulkAssigneeId || "none"} onValueChange={(value) => setBulkAssigneeId(value === "none" ? "" : value)}>
+              <SelectTrigger aria-label="벌크 담당자 변경">
+                <SelectValue placeholder="담당자 변경" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">담당자 변경 안 함</SelectItem>
+                <SelectItem value="unassigned">미할당</SelectItem>
+                {agents.map((agent) => (
+                  <SelectItem key={agent.id} value={agent.id}>
+                    {agent.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={applyBulkUpdate} disabled={isApplyingBulk}>
+                {isApplyingBulk ? "적용 중..." : "벌크 적용"}
+              </Button>
+              <Button variant="outline" onClick={() => setSelectedTicketIds([])} disabled={isApplyingBulk}>
+                선택 해제
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="rounded-md border">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                <Checkbox
+                  aria-label="전체 선택"
+                  checked={allVisibleSelected}
+                  onCheckedChange={(checked) => toggleVisibleTickets(Boolean(checked))}
+                />
+              </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
                 티켓 번호
               </th>
@@ -150,6 +334,13 @@ export function TicketList({
                 className="cursor-pointer hover:bg-gray-50"
                 onClick={() => router.push(`/admin/tickets/${ticket.id}`)}
               >
+                <td className="px-4 py-3" onClick={(event) => event.stopPropagation()}>
+                  <Checkbox
+                    aria-label={`select-ticket-${ticket.ticketNumber}`}
+                    checked={selectedTicketIds.includes(ticket.id)}
+                    onCheckedChange={(checked) => toggleTicketSelection(ticket.id, Boolean(checked))}
+                  />
+                </td>
                 <td className="px-4 py-3 text-sm font-medium text-blue-600">
                   {ticket.ticketNumber}
                 </td>

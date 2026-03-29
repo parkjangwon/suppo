@@ -48,21 +48,58 @@ const nextConfig: NextConfig = {
       "frame-src": ["'none'"],
       "base-uri": ["'self'"],
       "form-action": ["'self'"],
-      "frame-ancestors": ["'none'"],
       "report-uri": isDevelopment ? [] : ["/api/security/csp-report"],
       "report-to": isDevelopment ? [] : ["csp-endpoint"]
+    };
+
+    const embedCspDirectives = {
+      ...cspDirectives,
+      "frame-ancestors": ["*"],
     };
 
     const cspValue = Object.entries(cspDirectives)
       .map(([directive, sources]) => `${directive} ${sources.filter(Boolean).join(" ")}`)
       .join("; ");
 
+    const embedCspValue = Object.entries(embedCspDirectives)
+      .map(([directive, sources]) => `${directive} ${sources.filter(Boolean).join(" ")}`)
+      .join("; ");
+
     return [
+      {
+        source: "/chat/embed",
+        headers: [
+          { key: "Content-Security-Policy", value: embedCspValue },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=(), fullscreen=(), payment=()"
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload"
+          },
+          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" }
+        ]
+      },
+      {
+        source: "/chat/sdk",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
+          { key: "X-Content-Type-Options", value: "nosniff" }
+        ]
+      },
       {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: cspValue },
-          { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-XSS-Protection", value: "1; mode=block" },

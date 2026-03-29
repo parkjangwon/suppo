@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { v4 as uuidv4 } from "uuid";
 
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/svg+xml", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+function getUploadDirs() {
+  const currentAppUploadDir = join(process.cwd(), "public", "uploads", "branding");
+  const publicAppUploadDir = join(process.cwd(), "..", "public", "public", "uploads", "branding");
+
+  return Array.from(new Set([currentAppUploadDir, publicAppUploadDir]));
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,15 +45,17 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const ext = file.name.split(".").pop()?.toLowerCase() || "png";
-    const filename = `${type || "image"}-${uuidv4()}.${ext}`;
+    const filename = `${type || "image"}-${crypto.randomUUID()}.${ext}`;
     
     // Save to public/uploads/branding directory
-    const uploadDir = join(process.cwd(), "public", "uploads", "branding");
-    await mkdir(uploadDir, { recursive: true });
-
-    const filePath = join(uploadDir, filename);
     const bytes = await file.arrayBuffer();
-    await writeFile(filePath, Buffer.from(bytes));
+    const buffer = Buffer.from(bytes);
+
+    for (const uploadDir of getUploadDirs()) {
+      await mkdir(uploadDir, { recursive: true });
+      const filePath = join(uploadDir, filename);
+      await writeFile(filePath, buffer);
+    }
 
     // Return the public URL
     const url = `/uploads/branding/${filename}`;

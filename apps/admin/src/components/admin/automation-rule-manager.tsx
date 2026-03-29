@@ -44,6 +44,9 @@ const EMPTY_FORM = {
   conditionPriority: "",
   conditionCustomerEmail: "",
   conditionKeywords: "",
+  conditionSlaState: "",
+  conditionCreatedHoursAgo: "",
+  conditionUpdatedHoursAgo: "",
   actionStatus: "",
   actionPriority: "",
   actionAssigneeId: "",
@@ -101,6 +104,11 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
       conditionPriority: String(conditions.priority ?? ""),
       conditionCustomerEmail: String(conditions.customerEmail ?? ""),
       conditionKeywords: Array.isArray(conditions.keywords) ? conditions.keywords.join(", ") : "",
+      conditionSlaState: String(conditions.slaState ?? ""),
+      conditionCreatedHoursAgo:
+        typeof conditions.createdHoursAgo === "number" ? String(conditions.createdHoursAgo) : "",
+      conditionUpdatedHoursAgo:
+        typeof conditions.updatedHoursAgo === "number" ? String(conditions.updatedHoursAgo) : "",
       actionStatus: String(actions.setStatus ?? ""),
       actionPriority: String(actions.setPriority ?? ""),
       actionAssigneeId: String(actions.setAssigneeId ?? ""),
@@ -132,6 +140,13 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                   .map((keyword) => keyword.trim())
                   .filter(Boolean),
               }
+            : {}),
+          ...(form.conditionSlaState ? { slaState: form.conditionSlaState } : {}),
+          ...(form.conditionCreatedHoursAgo
+            ? { createdHoursAgo: Number(form.conditionCreatedHoursAgo) }
+            : {}),
+          ...(form.conditionUpdatedHoursAgo
+            ? { updatedHoursAgo: Number(form.conditionUpdatedHoursAgo) }
             : {}),
         },
         actions: {
@@ -280,38 +295,53 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
       </CardContent>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingId ? "자동화 규칙 수정" : "자동화 규칙 추가"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
               <Label>규칙 이름</Label>
-              <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} />
+              <Input
+                aria-label="규칙 이름"
+                value={form.name}
+                onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label>설명</Label>
-              <Textarea value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} rows={3} />
+              <Textarea
+                aria-label="설명"
+                value={form.description}
+                onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
             </div>
             <div className="space-y-2">
               <Label>트리거</Label>
               <Select value={form.triggerOn} onValueChange={(value) => setForm((prev) => ({ ...prev, triggerOn: value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="트리거"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="TICKET_CREATED">티켓 생성</SelectItem>
                   <SelectItem value="TICKET_UPDATED">티켓 수정</SelectItem>
                   <SelectItem value="TICKET_ASSIGNED">담당자 배정</SelectItem>
+                  <SelectItem value="SCHEDULED">스케줄 실행</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
               <Label>실행 우선순위</Label>
-              <Input type="number" value={form.priority} onChange={(e) => setForm((prev) => ({ ...prev, priority: Number(e.target.value) }))} />
+              <Input
+                aria-label="실행 우선순위"
+                type="number"
+                value={form.priority}
+                onChange={(e) => setForm((prev) => ({ ...prev, priority: Number(e.target.value) }))}
+              />
             </div>
             <div className="space-y-2">
               <Label>조건 상태</Label>
               <Select value={form.conditionStatus || "any"} onValueChange={(value) => setForm((prev) => ({ ...prev, conditionStatus: value === "any" ? "" : value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="조건 상태"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="any">모든 상태</SelectItem>
                   <SelectItem value="OPEN">열림</SelectItem>
@@ -325,7 +355,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2">
               <Label>조건 우선순위</Label>
               <Select value={form.conditionPriority || "any"} onValueChange={(value) => setForm((prev) => ({ ...prev, conditionPriority: value === "any" ? "" : value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="조건 우선순위"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="any">모든 우선순위</SelectItem>
                   <SelectItem value="URGENT">긴급</SelectItem>
@@ -338,6 +368,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2 md:col-span-2">
               <Label>고객 이메일 조건</Label>
               <Input
+                aria-label="고객 이메일 조건"
                 value={form.conditionCustomerEmail}
                 onChange={(e) => setForm((prev) => ({ ...prev, conditionCustomerEmail: e.target.value }))}
                 placeholder="예: .*@enterprise.com"
@@ -346,15 +377,54 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2 md:col-span-2">
               <Label>키워드 조건</Label>
               <Input
+                aria-label="키워드 조건"
                 value={form.conditionKeywords}
                 onChange={(e) => setForm((prev) => ({ ...prev, conditionKeywords: e.target.value }))}
                 placeholder="예: 결제, 장애, 환불"
               />
             </div>
             <div className="space-y-2">
+              <Label>SLA 상태</Label>
+              <Select
+                value={form.conditionSlaState || "any"}
+                onValueChange={(value) => setForm((prev) => ({ ...prev, conditionSlaState: value === "any" ? "" : value }))}
+              >
+                <SelectTrigger aria-label="SLA 상태"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">사용 안 함</SelectItem>
+                  <SelectItem value="warning">임박</SelectItem>
+                  <SelectItem value="breached">위반</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>생성 후 경과 시간(시간)</Label>
+              <Input
+                aria-label="생성 후 경과 시간(시간)"
+                type="number"
+                min="0"
+                step="1"
+                value={form.conditionCreatedHoursAgo}
+                onChange={(e) => setForm((prev) => ({ ...prev, conditionCreatedHoursAgo: e.target.value }))}
+                placeholder="예: 24"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>업데이트 후 경과 시간(시간)</Label>
+              <Input
+                aria-label="업데이트 후 경과 시간(시간)"
+                type="number"
+                min="0"
+                step="1"
+                value={form.conditionUpdatedHoursAgo}
+                onChange={(e) => setForm((prev) => ({ ...prev, conditionUpdatedHoursAgo: e.target.value }))}
+                placeholder="예: 24"
+              />
+            </div>
+            <div className="space-y-2">
               <Label>상태 변경</Label>
               <Select value={form.actionStatus || "none"} onValueChange={(value) => setForm((prev) => ({ ...prev, actionStatus: value === "none" ? "" : value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="상태 변경"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">변경 안 함</SelectItem>
                   <SelectItem value="OPEN">열림</SelectItem>
@@ -368,7 +438,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2">
               <Label>우선순위 변경</Label>
               <Select value={form.actionPriority || "none"} onValueChange={(value) => setForm((prev) => ({ ...prev, actionPriority: value === "none" ? "" : value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="우선순위 변경"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">변경 안 함</SelectItem>
                   <SelectItem value="URGENT">긴급</SelectItem>
@@ -381,7 +451,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2">
               <Label>담당자 재배정</Label>
               <Select value={form.actionAssigneeId || "none"} onValueChange={(value) => setForm((prev) => ({ ...prev, actionAssigneeId: value === "none" ? "" : value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="담당자 재배정"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">변경 안 함</SelectItem>
                   <SelectItem value="unassigned">미할당</SelectItem>
@@ -394,7 +464,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2">
               <Label>팀 재지정</Label>
               <Select value={form.actionTeamId || "none"} onValueChange={(value) => setForm((prev) => ({ ...prev, actionTeamId: value === "none" ? "" : value }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="팀 재지정"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">변경 안 함</SelectItem>
                   {teams.map((team) => (
@@ -406,6 +476,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
             <div className="space-y-2 md:col-span-2">
               <Label>추가 태그</Label>
               <Input
+                aria-label="추가 태그"
                 value={form.actionAddTags}
                 onChange={(e) => setForm((prev) => ({ ...prev, actionAddTags: e.target.value }))}
                 placeholder="예: vip, urgent-followup"
@@ -456,7 +527,15 @@ function summarizeConditions(conditions: Record<string, unknown>) {
 
   if (conditions.status) result.push(`상태: ${conditions.status}`);
   if (conditions.priority) result.push(`우선순위: ${conditions.priority}`);
+  if (conditions.slaState === "warning") result.push("SLA 상태: 임박");
+  if (conditions.slaState === "breached") result.push("SLA 상태: 위반");
   if (conditions.customerEmail) result.push(`이메일 패턴: ${conditions.customerEmail}`);
+  if (typeof conditions.createdHoursAgo === "number") {
+    result.push(`생성 후 경과: ${conditions.createdHoursAgo}시간 이상`);
+  }
+  if (typeof conditions.updatedHoursAgo === "number") {
+    result.push(`업데이트 후 경과: ${conditions.updatedHoursAgo}시간 이상`);
+  }
   if (Array.isArray(conditions.keywords) && conditions.keywords.length > 0) {
     result.push(`키워드: ${conditions.keywords.join(", ")}`);
   }

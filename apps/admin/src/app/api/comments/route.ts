@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { addComment, getAdminTicketDetail, updateTicketStatus } from "@/lib/db/queries/admin-tickets";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
+import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 import { prisma } from "@crinity/db";
 
 export async function POST(request: NextRequest) {
@@ -56,6 +57,43 @@ export async function POST(request: NextRequest) {
     if (!isInternal && ticket.assigneeId && ticket.status !== "IN_PROGRESS") {
       await updateTicketStatus(ticketId, "IN_PROGRESS", session.user.agentId);
     }
+
+    const chatConversation = await prisma.chatConversation.findUnique({
+      where: { ticketId },
+      select: { id: true },
+    });
+
+    if (chatConversation && !isInternal) {
+      await prisma.chatConversation.update({
+        where: { id: chatConversation.id },
+        data: {
+          status: "WAITING_CUSTOMER",
+          lastMessageAt: new Date(),
+          lastAgentMessageAt: new Date(),
+        },
+      });
+
+      await prisma.chatEvent.create({
+        data: {
+          conversationId: chatConversation.id,
+          ticketId,
+          type: "message.created",
+          payload: {
+            commentId: comment.id,
+            senderType: "AGENT",
+          },
+        },
+      });
+    }
+
+    await dispatchWebhookEvent("ticket.commented", {
+      source: "admin-panel",
+      ticketId,
+      ticketNumber: ticket.ticketNumber,
+      commentId: comment.id,
+      isInternal: comment.isInternal,
+      authorId: session.user.agentId,
+    });
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {

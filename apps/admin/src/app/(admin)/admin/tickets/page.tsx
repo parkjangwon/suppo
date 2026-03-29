@@ -27,7 +27,23 @@ export default async function TicketsPage({
   const priority = typeof params.priority === "string" ? params.priority : undefined;
   const categoryId = typeof params.categoryId === "string" ? params.categoryId : undefined;
   const assigneeId = typeof params.assigneeId === "string" ? params.assigneeId : undefined;
-  const search = typeof params.search === "string" ? params.search : undefined;
+  // Advanced search parsing (format: "term:fields:mode")
+  let search = typeof params.search === "string" ? params.search : undefined;
+  let searchFields: string[] = ["subject", "description", "comments"];
+  let searchMode: "all" | "any" | "exact" = "all";
+
+  if (search && search.includes(":")) {
+    const parts = search.split(":");
+    if (parts.length >= 2) {
+      search = parts[0];
+      if (parts.length >= 3 && ["all", "any", "exact"].includes(parts[2])) {
+        searchMode = parts[2] as "all" | "any" | "exact";
+        searchFields = parts[1] ? parts[1].split(",") : ["subject", "description", "comments"];
+      } else {
+        searchFields = parts[1] ? parts[1].split(",") : ["subject", "description", "comments"];
+      }
+    }
+  }
   const dateFrom = typeof params.dateFrom === "string" ? params.dateFrom : undefined;
   const dateTo = typeof params.dateTo === "string" ? params.dateTo : undefined;
   const queue = typeof params.queue === "string" ? params.queue : undefined;
@@ -53,13 +69,52 @@ export default async function TicketsPage({
     }
   }
   if (search) {
-    andFilters.push({
-      OR: [
-        { ticketNumber: { contains: search } },
-        { subject: { contains: search } },
-        { customerEmail: { contains: search } },
-      ],
-    });
+    // Advanced multi-field search
+    const searchConditions: Prisma.TicketWhereInput[] = [];
+
+    if (searchFields.includes("subject")) {
+      searchConditions.push({ subject: { contains: search } });
+    }
+    if (searchFields.includes("description")) {
+      searchConditions.push({ description: { contains: search } });
+    }
+    if (searchFields.includes("comments")) {
+      searchConditions.push({
+        comments: {
+          some: {
+            content: { contains: search },
+          },
+        },
+      });
+    }
+
+    if (searchConditions.length > 0) {
+      if (searchMode === "any") {
+        andFilters.push({ OR: searchConditions });
+      } else if (searchMode === "exact") {
+        // For exact mode, all fields must exactly match the search term
+        const exactConditions: Prisma.TicketWhereInput[] = [];
+        if (searchFields.includes("subject")) {
+          exactConditions.push({ subject: { equals: search } });
+        }
+        if (searchFields.includes("description")) {
+          exactConditions.push({ description: { equals: search } });
+        }
+        if (searchFields.includes("comments")) {
+          exactConditions.push({
+            comments: {
+              some: {
+                content: { equals: search },
+              },
+            },
+          });
+        }
+        andFilters.push({ AND: exactConditions });
+      } else {
+        // Default "all" mode - all selected fields must contain the search term
+        andFilters.push({ AND: searchConditions });
+      }
+    }
   }
   if (dateFrom || dateTo) {
     const createdAt: Prisma.DateTimeFilter = {};
@@ -125,7 +180,10 @@ export default async function TicketsPage({
     });
   }
 
-  const where: Prisma.TicketWhereInput = andFilters.length > 0 ? { AND: andFilters } : {};
+  const where: Prisma.TicketWhereInput = {
+    ...(andFilters.length > 0 ? { AND: andFilters } : {}),
+    chatConversation: null,
+  };
 
   const tickets = await prisma.ticket.findMany({
     where,

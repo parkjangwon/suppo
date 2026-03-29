@@ -6,7 +6,7 @@ import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { HelpdeskOperationsCenter } from "@/components/admin/helpdesk-operations-center";
 
 export const metadata: Metadata = {
-  title: "운영 정책 | Crinity",
+  title: "업무 규칙 | Crinity",
 };
 
 export default async function OperationsSettingsPage() {
@@ -19,8 +19,8 @@ export default async function OperationsSettingsPage() {
   if (session.user.role !== "ADMIN") {
     return (
       <AdminOnlyPageState
-        title="운영 정책"
-        description="SLA, 자동화, 큐, 연동 정책은 관리자만 변경할 수 있습니다."
+        title="업무 규칙"
+        description="응답 목표, 자동 처리, 작업 바로가기는 관리자만 변경할 수 있습니다."
       />
     );
   }
@@ -41,9 +41,9 @@ export default async function OperationsSettingsPage() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">운영 정책</h1>
+        <h1 className="text-2xl font-bold">업무 규칙</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          SLA, 자동화 규칙, 운영 큐, 연동, AI 운영 기준을 한 곳에서 관리합니다.
+          상담원이 일하는 방식에 직접 영향을 주는 응답 목표, 자동 처리, 작업 바로가기를 관리합니다.
         </p>
       </div>
 

@@ -109,6 +109,13 @@ enum RequestTypeChannel {
   IN_APP
 }
 
+enum ChatConversationStatus {
+  WAITING_AGENT
+  ACTIVE
+  WAITING_CUSTOMER
+  ENDED
+}
+
 enum CustomFieldType {
   TEXT
   NUMBER
@@ -180,6 +187,8 @@ model Ticket {
   presences         TicketPresence[]
   commentLock       TicketCommentLock?
   knowledgeLinks    TicketKnowledgeLink[]
+  chatConversation  ChatConversation?
+  chatEvents        ChatEvent[]
 
   @@index([categoryId])
   @@index([assigneeId])
@@ -230,6 +239,8 @@ model Agent {
   reportSchedules        ReportSchedule[]      @relation("ReportScheduleCreator")
   generatedReports       GeneratedReport[]     @relation("GeneratedReportRequester")
   knowledgeLinks         TicketKnowledgeLink[]
+  publicApiKeys          PublicApiKey[]        @relation("PublicApiKeyCreator")
+  webhookEndpoints       WebhookEndpoint[]     @relation("WebhookEndpointCreator")
 
   @@index([isActive])
 }
@@ -389,6 +400,44 @@ model Attachment {
 
   @@index([ticketId])
   @@index([commentId])
+}
+
+model ChatConversation {
+  id                    String                 @id @default(cuid())
+  ticketId              String                 @unique
+  widgetKey             String
+  customerTokenHash     String                 @unique
+  status                ChatConversationStatus @default(WAITING_AGENT)
+  startedAt             DateTime               @default(now())
+  endedAt               DateTime?
+  lastMessageAt         DateTime               @default(now())
+  lastCustomerMessageAt DateTime?
+  lastAgentMessageAt    DateTime?
+  metadata              Json?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  events ChatEvent[]
+
+  @@index([status, lastMessageAt])
+  @@index([widgetKey, createdAt])
+}
+
+model ChatEvent {
+  id             String   @id @default(cuid())
+  conversationId String
+  ticketId       String
+  type           String
+  payload        Json?
+  createdAt      DateTime @default(now())
+
+  conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  ticket       Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([ticketId, createdAt])
+  @@index([type, createdAt])
 }
 
 model GitLink {
@@ -869,6 +918,119 @@ model GitOperationQueue {
   @@index([status])
   @@index([retryCount])
   @@index([createdAt])
+}
+
+model PublicApiKey {
+  id          String   @id @default(cuid())
+  name        String
+  keyPrefix   String   @unique
+  keyHash     String   @unique
+  isActive    Boolean  @default(true)
+  lastUsedAt  DateTime?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy Agent @relation("PublicApiKeyCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([isActive, createdAt])
+  @@index([createdById])
+}
+
+model WebhookEndpoint {
+  id              String   @id @default(cuid())
+  name            String
+  url             String
+  secret          String?
+  events          Json
+  isActive        Boolean  @default(true)
+  lastTriggeredAt DateTime?
+  lastStatusCode  Int?
+  lastError       String?
+  createdById     String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  createdBy Agent               @relation("WebhookEndpointCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  deliveries WebhookDeliveryLog[]
+
+  @@index([isActive, createdAt])
+  @@index([createdById])
+}
+
+model WebhookDeliveryLog {
+  id                 String   @id @default(cuid())
+  endpointId         String
+  event              String
+  isTest             Boolean  @default(false)
+  requestBody        Json?
+  responseStatusCode Int?
+  responseBody       String?
+  errorMessage       String?
+  createdAt          DateTime @default(now())
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId, createdAt])
+  @@index([event, createdAt])
+}
+
+model ChatWidgetSettings {
+  id             String   @id @default("default")
+  widgetKey      String   @unique
+  buttonLabel    String   @default("채팅 상담")
+  buttonImageUrl String?
+  buttonImageFit String   @default("contain")
+  buttonBorderColor String?
+  buttonBorderWidth Int @default(0)
+  buttonHoverEffect String @default("lift")
+  buttonBadgeText String?
+  buttonBadgeColor String   @default("#ef4444")
+  buttonBadgePosition String @default("top-right")
+  showUnreadBadge Boolean @default(true)
+  buttonSize     String   @default("md")
+  buttonShape    String   @default("pill")
+  buttonShadow   String   @default("soft")
+  welcomeTitle   String   @default("실시간 채팅 상담")
+  welcomeMessage String   @default("메시지를 남기면 상담원이 바로 응답합니다.")
+  accentColor    String   @default("#0f172a")
+  position       String   @default("bottom-right")
+  enabled        Boolean  @default(true)
+  agentResponseTargetMinutes   Int @default(5)
+  customerFollowupTargetMinutes Int @default(30)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model ChatWidgetProfile {
+  id             String   @id @default(cuid())
+  name           String
+  widgetKey      String   @unique
+  buttonLabel    String
+  buttonImageUrl String?
+  buttonImageFit String   @default("contain")
+  buttonBorderColor String?
+  buttonBorderWidth Int @default(0)
+  buttonHoverEffect String @default("lift")
+  buttonBadgeText String?
+  buttonBadgeColor String   @default("#ef4444")
+  buttonBadgePosition String @default("top-right")
+  showUnreadBadge Boolean @default(true)
+  buttonSize     String   @default("md")
+  buttonShape    String   @default("pill")
+  buttonShadow   String   @default("soft")
+  welcomeTitle   String
+  welcomeMessage String
+  accentColor    String
+  position       String   @default("bottom-right")
+  enabled        Boolean  @default(true)
+  isDefault      Boolean  @default(false)
+  agentResponseTargetMinutes   Int @default(5)
+  customerFollowupTargetMinutes Int @default(30)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([enabled, isDefault])
 }
 
 // Ticket Merge (티켓 병합)

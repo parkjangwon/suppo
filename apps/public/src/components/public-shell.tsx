@@ -2,18 +2,36 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { useBranding } from "@crinity/shared/branding/context";
 import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 import { Phone, Mail, Globe, MapPin, BookOpen } from "lucide-react";
 import { formatPhoneNumber } from "@crinity/shared/utils/phone-format";
 import { PublicLocaleSwitcher } from "./public-locale-switcher";
 
-export function PublicShell({ children }: { children: React.ReactNode }) {
+export function PublicShell({
+  children,
+  chatWidgetEnabled,
+  defaultWidgetKey,
+}: {
+  children: React.ReactNode;
+  chatWidgetEnabled?: boolean;
+  defaultWidgetKey?: string;
+}) {
   const branding = useBranding();
   const copy = usePublicCopy();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
+      {chatWidgetEnabled ? (
+        <Script
+          id="crinity-public-chat-sdk"
+          src="/chat-sdk.js"
+          strategy="afterInteractive"
+          data-crinity-chat-sdk="true"
+          data-widget-key={defaultWidgetKey}
+        />
+      ) : null}
       <header 
         className="bg-white/80 backdrop-blur-md border-b sticky top-0 z-50"
         style={{ borderColor: `${branding.primaryColor}20` }}

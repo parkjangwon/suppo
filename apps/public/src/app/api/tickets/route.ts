@@ -4,6 +4,7 @@ import { ticketFormSchema } from "@crinity/shared/validation/ticket";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
 import { createTicket } from "@crinity/shared/tickets/create-ticket";
 import { classifyTicket } from "@crinity/shared/ai/classifier";
+import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 import { prisma } from "@crinity/db";
 
 export async function POST(request: NextRequest) {
@@ -109,6 +110,16 @@ export async function POST(request: NextRequest) {
         throw error;
       }
     }
+
+    await dispatchWebhookEvent("ticket.created", {
+      source: "public-form",
+      ticketId: result.ticket.id,
+      ticketNumber: result.ticket.ticketNumber,
+      subject: result.ticket.subject,
+      priority: result.ticket.priority,
+      status: result.ticket.status,
+      customerEmail: result.ticket.customerEmail,
+    });
 
     return NextResponse.json({ ticketNumber: result.ticket.ticketNumber }, { status: 201 });
   } catch (error) {

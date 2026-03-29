@@ -9,6 +9,9 @@ export interface AutomationCondition {
   teamId?: string;
   customerEmail?: string; // 특정 도메인/이메일 패턴
   keywords?: string[]; // 제목/내용에 포함된 키워드
+  slaState?: "warning" | "breached";
+  createdHoursAgo?: number;
+  updatedHoursAgo?: number;
 }
 
 export interface AutomationAction {
@@ -30,6 +33,279 @@ export interface AutomationRule {
   triggerOn: string;
 }
 
+interface TicketWithAutomationContext
+  extends Prisma.TicketGetPayload<{
+    include: {
+      assignee: true;
+      team: true;
+      category: true;
+      slaClocks: true;
+    };
+  }> {}
+
+interface AutomationRunResult {
+  processedRules: number;
+  matchedTickets: number;
+  updatedTickets: number;
+}
+
+function getTicketSLAState(ticket: { slaClocks?: Array<{ deadlineAt: Date; breachedAt: Date | null }> }, now: Date) {
+  const clocks = ticket.slaClocks ?? [];
+
+  if (clocks.some((clock) => clock.breachedAt !== null || clock.deadlineAt.getTime() <= now.getTime())) {
+    return "breached" as const;
+  }
+
+  if (
+    clocks.some(
+      (clock) =>
+        clock.deadlineAt.getTime() > now.getTime() &&
+        clock.deadlineAt.getTime() <= now.getTime() + 60 * 60 * 1000
+    )
+  ) {
+    return "warning" as const;
+  }
+
+  return "normal" as const;
+}
+
+function matchesAutomationConditions(
+  conditions: AutomationCondition,
+  ticket: Pick<
+    TicketWithAutomationContext,
+    | "status"
+    | "priority"
+    | "categoryId"
+    | "assigneeId"
+    | "teamId"
+    | "customerEmail"
+    | "subject"
+    | "description"
+    | "createdAt"
+    | "updatedAt"
+    | "slaClocks"
+  >,
+  now: Date
+) {
+  if (conditions.status && ticket.status !== conditions.status) {
+    return false;
+  }
+
+  if (conditions.priority && ticket.priority !== conditions.priority) {
+    return false;
+  }
+
+  if (conditions.categoryId && ticket.categoryId !== conditions.categoryId) {
+    return false;
+  }
+
+  if (conditions.assigneeId !== undefined) {
+    if (conditions.assigneeId === "unassigned" && ticket.assigneeId !== null) {
+      return false;
+    }
+    if (conditions.assigneeId !== "unassigned" && ticket.assigneeId !== conditions.assigneeId) {
+      return false;
+    }
+  }
+
+  if (conditions.teamId && ticket.teamId !== conditions.teamId) {
+    return false;
+  }
+
+  if (conditions.customerEmail) {
+    const pattern = conditions.customerEmail;
+    if (!ticket.customerEmail.match(new RegExp(pattern))) {
+      return false;
+    }
+  }
+
+  if (conditions.keywords && conditions.keywords.length > 0) {
+    const searchText = `${ticket.subject} ${ticket.description}`.toLowerCase();
+    const hasKeyword = conditions.keywords.some((kw) => searchText.includes(kw.toLowerCase()));
+    if (!hasKeyword) {
+      return false;
+    }
+  }
+
+  if (conditions.slaState) {
+    const slaState = getTicketSLAState(ticket, now);
+    if (slaState !== conditions.slaState) {
+      return false;
+    }
+  }
+
+  if (
+    typeof conditions.createdHoursAgo === "number" &&
+    now.getTime() - ticket.createdAt.getTime() < conditions.createdHoursAgo * 60 * 60 * 1000
+  ) {
+    return false;
+  }
+
+  if (
+    typeof conditions.updatedHoursAgo === "number" &&
+    now.getTime() - ticket.updatedAt.getTime() < conditions.updatedHoursAgo * 60 * 60 * 1000
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function buildUpdatedTags(existingTags: string | null | undefined, actions: AutomationAction) {
+  const currentTags = JSON.parse(existingTags || "[]") as string[];
+  let nextTags = [...currentTags];
+
+  if (actions.addTags) {
+    nextTags = [...new Set([...nextTags, ...actions.addTags])];
+  }
+
+  if (actions.removeTags) {
+    nextTags = nextTags.filter((tag) => !actions.removeTags?.includes(tag));
+  }
+
+  return nextTags;
+}
+
+async function applyAutomationRuleToTicket(
+  rule: AutomationRule & { createdById?: string },
+  ticketId: string,
+  actorId: string
+) {
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    include: {
+      assignee: true,
+      team: true,
+      category: true,
+    },
+  });
+
+  if (!ticket) {
+    return false;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const actions = rule.actions as AutomationAction;
+    const updates: Record<string, unknown> = {};
+    const logs: string[] = [];
+
+    if (actions.setStatus && actions.setStatus !== ticket.status) {
+      updates.status = actions.setStatus;
+      logs.push(`상태: ${ticket.status} → ${actions.setStatus}`);
+
+      await tx.ticketActivity.create({
+        data: {
+          ticketId,
+          actorType: "SYSTEM" as const,
+          action: "STATUS_CHANGED",
+          oldValue: ticket.status,
+          newValue: actions.setStatus,
+        },
+      });
+    }
+
+    if (actions.setPriority && actions.setPriority !== ticket.priority) {
+      updates.priority = actions.setPriority;
+      logs.push(`우선순위: ${ticket.priority} → ${actions.setPriority}`);
+
+      await tx.ticketActivity.create({
+        data: {
+          ticketId,
+          actorType: "SYSTEM" as const,
+          action: "PRIORITY_CHANGED",
+          oldValue: ticket.priority,
+          newValue: actions.setPriority,
+        },
+      });
+    }
+
+    if (actions.setAssigneeId !== undefined && actions.setAssigneeId !== ticket.assigneeId) {
+      updates.assigneeId = actions.setAssigneeId;
+
+      if (actions.setAssigneeId && ticket.assigneeId) {
+        logs.push(`담당자: ${ticket.assignee?.name || ticket.assigneeId} → ${actions.setAssigneeId}`);
+
+        await tx.ticketTransfer.create({
+          data: {
+            ticketId,
+            fromAgentId: ticket.assigneeId,
+            toAgentId: actions.setAssigneeId,
+            reason: `자동화 규칙 "${rule.name}" 실행`,
+          },
+        });
+
+        await tx.ticketActivity.create({
+          data: {
+            ticketId,
+            actorType: "SYSTEM" as const,
+            action: "TRANSFERRED",
+            oldValue: ticket.assigneeId,
+            newValue: actions.setAssigneeId,
+          },
+        });
+      } else {
+        logs.push(
+          actions.setAssigneeId
+            ? `담당자 지정: ${actions.setAssigneeId}`
+            : `담당자 해제: ${ticket.assignee?.name || ticket.assigneeId || "미할당"}`
+        );
+
+        await tx.ticketActivity.create({
+          data: {
+            ticketId,
+            actorType: "SYSTEM" as const,
+            action: "ASSIGNED",
+            oldValue: ticket.assigneeId || "unassigned",
+            newValue: actions.setAssigneeId || "unassigned",
+          },
+        });
+      }
+    }
+
+    if (actions.setTeamId && actions.setTeamId !== ticket.teamId) {
+      updates.teamId = actions.setTeamId;
+      logs.push(`팀: ${ticket.team?.name || ticket.teamId || "미할당"} → ${actions.setTeamId}`);
+    }
+
+    if (actions.addTags || actions.removeTags) {
+      const nextTags = buildUpdatedTags(ticket.tags, actions);
+      updates.tags = JSON.stringify(nextTags);
+      logs.push(`태그 업데이트: ${nextTags.join(", ")}`);
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return;
+    }
+
+    updates.updatedBy = actorId;
+
+    await tx.ticket.update({
+      where: { id: ticketId },
+      data: updates,
+    });
+
+    console.log(`[Automation] Rule "${rule.name}" executed:`, logs.join(", "));
+
+    if (actions.sendNotification) {
+      await tx.emailDelivery.create({
+        data: {
+          to: ticket.customerEmail,
+          subject: `티켓 ${ticket.ticketNumber} 업데이트`,
+          body: `
+              <p>티켓 <strong>${ticket.ticketNumber}</strong>이 자동화 규칙에 의해 업데이트되었습니다.</p>
+              <p>규칙: ${rule.name}</p>
+              ${logs.map((log) => `<p>- ${log}</p>`).join("")}
+              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/ticket/${ticket.ticketNumber}">티켓 보기</a></p>
+            `,
+          status: "PENDING",
+        },
+      });
+    }
+  });
+
+  return true;
+}
+
 /**
  * 티켓에 적용 가능한 자동화 규칙 조회
  */
@@ -48,61 +324,18 @@ export async function getApplicableRules(
     ],
   });
 
-  // 조건 필터링
-  return rules.filter((rule) => {
-    const conditions = rule.conditions as AutomationCondition;
-
-    // 상태 조건
-    if (conditions.status && ticket.status !== conditions.status) {
-      return false;
-    }
-
-    // 우선순위 조건
-    if (conditions.priority && ticket.priority !== conditions.priority) {
-      return false;
-    }
-
-    // 카테고리 조건
-    if (conditions.categoryId && ticket.categoryId !== conditions.categoryId) {
-      return false;
-    }
-
-    // 담당자 조건
-    if (conditions.assigneeId !== undefined) {
-      if (conditions.assigneeId === "unassigned" && ticket.assigneeId !== null) {
-        return false;
-      }
-      if (conditions.assigneeId !== "unassigned" && ticket.assigneeId !== conditions.assigneeId) {
-        return false;
-      }
-    }
-
-    // 팀 조건
-    if (conditions.teamId && ticket.teamId !== conditions.teamId) {
-      return false;
-    }
-
-    // 이메일 도메인 조건
-    if (conditions.customerEmail) {
-      const pattern = conditions.customerEmail;
-      if (!ticket.customerEmail.match(new RegExp(pattern))) {
-        return false;
-      }
-    }
-
-    // 키워드 조건
-    if (conditions.keywords && conditions.keywords.length > 0) {
-      const searchText = `${ticket.subject} ${ticket.description}`.toLowerCase();
-      const hasKeyword = conditions.keywords.some((kw) =>
-        searchText.includes(kw.toLowerCase())
-      );
-      if (!hasKeyword) {
-        return false;
-      }
-    }
-
-    return true;
-  });
+  return rules.filter((rule) =>
+    matchesAutomationConditions(
+      rule.conditions as AutomationCondition,
+      {
+        ...ticket,
+        createdAt: ticket.createdAt,
+        updatedAt: ticket.updatedAt,
+        slaClocks: [],
+      },
+      new Date()
+    )
+  );
 }
 
 /**
@@ -127,135 +360,79 @@ export async function executeAutomationRules(
   const applicableRules = await getApplicableRules(trigger, ticket);
 
   for (const rule of applicableRules) {
-    await prisma.$transaction(async (tx) => {
-      const actions = rule.actions as AutomationAction;
-      const updates: any = {};
-      const logs: string[] = [];
-
-      // 상태 변경
-      if (actions.setStatus && actions.setStatus !== ticket.status) {
-        updates.status = actions.setStatus;
-        logs.push(`상태: ${ticket.status} → ${actions.setStatus}`);
-
-        await tx.ticketActivity.create({
-          data: {
-            ticketId,
-            actorType: "SYSTEM" as any,
-            action: "STATUS_CHANGED",
-            oldValue: ticket.status,
-            newValue: actions.setStatus,
-          },
-        });
-      }
-
-      // 우선순위 변경
-      if (actions.setPriority && actions.setPriority !== ticket.priority) {
-        updates.priority = actions.setPriority;
-        logs.push(`우선순위: ${ticket.priority} → ${actions.setPriority}`);
-
-        await tx.ticketActivity.create({
-          data: {
-            ticketId,
-            actorType: "SYSTEM" as any,
-            action: "PRIORITY_CHANGED",
-            oldValue: ticket.priority,
-            newValue: actions.setPriority,
-          },
-        });
-      }
-
-      // 담당자 할당
-      if (actions.setAssigneeId !== undefined) {
-        const oldAssigneeId = ticket.assigneeId;
-        updates.assigneeId = actions.setAssigneeId;
-        updates.updatedBy = actorId;
-
-        if (actions.setAssigneeId && actions.setAssigneeId !== oldAssigneeId) {
-          logs.push(`담당자: ${ticket.assignee?.name || "미할당"} → ${actions.setAssigneeId}`);
-
-          await tx.ticketTransfer.create({
-            data: {
-              ticketId,
-              fromAgentId: oldAssigneeId || "unassigned",
-              toAgentId: actions.setAssigneeId,
-            },
-          });
-
-          await tx.ticketActivity.create({
-            data: {
-              ticketId,
-              actorType: "SYSTEM" as any,
-              action: "TRANSFERRED",
-              oldValue: oldAssigneeId || "unassigned",
-              newValue: actions.setAssigneeId,
-            },
-          });
-        } else if (actions.setAssigneeId === null && oldAssigneeId) {
-          logs.push(`담당자 해제: ${ticket.assignee?.name}`);
-
-          await tx.ticketActivity.create({
-            data: {
-              ticketId,
-              actorType: "SYSTEM" as any,
-              action: "ASSIGNED",
-              oldValue: oldAssigneeId || "unassigned",
-              newValue: "unassigned",
-            },
-          });
-        }
-      }
-
-      // 팀 할당
-      if (actions.setTeamId && actions.setTeamId !== ticket.teamId) {
-        updates.teamId = actions.setTeamId;
-        logs.push(`팀: ${ticket.team?.name || "미할당"} → ${actions.setTeamId}`);
-      }
-
-      // 태그 추가/제거
-      if (actions.addTags || actions.removeTags) {
-        const currentTags = JSON.parse(ticket.tags || "[]");
-        let newTags = [...currentTags];
-
-        if (actions.addTags) {
-          newTags = [...new Set([...newTags, ...actions.addTags])];
-        }
-        if (actions.removeTags) {
-          newTags = newTags.filter((tag) => !actions.removeTags!.includes(tag));
-        }
-
-        updates.tags = JSON.stringify(newTags);
-        logs.push(`태그 업데이트: ${newTags.join(", ")}`);
-      }
-
-      // 티켓 업데이트
-      if (Object.keys(updates).length > 0) {
-        await tx.ticket.update({
-          where: { id: ticketId },
-          data: updates,
-        });
-      }
-
-      // 자동화 로그 기록
-      console.log(`[Automation] Rule "${rule.name}" executed:`, logs.join(", "));
-
-      // 알림 발송
-      if (actions.sendNotification) {
-        await tx.emailDelivery.create({
-          data: {
-            to: ticket.customerEmail,
-            subject: `티켓 ${ticket.ticketNumber} 업데이트`,
-            body: `
-              <p>티켓 <strong>${ticket.ticketNumber}</strong>이 자동화 규칙에 의해 업데이트되었습니다.</p>
-              <p>규칙: ${rule.name}</p>
-              ${logs.map((log) => `<p>- ${log}</p>`).join("")}
-              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/ticket/${ticket.ticketNumber}">티켓 보기</a></p>
-            `,
-            status: "PENDING",
-          },
-        });
-      }
-    });
+    await applyAutomationRuleToTicket(rule, ticketId, actorId);
   }
+}
+
+export async function executeScheduledAutomationRules({
+  now = new Date(),
+}: {
+  now?: Date;
+} = {}): Promise<AutomationRunResult> {
+  const rules = await prisma.automationRule.findMany({
+    where: {
+      isActive: true,
+      triggerOn: "SCHEDULED",
+    },
+    orderBy: [{ priority: "desc" }],
+  });
+
+  if (rules.length === 0) {
+    return {
+      processedRules: 0,
+      matchedTickets: 0,
+      updatedTickets: 0,
+    };
+  }
+
+  const tickets = await prisma.ticket.findMany({
+    where: {
+      status: {
+        in: ["OPEN", "IN_PROGRESS", "WAITING"],
+      },
+    },
+    include: {
+      assignee: true,
+      team: true,
+      category: true,
+      slaClocks: {
+        where: {
+          status: {
+            in: ["RUNNING", "PAUSED"],
+          },
+        },
+      },
+    },
+  });
+
+  let matchedTickets = 0;
+  let updatedTickets = 0;
+
+  for (const rule of rules) {
+    for (const ticket of tickets) {
+      const matches = matchesAutomationConditions(rule.conditions as AutomationCondition, ticket, now);
+      if (!matches) {
+        continue;
+      }
+
+      matchedTickets += 1;
+      const updated = await applyAutomationRuleToTicket(
+        rule as AutomationRule & { createdById?: string },
+        ticket.id,
+        rule.createdById
+      );
+
+      if (updated) {
+        updatedTickets += 1;
+      }
+    }
+  }
+
+  return {
+    processedRules: rules.length,
+    matchedTickets,
+    updatedTickets,
+  };
 }
 
 /**

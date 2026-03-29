@@ -9,6 +9,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const scope = request.nextUrl.searchParams.get("scope");
+
     const filters = await prisma.savedFilter.findMany({
       where: {
         OR: [
@@ -24,7 +26,18 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(filters);
+    const scopedFilters =
+      scope === null
+        ? filters
+        : filters.filter((filter) => {
+            const config =
+              filter.filterConfig && typeof filter.filterConfig === "object"
+                ? (filter.filterConfig as Record<string, unknown>)
+                : {};
+            return config.scope === scope;
+          });
+
+    return NextResponse.json(scopedFilters);
   } catch (error) {
     console.error("Failed to fetch saved filters:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -47,7 +60,7 @@ export async function POST(request: NextRequest) {
         filterConfig: body.filterConfig,
         sortConfig: body.sortConfig,
         isDefault: false,
-        isShared: false,
+        isShared: Boolean(body.isShared),
         createdById: session.user.agentId,
       },
     });

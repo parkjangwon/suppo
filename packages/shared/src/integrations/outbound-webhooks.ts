@@ -1,0 +1,118 @@
+import { createHmac } from "node:crypto";
+
+import { prisma } from "@crinity/db";
+
+export type HelpdeskWebhookEvent =
+  | "ticket.created"
+  | "ticket.updated"
+  | "ticket.commented"
+  | "webhook.test";
+
+interface DispatchWebhookOptions {
+  endpointId?: string;
+  isTest?: boolean;
+}
+
+interface WebhookDispatchResult {
+  sent: number;
+}
+
+function signPayload(secret: string, payload: string) {
+  return createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+export async function dispatchWebhookEvent(
+  event: HelpdeskWebhookEvent,
+  data: Record<string, unknown>,
+  options: DispatchWebhookOptions = {}
+): Promise<WebhookDispatchResult> {
+  const endpoints = await prisma.webhookEndpoint.findMany({
+    where: {
+      isActive: true,
+    },
+  });
+
+  const matchingEndpoints = endpoints.filter((endpoint) => {
+    if (options.endpointId && endpoint.id !== options.endpointId) {
+      return false;
+    }
+
+    if (event === "webhook.test") {
+      return true;
+    }
+
+    const events = Array.isArray(endpoint.events) ? endpoint.events : [];
+    return events.includes(event);
+  });
+
+  let sent = 0;
+
+  for (const endpoint of matchingEndpoints) {
+    const payload = JSON.stringify({
+      event,
+      occurredAt: new Date().toISOString(),
+      data,
+    });
+
+    try {
+      const response = await fetch(endpoint.url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          ...(endpoint.secret
+            ? {
+                "x-crinity-signature": signPayload(endpoint.secret, payload),
+              }
+            : {}),
+        },
+        body: payload,
+      });
+
+      await prisma.webhookEndpoint.update({
+        where: { id: endpoint.id },
+        data: {
+          lastTriggeredAt: new Date(),
+          lastStatusCode: response.status,
+          lastError: response.ok ? null : await response.text(),
+        },
+      });
+
+      await prisma.webhookDeliveryLog.create({
+        data: {
+          endpointId: endpoint.id,
+          event,
+          isTest: Boolean(options.isTest),
+          requestBody: JSON.parse(payload) as Record<string, unknown>,
+          responseStatusCode: response.status,
+          responseBody: response.ok ? null : await response.clone().text(),
+          errorMessage: null,
+        },
+      });
+
+      sent += 1;
+    } catch (error) {
+      await prisma.webhookEndpoint.update({
+        where: { id: endpoint.id },
+        data: {
+          lastTriggeredAt: new Date(),
+          lastStatusCode: null,
+          lastError: error instanceof Error ? error.message : "Unknown webhook error",
+        },
+      });
+
+      await prisma.webhookDeliveryLog.create({
+        data: {
+          endpointId: endpoint.id,
+          event,
+          isTest: Boolean(options.isTest),
+          requestBody: JSON.parse(payload) as Record<string, unknown>,
+          responseStatusCode: null,
+          responseBody: null,
+          errorMessage: error instanceof Error ? error.message : "Unknown webhook error",
+        },
+      });
+    }
+  }
+
+  return { sent };
+}

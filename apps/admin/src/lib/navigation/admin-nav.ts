@@ -4,6 +4,9 @@ export type AdminNavItemKey =
   | "dashboard"
   | "analytics"
   | "knowledge"
+  | "chats"
+  | "chat-settings"
+  | "integration-settings"
   | "tickets"
   | "agents"
   | "calendar"
@@ -45,6 +48,7 @@ const NAV_ITEMS: Array<
   { key: "dashboard", href: "/admin/dashboard", label: "대시보드", section: "main" },
   { key: "analytics", href: "/admin/analytics", label: "분석 및 리포트", section: "main" },
   { key: "knowledge", href: "/admin/knowledge", label: "지식", section: "main" },
+  { key: "chats", href: "/admin/chats", label: "실시간 채팅", section: "main" },
   { key: "tickets", href: "/admin/tickets", label: "티켓 목록", section: "main" },
   { key: "agents", href: "/admin/agents", label: "상담원 관리", section: "main", hiddenForRoles: ["VIEWER"] },
   { key: "calendar", href: "/admin/calendar", label: "일정 관리", section: "main", hiddenForRoles: ["VIEWER"] },
@@ -54,9 +58,11 @@ const NAV_ITEMS: Array<
   { key: "saml", href: "/admin/settings/saml", label: "SAML SSO", section: "settings", adminOnly: true },
   { key: "git", href: "/admin/settings/git", label: "Git 연동", section: "settings", adminOnly: true },
   { key: "email", href: "/admin/settings/email", label: "이메일 연동", section: "settings", adminOnly: true },
+  { key: "integration-settings", href: "/admin/settings/integrations", label: "연동 설정", section: "settings", adminOnly: true },
+  { key: "chat-settings", href: "/admin/settings/chat", label: "채팅 설정", section: "settings", adminOnly: true },
   { key: "branding", href: "/admin/settings/branding", label: "브랜딩", section: "settings", adminOnly: true },
   { key: "business-hours", href: "/admin/settings/business-hours", label: "영업시간", section: "settings", adminOnly: true },
-  { key: "operations", href: "/admin/settings/operations", label: "운영 정책", section: "settings", adminOnly: true },
+  { key: "operations", href: "/admin/settings/operations", label: "업무 규칙", section: "settings", adminOnly: true },
   { key: "llm", href: "/admin/settings/llm", label: "AI 연동", section: "settings", adminOnly: true },
   { key: "system", href: "/admin/settings/system", label: "시스템", section: "settings", adminOnly: true },
   { key: "templates", href: "/admin/templates", label: "응답 템플릿", section: "tools", hiddenForRoles: ["VIEWER"] },

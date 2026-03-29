@@ -25,9 +25,10 @@ import { cn } from "@crinity/shared/utils";
 interface TicketFiltersProps {
   categories: { id: string; name: string }[];
   agents: { id: string; name: string }[];
+  showBasicSearch?: boolean;
 }
 
-export function TicketFilters({ categories, agents }: TicketFiltersProps) {
+export function TicketFilters({ categories, agents, showBasicSearch = true }: TicketFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -81,27 +82,29 @@ export function TicketFilters({ categories, agents }: TicketFiltersProps) {
 
   return (
     <div className="space-y-4 mb-6">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="티켓 번호, 제목, 이메일 검색..."
-              className="pl-9"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <Button type="submit" variant="secondary">검색</Button>
-        </form>
-        
-        {hasFilters && (
-          <Button variant="ghost" onClick={clearFilters} className="shrink-0">
-            <X className="mr-2 h-4 w-4" />
-            필터 초기화
-          </Button>
-        )}
-      </div>
+      {showBasicSearch && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="티켓 번호, 제목, 이메일 검색..."
+                className="pl-9"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <Button type="submit" variant="secondary">검색</Button>
+          </form>
+
+          {hasFilters && (
+            <Button variant="ghost" onClick={clearFilters} className="shrink-0">
+              <X className="mr-2 h-4 w-4" />
+              필터 초기화
+            </Button>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Popover>

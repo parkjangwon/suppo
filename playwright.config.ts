@@ -32,7 +32,7 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: `DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@crinity/admin dev`,
+      command: `DATABASE_URL='${e2eDatabaseUrl}' INTERNAL_AUTOMATION_DISPATCH_TOKEN='e2e-automation-token' pnpm --filter=@crinity/admin dev`,
       url: "http://127.0.0.1:3001/admin/login",
       reuseExistingServer: !process.env.CI,
     },

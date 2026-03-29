@@ -8,6 +8,7 @@ interface AttachmentUploadProps {
   onChange: (files: File[]) => void;
   maxFiles?: number;
   maxSize?: number;
+  inputAriaLabel?: string;
 }
 
 export function AttachmentUpload({
@@ -15,6 +16,7 @@ export function AttachmentUpload({
   onChange,
   maxFiles = 20,
   maxSize = 10 * 1024 * 1024,
+  inputAriaLabel,
 }: AttachmentUploadProps) {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +73,7 @@ export function AttachmentUpload({
         <input
           type="file"
           ref={fileInputRef}
+          aria-label={inputAriaLabel}
           onChange={handleFileChange}
           className="hidden"
           multiple

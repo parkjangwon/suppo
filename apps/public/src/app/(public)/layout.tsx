@@ -4,6 +4,7 @@ import { BrandingProvider } from "@crinity/shared/branding/context";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
 import { PublicCopyProvider } from "@crinity/shared/i18n/public-context";
 import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { getChatWidgetConfig } from "@crinity/shared/chat/widget-settings";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,11 +24,17 @@ export default async function PublicLayout({
   const branding = await getSystemBranding();
   const locale = (await cookies()).get("crinity-locale")?.value;
   const copy = getPublicCopy(locale);
+  const chatSettings = await getChatWidgetConfig();
 
   return (
     <BrandingProvider branding={branding}>
       <PublicCopyProvider value={copy}>
-        <PublicShell>{children}</PublicShell>
+        <PublicShell
+          chatWidgetEnabled={chatSettings.enabled}
+          defaultWidgetKey={chatSettings.widgetKey}
+        >
+          {children}
+        </PublicShell>
       </PublicCopyProvider>
     </BrandingProvider>
   );

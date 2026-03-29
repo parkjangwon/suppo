@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Button } from "@crinity/ui/components/ui/button";
@@ -40,6 +40,7 @@ interface CommentSectionProps {
   isAdmin: boolean;
   ticketAssigneeId: string | null;
   templateContext?: TemplateContext;
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
 export function CommentSection({
@@ -53,13 +54,43 @@ export function CommentSection({
   isAdmin,
   ticketAssigneeId,
   templateContext,
+  onTypingChange,
 }: CommentSectionProps) {
   const router = useRouter();
   const [reply, setReply] = useState("");
   const [isInternal, setIsInternal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const typingTimerRef = useRef<number | null>(null);
   const { lock, isLockedByMe, isLocked, acquireLock, releaseLock } = useCommentLock({ ticketId });
+
+  useEffect(() => {
+    if (!onTypingChange) {
+      return;
+    }
+
+    if (reply.trim().length > 0) {
+      onTypingChange(true);
+      if (typingTimerRef.current) {
+        window.clearTimeout(typingTimerRef.current);
+      }
+      typingTimerRef.current = window.setTimeout(() => {
+        onTypingChange(false);
+      }, 1200);
+    } else {
+      onTypingChange(false);
+      if (typingTimerRef.current) {
+        window.clearTimeout(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+    }
+
+    return () => {
+      if (typingTimerRef.current) {
+        window.clearTimeout(typingTimerRef.current);
+      }
+    };
+  }, [reply, onTypingChange]);
 
   async function handleAiSuggestion() {
     if (!onAiSuggestion) return;
@@ -97,6 +128,7 @@ export function CommentSection({
       setReply("");
       setIsInternal(false);
       setFiles([]);
+      onTypingChange?.(false);
       await releaseLock();
       router.refresh();
     }

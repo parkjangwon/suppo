@@ -27,7 +27,9 @@ export async function getAdminTickets(params: GetAdminTicketsParams) {
     agentRole,
   } = params;
 
-  const where: Prisma.TicketWhereInput = {};
+  const where: Prisma.TicketWhereInput = {
+    chatConversation: null,
+  };
 
   if (status) where.status = status;
   if (priority) where.priority = priority;
@@ -106,7 +108,12 @@ export async function getAdminTicketDetail(id: string, agentId: string, agentRol
   return ticket;
 }
 
-export async function updateTicketStatus(id: string, status: TicketStatus, actorId: string) {
+export async function updateTicketStatus(
+  id: string,
+  status: TicketStatus,
+  actorId: string | null,
+  actorType: "AGENT" | "SYSTEM" = "AGENT"
+) {
   const oldTicket = await prisma.ticket.findUnique({ where: { id } });
   if (!oldTicket) throw new Error("Ticket not found");
 
@@ -125,8 +132,8 @@ export async function updateTicketStatus(id: string, status: TicketStatus, actor
   await prisma.ticketActivity.create({
     data: {
       ticketId: id,
-      actorType: "AGENT",
-      actorId,
+      actorType,
+      actorId: actorId ?? undefined,
       action: "STATUS_CHANGED",
       oldValue: oldTicket.status,
       newValue: status,
@@ -147,7 +154,12 @@ export async function updateTicketStatus(id: string, status: TicketStatus, actor
   return ticket;
 }
 
-export async function updateTicketPriority(id: string, priority: TicketPriority, actorId: string) {
+export async function updateTicketPriority(
+  id: string,
+  priority: TicketPriority,
+  actorId: string | null,
+  actorType: "AGENT" | "SYSTEM" = "AGENT"
+) {
   const oldTicket = await prisma.ticket.findUnique({ where: { id } });
   if (!oldTicket) throw new Error("Ticket not found");
 
@@ -159,8 +171,8 @@ export async function updateTicketPriority(id: string, priority: TicketPriority,
   await prisma.ticketActivity.create({
     data: {
       ticketId: id,
-      actorType: "AGENT",
-      actorId,
+      actorType,
+      actorId: actorId ?? undefined,
       action: "PRIORITY_CHANGED",
       oldValue: oldTicket.priority,
       newValue: priority,
@@ -170,7 +182,12 @@ export async function updateTicketPriority(id: string, priority: TicketPriority,
   return ticket;
 }
 
-export async function assignTicket(id: string, assigneeId: string | null, actorId: string) {
+export async function assignTicket(
+  id: string,
+  assigneeId: string | null,
+  actorId: string | null,
+  actorType: "AGENT" | "SYSTEM" = "AGENT"
+) {
   const oldTicket = await prisma.ticket.findUnique({ where: { id } });
   if (!oldTicket) throw new Error("Ticket not found");
 
@@ -191,8 +208,8 @@ export async function assignTicket(id: string, assigneeId: string | null, actorI
     await prisma.ticketActivity.create({
       data: {
         ticketId: id,
-        actorType: "AGENT",
-        actorId,
+        actorType,
+        actorId: actorId ?? undefined,
         action: "TRANSFERRED",
         oldValue: oldTicket.assigneeId,
         newValue: assigneeId,
@@ -202,8 +219,8 @@ export async function assignTicket(id: string, assigneeId: string | null, actorI
     await prisma.ticketActivity.create({
       data: {
         ticketId: id,
-        actorType: "AGENT",
-        actorId,
+        actorType,
+        actorId: actorId ?? undefined,
         action: "ASSIGNED",
         oldValue: oldTicket.assigneeId || "unassigned",
         newValue: assigneeId || "unassigned",
