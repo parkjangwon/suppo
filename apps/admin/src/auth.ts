@@ -15,9 +15,6 @@ import {
 import BoxyHQSAML from "@crinity/shared/auth/providers/boxyhq-saml";
 import { prisma } from "@crinity/db";
 
-const DEFAULT_ADMIN_EMAIL = "admin@crinity.io";
-const DEFAULT_ADMIN_PASSWORD = "admin1234";
-const DEFAULT_ADMIN_PASSWORD_HASH = hashSync(DEFAULT_ADMIN_PASSWORD, 10);
 const HAS_DATABASE = Boolean(process.env.DATABASE_URL);
 
 type AuthenticatedAgent = {
@@ -30,10 +27,13 @@ type AuthenticatedAgent = {
 };
 
 async function ensureDefaultAdminSeed() {
-  // production에서는 INITIAL_ADMIN_EMAIL / INITIAL_ADMIN_PASSWORD 환경변수 우선 사용.
-  // 이 변수가 없으면 DEFAULT_ADMIN_* fallback.
-  const adminEmail = process.env.INITIAL_ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL;
-  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD ?? DEFAULT_ADMIN_PASSWORD;
+  const adminEmail = process.env.INITIAL_ADMIN_EMAIL;
+  const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    console.log("[Auth] INITIAL_ADMIN_EMAIL or INITIAL_ADMIN_PASSWORD not set, skipping default admin seed");
+    return;
+  }
 
   const existingAdmin = await prisma.agent.findUnique({
     where: { email: adminEmail }
@@ -52,6 +52,7 @@ async function ensureDefaultAdminSeed() {
         passwordHash
       }
     });
+    console.log("[Auth] Default admin created:", adminEmail);
     return;
   }
 
@@ -83,23 +84,8 @@ function toAuthenticatedAgent(agent: {
   };
 }
 
-async function authorizeFallbackAdmin(email: string, password: string): Promise<AuthenticatedAgent | null> {
-  if (process.env.NODE_ENV === "production" || email !== DEFAULT_ADMIN_EMAIL) {
-    return null;
-  }
-
-  const isValidPassword = await compare(password, DEFAULT_ADMIN_PASSWORD_HASH);
-  if (!isValidPassword) {
-    return null;
-  }
-
-  return {
-    id: "mock-admin",
-    agentId: "mock-admin",
-    email: DEFAULT_ADMIN_EMAIL,
-    name: "관리자",
-    role: "ADMIN"
-  };
+async function authorizeFallbackAdmin(): Promise<AuthenticatedAgent | null> {
+  return null;
 }
 
 const providers: Provider[] = [
@@ -118,7 +104,7 @@ const providers: Provider[] = [
       }
 
       if (!HAS_DATABASE) {
-        return authorizeFallbackAdmin(email, password);
+        return authorizeFallbackAdmin();
       }
 
       try {
@@ -149,7 +135,7 @@ const providers: Provider[] = [
 
         return toAuthenticatedAgent(agent);
       } catch {
-        return authorizeFallbackAdmin(email, password);
+        return authorizeFallbackAdmin();
       }
     }
   })
@@ -214,7 +200,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return false;
       }
 
-      const providerMap: Record<string, string> = {
+      const providerMap: Record<string, "GOOGLE" | "GITHUB" | "SAML"> = {
         google: "GOOGLE",
         github: "GITHUB",
         "boxyhq-saml": "SAML",

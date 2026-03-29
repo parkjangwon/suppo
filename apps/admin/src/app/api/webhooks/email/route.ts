@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
 import { z } from "zod";
+import { createHmac, timingSafeEqual } from "crypto";
 
 /**
  * 이메일 수신 웹훅 스키마
@@ -29,18 +30,55 @@ const emailWebhookSchema = z.object({
 });
 
 /**
+ * Verify HMAC-SHA256 signature for webhook authenticity
+ */
+function verifyWebhookSignature(payload: string, signature: string | null, secret: string): boolean {
+  if (!signature) return false;
+
+  const expectedSignature = createHmac("sha256", secret)
+    .update(payload, "utf8")
+    .digest("hex");
+
+  try {
+    const sigBuffer = Buffer.from(signature.replace("sha256=", ""), "hex");
+    const expectedBuffer = Buffer.from(expectedSignature, "hex");
+    
+    if (sigBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+    
+    return timingSafeEqual(sigBuffer, expectedBuffer);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * 이메일 수신 웹훅
  * - 티켓 생성 또는 기존 티켓에 댓글 추가
  */
 export async function POST(request: NextRequest) {
   try {
-    // API 키 검증 (환경 변수로 설정)
+    const rawBody = await request.text();
+    
     const apiKey = request.headers.get("x-api-key");
-    if (apiKey !== process.env.EMAIL_WEBHOOK_API_KEY) {
+    const signature = request.headers.get("x-webhook-signature");
+    const webhookSecret = process.env.EMAIL_WEBHOOK_SECRET;
+    const expectedApiKey = process.env.EMAIL_WEBHOOK_API_KEY;
+    
+    let isAuthorized = false;
+    
+    if (webhookSecret && signature) {
+      isAuthorized = verifyWebhookSignature(rawBody, signature, webhookSecret);
+    } else if (expectedApiKey && apiKey) {
+      isAuthorized = apiKey === expectedApiKey;
+    }
+    
+    if (!isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = JSON.parse(rawBody);
     const validated = emailWebhookSchema.parse(body);
 
     // 티켓 번호 추출 (Subject에서 [TKT-123] 형식 검색)

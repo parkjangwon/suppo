@@ -156,60 +156,64 @@ export async function mergeTickets(params: MergeTicketsParams) {
       },
     });
 
-    // 코멘트 복사
     if (allComments.length > 0) {
-      for (const comment of allComments) {
-        await tx.comment.update({
-          where: { id: comment.id },
-          data: { ticketId: targetTicketId },
-        });
-      }
-    }
-
-    // 첨부파일 복사
-    if (allAttachments.length > 0) {
-      for (const attachment of allAttachments) {
-        await tx.attachment.update({
-          where: { id: attachment.id },
-          data: { ticketId: targetTicketId },
-        });
-      }
-    }
-
-    // 활동 로그 기록
-    for (const sourceTicket of sourceTickets) {
-      await tx.ticketActivity.create({
-        data: {
-          ticketId: sourceTicket.id,
-          actorType: "AGENT",
-          actorId: mergedBy,
-          action: "MERGED" as any,
-          oldValue: sourceTicket.ticketNumber,
-          newValue: targetTicket.ticketNumber,
-        },
+      await tx.comment.updateMany({
+        where: { id: { in: allComments.map((c) => c.id) } },
+        data: { ticketId: targetTicketId },
       });
+    }
 
-      // 원본 담당자에게 알림 (이메일 발송)
-      if (sourceTicket.assigneeId && sourceTicket.assigneeId !== mergedBy) {
-        const assignee = await tx.agent.findUnique({
-          where: { id: sourceTicket.assigneeId },
-        });
-        if (assignee) {
-          // 이메일 큐에 추가
-          await tx.emailDelivery.create({
-            data: {
-              to: assignee.email,
-              subject: `티켓 ${sourceTicket.ticketNumber}이 병합되었습니다`,
-              body: `
+    if (allAttachments.length > 0) {
+      await tx.attachment.updateMany({
+        where: { id: { in: allAttachments.map((a) => a.id) } },
+        data: { ticketId: targetTicketId },
+      });
+    }
+
+    const assigneeIds = sourceTickets
+      .map((t) => t.assigneeId)
+      .filter((id): id is string => id !== null && id !== mergedBy);
+
+    const assignees = assigneeIds.length > 0
+      ? await tx.agent.findMany({
+          where: { id: { in: assigneeIds } },
+          select: { id: true, email: true },
+        })
+      : [];
+
+    const assigneeMap = new Map(assignees.map((a) => [a.id, a]));
+
+    await tx.ticketActivity.createMany({
+      data: sourceTickets.map((sourceTicket) => ({
+        ticketId: sourceTicket.id,
+        actorType: "AGENT" as const,
+        actorId: mergedBy,
+        action: "MERGED" as const,
+        oldValue: sourceTicket.ticketNumber,
+        newValue: targetTicket.ticketNumber,
+      })),
+    });
+
+    const emailData = sourceTickets
+      .filter((t) => t.assigneeId && t.assigneeId !== mergedBy)
+      .map((sourceTicket) => {
+        const assignee = assigneeMap.get(sourceTicket.assigneeId!);
+        if (!assignee) return null;
+        return {
+          to: assignee.email,
+          subject: `티켓 ${sourceTicket.ticketNumber}이 병합되었습니다`,
+          body: `
                 <p>티켓 <strong>${sourceTicket.ticketNumber}</strong>이 티켓 <strong>${targetTicket.ticketNumber}</strong>으로 병합되었습니다.</p>
                 <p>대상 티켓: ${targetTicket.subject}</p>
                 <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/tickets/${targetTicketId}">티켓 보기</a></p>
               `,
-              status: "PENDING",
-            },
-          });
-        }
-      }
+          status: "PENDING" as const,
+        };
+      })
+      .filter((data): data is NonNullable<typeof data> => data !== null);
+
+    if (emailData.length > 0) {
+      await tx.emailDelivery.createMany({ data: emailData });
     }
 
     return {

@@ -1,11 +1,21 @@
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@crinity/db";
+import { getCache, setCache } from "../../cache/redis";
+
+const CATEGORIES_CACHE_KEY = "categories:all";
+const CATEGORIES_CACHE_TTL = 3600;
 
 export async function listCategories() {
-  return prisma.category.findMany({
+  const cached = await getCache<ReturnType<typeof prisma.category.findMany>>(CATEGORIES_CACHE_KEY);
+  if (cached) return cached;
+
+  const categories = await prisma.category.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }]
   });
+
+  await setCache(CATEGORIES_CACHE_KEY, categories, { ttl: CATEGORIES_CACHE_TTL });
+  return categories;
 }
 
 export async function getCategoryById(categoryId: string) {

@@ -133,13 +133,14 @@ export async function getKnowledgeArticleById(
 
   if (!article) return null;
 
-  const helpfulCount = await prisma.knowledgeArticleFeedback.count({
-    where: { articleId: id, wasHelpful: true },
+  const feedbackStats = await prisma.knowledgeArticleFeedback.groupBy({
+    by: ["wasHelpful"],
+    where: { articleId: id },
+    _count: { articleId: true },
   });
 
-  const notHelpfulCount = await prisma.knowledgeArticleFeedback.count({
-    where: { articleId: id, wasHelpful: false },
-  });
+  const helpfulCount = feedbackStats.find((s) => s.wasHelpful)?._count.articleId || 0;
+  const notHelpfulCount = feedbackStats.find((s) => !s.wasHelpful)?._count.articleId || 0;
 
   return {
     id: article.id,
@@ -182,13 +183,14 @@ export async function getKnowledgeArticleBySlug(
 
   if (!article) return null;
 
-  const helpfulCount = await prisma.knowledgeArticleFeedback.count({
-    where: { articleId: article.id, wasHelpful: true },
+  const feedbackStats = await prisma.knowledgeArticleFeedback.groupBy({
+    by: ["wasHelpful"],
+    where: { articleId: article.id },
+    _count: { articleId: true },
   });
 
-  const notHelpfulCount = await prisma.knowledgeArticleFeedback.count({
-    where: { articleId: article.id, wasHelpful: false },
-  });
+  const helpfulCount = feedbackStats.find((s) => s.wasHelpful)?._count.articleId || 0;
+  const notHelpfulCount = feedbackStats.find((s) => !s.wasHelpful)?._count.articleId || 0;
 
   return {
     id: article.id,
@@ -229,25 +231,43 @@ export async function getKnowledgeContributors(): Promise<KnowledgeContributor[]
     },
   });
 
+  const agentsWithArticles = agents.filter((a) => a.authoredKnowledge.length > 0);
+  if (agentsWithArticles.length === 0) return [];
+
+  const allArticleIds = agentsWithArticles.flatMap((a) =>
+    a.authoredKnowledge.map((k) => k.id)
+  );
+
+  const feedbackStats = await prisma.knowledgeArticleFeedback.groupBy({
+    by: ["articleId", "wasHelpful"],
+    where: { articleId: { in: allArticleIds } },
+    _count: { articleId: true },
+  });
+
+  const feedbackMap = new Map<string, { helpful: number; total: number }>();
+  for (const stat of feedbackStats) {
+    const existing = feedbackMap.get(stat.articleId) || { helpful: 0, total: 0 };
+    existing.total += stat._count.articleId;
+    if (stat.wasHelpful) {
+      existing.helpful += stat._count.articleId;
+    }
+    feedbackMap.set(stat.articleId, existing);
+  }
+
   const contributors: KnowledgeContributor[] = [];
 
-  for (const agent of agents) {
-    if (agent.authoredKnowledge.length === 0) continue;
-
+  for (const agent of agentsWithArticles) {
     const articleIds = agent.authoredKnowledge.map((a) => a.id);
-    
-    const helpfulCount = await prisma.knowledgeArticleFeedback.count({
-      where: {
-        articleId: { in: articleIds },
-        wasHelpful: true,
-      },
-    });
 
-    const totalFeedback = await prisma.knowledgeArticleFeedback.count({
-      where: {
-        articleId: { in: articleIds },
-      },
-    });
+    let helpfulCount = 0;
+    let totalFeedback = 0;
+    for (const id of articleIds) {
+      const stats = feedbackMap.get(id);
+      if (stats) {
+        helpfulCount += stats.helpful;
+        totalFeedback += stats.total;
+      }
+    }
 
     const totalViews = agent.authoredKnowledge.reduce((sum, a) => sum + a.viewCount, 0);
     const publishedCount = agent.authoredKnowledge.filter((a) => a.isPublished).length;

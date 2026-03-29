@@ -197,7 +197,10 @@ model Ticket {
   @@index([teamId])
   @@index([requestTypeId])
   @@index([customerId])
+  @@index([customerEmail])
   @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([assigneeId, status])
   @@index([searchVector])
   @@index([mergedIntoId])
 }
@@ -381,6 +384,7 @@ model Comment {
   attachments Attachment[]
 
   @@index([ticketId])
+  @@index([ticketId, createdAt])
   @@index([authorId])
 }
 
@@ -1148,7 +1152,9 @@ model KnowledgeArticle {
   @@index([categoryId])
   @@index([authorId])
   @@index([lastEditedById])
+  @@index([isPublished])
   @@index([isPublished, isPublic])
+  @@index([viewCount])
   @@index([publishedAt])
 }
 

@@ -1,8 +1,10 @@
-import { unstable_noStore as noStore } from "next/cache";
 import { prisma } from "@crinity/db";
 import { SystemBranding } from "@crinity/shared/branding/context";
+import { getCache, setCache } from "../../cache/redis";
 
 const DEFAULT_BRANDING_ID = "default";
+const BRANDING_CACHE_KEY = "branding:system";
+const BRANDING_CACHE_TTL = 1800;
 
 const defaultBranding: SystemBranding = {
   companyName: "Crinity",
@@ -26,16 +28,14 @@ const defaultBranding: SystemBranding = {
 };
 
 export async function getSystemBranding(): Promise<SystemBranding> {
-  noStore();
+  const cached = await getCache<SystemBranding>(BRANDING_CACHE_KEY);
+  if (cached) return cached;
+
   const branding = await prisma.systemBranding.findUnique({
     where: { id: DEFAULT_BRANDING_ID },
   });
 
-  if (!branding) {
-    return defaultBranding;
-  }
-
-  return {
+  const result = branding ? {
     companyName: branding.companyName,
     logoUrl: branding.logoUrl || undefined,
     faviconUrl: branding.faviconUrl || undefined,
@@ -54,7 +54,10 @@ export async function getSystemBranding(): Promise<SystemBranding> {
     showPoweredBy: branding.showPoweredBy,
     knowledgeEnabled: branding.knowledgeEnabled,
     customCss: branding.customCss || undefined,
-  };
+  } : defaultBranding;
+
+  await setCache(BRANDING_CACHE_KEY, result, { ttl: BRANDING_CACHE_TTL });
+  return result;
 }
 
 export async function getBrandingByRequest(): Promise<SystemBranding> {
