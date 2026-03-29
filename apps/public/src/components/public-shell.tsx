@@ -13,10 +13,12 @@ export function PublicShell({
   children,
   chatWidgetEnabled,
   defaultWidgetKey,
+  hideFooter = false,
 }: {
   children: React.ReactNode;
   chatWidgetEnabled?: boolean;
   defaultWidgetKey?: string;
+  hideFooter?: boolean;
 }) {
   const branding = useBranding();
   const copy = usePublicCopy();
@@ -77,122 +79,124 @@ export function PublicShell({
         {children}
       </main>
       
-      <footer className="bg-slate-900 text-slate-300">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            <div className="lg:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                {branding.logoUrl ? (
-                  <img
-                    src={branding.logoUrl}
-                    alt={branding.companyName}
-                    className="h-8 w-auto brightness-0 invert"
-                  />
-                ) : (
-                  <div 
-                    className="h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold"
-                    style={{ backgroundColor: branding.secondaryColor }}
-                  >
-                    {branding.companyName.charAt(0)}
-                  </div>
-                )}
-                <span className="font-bold text-xl text-white">
-                  {branding.companyName}
-                </span>
+      {!hideFooter && (
+        <footer className="bg-slate-900 text-slate-300">
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+              <div className="lg:col-span-2">
+                <div className="flex items-center gap-3 mb-4">
+                  {branding.logoUrl ? (
+                    <img
+                      src={branding.logoUrl}
+                      alt={branding.companyName}
+                      className="h-8 w-auto brightness-0 invert"
+                    />
+                  ) : (
+                    <div 
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: branding.secondaryColor }}
+                    >
+                      {branding.companyName.charAt(0)}
+                    </div>
+                  )}
+                  <span className="font-bold text-xl text-white">
+                    {branding.companyName}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+                  {branding.welcomeMessage}
+                </p>
               </div>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-md">
-                {branding.welcomeMessage}
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-4">{copy.footerSupport}</h4>
-              <ul className="space-y-3">
-                {branding.footerPhone && (
+              
+              <div>
+                <h4 className="font-semibold text-white mb-4">{copy.footerSupport}</h4>
+                <ul className="space-y-3">
+                  {branding.footerPhone && (
+                    <li>
+                      <a 
+                        href={`tel:${branding.footerPhone.replace(/-/g, '')}`}
+                        className="flex items-center gap-2 text-sm hover:text-white transition-colors"
+                      >
+                        <Phone className="h-4 w-4" />
+                        {formatPhoneNumber(branding.footerPhone)}
+                      </a>
+                    </li>
+                  )}
+                  {branding.footerEmail && (
+                    <li>
+                      <a 
+                        href={`mailto:${branding.footerEmail}`}
+                        className="flex items-center gap-2 text-sm hover:text-white transition-colors"
+                      >
+                        <Mail className="h-4 w-4" />
+                        {branding.footerEmail}
+                      </a>
+                    </li>
+                  )}
+                  {branding.footerHomepage && (
+                    <li>
+                      <a 
+                        href={branding.footerHomepage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-sm hover:text-white transition-colors"
+                      >
+                        <Globe className="h-4 w-4" />
+                        {copy.footerHomepage}
+                      </a>
+                    </li>
+                  )}
+                  {branding.footerAddress && (
+                    <li className="flex items-start gap-2 text-sm">
+                      <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      {branding.footerAddress}
+                    </li>
+                  )}
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-white mb-4">{copy.footerQuickLinks}</h4>
+                <ul className="space-y-2">
                   <li>
-                    <a 
-                      href={`tel:${branding.footerPhone.replace(/-/g, '')}`}
-                      className="flex items-center gap-2 text-sm hover:text-white transition-colors"
-                    >
-                      <Phone className="h-4 w-4" />
-                      {formatPhoneNumber(branding.footerPhone)}
-                    </a>
-                  </li>
-                )}
-                {branding.footerEmail && (
-                  <li>
-                    <a 
-                      href={`mailto:${branding.footerEmail}`}
-                      className="flex items-center gap-2 text-sm hover:text-white transition-colors"
-                    >
-                      <Mail className="h-4 w-4" />
-                      {branding.footerEmail}
-                    </a>
-                  </li>
-                )}
-                {branding.footerHomepage && (
-                  <li>
-                    <a 
-                      href={branding.footerHomepage}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm hover:text-white transition-colors"
-                    >
-                      <Globe className="h-4 w-4" />
-                      {copy.footerHomepage}
-                    </a>
-                  </li>
-                )}
-                {branding.footerAddress && (
-                  <li className="flex items-start gap-2 text-sm">
-                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    {branding.footerAddress}
-                  </li>
-                )}
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-4">{copy.footerQuickLinks}</h4>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/" className="text-sm hover:text-white transition-colors">
-                    {copy.footerHome}
-                  </Link>
-                </li>
-                {branding.knowledgeEnabled && (
-                  <li>
-                    <Link href="/knowledge" className="text-sm hover:text-white transition-colors">
-                      {copy.navKnowledge}
+                    <Link href="/" className="text-sm hover:text-white transition-colors">
+                      {copy.footerHome}
                     </Link>
                   </li>
-                )}
-                <li>
-                  <Link href="/ticket/new" className="text-sm hover:text-white transition-colors">
-                    {copy.navNewTicket}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/ticket/lookup" className="text-sm hover:text-white transition-colors">
-                    {copy.navLookupTicket}
-                  </Link>
-                </li>
-              </ul>
+                  {branding.knowledgeEnabled && (
+                    <li>
+                      <Link href="/knowledge" className="text-sm hover:text-white transition-colors">
+                        {copy.navKnowledge}
+                      </Link>
+                    </li>
+                  )}
+                  <li>
+                    <Link href="/ticket/new" className="text-sm hover:text-white transition-colors">
+                      {copy.navNewTicket}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/ticket/lookup" className="text-sm hover:text-white transition-colors">
+                      {copy.navLookupTicket}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-slate-500">
+                {branding.footerText}
+              </p>
+              {branding.showPoweredBy && (
+                <p className="text-xs text-slate-600">
+                  Powered by <span className="text-slate-500">Crinity</span>
+                </p>
+              )}
             </div>
           </div>
-          
-          <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-slate-500">
-              {branding.footerText}
-            </p>
-            {branding.showPoweredBy && (
-              <p className="text-xs text-slate-600">
-                Powered by <span className="text-slate-500">Crinity</span>
-              </p>
-            )}
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

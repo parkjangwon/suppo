@@ -1,0 +1,8 @@
+Test Case ID,Test Case Name,Test Category,URL,Status,Screenshot File,Notes,Test Date
+TC-01,Public 홈페이지 접속 및 스크린샷,Public,http://localhost:3000/,PASS,TC-01-Public-Homepage.png,헬프데스크 메인 페이지 정상 로드,2026-03-29
+TC-02,티켓 생성 페이지 테스트,Public,http://localhost:3000/ticket/new,PASS,TC-02-Ticket-New.png,티켓 작성 폼 정상 표시,2026-03-29
+TC-03,티켓 조회 페이지 테스트,Public,http://localhost:3000/ticket/lookup,PASS,TC-03-Ticket-Lookup.png,티켓 조회 폼 정상 표시,2026-03-29
+TC-04,Admin 로그인 페이지 테스트,Admin,http://localhost:3001/admin/login,PASS,TC-04-Admin-Login.png,관리자 로그인 페이지 정상 로드,2026-03-29
+TC-05,Admin 대시보드 테스트,Admin,http://localhost:3001/admin/dashboard,N/A,,로그인 필요 - 인증 후 테스트 가능,2026-03-29
+TC-06,Admin 티켓 목록 테스트,Admin,http://localhost:3001/admin/tickets,N/A,,로그인 필요 - 인증 후 테스트 가능,2026-03-29
+TC-07,Knowledge Base 페이지 테스트,Public,http://localhost:3000/knowledge,PASS,TC-07-Knowledge-Base.png,지식베이스 페이지 정상 로드 (9개 문서),2026-03-29
