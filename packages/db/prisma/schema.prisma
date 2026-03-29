@@ -244,6 +244,7 @@ model Agent {
   knowledgeLinks         TicketKnowledgeLink[]
   publicApiKeys          PublicApiKey[]        @relation("PublicApiKeyCreator")
   webhookEndpoints       WebhookEndpoint[]     @relation("WebhookEndpointCreator")
+  macros                 Macro[]               @relation("MacroCreator")
 
   @@index([isActive])
 }
@@ -1277,4 +1278,25 @@ model TicketKnowledgeLink {
   @@unique([ticketId, articleId])
   @@index([articleId])
   @@index([agentId])
+}
+
+// Macro (매크로/빠른 응답)
+model Macro {
+  id          String   @id @default(cuid())
+  title       String   // 매크로 제목
+  shortcut    String   // 단축키 (예: "/greeting")
+  content     String   // 매크로 내용
+  variables   Json?    // 사용 가능한 변수 목록
+  category    String   // 카테고리
+  isPersonal  Boolean  @default(false) // 개인용 여부
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy Agent @relation("MacroCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([shortcut])
+  @@index([isPersonal])
+  @@index([category])
 }
