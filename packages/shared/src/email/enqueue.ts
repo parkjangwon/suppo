@@ -52,11 +52,13 @@ export interface TicketEmailContext {
   customerEmail: string;
 }
 
-async function enqueueSafely(task: () => Promise<unknown>, message: string): Promise<void> {
+async function enqueueSafely(task: () => Promise<unknown>, message: string): Promise<boolean> {
   try {
     await task();
+    return true;
   } catch (error) {
     console.error(message, error);
+    return false;
   }
 }
 
