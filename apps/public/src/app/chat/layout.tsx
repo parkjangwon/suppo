@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ChatWidgetLayout({
+export default async function ChatLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
