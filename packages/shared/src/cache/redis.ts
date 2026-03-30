@@ -17,7 +17,16 @@ async function createRedisClient(): Promise<RedisLike | null> {
   }
 
   try {
-    const { Redis } = await import("ioredis");
+    const dynamicRequire = eval("require") as NodeRequire;
+    const { Redis } = dynamicRequire("ioredis") as {
+      Redis: new (
+        url: string,
+        options: {
+          retryStrategy: (times: number) => number;
+          maxRetriesPerRequest: number;
+        }
+      ) => RedisLike;
+    };
     const client = new Redis(redisUrl, {
       retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);

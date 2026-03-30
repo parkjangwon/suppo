@@ -2,6 +2,7 @@
   "name": "crinity-helpdesk",
   "private": true,
   "scripts": {
+    "dev": "pnpm dev:all",
     "dev:admin": "pnpm --filter=@crinity/admin dev",
     "dev:public": "pnpm --filter=@crinity/public dev",
     "dev:all": "pnpm -r --parallel --filter=@crinity/public --filter=@crinity/admin dev",
