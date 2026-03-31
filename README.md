@@ -433,6 +433,10 @@ docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t 
 - [CLAUDE.md](/Users/pjw/dev/project/crinity/crinity-helpdesk/CLAUDE.md)
 - `docs/superpowers/plans/2026-03-22-monorepo-restructure.md`
 
+## Paperclip E2E verification
+
+- 2026-03-31: Paperclip wake 이벤트로 README 반영, commit, push까지 완료.
+
 ## 라이선스
 
 MIT
