@@ -440,3 +440,5 @@ docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t 
 ## 라이선스
 
 MIT
+
+Paperclip E2E code-path verified.
