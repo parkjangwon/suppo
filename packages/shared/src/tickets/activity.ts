@@ -1,40 +1,14 @@
+import type { AuthorType, ActivityAction, PrismaClient, TicketActivity } from "@prisma/client";
+
 import { prisma } from "@crinity/db";
 
-type PersistedActorType = "AGENT" | "CUSTOMER";
-type ActivityAction =
-  | "CREATED"
-  | "ASSIGNED"
-  | "STATUS_CHANGED"
-  | "PRIORITY_CHANGED"
-  | "TRANSFERRED";
-
-export interface LoggedActivity {
-  id: string;
-  ticketId: string;
-  actorType: PersistedActorType;
-  actorId: string | null;
-  action: ActivityAction;
-  oldValue: string | null;
-  newValue: string | null;
-  createdAt: Date;
-}
+export type LoggedActivity = TicketActivity;
 
 interface ActivityDbClient {
-  ticketActivity: {
-    create: (args: {
-      data: {
-        ticketId: string;
-        actorType: PersistedActorType;
-        actorId?: string;
-        action: ActivityAction;
-        oldValue?: string;
-        newValue?: string;
-      };
-    }) => Promise<LoggedActivity>;
-  };
+  ticketActivity: PrismaClient["ticketActivity"];
 }
 
-export type ActivityActorType = "SYSTEM" | "AGENT" | "CUSTOMER";
+export type ActivityActorType = AuthorType;
 
 export interface LogActivityInput {
   ticketId: string;
@@ -45,14 +19,6 @@ export interface LogActivityInput {
   newValue?: string;
 }
 
-function toDbActorType(actorType: ActivityActorType): PersistedActorType {
-  if (actorType === "SYSTEM") {
-    return "CUSTOMER";
-  }
-
-  return actorType;
-}
-
 export async function logActivity(
   input: LogActivityInput,
   db: ActivityDbClient = prisma
@@ -60,7 +26,7 @@ export async function logActivity(
   return db.ticketActivity.create({
     data: {
       ticketId: input.ticketId,
-      actorType: toDbActorType(input.actorType),
+      actorType: input.actorType,
       actorId: input.actorId,
       action: input.action,
       oldValue: input.oldValue,

@@ -30,7 +30,30 @@ export interface AutomationRule {
   description: string | null;
   conditions: AutomationCondition;
   actions: AutomationAction;
-  triggerOn: string;
+  triggerOn: string | null;
+  createdById?: string;
+}
+
+function normalizeAutomationRule(
+  rule: Prisma.AutomationRuleGetPayload<Record<string, never>>
+): AutomationRule | null {
+  if (!rule.conditions || typeof rule.conditions !== "object" || Array.isArray(rule.conditions)) {
+    return null;
+  }
+
+  if (!rule.actions || typeof rule.actions !== "object" || Array.isArray(rule.actions)) {
+    return null;
+  }
+
+  return {
+    id: rule.id,
+    name: rule.name,
+    description: rule.description,
+    conditions: rule.conditions as AutomationCondition,
+    actions: rule.actions as AutomationAction,
+    triggerOn: rule.triggerOn,
+    createdById: rule.createdById,
+  };
 }
 
 interface TicketWithAutomationContext
@@ -324,18 +347,21 @@ export async function getApplicableRules(
     ],
   });
 
-  return rules.filter((rule) =>
-    matchesAutomationConditions(
-      rule.conditions as AutomationCondition,
-      {
-        ...ticket,
-        createdAt: ticket.createdAt,
-        updatedAt: ticket.updatedAt,
-        slaClocks: [],
-      },
-      new Date()
-    )
-  );
+  return rules
+    .map(normalizeAutomationRule)
+    .filter((rule): rule is AutomationRule => rule !== null)
+    .filter((rule) =>
+      matchesAutomationConditions(
+        rule.conditions,
+        {
+          ...ticket,
+          createdAt: ticket.createdAt,
+          updatedAt: ticket.updatedAt,
+          slaClocks: [],
+        },
+        new Date()
+      )
+    );
 }
 
 /**

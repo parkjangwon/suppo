@@ -1,5 +1,7 @@
+import type { PrismaClient } from "@prisma/client";
+
 import { prisma } from "@crinity/db";
-import { logActivity, type LoggedActivity } from "@crinity/shared/tickets/activity";
+import { logActivity } from "@crinity/shared/tickets/activity";
 
 interface TransferTicketInput {
   ticketId: string;
@@ -15,51 +17,7 @@ interface TransferResult {
   toAgentId: string;
 }
 
-interface TransferTxClient {
-  ticket: {
-    findUnique: (args: {
-      where: { id: string };
-      select: { id: true; assigneeId: true };
-    }) => Promise<{ id: string; assigneeId: string | null } | null>;
-    update: (args: {
-      where: { id: string };
-      data: { assigneeId: string };
-    }) => Promise<unknown>;
-  };
-  agent: {
-    findUnique: (args: {
-      where: { id: string };
-      select: { id: true; isActive: true };
-    }) => Promise<{ id: string; isActive: boolean } | null>;
-    update: (args: { where: { id: string }; data: { lastAssignedAt: Date } }) => Promise<unknown>;
-  };
-  ticketTransfer: {
-    create: (args: {
-      data: {
-        ticketId: string;
-        fromAgentId: string;
-        toAgentId: string;
-        reason?: string;
-      };
-    }) => Promise<{ id: string }>;
-  };
-  ticketActivity: {
-    create: (args: {
-      data: {
-        ticketId: string;
-        actorType: "AGENT" | "CUSTOMER";
-        actorId?: string;
-        action: "CREATED" | "ASSIGNED" | "STATUS_CHANGED" | "PRIORITY_CHANGED" | "TRANSFERRED";
-        oldValue?: string;
-        newValue?: string;
-      };
-    }) => Promise<LoggedActivity>;
-  };
-}
-
-interface TransferDbClient {
-  $transaction: <T>(callback: (client: TransferTxClient) => Promise<T>) => Promise<T>;
-}
+type TransferDbClient = Pick<PrismaClient, "$transaction">;
 
 export async function transferTicket(
   input: TransferTicketInput,

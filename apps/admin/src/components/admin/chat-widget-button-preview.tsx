@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 type WidgetButtonPreviewForm = {
   accentColor: string;
   buttonBadgeColor: string;
@@ -82,7 +84,7 @@ export function ChatWidgetButtonPreview({
             style={{
               width: size.image,
               height: size.image,
-              objectFit: form.buttonImageFit,
+              objectFit: form.buttonImageFit as CSSProperties["objectFit"],
             }}
           />
         ) : (

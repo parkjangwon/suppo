@@ -28,7 +28,7 @@ export async function GET(_request: NextRequest) {
       description: "전체 데이터 백업 다운로드",
     });
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       headers: {
         "Content-Type": "application/zip",
         "Content-Disposition": `attachment; filename="backup-${timestamp}.zip"`,

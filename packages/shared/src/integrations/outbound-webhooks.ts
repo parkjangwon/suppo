@@ -1,5 +1,6 @@
 import { createHmac } from "node:crypto";
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@crinity/db";
 
 export type HelpdeskWebhookEvent =
@@ -19,6 +20,10 @@ interface WebhookDispatchResult {
 
 function signPayload(secret: string, payload: string) {
   return createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+function toJsonValue(value: unknown): Prisma.InputJsonValue {
+  return value as Prisma.InputJsonValue;
 }
 
 export async function dispatchWebhookEvent(
@@ -41,18 +46,21 @@ export async function dispatchWebhookEvent(
       return true;
     }
 
-    const events = Array.isArray(endpoint.events) ? endpoint.events : [];
+    const events = Array.isArray(endpoint.events)
+      ? endpoint.events.filter((value): value is string => typeof value === "string")
+      : [];
     return events.includes(event);
   });
 
   let sent = 0;
 
   for (const endpoint of matchingEndpoints) {
-    const payload = JSON.stringify({
+    const requestBody = {
       event,
       occurredAt: new Date().toISOString(),
       data,
-    });
+    };
+    const payload = JSON.stringify(requestBody);
 
     try {
       const response = await fetch(endpoint.url, {
@@ -82,7 +90,7 @@ export async function dispatchWebhookEvent(
           endpointId: endpoint.id,
           event,
           isTest: Boolean(options.isTest),
-          requestBody: JSON.parse(payload) as Record<string, unknown>,
+          requestBody: toJsonValue(requestBody),
           responseStatusCode: response.status,
           responseBody: response.ok ? null : await response.clone().text(),
           errorMessage: null,
@@ -105,7 +113,7 @@ export async function dispatchWebhookEvent(
           endpointId: endpoint.id,
           event,
           isTest: Boolean(options.isTest),
-          requestBody: JSON.parse(payload) as Record<string, unknown>,
+          requestBody: toJsonValue(requestBody),
           responseStatusCode: null,
           responseBody: null,
           errorMessage: error instanceof Error ? error.message : "Unknown webhook error",

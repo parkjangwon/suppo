@@ -4,10 +4,15 @@ import {
   AbsenceType,
   AgentRole,
   AuthProvider,
+  Prisma,
   PrismaClient,
   ActivityAction,
 } from "@prisma/client";
 import { hash } from "bcryptjs";
+
+function toAuditJsonValue(value: unknown) {
+  return (value ?? Prisma.JsonNull) as Prisma.InputJsonValue | typeof Prisma.JsonNull;
+}
 
 // ─── Categories ────────────────────────────────────────────────────────────────
 
@@ -1793,9 +1798,9 @@ export async function seedAuditLogs(
         resourceType: log.resourceType,
         resourceId: log.resourceId ?? null,
         description: log.description,
-        oldValue: log.oldValue ?? null,
-        newValue: log.newValue ?? null,
-        metadata: log.metadata ?? null,
+        oldValue: toAuditJsonValue(log.oldValue),
+        newValue: toAuditJsonValue(log.newValue),
+        metadata: toAuditJsonValue(log.metadata),
         ipAddress: log.ipAddress ?? null,
         createdAt: log.createdAt,
       },

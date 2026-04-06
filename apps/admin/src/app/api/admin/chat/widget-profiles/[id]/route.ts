@@ -59,9 +59,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       });
     }
 
+    const updateData = {
+      ...validated,
+      buttonBadgeColor: validated.buttonBadgeColor ?? undefined,
+    };
+
     const profile = await prisma.chatWidgetProfile.update({
       where: { id },
-      data: validated,
+      data: updateData,
     });
 
     return NextResponse.json(profile);

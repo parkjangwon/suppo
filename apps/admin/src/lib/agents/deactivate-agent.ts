@@ -1,6 +1,8 @@
+import type { PrismaClient } from "@prisma/client";
+
 import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pick-assignee";
 import { prisma } from "@crinity/db";
-import { logActivity, type LoggedActivity } from "@crinity/shared/tickets/activity";
+import { logActivity } from "@crinity/shared/tickets/activity";
 
 const REASSIGNABLE_STATUSES: Array<"OPEN" | "IN_PROGRESS" | "WAITING"> = ["OPEN", "IN_PROGRESS", "WAITING"];
 
@@ -16,100 +18,18 @@ interface DeactivateAgentResult {
   totalProcessed: number;
 }
 
-interface CandidateAgentRow {
-  id: string;
-  name: string;
-  maxTickets: number;
-  createdAt: Date;
-  lastAssignedAt: Date | null;
-  _count: {
-    assignedTickets: number;
-  };
-}
+type DeactivateDbClient = Pick<PrismaClient, "$transaction">;
 
-interface DeactivateTxClient {
-  agent: {
-    findUnique: (args: {
-      where: { id: string };
-      select: { id: true; isActive: true; role: true };
-    }) => Promise<{ id: string; isActive: boolean; role: "ADMIN" | "AGENT" } | null>;
-    findMany: (args: {
-      where: {
-        isActive: true;
-        id: { not: string };
-        role: "AGENT";
-        categories: { some: { categoryId: string } };
-      };
-      select: {
-        id: true;
-        name: true;
-        maxTickets: true;
-        createdAt: true;
-        lastAssignedAt: true;
-        _count: {
-          select: {
-            assignedTickets: {
-              where: {
-                status: {
-                  in: Array<"OPEN" | "IN_PROGRESS" | "WAITING">;
-                };
-              };
-            };
-          };
-        };
-      };
-    }) => Promise<CandidateAgentRow[]>;
-    update: (args: {
-      where: { id: string };
-      data: {
-        isActive?: boolean;
-        lastAssignedAt?: Date;
-      };
-    }) => Promise<unknown>;
-  };
-  ticket: {
-    findMany: (args: {
-      where: {
-        assigneeId: string;
-        status: { in: Array<"OPEN" | "IN_PROGRESS" | "WAITING"> };
-      };
-      select: {
-        id: true;
-        categoryId: true;
-        assigneeId: true;
-      };
-    }) => Promise<Array<{ id: string; categoryId: string; assigneeId: string | null }>>;
-    update: (args: { where: { id: string }; data: { assigneeId: string | null } }) => Promise<unknown>;
-  };
-  ticketTransfer: {
-    create: (args: {
-      data: {
-        ticketId: string;
-        fromAgentId: string;
-        toAgentId: string;
-        reason?: string;
-      };
-    }) => Promise<unknown>;
-  };
-  ticketActivity: {
-    create: (args: {
-      data: {
-        ticketId: string;
-        actorType: "AGENT" | "CUSTOMER";
-        actorId?: string;
-        action: "CREATED" | "ASSIGNED" | "STATUS_CHANGED" | "PRIORITY_CHANGED" | "TRANSFERRED";
-        oldValue?: string;
-        newValue?: string;
-      };
-    }) => Promise<LoggedActivity>;
-  };
-}
-
-interface DeactivateDbClient {
-  $transaction: <T>(callback: (client: DeactivateTxClient) => Promise<T>) => Promise<T>;
-}
-
-function toCandidates(rows: CandidateAgentRow[]): CandidateAgent[] {
+function toCandidates(
+  rows: Array<{
+    id: string;
+    name: string;
+    maxTickets: number;
+    createdAt: Date;
+    lastAssignedAt: Date | null;
+    _count: { assignedTickets: number };
+  }>
+): CandidateAgent[] {
   return rows.map((row) => {
     const currentTickets = row._count.assignedTickets;
     const loadRatio = row.maxTickets > 0 ? currentTickets / row.maxTickets : 1;
@@ -156,7 +76,7 @@ export async function deactivateAgent(
       }
     });
 
-    const candidateCache = new Map<string, CandidateAgent[]>();
+    const candidateCache = new Map<string | null, CandidateAgent[]>();
     let reassignedCount = 0;
     let unassignedCount = 0;
 
@@ -168,40 +88,44 @@ export async function deactivateAgent(
 
       let candidates = candidateCache.get(ticket.categoryId);
       if (!candidates) {
-        const rows = await tx.agent.findMany({
-          where: {
-            isActive: true,
-            id: { not: agentId },
-            role: "AGENT",
-            categories: {
-              some: { categoryId: ticket.categoryId }
-            }
-          },
-          select: {
-            id: true,
-            name: true,
-            maxTickets: true,
-            createdAt: true,
-            lastAssignedAt: true,
-            _count: {
-              select: {
-                assignedTickets: {
-                  where: {
-                    status: {
-                      in: REASSIGNABLE_STATUSES
+        if (!ticket.categoryId) {
+          candidates = [];
+        } else {
+          const rows = await tx.agent.findMany({
+            where: {
+              isActive: true,
+              id: { not: agentId },
+              role: "AGENT",
+              categories: {
+                some: { categoryId: ticket.categoryId }
+              }
+            },
+            select: {
+              id: true,
+              name: true,
+              maxTickets: true,
+              createdAt: true,
+              lastAssignedAt: true,
+              _count: {
+                select: {
+                  assignedTickets: {
+                    where: {
+                      status: {
+                        in: REASSIGNABLE_STATUSES
+                      }
                     }
                   }
                 }
               }
             }
-          }
-        });
+          });
 
-        candidates = toCandidates(rows);
+          candidates = toCandidates(rows);
+        }
         candidateCache.set(ticket.categoryId, candidates);
       }
 
-      const assignee = pickAssignee(candidates, ticket.categoryId);
+      const assignee = pickAssignee(candidates, ticket.categoryId ?? undefined);
 
       if (assignee) {
         await tx.ticket.update({

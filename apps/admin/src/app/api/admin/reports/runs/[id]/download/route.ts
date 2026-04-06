@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     const buffer = await readReportFile(report.storageKey);
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": report.mimeType || "application/octet-stream",
         "Content-Disposition": `attachment; filename="${report.fileName || "report.xlsx"}"`,

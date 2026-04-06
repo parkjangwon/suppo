@@ -70,14 +70,14 @@ const baseTicketSchema = {
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   requestTypeId: z.string().optional(),
   agentId: z.string().optional(),
-  status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CUSTOMER", "RESOLVED", "CLOSED"]).optional(),
+  status: z.enum(["OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CLOSED"]).optional(),
 };
 
 // 티켓 관련 스키마
 export const createTicketSchema = z.object(baseTicketSchema);
 
 export const updateTicketSchema = z.object({
-  status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CUSTOMER", "RESOLVED", "CLOSED"]).optional(),
+  status: z.enum(["OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CLOSED"]).optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
   assigneeId: z.string().optional(),
   title: z.string().min(1).max(200).transform(escapeHtml).optional(),

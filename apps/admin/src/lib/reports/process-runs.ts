@@ -1,5 +1,5 @@
 import { prisma } from "@crinity/db";
-import { ReportType, ReportFormat, ReportRunStatus } from "@prisma/client";
+import { ReportType, ReportFormat, ReportRunStatus, ReportTriggerSource } from "@prisma/client";
 import { DateRange, GeneratedReportResult } from "./contracts";
 import { getOperationalReportData } from "./operational/query";
 import { buildOperationalReportExcel } from "./operational/excel";
@@ -79,7 +79,7 @@ export async function createPendingReport(params: {
   periodKey: string;
   requestedById?: string;
   scheduleId?: string;
-  triggerSource: string;
+  triggerSource: ReportTriggerSource;
 }): Promise<string> {
   const report = await prisma.generatedReport.create({
     data: {

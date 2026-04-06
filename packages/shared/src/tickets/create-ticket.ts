@@ -1,4 +1,12 @@
 import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pick-assignee";
+import {
+  AgentRole,
+  type Prisma,
+  type PrismaClient,
+  type Ticket,
+  type TicketActivity,
+  type TicketPriority as PrismaTicketPriority
+} from "@prisma/client";
 import { prisma } from "@crinity/db";
 import { logActivity } from "@crinity/shared/tickets/activity";
 import { generateTicketNumber } from "@crinity/shared/tickets/ticket-number";
@@ -10,135 +18,11 @@ const ACTIVE_STATUSES: Array<"OPEN" | "IN_PROGRESS" | "WAITING"> = [
 ];
 const MAX_CREATE_ATTEMPTS = 5;
 
-type TicketPriority = "URGENT" | "HIGH" | "MEDIUM" | "LOW";
-
-interface TicketRecord {
-  id: string;
-  ticketNumber: string;
-  customerId: string | null;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string | null;
-  subject: string;
-  description: string;
-  categoryId: string;
-  priority: TicketPriority;
-  status: "OPEN" | "IN_PROGRESS" | "WAITING" | "RESOLVED" | "CLOSED";
-  assigneeId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  resolvedAt: Date | null;
-  closedAt: Date | null;
-}
-
-interface TicketActivityRecord {
-  id: string;
-  ticketId: string;
-  actorType: "AGENT" | "CUSTOMER";
-  actorId: string | null;
-  action: "CREATED" | "ASSIGNED" | "STATUS_CHANGED" | "PRIORITY_CHANGED" | "TRANSFERRED";
-  oldValue: string | null;
-  newValue: string | null;
-  createdAt: Date;
-}
-
-interface CandidateAgentRow {
-  id: string;
-  name: string;
-  maxTickets: number;
-  createdAt: Date;
-  lastAssignedAt: Date | null;
-  _count: {
-    assignedTickets: number;
-  };
-}
-
-interface CandidateQueryClient {
-  agent: {
-    findMany: (args: {
-      where: {
-        isActive: true;
-        role: "AGENT";
-        categories: { some: { categoryId: string } };
-      };
-      select: {
-        id: true;
-        name: true;
-        maxTickets: true;
-        createdAt: true;
-        lastAssignedAt: true;
-        _count: {
-          select: {
-            assignedTickets: {
-              where: {
-                status: {
-                  in: Array<"OPEN" | "IN_PROGRESS" | "WAITING">;
-                };
-              };
-            };
-          };
-        };
-      };
-    }) => Promise<CandidateAgentRow[]>;
-  };
-}
-
-interface CreateTicketTxClient extends CandidateQueryClient {
-  customer: {
-    upsert: (args: {
-      where: { email: string };
-      update: {
-        name: string;
-        phone?: string | null;
-        ticketCount: { increment: number };
-        lastTicketAt: Date;
-      };
-      create: {
-        email: string;
-        name: string;
-        phone?: string | null;
-        ticketCount: number;
-        lastTicketAt: Date;
-      };
-    }) => Promise<{ id: string }>;
-  };
-  ticket: {
-    create: (args: {
-      data: {
-        ticketNumber: string;
-        customerId?: string;
-        customerName: string;
-        customerEmail: string;
-        customerPhone?: string;
-        customerOrganization?: string;
-        subject: string;
-        description: string;
-        categoryId: string;
-        requestTypeId?: string;
-        priority: TicketPriority;
-        assigneeId?: string;
-      };
-    }) => Promise<TicketRecord>;
-  };
-  requestType: {
-    findUnique: (args: { where: { id: string }; include?: { category?: boolean } }) => Promise<{ id: string; categoryId?: string | null; category?: { id: string } | null } | null>;
-  };
-  agent: CandidateQueryClient["agent"] & {
-    update: (args: { where: { id: string }; data: { lastAssignedAt: Date } }) => Promise<unknown>;
-  };
-  ticketActivity: {
-    create: (args: {
-      data: {
-        ticketId: string;
-        actorType: "AGENT" | "CUSTOMER";
-        actorId?: string;
-        action: "CREATED" | "ASSIGNED" | "STATUS_CHANGED" | "PRIORITY_CHANGED" | "TRANSFERRED";
-        oldValue?: string;
-        newValue?: string;
-      };
-    }) => Promise<TicketActivityRecord>;
-  };
-}
+type DbClient = Pick<PrismaClient, "$transaction">;
+type TxClient = Prisma.TransactionClient;
+type TicketRecord = Ticket;
+type TicketActivityRecord = TicketActivity;
+type TicketPriority = PrismaTicketPriority;
 
 export interface CreateTicketInput {
   customerName: string;
@@ -182,18 +66,20 @@ function isTicketNumberConflict(error: unknown): boolean {
   return false;
 }
 
-async function buildCandidates(db: CandidateQueryClient, categoryId: string | null): Promise<CandidateAgent[]> {
+async function buildCandidates(db: TxClient, categoryId: string | null): Promise<CandidateAgent[]> {
   const now = new Date();
 
   const agents = await db.agent.findMany({
-      where: {
-        isActive: true,
-        role: { in: ["AGENT", "TEAM_LEAD"] },
-        ...(categoryId ? {
+    where: {
+      isActive: true,
+      role: { in: [AgentRole.AGENT, AgentRole.TEAM_LEAD] },
+      ...(categoryId
+        ? {
           categories: {
             some: { categoryId }
+          }
         }
-      } : {}),
+        : {}),
       absences: {
         none: {
           startDate: { lte: now },
@@ -241,7 +127,7 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
     const ticketNumber = await generateTicketNumber();
 
     try {
-      return await prisma.$transaction(async (tx: CreateTicketTxClient) => {
+      return await prisma.$transaction(async (tx) => {
         // Get request type and its category
         const requestType = await tx.requestType.findUnique({
           where: { id: input.requestTypeId },
@@ -260,14 +146,14 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
           where: { email: input.customerEmail },
           update: {
             name: input.customerName,
-            phone: input.customerPhone,
+            phone: input.customerPhone ?? null,
             ticketCount: { increment: 1 },
             lastTicketAt: new Date()
           },
           create: {
             email: input.customerEmail,
             name: input.customerName,
-            phone: input.customerPhone,
+            phone: input.customerPhone ?? null,
             ticketCount: 1,
             lastTicketAt: new Date()
           }
@@ -279,14 +165,14 @@ export async function createTicket(input: CreateTicketInput): Promise<CreateTick
             customerId: customer.id,
             customerName: input.customerName,
             customerEmail: input.customerEmail,
-            customerPhone: input.customerPhone,
-            customerOrganization: input.customerOrganization,
+            customerPhone: input.customerPhone ?? null,
+            customerOrganization: input.customerOrganization ?? null,
             subject: input.subject,
             description: input.description,
-            categoryId: categoryId,
+            categoryId: categoryId ?? null,
             requestTypeId: input.requestTypeId,
             priority: input.priority,
-            assigneeId: assignee?.id
+            assigneeId: assignee?.id ?? null
           }
         });
 

@@ -5,6 +5,8 @@ import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pi
 import { buildChatCustomerTokenHash } from "@crinity/shared/chat/token";
 import { generateTicketNumber } from "@crinity/shared/tickets/ticket-number";
 
+export { buildChatCustomerTokenHash } from "@crinity/shared/chat/token";
+
 type TicketPriority = "URGENT" | "HIGH" | "MEDIUM" | "LOW";
 type CommentAuthorType = "CUSTOMER" | "AGENT";
 
