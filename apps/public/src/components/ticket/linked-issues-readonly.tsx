@@ -28,14 +28,12 @@ interface LinkedIssuesReadonlyProps {
 
 export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesReadonlyProps) {
   const [issueDetails, setIssueDetails] = useState<Record<string, IssueDetail | null | undefined>>({});
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [fullDetails, setFullDetails] = useState<Record<string, IssueFullDetail | null | undefined>>({});
 
   useEffect(() => {
     if (initialLinks.length === 0) return;
 
-    setIsLoadingDetails(true);
     fetch(`/api/git/links?ticketId=${ticketId}`)
       .then((res) => {
         if (!res.ok) throw new Error("failed");
@@ -54,8 +52,7 @@ export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesRea
           details[link.id] = null;
         }
         setIssueDetails(details);
-      })
-      .finally(() => setIsLoadingDetails(false));
+      });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId]);
 

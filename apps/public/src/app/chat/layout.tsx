@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { BrandingProvider } from "@crinity/shared/branding/context";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
@@ -28,7 +29,7 @@ export default async function ChatLayout({
       <PublicCopyProvider value={copy}>
         <div className="min-h-screen bg-slate-100">
           <header className="bg-white border-b px-4 h-14 flex items-center">
-            <a href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               {branding.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.companyName} className="h-6 w-auto" />
               ) : (
@@ -42,7 +43,7 @@ export default async function ChatLayout({
               <span className="font-semibold" style={{ color: branding.primaryColor }}>
                 {branding.companyName}
               </span>
-            </a>
+            </Link>
           </header>
           <main>{children}</main>
         </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
+import { Prisma } from "@prisma/client";
 import { knowledgeSearchSchema } from "@crinity/shared/validation/knowledge";
 
 export async function GET(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     const { q, categoryId, limit, offset } = parsed.data;
 
-    const where: any = {
+    const where: Prisma.KnowledgeArticleWhereInput = {
       isPublished: true,
       isPublic: true,
     };

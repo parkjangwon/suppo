@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
     });
 
     const where: Prisma.TicketWhereInput = {};
+    const andClauses: Prisma.TicketWhereInput[] = [];
 
     // Full-text search
     if (params.query) {
@@ -92,33 +93,33 @@ export async function GET(request: NextRequest) {
     }
 
     // Status filter
-    if (params.status.length > 0) {
+    if (params.status && params.status.length > 0) {
       where.status = { in: params.status as any };
     }
 
     // Priority filter
-    if (params.priority.length > 0) {
+    if (params.priority && params.priority.length > 0) {
       where.priority = { in: params.priority as any };
     }
 
     // Assignee filter
-    if (params.assigneeId.length > 0) {
+    if (params.assigneeId && params.assigneeId.length > 0) {
       where.assigneeId = { in: params.assigneeId };
     }
 
     // Category filter
-    if (params.categoryId.length > 0) {
+    if (params.categoryId && params.categoryId.length > 0) {
       where.categoryId = { in: params.categoryId };
     }
 
     // Request type filter
-    if (params.requestTypeId.length > 0) {
+    if (params.requestTypeId && params.requestTypeId.length > 0) {
       where.requestTypeId = { in: params.requestTypeId };
     }
 
     // Tags filter
-    if (params.tags.length > 0) {
-      where.tags = { hasEvery: params.tags };
+    if (params.tags && params.tags.length > 0) {
+      andClauses.push(...params.tags.map((tag) => ({ tags: { contains: tag } })));
     }
 
     // Date range filter
@@ -136,8 +137,11 @@ export async function GET(request: NextRequest) {
     if (params.customerEmail) {
       where.customerEmail = {
         contains: params.customerEmail,
-        mode: "insensitive",
       };
+    }
+
+    if (andClauses.length > 0) {
+      where.AND = andClauses;
     }
 
     // 권한에 따른 필터링
@@ -147,13 +151,12 @@ export async function GET(request: NextRequest) {
     }
 
     // 정렬 설정
-    const orderBy: Prisma.TicketOrderByWithRelationInput = {};
-    if (params.sortBy === "priority") {
-      // Priority는 ENUM이므로 별도 처리
-      orderBy.priority = params.sortOrder;
-    } else {
-      orderBy[params.sortBy] = params.sortOrder;
-    }
+    const orderBy: Prisma.TicketOrderByWithRelationInput =
+      params.sortBy === "priority"
+        ? { priority: params.sortOrder }
+        : params.sortBy === "updatedAt"
+          ? { updatedAt: params.sortOrder }
+          : { createdAt: params.sortOrder };
 
     // 총 개수 조회
     const total = await prisma.ticket.count({ where });

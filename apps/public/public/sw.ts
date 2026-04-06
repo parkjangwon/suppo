@@ -1,3 +1,6 @@
+/// <reference lib="webworker" />
+export {};
+
 // PWA Service Worker - Offline support and caching
 const CACHE_NAME = "crinity-helpdesk-v1";
 const STATIC_ASSETS = [
@@ -8,6 +11,11 @@ const STATIC_ASSETS = [
 ];
 
 // Install event - cache static assets
+declare const self: ServiceWorkerGlobalScope;
+interface SyncEvent extends ExtendableEvent {
+  readonly tag: string;
+}
+
 self.addEventListener("install", (event: ExtendableEvent) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
@@ -59,7 +67,9 @@ self.addEventListener("fetch", (event: FetchEvent) => {
         .catch(() => {
           // Return offline page for navigation requests
           if (event.request.mode === "navigate") {
-            return caches.match("/offline.html");
+            return caches
+              .match("/offline.html")
+              .then((offlinePage) => offlinePage ?? new Response("Offline", { status: 503 }));
           }
           return new Response("Offline", { status: 503 });
         });
@@ -81,10 +91,6 @@ self.addEventListener("push", (event: PushEvent) => {
         icon: "/icon-192x192.png",
         badge: "/badge-72x72.png",
         data: data.url || "/",
-        actions: [
-          { action: "open", title: "Open" },
-          { action: "close", title: "Close" }
-        ]
       }
     )
   );
@@ -104,11 +110,12 @@ self.addEventListener("notificationclick", (event: NotificationEvent) => {
 });
 
 // Background sync - queue offline actions
-self.addEventListener("sync", (event: SyncEvent) => {
-  if (event.tag === "sync-tickets") {
-    event.waitUntil(syncPendingTickets());
+self.addEventListener("sync", ((event: Event) => {
+  const syncEvent = event as SyncEvent;
+  if (syncEvent.tag === "sync-tickets") {
+    syncEvent.waitUntil(syncPendingTickets());
   }
-});
+}) as EventListener);
 
 async function syncPendingTickets(): Promise<void> {
   // Get pending tickets from IndexedDB and sync

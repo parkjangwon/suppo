@@ -1,6 +1,8 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AdminCopyProvider } from "@crinity/shared/i18n/admin-context";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -43,14 +45,18 @@ describe("CommentSection", () => {
 
   it("renders a taller default reply textarea", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(CommentSection, {
-        ticketId: "ticket-1",
-        comments: [],
-        canEdit: true,
-        currentAgentId: "agent-1",
-        isAdmin: true,
-        ticketAssigneeId: "agent-1",
-      })
+      React.createElement(
+        AdminCopyProvider,
+        { value: getAdminCopy("ko") },
+        React.createElement(CommentSection, {
+          ticketId: "ticket-1",
+          comments: [],
+          canEdit: true,
+          currentAgentId: "agent-1",
+          isAdmin: true,
+          ticketAssigneeId: "agent-1",
+        })
+      )
     );
 
     expect(markup).toContain('aria-label="응답 작성"');

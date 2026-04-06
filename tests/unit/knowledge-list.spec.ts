@@ -1,6 +1,8 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { AdminCopyProvider } from "@crinity/shared/i18n/admin-context";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -42,13 +44,17 @@ describe("KnowledgeList public link visibility", () => {
 
   it("shows a public link only for published public articles", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(KnowledgeList, {
-        articles: [baseArticle],
-        categories: [{ id: "cat-1", name: "카테고리" }],
-        currentUserId: "author-1",
-        isAdmin: true,
-        publicBaseUrl: "https://helpdesk.example.com",
-      })
+      React.createElement(
+        AdminCopyProvider,
+        { value: getAdminCopy("ko") },
+        React.createElement(KnowledgeList, {
+          articles: [baseArticle],
+          categories: [{ id: "cat-1", name: "카테고리" }],
+          currentUserId: "author-1",
+          isAdmin: true,
+          publicBaseUrl: "https://helpdesk.example.com",
+        })
+      )
     );
 
     expect(markup).toContain("공개 링크");
@@ -57,16 +63,20 @@ describe("KnowledgeList public link visibility", () => {
 
   it("does not show a public link for draft or internal-only articles", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(KnowledgeList, {
-        articles: [
-          { ...baseArticle, id: "draft", slug: "draft-article", isPublished: false },
-          { ...baseArticle, id: "internal", slug: "internal-article", isPublic: false },
-        ],
-        categories: [{ id: "cat-1", name: "카테고리" }],
-        currentUserId: "author-1",
-        isAdmin: true,
-        publicBaseUrl: "https://helpdesk.example.com",
-      })
+      React.createElement(
+        AdminCopyProvider,
+        { value: getAdminCopy("ko") },
+        React.createElement(KnowledgeList, {
+          articles: [
+            { ...baseArticle, id: "draft", slug: "draft-article", isPublished: false },
+            { ...baseArticle, id: "internal", slug: "internal-article", isPublic: false },
+          ],
+          categories: [{ id: "cat-1", name: "카테고리" }],
+          currentUserId: "author-1",
+          isAdmin: true,
+          publicBaseUrl: "https://helpdesk.example.com",
+        })
+      )
     );
 
     expect(markup).not.toContain("https://helpdesk.example.com/knowledge/draft-article");

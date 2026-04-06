@@ -31,7 +31,9 @@ export async function POST(request: NextRequest) {
     }
 
     const files = formData.getAll("attachments") as File[];
-    let processedAttachments = [];
+    let processedAttachments: Awaited<ReturnType<typeof processAttachments>> = [];
+    const authorName = session.user.name ?? session.user.email ?? "Unknown Agent";
+    const authorEmail = session.user.email ?? "";
 
     if (files.length > 0) {
       try {
@@ -49,8 +51,8 @@ export async function POST(request: NextRequest) {
       content,
       isInternal: isInternal || false,
       authorId: session.user.agentId,
-      authorName: session.user.name,
-      authorEmail: session.user.email,
+      authorName,
+      authorEmail,
       attachments: processedAttachments,
     });
 

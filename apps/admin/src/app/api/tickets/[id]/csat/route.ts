@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: RouteContext
 ) {
   try {
     const session = await auth();
@@ -12,8 +16,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const csat = await prisma.customerSatisfaction.findUnique({
-      where: { ticketId: params.id },
+      where: { ticketId: id },
     });
 
     return NextResponse.json(csat);

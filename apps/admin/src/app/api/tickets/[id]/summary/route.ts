@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { updateTicketSummary } from "@/lib/ai/summarizer";
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: RouteContext
 ) {
   try {
     const session = await auth();
@@ -12,7 +16,8 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    await updateTicketSummary(params.id);
+    const { id } = await params;
+    await updateTicketSummary(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

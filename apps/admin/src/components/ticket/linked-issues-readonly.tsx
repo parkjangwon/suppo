@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import type { IssueDetail, IssueFullDetail, GitProvider } from "/shared/git/provider";
+import type { IssueDetail, IssueFullDetail, GitProvider } from "@crinity/shared/git/provider";
 import {
   getStateBadgeClass,
   getLabelTextColor,

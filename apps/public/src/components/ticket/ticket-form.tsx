@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { ticketFormSchema, TicketFormValues } from "@crinity/shared/validation/ticket";
+import { ticketFormSchema, type TicketFormValues } from "@crinity/shared/validation/ticket";
 import { AttachmentUpload } from "./attachment-upload";
 import { KnowledgeSuggestions } from "./knowledge-suggestions";
 import { useBranding } from "@crinity/shared/branding/context";
@@ -28,7 +28,6 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     formState: { errors },
   } = useForm<TicketFormValues>({
@@ -49,7 +48,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       const formData = new FormData();
       
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (typeof value === "string") {
           formData.append(key, value);
         }
       });

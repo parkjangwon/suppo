@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     const files = formData.getAll("attachments") as File[];
-    let processedAttachments = [];
+    let processedAttachments: Awaited<ReturnType<typeof processAttachments>> = [];
 
     if (files.length > 0) {
       try {

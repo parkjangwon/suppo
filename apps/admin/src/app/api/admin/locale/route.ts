@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -10,7 +9,7 @@ export async function POST(request: NextRequest) {
   }
 
   const response = NextResponse.json({ success: true });
-  response.cookies.set("crinity-locale", locale, {
+  response.cookies.set("crinity-admin-locale", locale, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { saveToLocal } from "./local-storage";
 import { saveToS3 } from "./s3-storage";
-import { validateFile, generateSafeFileName, type AttachmentError as FileValidationError } from "@crinity/shared/security/file-upload";
+import { validateFile, generateSafeFileName } from "@crinity/shared/security/file-upload";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MAX_FILES = 20;

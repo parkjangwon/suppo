@@ -6,34 +6,40 @@ interface ResolveDatabaseUrlOptions {
   configuredUrl?: string;
 }
 
-function resolveRepoRoot(cwd: string) {
-  const repoCandidate = path.resolve(cwd, "../..");
-  if (existsSync(path.join(repoCandidate, "packages/db/dev.db"))) {
-    return repoCandidate;
+function findWorkspaceRoot(startCwd: string) {
+  let current = path.resolve(startCwd);
+  let previous = "";
+
+  while (current !== previous) {
+    if (existsSync(path.join(current, "pnpm-workspace.yaml"))) {
+      return current;
+    }
+
+    if (path.basename(current) === "apps") {
+      return path.dirname(current);
+    }
+
+    previous = current;
+    current = path.dirname(current);
   }
 
-  return cwd;
+  return startCwd;
 }
 
 export function resolveDatabaseUrl({
   cwd = process.cwd(),
   configuredUrl = process.env.DATABASE_URL?.trim(),
 }: ResolveDatabaseUrlOptions = {}): string {
+  const workspaceRoot = findWorkspaceRoot(cwd);
+
   if (configuredUrl) {
     if (configuredUrl.startsWith("file:./") || configuredUrl.startsWith("file:../")) {
-      const repoRoot = resolveRepoRoot(cwd);
       const relativePath = configuredUrl.slice("file:".length);
-      return `file:${path.resolve(repoRoot, relativePath.replace(/^\.\//, ""))}`;
+      return `file:${path.resolve(workspaceRoot, relativePath)}`;
     }
 
     return configuredUrl;
   }
 
-  const appScopedPath = path.resolve(cwd, "../../packages/db/dev.db");
-  if (existsSync(appScopedPath)) {
-    return `file:${appScopedPath}`;
-  }
-
-  const repoScopedPath = path.resolve(cwd, "packages/db/dev.db");
-  return `file:${repoScopedPath}`;
+  return `file:${path.resolve(workspaceRoot, "packages/db/dev.db")}`;
 }

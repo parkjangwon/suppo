@@ -1,20 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
 
+type RouteContext = {
+  params: Promise<{ token: string }>;
+};
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: RouteContext
 ) {
   try {
     const body = await request.json();
     const { rating, comment } = body;
+    const { token } = await params;
 
     if (!rating || rating < 1 || rating > 5) {
       return NextResponse.json({ error: "Invalid rating" }, { status: 400 });
     }
 
     const ticket = await prisma.ticket.findUnique({
-      where: { id: params.token },
+      where: { id: token },
       select: {
         id: true,
         ticketNumber: true,

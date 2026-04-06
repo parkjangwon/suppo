@@ -1,3 +1,5 @@
+import Script from "next/script";
+
 export default async function ChatSdkHostPage({
   searchParams,
 }: {
@@ -9,8 +11,9 @@ export default async function ChatSdkHostPage({
   return (
     <>
       <div id="host-page">Third-party host page</div>
-      <script
+      <Script
         src="/chat-sdk.js"
+        strategy="afterInteractive"
         data-crinity-chat-sdk="true"
         data-widget-key={widgetKey}
         data-position="bottom-right"

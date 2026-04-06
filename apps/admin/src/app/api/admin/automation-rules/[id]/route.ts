@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 const updateAutomationRuleSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
-  conditions: z.record(z.any()).optional(),
-  actions: z.record(z.any()).optional(),
+  conditions: z.record(z.string(), z.unknown()).optional(),
+  actions: z.record(z.string(), z.unknown()).optional(),
   isActive: z.boolean().optional(),
   priority: z.number().int().min(0).optional(),
   triggerOn: z.string().min(1).optional(),
@@ -34,6 +35,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       data: {
         ...data,
         description: data.description ?? undefined,
+        conditions: data.conditions as Prisma.InputJsonValue | undefined,
+        actions: data.actions as Prisma.InputJsonValue | undefined,
       },
     });
 

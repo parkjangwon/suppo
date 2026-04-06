@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "/ui/components/ui/card";
-import { Badge } from "/ui/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { Badge } from "@crinity/ui/components/ui/badge";
 import { Lightbulb, ExternalLink, BookOpen } from "lucide-react";
-import { toast } from "sonner";
 
 interface KnowledgeSuggestionsProps {
   subject: string;
@@ -77,7 +76,7 @@ export function KnowledgeSuggestions({ subject, description }: KnowledgeSuggesti
       </CardHeader>
       <CardContent>
         <p className="text-xs text-blue-600 mb-3">
-          비슷한 내용의 도움말을 찾았습니다. 티켓을 생성하기 전에 먼저 확인필요하신 내용을 확인필요하신 내용을 확인해 보세요:
+          비슷한 내용의 도움말을 찾았습니다. 티켓을 생성하기 전에 먼저 확인해 보세요.
         </p>
         <div className="space-y-2">
           {suggestions.map((article) => (
