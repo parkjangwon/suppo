@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface TicketRelationRecord {
   id: string;
@@ -27,6 +28,8 @@ interface TicketRelationsPanelProps {
 }
 
 export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [relations, setRelations] = useState<TicketRelationRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,7 +39,7 @@ export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
       try {
         const response = await fetch(`/api/admin/tickets/merge?ticketId=${ticketId}`);
         if (!response.ok) {
-          throw new Error("Failed to load relations");
+          throw new Error(t("ticketMergeFailed", "Failed to load relations"));
         }
         const data = await response.json();
         setRelations(data);
@@ -57,19 +60,19 @@ export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">병합 이력을 불러오는 중...</p>
+          <p className="text-sm text-muted-foreground">{t("commonLoading", "병합 이력을 불러오는 중...")}</p>
         ) : relations.length === 0 ? (
-          <p className="text-sm text-muted-foreground">병합/연결 이력이 없습니다.</p>
+          <p className="text-sm text-muted-foreground">{t("commonNotFound", "병합/연결 이력이 없습니다.")}</p>
         ) : (
           relations.map((relation) => (
             <div key={relation.id} className="rounded-lg border border-border/60 p-4">
               <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline">병합 이력</Badge>
+                <Badge variant="outline">{t("ticketMergeSuccess", "병합 이력")}</Badge>
                 <span>{new Date(relation.mergedAt).toLocaleString("ko-KR")}</span>
               </div>
               <div className="grid gap-3 lg:grid-cols-2">
-                <RelationTicketCard title="원본 티켓" ticket={relation.sourceTicket} />
-                <RelationTicketCard title="대상 티켓" ticket={relation.targetTicket} />
+                <RelationTicketCard title={t("ticketMergeFieldAssignee", "원본 티켓")} ticket={relation.sourceTicket} />
+                <RelationTicketCard title={t("ticketMergeFieldTeam", "대상 티켓")} ticket={relation.targetTicket} />
               </div>
             </div>
           ))

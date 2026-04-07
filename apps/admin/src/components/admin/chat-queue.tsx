@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 
 import { ChatAutoRefresh } from "./chat-auto-refresh";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export function ChatQueue({
   conversations,
@@ -25,13 +27,16 @@ export function ChatQueue({
     };
   }>;
 }) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   return (
     <div className="space-y-4">
       <ChatAutoRefresh />
       {conversations.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            진행 중인 채팅이 없습니다.
+            {t("chatQueueEmpty", "진행 중인 채팅이 없습니다.", "There are no active chats.")}
           </CardContent>
         </Card>
       ) : (
@@ -43,8 +48,8 @@ export function ChatQueue({
                   {conversation.ticket.customerName} · {conversation.ticket.ticketNumber}
                 </Link>
                 <div className="flex items-center gap-2">
-                  {conversation.slaState === "warning" ? <Badge>SLA 임박</Badge> : null}
-                  {conversation.slaState === "breached" ? <Badge variant="destructive">SLA 초과</Badge> : null}
+                  {conversation.slaState === "warning" ? <Badge>{t("chatsSlaWarning", "SLA 임박", "SLA warning")}</Badge> : null}
+                  {conversation.slaState === "breached" ? <Badge variant="destructive">{t("chatsSlaBreached", "SLA 초과", "SLA breached")}</Badge> : null}
                   <Badge variant="outline">{conversation.status}</Badge>
                 </div>
               </CardTitle>
@@ -52,7 +57,7 @@ export function ChatQueue({
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <div>{conversation.ticket.subject}</div>
               <div>{conversation.ticket.customerEmail}</div>
-              <div>담당자: {conversation.ticket.assignee?.name ?? "미할당"}</div>
+              <div>{t("ticketDetailAssignee", "담당자", "Assignee")}: {conversation.ticket.assignee?.name ?? t("ticketDetailUnassigned", "미할당", "Unassigned")}</div>
             </CardContent>
           </Card>
         ))

@@ -7,8 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@crinity/ui/components/ui/tabs";
 import { ArrowRight } from "lucide-react";
 import { getTicketQueuePresets } from "@/lib/tickets/ticket-queue-presets";
+import type { TicketQueueFilter } from "@/lib/tickets/ticket-queue-presets";
 import { SLAPolicyManager } from "@/components/admin/sla-policy-manager";
 import { AutomationRuleManager } from "@/components/admin/automation-rule-manager";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface HelpdeskOperationsCenterProps {
   currentAgentId?: string;
@@ -21,29 +24,30 @@ export function HelpdeskOperationsCenter({
   agents,
   teams,
 }: HelpdeskOperationsCenterProps) {
+  const copy = useAdminCopy();
   const queuePresets = useMemo(() => getTicketQueuePresets(currentAgentId), [currentAgentId]);
 
   return (
     <Tabs defaultValue="sla" className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryCard
-          title="응답 목표"
-          description="문의별 응답/해결 목표 시간을 정해 서비스 기준을 맞춥니다."
+          title={copyText(copy, "helpdeskSlaTitle", "응답 목표")}
+          description={copyText(copy, "helpdeskSlaDescription", "문의별 응답/해결 목표 시간을 정해 서비스 기준을 맞춥니다.")}
         />
         <SummaryCard
-          title="자동 처리"
-          description="반복되는 분류, 우선순위 변경, 재배정을 규칙으로 자동화합니다."
+          title={copyText(copy, "helpdeskAutoTitle", "자동 처리")}
+          description={copyText(copy, "helpdeskAutoDescription", "반복되는 분류, 우선순위 변경, 재배정을 규칙으로 자동화합니다.")}
         />
         <SummaryCard
-          title="작업 바로가기"
-          description="상담원이 자주 보는 작업 목록을 빠르게 열 수 있게 준비합니다."
+          title={copyText(copy, "helpdeskShortcutsTitle", "작업 바로가기")}
+          description={copyText(copy, "helpdeskShortcutsDescription", "상담원이 자주 보는 작업 목록을 빠르게 열 수 있게 준비합니다.")}
         />
       </div>
 
       <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="sla">응답 목표</TabsTrigger>
-        <TabsTrigger value="automation">자동 처리</TabsTrigger>
-        <TabsTrigger value="queues">작업 바로가기</TabsTrigger>
+        <TabsTrigger value="sla">{copyText(copy, "helpdeskSlaTitle", "응답 목표")}</TabsTrigger>
+        <TabsTrigger value="automation">{copyText(copy, "helpdeskAutoTitle", "자동 처리")}</TabsTrigger>
+        <TabsTrigger value="queues">{copyText(copy, "helpdeskShortcutsTitle", "작업 바로가기")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="sla">
@@ -65,7 +69,7 @@ export function HelpdeskOperationsCenter({
                 <p className="text-sm text-muted-foreground">{preset.description}</p>
                 <Button variant="outline" size="sm" asChild>
                   <Link href={buildQueueHref(preset.filter)}>
-                    이 큐 열기
+                    {copyText(copy, "helpdeskOpenQueue", "이 큐 열기")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -91,7 +95,7 @@ function SummaryCard({ title, description }: { title: string; description: strin
   );
 }
 
-function buildQueueHref(filter: Record<string, string | undefined>) {
+function buildQueueHref(filter: TicketQueueFilter) {
   const params = new URLSearchParams();
   Object.entries(filter).forEach(([key, value]) => {
     if (value) {

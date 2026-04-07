@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@crinity/ui/components/ui/table";
 import { DatePreset, AgentPerformance, AgentPerformanceResponse } from "@/lib/db/queries/admin-analytics/contracts";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface AgentPerformanceTableProps {
   preset: DatePreset;
 }
 
 export function AgentPerformanceTable({ preset }: AgentPerformanceTableProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const [data, setData] = useState<AgentPerformanceResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,7 +41,7 @@ export function AgentPerformanceTable({ preset }: AgentPerformanceTableProps) {
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">불러오는 중...</div>
+          <div className="text-center text-muted-foreground">{copy.commonLoading}</div>
         </CardContent>
       </Card>
     );
@@ -45,17 +50,17 @@ export function AgentPerformanceTable({ preset }: AgentPerformanceTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>상담원 성과</CardTitle>
+        <CardTitle>{t("analyticsAgentPerformanceTitle", "상담원 성과", "Agent performance")}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>상담원</TableHead>
-              <TableHead className="text-right">처리 티켓</TableHead>
-              <TableHead className="text-right">오픈 티켓</TableHead>
-              <TableHead className="text-right">평균 첫 응답</TableHead>
-              <TableHead className="text-right">평균 해결 시간</TableHead>
+              <TableHead>{t("navAgents", "상담원", "Agents")}</TableHead>
+              <TableHead className="text-right">{t("analyticsHandledTickets", "처리 티켓", "Handled tickets")}</TableHead>
+              <TableHead className="text-right">{t("analyticsOpenTickets", "오픈 티켓", "Open tickets")}</TableHead>
+              <TableHead className="text-right">{t("analyticsAverageFirstResponse", "평균 첫 응답", "Avg. first response")}</TableHead>
+              <TableHead className="text-right">{t("analyticsAverageResolutionTime", "평균 해결 시간", "Avg. resolution time")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -66,12 +71,12 @@ export function AgentPerformanceTable({ preset }: AgentPerformanceTableProps) {
                 <TableCell className="text-right">{agent.openTickets}</TableCell>
                 <TableCell className="text-right">
                   {agent.avgFirstResponseMinutes 
-                    ? `${Math.round(agent.avgFirstResponseMinutes)}분` 
+                    ? `${Math.round(agent.avgFirstResponseMinutes)}${copy.locale === "en" ? "m" : "분"}` 
                     : "-"}
                 </TableCell>
                 <TableCell className="text-right">
                   {agent.avgResolutionMinutes 
-                    ? `${Math.round(agent.avgResolutionMinutes / 60)}시간` 
+                    ? `${Math.round(agent.avgResolutionMinutes / 60)}${copy.locale === "en" ? "h" : "시간"}` 
                     : "-"}
                 </TableCell>
               </TableRow>
@@ -79,7 +84,7 @@ export function AgentPerformanceTable({ preset }: AgentPerformanceTableProps) {
             {data?.agents.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  데이터가 없습니다
+                  {t("commonNoData", "데이터가 없습니다", "No data available.")}
                 </TableCell>
               </TableRow>
             )}

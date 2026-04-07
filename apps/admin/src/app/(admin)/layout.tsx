@@ -21,7 +21,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }>) {
   const branding = await getSystemBranding();
-  const locale = (await cookies()).get("crinity-locale")?.value;
+  const locale = (await cookies()).get("crinity-admin-locale")?.value;
   const copy = getAdminCopy(locale);
 
   return (

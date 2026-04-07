@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@crinity/db";
@@ -12,11 +13,14 @@ import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 
 import { auth } from "@/auth";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function ChatAnalyticsPage() {
   const session = await auth();
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   if (!session?.user) {
     redirect("/admin/login");
   }
@@ -64,28 +68,28 @@ export default async function ChatAnalyticsPage() {
     <div className="container mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">채팅 분석</h1>
-          <p className="mt-1 text-sm text-muted-foreground">실시간 채팅 운영 지표와 SLA 위험 대화를 확인합니다.</p>
+          <h1 className="text-2xl font-bold">{copyText(copy, "chatsAnalyticsTitle", "채팅 분석")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{copyText(copy, "chatsAnalyticsDescription", "실시간 채팅 운영 지표와 SLA 위험 대화를 확인합니다.")}</p>
         </div>
         <Button asChild variant="outline">
-          <Link href="/admin/chats">채팅 큐로 돌아가기</Link>
+          <Link href="/admin/chats">{copyText(copy, "commonBackToQueue", "채팅 큐로 돌아가기")}</Link>
         </Button>
       </div>
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <StatCard title="전체 대화" value={summary.total} />
-        <StatCard title="평균 첫 응답" value={summary.avgFirstResponseMinutes != null ? `${Math.round(summary.avgFirstResponseMinutes)}분` : "-"} />
-        <StatCard title="평균 대화 길이" value={summary.avgConversationMinutes != null ? `${Math.round(summary.avgConversationMinutes)}분` : "-"} />
-        <StatCard title="SLA 초과" value={summary.slaBreached} />
+        <StatCard title={copyText(copy, "chatsTotalConversations", "전체 대화")} value={summary.total} />
+        <StatCard title={copyText(copy, "analyticsAverageFirstResponse", "평균 첫 응답")} value={summary.avgFirstResponseMinutes != null ? `${Math.round(summary.avgFirstResponseMinutes)}분` : "-"} />
+        <StatCard title={copyText(copy, "chatsAverageConversationLength", "평균 대화 길이")} value={summary.avgConversationMinutes != null ? `${Math.round(summary.avgConversationMinutes)}분` : "-"} />
+        <StatCard title={copyText(copy, "chatsSlaBreached", "SLA 초과")} value={summary.slaBreached} />
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>SLA 위험 대화</CardTitle>
+          <CardTitle>{copyText(copy, "chatsRiskyConversations", "SLA 위험 대화")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {riskyConversations.length === 0 ? (
-            <div className="text-sm text-muted-foreground">현재 SLA 위험 대화가 없습니다.</div>
+            <div className="text-sm text-muted-foreground">{copyText(copy, "commonNoResults", "현재 SLA 위험 대화가 없습니다.")}</div>
           ) : (
             riskyConversations.map((conversation) => (
               <div key={conversation.id} className="rounded-xl border p-4">
@@ -106,11 +110,11 @@ export default async function ChatAnalyticsPage() {
 
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>상담원별 채팅 성과</CardTitle>
+          <CardTitle>{copyText(copy, "chatsAgentPerformance", "상담원별 채팅 성과")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {agentPerformance.length === 0 ? (
-            <div className="text-sm text-muted-foreground">성과 데이터가 없습니다.</div>
+            <div className="text-sm text-muted-foreground">{copyText(copy, "commonNoData", "성과 데이터가 없습니다.")}</div>
           ) : (
             agentPerformance.map((agent) => (
               <div key={agent.agentId} className="rounded-xl border p-4">

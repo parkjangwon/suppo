@@ -26,6 +26,7 @@ import {
 } from "@crinity/ui/components/ui/alert-dialog";
 import { FolderTree, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface Category {
   id: string;
@@ -43,6 +44,8 @@ interface CategoryManagerProps {
 }
 
 export function CategoryManager({ categories }: CategoryManagerProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState<string | null>(null);
@@ -92,7 +95,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
 
   const handleSubmit = async () => {
     if (!formData.name.trim()) {
-      toast.error("카테고리 이름을 입력하세요");
+      toast.error(t("categoriesNameRequired", "카테고리 이름을 입력하세요"));
       return;
     }
 
@@ -116,7 +119,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       resetForm();
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : t("categoriesError", "오류가 발생했습니다"));
     }
   };
 
@@ -135,7 +138,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       toast.success("카테고리가 삭제되었습니다");
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : t("categoriesError", "오류가 발생했습니다"));
     } finally {
       setIsDeleting(null);
     }

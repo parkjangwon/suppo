@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { Search, X, Folder, Filter } from "lucide-react";
 import { cn } from "@crinity/shared/utils";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface AdvancedSearchProps {
   categories: { id: string; name: string }[];
@@ -20,6 +21,8 @@ interface AdvancedSearchProps {
 type SearchMode = "all" | "any" | "exact";
 
 export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -123,10 +126,10 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
       <div className="space-y-2">
         <div className="flex gap-2">
           <div className="flex-1">
-            <Label htmlFor="search-term">검색어</Label>
+            <Label htmlFor="search-term">{t("advancedSearchPlaceholder", "검색어")}</Label>
             <Input
               id="search-term"
-              placeholder="검색어를 입력하세요..."
+              placeholder={t("advancedSearchPlaceholder", "검색어를 입력하세요...")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -135,7 +138,7 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
           </div>
           <Button onClick={handleSearch} size="sm">
             <Search className="h-4 w-4 mr-2" />
-            검색
+            {t("commonSearch", "검색")}
           </Button>
         </div>
 
@@ -146,9 +149,9 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
             checked={searchFields.includes("subject")}
             onCheckedChange={() => toggleSearchField("subject")}
           >
-            <Label htmlFor="field-subject" className="cursor-pointer">
-              제목
-            </Label>
+              <Label htmlFor="field-subject" className="cursor-pointer">
+              {t("ticketDetailTitle", "제목")}
+              </Label>
           </Checkbox>
 
           <Checkbox
@@ -156,9 +159,9 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
             checked={searchFields.includes("description")}
             onCheckedChange={() => toggleSearchField("description")}
           >
-            <Label htmlFor="field-description" className="cursor-pointer">
-              내용
-            </Label>
+              <Label htmlFor="field-description" className="cursor-pointer">
+              {t("ticketFormBodyPlaceholder", "내용")}
+              </Label>
           </Checkbox>
 
           <Checkbox
@@ -166,21 +169,21 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
             checked={searchFields.includes("comments")}
             onCheckedChange={() => toggleSearchField("comments")}
           >
-            <Label htmlFor="field-comments" className="cursor-pointer">
-              댓글
-            </Label>
+              <Label htmlFor="field-comments" className="cursor-pointer">
+              {t("ticketDetailComments", "댓글")}
+              </Label>
           </Checkbox>
 
           <div className="border-l pl-4">
-            <Label htmlFor="search-mode">검색 모드</Label>
-            <Select value={searchMode} onValueChange={(v) => setSearchMode(v)}>
+            <Label htmlFor="search-mode">{t("advancedSearchAny", "검색 모드")}</Label>
+            <Select value={searchMode} onValueChange={(v) => setSearchMode(v as SearchMode)}>
               <SelectTrigger id="search-mode" className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">모든 포함</SelectItem>
-                <SelectItem value="any">하나라도 포함</SelectItem>
-                <SelectItem value="exact">정확히 일치</SelectItem>
+                <SelectItem value="all">{t("advancedSearchAll", "모든 포함")}</SelectItem>
+                <SelectItem value="any">{t("advancedSearchAny", "하나라도 포함")}</SelectItem>
+                <SelectItem value="exact">{t("advancedSearchExact", "정확히 일치")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -188,7 +191,7 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
 
         <Button variant="ghost" size="sm" onClick={clearSearch}>
           <X className="h-4 w-4 mr-2" />
-          초기화
+          {t("commonClose", "초기화")}
         </Button>
       </div>
 
@@ -198,7 +201,7 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Folder className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold">저장된 검색</h3>
+              <h3 className="text-sm font-semibold">{t("savedFilterSaving", "저장된 검색")}</h3>
             </div>
             <Button
               variant="outline"
@@ -218,9 +221,9 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
-                      {saved.mode === "all" && "모두"}
-                      {saved.mode === "any" && "하나라도"}
-                      {saved.mode === "exact" && "정확"}
+                      {saved.mode === "all" && t("advancedSearchAll", "모두")}
+                      {saved.mode === "any" && t("advancedSearchAny", "하나라도")}
+                      {saved.mode === "exact" && t("advancedSearchExact", "정확")}
                     </Badge>
                     <span className="text-sm font-medium">{saved.name}</span>
                   </div>
@@ -236,7 +239,7 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
                     className="h-8 px-3"
                   >
                     <Filter className="h-4 w-4" />
-                    불러오기
+                    {t("commonView", "불러오기")}
                   </Button>
                   <Button
                     variant="ghost"

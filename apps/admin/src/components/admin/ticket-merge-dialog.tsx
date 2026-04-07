@@ -16,6 +16,7 @@ import { Badge } from "@crinity/ui/components/ui/badge";
 import { Checkbox } from "@crinity/ui/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 export interface Ticket {
   id: string;
@@ -41,6 +42,8 @@ export function TicketMergeDialog({
   onOpenChange,
   onMergeComplete,
 }: TicketMergeDialogProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [selectedTicketIds, setSelectedTicketIds] = useState<string[]>([]);
   const [mergeComment, setMergeComment] = useState("");
   const [isMerging, setIsMerging] = useState(false);
@@ -83,12 +86,12 @@ export function TicketMergeDialog({
 
   async function handleMerge() {
     if (selectedTicketIds.length === 0) {
-      toast.error("병합할 티켓을 선택해주세요.");
+      toast.error(t("ticketMergeSelectRequired", "병합할 티켓을 선택해주세요."));
       return;
     }
 
     if (!validationResult?.valid) {
-      toast.error("병합에 문제가 있습니다. 충돌을 확인해주세요.");
+      toast.error(t("ticketMergeConflict", "병합에 문제가 있습니다. 충돌을 확인해주세요."));
       return;
     }
 
@@ -106,14 +109,14 @@ export function TicketMergeDialog({
 
       if (!response.ok) throw new Error();
 
-      toast.success("티켓이 병합되었습니다.");
+      toast.success(t("ticketMergeSuccess", "티켓이 병합되었습니다."));
       onMergeComplete();
       onOpenChange(false);
       setSelectedTicketIds([]);
       setMergeComment("");
       setValidationResult(null);
     } catch {
-      toast.error("병합 중 오류가 발생했습니다.");
+      toast.error(t("ticketMergeFailed", "병합 중 오류가 발생했습니다."));
     } finally {
       setIsMerging(false);
     }
@@ -135,10 +138,9 @@ export function TicketMergeDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>티켓 병합</DialogTitle>
+          <DialogTitle>{t("ticketMergeValidate", "티켓 병합")}</DialogTitle>
           <DialogDescription>
-            여러 티켓을 하나로 병합합니다. 선택한 티켓의 코멘트와 첨부파일이 대상
-            티켓으로 이동됩니다.
+            {t("ticketMergeReasonPlaceholder", "여러 티켓을 하나로 병합합니다. 선택한 티켓의 코멘트와 첨부파일이 대상 티켓으로 이동됩니다.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -149,7 +151,7 @@ export function TicketMergeDialog({
               <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5" />
               <div className="flex-1">
                 <div className="text-sm font-medium text-blue-900">
-                  대상 티켓
+                  {t("ticketMergeTargetTicket", "대상 티켓")}
                 </div>
                 <div className="text-lg font-semibold text-blue-900">
                   {targetTicket.ticketNumber}
@@ -163,11 +165,11 @@ export function TicketMergeDialog({
 
           {/* 병합할 티켓 선택 */}
           <div>
-            <Label>병합할 티켓 선택</Label>
+            <Label>{t("ticketMergeSelectRequired", "병합할 티켓 선택")}</Label>
             <div className="mt-2 border rounded-lg divide-y max-h-60 overflow-y-auto">
               {filteredTickets.length === 0 ? (
                 <div className="p-4 text-sm text-gray-500 text-center">
-                  병합할 수 있는 티켓이 없습니다.
+                  {t("commonNotFound", "병합할 수 있는 티켓이 없습니다.")}
                 </div>
               ) : (
                 filteredTickets.map((ticket) => (
@@ -228,11 +230,11 @@ export function TicketMergeDialog({
                       <div key={i} className="text-sm text-amber-800">
                         <span className="font-medium">
                           {conflict.field === "assignee"
-                            ? "담당자"
+                            ? t("ticketMergeFieldAssignee", "담당자")
                             : conflict.field === "team"
-                            ? "팀"
+                            ? t("ticketMergeFieldTeam", "팀")
                             : conflict.field === "status"
-                            ? "상태"
+                            ? t("ticketMergeFieldStatus", "상태")
                             : conflict.field}
                           :
                         </span>{" "}
@@ -250,12 +252,12 @@ export function TicketMergeDialog({
 
           {/* 병합 코멘트 */}
           <div>
-            <Label htmlFor="merge-comment">병합 코멘트 (선택사항)</Label>
+            <Label htmlFor="merge-comment">{t("ticketMergeReasonPlaceholder", "병합 코멘트 (선택사항)")}</Label>
             <Textarea
               id="merge-comment"
               value={mergeComment}
               onChange={(e) => setMergeComment(e.target.value)}
-              placeholder="병합 이유를 입력해주세요..."
+              placeholder={t("ticketMergeReasonPlaceholder", "병합 이유를 입력해주세요...")}
               className="mt-2"
               rows={3}
             />
@@ -275,7 +277,7 @@ export function TicketMergeDialog({
                 disabled={isMerging}
                 className="flex-1"
               >
-                취소
+                {t("commonCancel", "취소")}
               </Button>
               <Button
                 variant="outline"
@@ -286,10 +288,10 @@ export function TicketMergeDialog({
                 {isValidating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    검증 중...
+                    {t("ticketMergeValidate", "검증 중...")}
                   </>
                 ) : (
-                  "검증"
+                  t("ticketMergeValidate", "검증")
                 )}
               </Button>
               <Button
@@ -304,10 +306,10 @@ export function TicketMergeDialog({
                 {isMerging ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    병합 중...
+                    {t("commonProcessing", "병합 중...")}
                   </>
                 ) : (
-                  `티켓 ${selectedTicketIds.length}개 병합`
+                  `${t("ticketMergeSuccess", "티켓")} ${selectedTicketIds.length}${t("commonCreate", "개 병합")}`
                 )}
               </Button>
             </div>

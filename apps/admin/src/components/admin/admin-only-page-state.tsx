@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface AdminOnlyPageStateProps {
   title: string;
@@ -12,6 +15,8 @@ export function AdminOnlyPageState({
   title,
   description,
 }: AdminOnlyPageStateProps) {
+  const copy = useAdminCopy();
+
   return (
     <div className="container mx-auto max-w-3xl px-4 py-12">
       <Card>
@@ -27,7 +32,7 @@ export function AdminOnlyPageState({
         <CardContent className="space-y-6">
           <p className="text-sm leading-6 text-muted-foreground">{description}</p>
           <Button asChild>
-            <Link href="/admin/dashboard">대시보드로 돌아가기</Link>
+            <Link href="/admin/dashboard">{copy.navDashboard}</Link>
           </Button>
         </CardContent>
       </Card>

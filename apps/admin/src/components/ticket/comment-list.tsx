@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { FileText, Image as ImageIcon, Download, User, Headphones } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface Comment {
   id: string;
@@ -30,14 +31,16 @@ function getFileIcon(mimeType?: string) {
 }
 
 export function CommentList({ comments }: CommentListProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   if (!comments || comments.length === 0) {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
         <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
           <Headphones className="h-6 w-6 text-slate-400" />
         </div>
-        <p className="text-slate-500">아직 답변이 없습니다.</p>
-        <p className="text-sm text-slate-400 mt-1">첫 번째 답변을 기다리고 있어요!</p>
+        <p className="text-slate-500">{t("commonNotFound", "아직 답변이 없습니다.")}</p>
+        <p className="text-sm text-slate-400 mt-1">{t("commonNone", "첫 번째 답변을 기다리고 있어요!")}</p>
       </div>
     );
   }
@@ -71,14 +74,14 @@ export function CommentList({ comments }: CommentListProps) {
                 </div>
                 <div>
                   <span className="font-semibold text-sm">
-                    {isCustomer ? "고객" : comment.author?.name || "상담원"}
+                    {isCustomer ? t("commentAuthorCustomer", "고객") : comment.author?.name || t("commentAuthorAgent", "상담원")}
                   </span>
                   <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
                     isCustomer 
                       ? "bg-slate-100 text-slate-600" 
                       : "bg-blue-100 text-blue-600"
                   }`}>
-                    {isCustomer ? "작성자" : "상담원"}
+                    {isCustomer ? t("commentRoleCustomer", "작성자") : t("commentRoleAgent", "상담원")}
                   </span>
                 </div>
               </div>
@@ -96,7 +99,7 @@ export function CommentList({ comments }: CommentListProps) {
                 <div className="mt-4 pt-4 border-t border-slate-100">
                   <p className="text-xs text-slate-500 font-medium mb-3 flex items-center gap-1">
                     <FileText className="h-3 w-3" />
-                    첨부 파일 {comment.attachments.length}개
+                    {t("commonAdd", "첨부 파일")} {comment.attachments.length}개
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {comment.attachments.map((attachment) => (

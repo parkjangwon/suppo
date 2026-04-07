@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@crinity/ui/components/ui/table";
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { DatePreset, RepeatInquiry, RepeatInquiryResponse } from "@/lib/db/queries/admin-analytics/contracts";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface RepeatInquiriesTableProps {
   preset: DatePreset;
 }
 
 export function RepeatInquiriesTable({ preset }: RepeatInquiriesTableProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const [data, setData] = useState<RepeatInquiryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,7 +42,7 @@ export function RepeatInquiriesTable({ preset }: RepeatInquiriesTableProps) {
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">불러오는 중...</div>
+          <div className="text-center text-muted-foreground">{copy.commonLoading}</div>
         </CardContent>
       </Card>
     );
@@ -46,16 +51,16 @@ export function RepeatInquiriesTable({ preset }: RepeatInquiriesTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>반복 문의 고객 ({data?.totalRepeatCustomers ?? 0}명)</CardTitle>
+        <CardTitle>{t("analyticsRepeatInquiryCustomersTitle", "반복 문의 고객", "Repeat inquiry customers")} ({data?.totalRepeatCustomers ?? 0}{copy.locale === "en" ? "" : "명"})</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>고객</TableHead>
-              <TableHead className="text-right">티켓 수</TableHead>
-              <TableHead className="text-right">카테고리</TableHead>
-              <TableHead>패턴</TableHead>
+              <TableHead className="text-right">{t("analyticsTicketCount", "티켓 수", "Tickets")}</TableHead>
+              <TableHead className="text-right">{t("knowledgeCategories", "카테고리", "Categories")}</TableHead>
+              <TableHead>{t("analyticsPattern", "패턴", "Pattern")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -75,7 +80,7 @@ export function RepeatInquiriesTable({ preset }: RepeatInquiriesTableProps) {
             {data?.customers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  반복 문의 고객이 없습니다
+                  {t("analyticsRepeatInquiryEmpty", "반복 문의 고객이 없습니다", "There are no repeat inquiry customers.")}
                 </TableCell>
               </TableRow>
             )}

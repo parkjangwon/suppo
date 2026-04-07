@@ -7,6 +7,7 @@ import { Badge } from "@crinity/ui/components/ui/badge";
 import { Input } from "@crinity/ui/components/ui/input";
 import { BookOpen, X, Plus, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface ArticleLink {
   id: string;
@@ -49,6 +50,8 @@ interface TicketKnowledgeLinksProps {
 }
 
 export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowledgeLinksProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [links, setLinks] = useState<ArticleLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingMode, setIsAddingMode] = useState(false);
@@ -86,7 +89,7 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
         setSearchResults(data.articles || []);
       }
     } catch {
-      toast.error("검색 중 오류가 발생했습니다.");
+      toast.error(t("ticketKnowledgeSearchError", "검색 중 오류가 발생했습니다."));
     } finally {
       setIsSearching(false);
     }
@@ -101,16 +104,16 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
       });
 
       if (response.ok) {
-        toast.success("문서가 연결되었습니다.");
+        toast.success(t("ticketKnowledgeLinkSuccess", "문서가 연결되었습니다."));
         setIsAddingMode(false);
         setSearchQuery("");
         setSearchResults([]);
         await fetchLinks();
       } else if (response.status === 409) {
-        toast.info("이미 연결된 문서입니다.");
+        toast.info(t("ticketKnowledgeAlreadyLinked", "이미 연결된 문서입니다."));
       }
     } catch {
-      toast.error("연결 중 오류가 발생했습니다.");
+      toast.error(t("ticketKnowledgeLinkFailed", "연결 중 오류가 발생했습니다."));
     }
   };
 
@@ -122,11 +125,11 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
       );
 
       if (response.ok) {
-        toast.success("연결이 해제되었습니다.");
+        toast.success(t("ticketKnowledgeUnlinkSuccess", "연결이 해제되었습니다."));
         await fetchLinks();
       }
     } catch {
-      toast.error("연결 해제 중 오류가 발생했습니다.");
+      toast.error(t("ticketKnowledgeUnlinkFailed", "연결 해제 중 오류가 발생했습니다."));
     }
   };
 
@@ -212,7 +215,7 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
           <div className="space-y-2 pt-2 border-t">
             <div className="flex gap-2">
               <Input
-                placeholder="지식 문서 검색..."
+                placeholder={t("ticketKnowledgeSearchPlaceholder", "지식 문서 검색...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}

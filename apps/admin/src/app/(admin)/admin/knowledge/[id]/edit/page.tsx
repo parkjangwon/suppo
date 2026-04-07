@@ -1,9 +1,11 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { KnowledgeForm } from "@/components/admin/knowledge-form";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
   title: "지식 문서 수정 | Crinity",
@@ -14,6 +16,7 @@ interface EditKnowledgePageProps {
 }
 
 export default async function EditKnowledgePage({ params }: EditKnowledgePageProps) {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
   const { id } = await params;
 
@@ -49,11 +52,11 @@ export default async function EditKnowledgePage({ params }: EditKnowledgePagePro
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">지식 문서 수정</h1>
+      <h1 className="text-2xl font-bold mb-6">{copy.commonEdit} {copy.knowledgeTitle}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>문서 편집</CardTitle>
+          <CardTitle>{copy.commonEdit}</CardTitle>
         </CardHeader>
         <CardContent>
           <KnowledgeForm article={article} categories={categories} />

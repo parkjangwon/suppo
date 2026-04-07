@@ -20,6 +20,8 @@ import {
 } from "@crinity/ui/components/ui/select";
 import { Bookmark, Save } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface ChatFilterConfig {
   scope: "chat";
@@ -42,6 +44,8 @@ export function ChatSavedViewsBar({
   agents: Array<{ id: string; name: string }>;
 }) {
   const router = useRouter();
+  const copy = useAdminCopy();
+  const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const [savedViews, setSavedViews] = useState<SavedFilterRecord[]>([]);
   const [viewName, setViewName] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -71,7 +75,7 @@ export function ChatSavedViewsBar({
 
   async function saveView() {
     if (!viewName.trim()) {
-      toast.error("보기 이름을 입력해주세요.");
+      toast.error(t("chatViewNameRequired", "보기 이름을 입력해주세요."));
       return;
     }
 
@@ -88,60 +92,60 @@ export function ChatSavedViewsBar({
     });
 
     if (!response.ok) {
-      toast.error("보기 저장에 실패했습니다.");
+      toast.error(t("chatViewSaveFailed", "보기 저장에 실패했습니다."));
       return;
     }
 
     setIsDialogOpen(false);
     setViewName("");
     await fetchSavedViews();
-    toast.success("채팅 보기가 저장되었습니다.");
+    toast.success(t("chatViewSaveSuccess", "채팅 보기가 저장되었습니다."));
   }
 
   async function deleteView(id: string) {
     const response = await fetch(`/api/admin/saved-filters/${id}`, { method: "DELETE" });
     if (!response.ok) {
-      toast.error("보기 삭제에 실패했습니다.");
+      toast.error(t("chatViewDeleteFailed", "보기 삭제에 실패했습니다."));
       return;
     }
 
     await fetchSavedViews();
-    toast.success("채팅 보기가 삭제되었습니다.");
+    toast.success(t("chatViewDeleteSuccess", "채팅 보기가 삭제되었습니다."));
   }
 
   return (
     <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div className="flex flex-wrap gap-2">
         <Select value={currentFilter.status ?? "all"} onValueChange={(value) => updateFilter({ status: value === "all" ? undefined : value })}>
-          <SelectTrigger aria-label="채팅 상태 필터" className="w-[160px]">
-            <SelectValue placeholder="상태 필터" />
+          <SelectTrigger aria-label={t("chatFilterStatus", "채팅 상태 필터")} className="w-[160px]">
+            <SelectValue placeholder={t("chatFilterStatus", "상태 필터")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 상태</SelectItem>
-            <SelectItem value="WAITING_AGENT">상담원 대기</SelectItem>
-            <SelectItem value="WAITING_CUSTOMER">고객 대기</SelectItem>
-            <SelectItem value="ACTIVE">활성</SelectItem>
-            <SelectItem value="ENDED">종료</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 상태")}</SelectItem>
+            <SelectItem value="WAITING_AGENT">{t("chatsWaitingAgent", "상담원 대기")}</SelectItem>
+            <SelectItem value="WAITING_CUSTOMER">{t("chatsWaitingCustomer", "고객 대기")}</SelectItem>
+            <SelectItem value="ACTIVE">{t("commonActive", "활성")}</SelectItem>
+            <SelectItem value="ENDED">{t("commonInactive", "종료")}</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={currentFilter.slaState ?? "all"} onValueChange={(value) => updateFilter({ slaState: value === "all" ? undefined : value })}>
-          <SelectTrigger aria-label="채팅 SLA 필터" className="w-[160px]">
-            <SelectValue placeholder="SLA 필터" />
+          <SelectTrigger aria-label={t("chatFilterSla", "채팅 SLA 필터")} className="w-[160px]">
+            <SelectValue placeholder={t("chatFilterSla", "SLA 필터")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 SLA</SelectItem>
-            <SelectItem value="warning">SLA 임박</SelectItem>
-            <SelectItem value="breached">SLA 초과</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 SLA")}</SelectItem>
+            <SelectItem value="warning">{t("chatsSlaWarning", "SLA 임박")}</SelectItem>
+            <SelectItem value="breached">{t("chatsSlaBreached", "SLA 초과")}</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={currentFilter.assigneeId ?? "all"} onValueChange={(value) => updateFilter({ assigneeId: value === "all" ? undefined : value })}>
-          <SelectTrigger aria-label="채팅 담당자 필터" className="w-[170px]">
-            <SelectValue placeholder="담당자 필터" />
+          <SelectTrigger aria-label={t("chatFilterAssignee", "채팅 담당자 필터")} className="w-[170px]">
+            <SelectValue placeholder={t("chatFilterAssignee", "담당자 필터")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 담당자</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 담당자")}</SelectItem>
             {agents.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}
@@ -156,12 +160,12 @@ export function ChatSavedViewsBar({
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
               <Bookmark className="mr-2 h-4 w-4" />
-              저장 보기
+              {t("savedFilterTitle", "저장 보기")}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
             {savedViews.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">저장된 채팅 보기가 없습니다.</div>
+              <div className="px-3 py-2 text-sm text-muted-foreground">{t("chatViewEmpty", "저장된 채팅 보기가 없습니다.")}</div>
             ) : (
               <>
                 {savedViews.map((view) => (
@@ -182,7 +186,7 @@ export function ChatSavedViewsBar({
                           void deleteView(view.id);
                         }}
                       >
-                        삭제
+                        {copy.commonDelete}
                       </button>
                     </div>
                   </DropdownMenuItem>
@@ -192,7 +196,7 @@ export function ChatSavedViewsBar({
             )}
             <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
               <Save className="mr-2 h-4 w-4" />
-              현재 보기 저장
+              {t("chatViewSaveCurrent", "현재 보기 저장")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -201,20 +205,20 @@ export function ChatSavedViewsBar({
       {isDialogOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-background p-6 space-y-4">
-            <h3 className="text-lg font-semibold">채팅 보기 저장</h3>
+            <h3 className="text-lg font-semibold">{t("chatViewSaveDialogTitle", "채팅 보기 저장")}</h3>
             <input
-              aria-label="채팅 보기 이름"
+              aria-label={t("chatViewName", "채팅 보기 이름")}
               type="text"
               value={viewName}
               onChange={(event) => setViewName(event.target.value)}
               className="w-full rounded-md border px-3 py-2"
-              placeholder="예: SLA 초과 대화"
+              placeholder={t("savedFilterNamePlaceholder", "예: SLA 초과 대화")}
             />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                취소
+                {copy.commonCancel}
               </Button>
-              <Button onClick={saveView}>저장</Button>
+              <Button onClick={saveView}>{copy.commonSave}</Button>
             </div>
           </div>
         </div>

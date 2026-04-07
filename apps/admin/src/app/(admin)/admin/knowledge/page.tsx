@@ -1,16 +1,19 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { KnowledgeList } from "@/components/admin/knowledge-list";
 import { getPublicAppUrl } from "@crinity/shared/utils/public-app-url";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
   title: "지식 관리 | Crinity",
 };
 
 export default async function KnowledgePage() {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
   const publicBaseUrl = getPublicAppUrl();
 
@@ -45,11 +48,11 @@ export default async function KnowledgePage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">지식 관리</h1>
+      <h1 className="text-2xl font-bold mb-6">{copy.navKnowledge}</h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>지식 문서 목록</CardTitle>
+          <CardTitle>{copy.knowledgeTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-6">

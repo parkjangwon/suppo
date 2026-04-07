@@ -1,9 +1,12 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { DashboardAiSection } from "@/components/admin/dashboard-ai-section";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
   title: "운영 대시보드 | Crinity",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const session = await auth();
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
 
   if (!session?.user) {
     redirect("/admin/login");
@@ -61,10 +65,10 @@ export default async function DashboardPage() {
   };
 
   const priorityLabels: Record<string, string> = {
-    URGENT: "긴급",
-    HIGH: "높음",
-    MEDIUM: "보통",
-    LOW: "낮음",
+    URGENT: copyText(copy, "ticketsPriorityUrgent", "긴급"),
+    HIGH: copyText(copy, "ticketsPriorityHigh", "높음"),
+    MEDIUM: copyText(copy, "ticketsPriorityMedium", "보통"),
+    LOW: copyText(copy, "ticketsPriorityLow", "낮음"),
   };
 
   const openCount = statusCounts
@@ -73,7 +77,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">운영 대시보드</h1>
+      <h1 className="text-2xl font-bold mb-6">{copyText(copy, "dashboardTitle", "운영 대시보드")}</h1>
 
       {analysisEnabled && <DashboardAiSection />}
 
@@ -81,25 +85,25 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-3xl font-bold">{todayCount}</div>
-            <div className="text-sm text-gray-600">오늘 신규</div>
+            <div className="text-sm text-gray-600">{copyText(copy, "dashboardTodayNew", "오늘 신규")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="text-3xl font-bold">{weekCount}</div>
-            <div className="text-sm text-gray-600">최근 7일</div>
+            <div className="text-sm text-gray-600">{copyText(copy, "dashboardLast7Days", "최근 7일")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="text-3xl font-bold">{monthCount}</div>
-            <div className="text-sm text-gray-600">최근 30일</div>
+            <div className="text-sm text-gray-600">{copyText(copy, "dashboardLast30Days", "최근 30일")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className="text-3xl font-bold text-red-600">{slaBreaches}</div>
-            <div className="text-sm text-gray-600">SLA 위반</div>
+            <div className="text-sm text-gray-600">{copyText(copy, "dashboardSlaBreaches", "SLA 위반")}</div>
           </CardContent>
         </Card>
       </div>
@@ -107,7 +111,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>상태별 ({openCount} 오픈)</CardTitle>
+            <CardTitle>{copyText(copy, "dashboardStatusBy", "상태별")} ({openCount} {copyText(copy, "dashboardOpenCountLabel", "오픈")})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -123,7 +127,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>우선순위별</CardTitle>
+            <CardTitle>{copyText(copy, "dashboardPriorityBy", "우선순위별")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -139,7 +143,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>상담원별 오픈 티켓</CardTitle>
+            <CardTitle>{copyText(copy, "dashboardOpenTicketsByAgent", "상담원별 오픈 티켓")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

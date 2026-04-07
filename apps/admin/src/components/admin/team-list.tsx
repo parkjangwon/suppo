@@ -18,6 +18,7 @@ import { Label } from "@crinity/ui/components/ui/label";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Edit2, Users } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface Team {
   id: string;
@@ -37,6 +38,8 @@ interface TeamListProps {
 }
 
 export function TeamList({ teams, agents }: TeamListProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,16 +102,16 @@ export function TeamList({ teams, agents }: TeamListProps) {
           <DialogTrigger asChild>
             <Button onClick={() => setIsCreateOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              팀 추가
+              {t("commonCreate", "생성")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>새 팀 생성</DialogTitle>
+              <DialogTitle>{t("commonCreate", "생성")} {t("teamsTitle", "팀 관리")}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label>팀 이름</Label>
+                <Label>{t("teamsName", "팀 이름")}</Label>
                 <Input
                   value={formData.name}
                   onChange={(e) =>
@@ -120,7 +123,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>설명</Label>
+                <Label>{t("teamsDescriptionPlaceholder", "팀에 대한 설명")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
@@ -132,7 +135,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>팀원 선택</Label>
+                <Label>{t("teamsMembers", "구성원")}</Label>
                 <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 border rounded-md">
                   {agents.map((agent) => (
                     <label
@@ -170,7 +173,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
 
               {formData.memberIds.length > 0 && (
                 <div className="space-y-2">
-                  <Label>팀장 선택</Label>
+                  <Label>{t("teamsLead", "팀장")}</Label>
                   <select
                     value={formData.leaderId}
                     onChange={(e) =>
@@ -178,7 +181,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
                     }
                     className="w-full h-10 rounded-md border border-input bg-background px-3"
                   >
-                    <option value="">팀장 없음</option>
+                    <option value="">{t("commonNone", "없음")}</option>
                     {agents
                       .filter((a) => formData.memberIds.includes(a.id))
                       .map((agent) => (
@@ -198,11 +201,11 @@ export function TeamList({ teams, agents }: TeamListProps) {
                     setFormData({ ...formData, isActive: v })
                   }
                 />
-                <Label htmlFor="isActive">활성화</Label>
+                <Label htmlFor="isActive">{t("commonActive", "활성")}</Label>
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "생성 중..." : "생성"}
+                {isSubmitting ? "생성 중..." : t("commonCreate", "생성")}
               </Button>
             </form>
           </DialogContent>
@@ -233,15 +236,15 @@ export function TeamList({ teams, agents }: TeamListProps) {
             <CardContent className="pt-0">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                 <Users className="w-4 h-4" />
-                <span>팀원 {team.members.length}명</span>
+                <span>{t("teamsMembers", "구성원")} {team.members.length}명</span>
                 <span className="mx-1">•</span>
-                <span>티켓 {team._count.tickets}개</span>
+                <span>{t("ticketsTitle", "티켓")} {team._count.tickets}개</span>
               </div>
 
               <div className="space-y-1">
                 {team.members.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    팀원이 없습니다
+                    <p className="text-sm text-muted-foreground">
+                    {t("commonNotFound", "찾을 수 없습니다")}
                   </p>
                 ) : (
                   team.members.map((member) => (
@@ -252,7 +255,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
                       <span>{member.agent.name}</span>
                       {member.isLeader && (
                         <Badge variant="secondary" className="text-xs">
-                          팀장
+                          {t("teamsLead", "팀장")}
                         </Badge>
                       )}
                     </div>

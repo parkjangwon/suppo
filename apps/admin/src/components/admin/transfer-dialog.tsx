@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { Button } from "@crinity/ui/components/ui/button";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface TransferAgent {
   id: string;
@@ -25,6 +26,8 @@ export function TransferDialog({
   activeAgents,
   onTransferred
 }: TransferDialogProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [open, setOpen] = useState(false);
   const [targetAgentId, setTargetAgentId] = useState("");
   const [reason, setReason] = useState("");
@@ -40,7 +43,7 @@ export function TransferDialog({
     setError("");
 
     if (!targetAgentId) {
-      setError("양도할 상담원을 선택해주세요");
+      setError(t("ticketTransferSelectRequired", "양도할 상담원을 선택해주세요"));
       return;
     }
 
@@ -58,7 +61,7 @@ export function TransferDialog({
 
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error ?? "양도 처리에 실패했습니다");
+        setError(data.error ?? t("ticketTransferFailed", "양도 처리에 실패했습니다"));
         return;
       }
 
@@ -67,7 +70,7 @@ export function TransferDialog({
       setReason("");
       onTransferred?.();
     } catch {
-      setError("양도 처리 중 오류가 발생했습니다");
+      setError(t("ticketTransferError", "양도 처리 중 오류가 발생했습니다"));
     } finally {
       setIsSubmitting(false);
     }
@@ -76,24 +79,24 @@ export function TransferDialog({
   return (
     <>
       <Button type="button" variant="outline" onClick={() => setOpen(true)}>
-        {triggerLabel}
+        {triggerLabel || t("ticketTransferLabel", "양도")}
       </Button>
 
       {open ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-5 text-slate-100 shadow-xl">
-            <h3 className="text-lg font-semibold">티켓 양도</h3>
-            <p className="mt-1 text-sm text-slate-400">담당 티켓을 다른 상담원에게 양도합니다.</p>
+            <h3 className="text-lg font-semibold">{t("ticketTransferLabel", "티켓 양도")}</h3>
+            <p className="mt-1 text-sm text-slate-400">{t("ticketTransferReasonPlaceholder", "담당 티켓을 다른 상담원에게 양도합니다.")}</p>
 
             <div className="mt-4 space-y-3">
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-300">상담원 선택</span>
+                <span className="mb-1 block text-slate-300">{t("ticketTransferLabel", "상담원 선택")}</span>
                 <select
                   className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
                   value={targetAgentId}
                   onChange={(event) => setTargetAgentId(event.target.value)}
                 >
-                  <option value="">상담원을 선택하세요</option>
+                  <option value="">{t("ticketTransferSelectRequired", "상담원을 선택하세요")}</option>
                   {candidates.map((agent) => (
                     <option key={agent.id} value={agent.id}>
                       {agent.name}
@@ -103,12 +106,12 @@ export function TransferDialog({
               </label>
 
               <label className="block text-sm">
-                <span className="mb-1 block text-slate-300">양도 사유 (선택)</span>
+                <span className="mb-1 block text-slate-300">{t("ticketTransferReasonPlaceholder", "양도 사유 (선택)")}</span>
                 <textarea
                   className="h-24 w-full resize-none rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm"
                   value={reason}
                   onChange={(event) => setReason(event.target.value)}
-                  placeholder="양도 사유를 입력하세요"
+                  placeholder={t("ticketTransferReasonPlaceholder", "양도 사유를 입력하세요")}
                 />
               </label>
 
@@ -117,10 +120,10 @@ export function TransferDialog({
 
             <div className="mt-5 flex justify-end gap-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)} disabled={isSubmitting}>
-                취소
+                {t("commonCancel", "취소")}
               </Button>
               <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? "처리 중..." : "양도"}
+                {isSubmitting ? t("ticketTransferSubmitting", "처리 중...") : t("ticketTransferLabel", "양도")}
               </Button>
             </div>
           </div>

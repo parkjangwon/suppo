@@ -7,20 +7,14 @@ import { Badge } from "@crinity/ui/components/ui/badge";
 import Link from "next/link";
 import { CustomerInsightsResponse } from "@/lib/db/queries/admin-analytics/contracts";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CustomerInsightsPanelProps {
   customerId: string;
 }
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
-const STATUS_LABELS: Record<string, string> = {
-  OPEN: "열림",
-  IN_PROGRESS: "진행중",
-  WAITING: "대기중",
-  RESOLVED: "해결됨",
-  CLOSED: "종료",
-};
-
 const PRIORITY_COLORS: Record<string, string> = {
   URGENT: "bg-red-500",
   HIGH: "bg-orange-500",
@@ -29,6 +23,16 @@ const PRIORITY_COLORS: Record<string, string> = {
 };
 
 export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
+  const STATUS_LABELS: Record<string, string> = {
+    OPEN: t("ticketStatusOpen", "열림", "Open"),
+    IN_PROGRESS: t("ticketStatusInProgress", "진행중", "In progress"),
+    WAITING: t("ticketStatusWaiting", "대기중", "Waiting"),
+    RESOLVED: t("ticketStatusResolved", "해결됨", "Resolved"),
+    CLOSED: t("ticketStatusClosed", "종료", "Closed"),
+  };
   const [data, setData] = useState<CustomerInsightsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,7 +59,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">불러오는 중...</div>
+          <div className="text-center text-muted-foreground">{t("commonLoading", "로딩 중...")}</div>
         </CardContent>
       </Card>
     );
@@ -65,7 +69,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">데이터를 불러올 수 없습니다</div>
+          <div className="text-center text-muted-foreground">{t("commonNotFound", "찾을 수 없습니다")}</div>
         </CardContent>
       </Card>
     );
@@ -79,11 +83,11 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="총 티켓" value={data.stats.totalTickets} />
-        <StatCard title="오픈 티켓" value={data.stats.openTickets} />
-        <StatCard title="해결됨" value={data.stats.resolvedTickets} />
+        <StatCard title={t("customersTotalTickets", "총 문의")} value={data.stats.totalTickets} />
+        <StatCard title={t("ticketStatusOpen", "열림")} value={data.stats.openTickets} />
+        <StatCard title={t("ticketStatusResolved", "해결됨")} value={data.stats.resolvedTickets} />
         <StatCard
-          title="고객 만족도"
+          title={t("customersCsat", "고객 만족도")}
           value={data.stats.avgCsat ? data.stats.avgCsat.toFixed(1) : "-"}
         />
       </div>
@@ -91,29 +95,29 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">평균 첫 응답:</span>
+            <span className="text-muted-foreground">{t("analyticsAverageFirstResponse", "평균 첫 응답", "Avg. first response")}:</span>
             <span>
               {data.stats.avgFirstResponseMinutes
-                ? `${Math.round(data.stats.avgFirstResponseMinutes)}분`
+                ? `${Math.round(data.stats.avgFirstResponseMinutes)}${copy.locale === "en" ? "m" : "분"}`
                 : "-"}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">평균 해결 시간:</span>
+            <span className="text-muted-foreground">{t("analyticsAverageResolutionTime", "평균 해결 시간", "Avg. resolution time")}:</span>
             <span>
               {data.stats.avgResolutionHours
-                ? `${Math.round(data.stats.avgResolutionHours)}시간`
+                ? `${Math.round(data.stats.avgResolutionHours)}${copy.locale === "en" ? "h" : "시간"}`
                 : "-"}
             </span>
           </div>
         </div>
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">고객 만족도 응답 수:</span>
-            <span>{data.stats.csatResponses}건</span>
+            <span className="text-muted-foreground">{t("analyticsCsatResponseCount", "고객 만족도 응답 수", "CSAT responses")}:</span>
+            <span>{data.stats.csatResponses}{copy.locale === "en" ? "" : "건"}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">마지막 티켓:</span>
+            <span className="text-muted-foreground">{t("analyticsLastTicket", "마지막 티켓", "Last ticket")}:</span>
             <span>
               {data.stats.lastTicketAt
                 ? new Date(data.stats.lastTicketAt).toLocaleDateString("ko-KR")
@@ -126,7 +130,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
       {categoryChartData.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">카테고리 분포</CardTitle>
+            <CardTitle className="text-base">{t("analyticsCategoryDistributionTitle", "카테고리 분포", "Category distribution")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-48">
@@ -145,7 +149,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value, name) => [`${value}건`, name]} />
+                  <Tooltip formatter={(value, name) => [copy.locale === "en" ? `${value} tickets` : `${value}건`, name]} />
                   <Legend fontSize={12} />
                 </PieChart>
               </ResponsiveContainer>
@@ -156,16 +160,16 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">최근 티켓</CardTitle>
+          <CardTitle className="text-base">{t("analyticsRecentTickets", "최근 티켓", "Recent tickets")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>티켓 번호</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead>상태</TableHead>
-                <TableHead>우선순위</TableHead>
+                <TableHead>{t("ticketsTitle", "티켓 번호", "Ticket")}</TableHead>
+                <TableHead>{t("ticketDetailTitle", "제목", "Title")}</TableHead>
+                <TableHead>{t("ticketDetailStatus", "상태", "Status")}</TableHead>
+                <TableHead>{t("ticketDetailPriority", "우선순위", "Priority")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -200,7 +204,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
               {data.tickets.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    티켓이 없습니다
+                    {t("commonNotFound", "찾을 수 없습니다")}
                   </TableCell>
                 </TableRow>
               )}

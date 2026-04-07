@@ -22,6 +22,7 @@ import {
 import { Search, Users, Inbox, Calendar, ChevronRight, AlertCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface CustomerItem {
   id: string;
@@ -38,6 +39,8 @@ interface CustomerListProps {
 }
 
 export function CustomerList({ initialCustomers }: CustomerListProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredCustomers = useMemo(() => {
@@ -70,7 +73,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 dark:text-blue-400">전체 고객</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400">{t("customersTitle", "고객 관리")}</p>
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-blue-500 dark:text-blue-400 opacity-80" />
@@ -92,7 +95,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-amber-600 dark:text-amber-400">총 누적 티켓</p>
+                <p className="text-sm text-amber-600 dark:text-amber-400">{t("customersTotalTickets", "총 문의")}</p>
                 <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.totalTickets}</p>
               </div>
               <Inbox className="w-8 h-8 text-amber-500 dark:text-amber-400 opacity-80" />
@@ -105,7 +108,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="이름 또는 이메일로 검색..."
+            placeholder={t("customersSearchPlaceholder", "이름 또는 이메일로 검색...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -118,11 +121,11 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>고객명</TableHead>
-                <TableHead>이메일</TableHead>
-                <TableHead>연락처</TableHead>
-                <TableHead className="text-right">티켓 수</TableHead>
-                <TableHead>최근 문의일</TableHead>
+                <TableHead>{t("customersName", "이름")}</TableHead>
+                <TableHead>{t("customersEmail", "이메일")}</TableHead>
+                <TableHead>{t("customersPhone", "전화번호")}</TableHead>
+                <TableHead className="text-right">{t("customersTotalTickets", "총 문의")}</TableHead>
+                <TableHead>{t("customersRecentInquiry", "최근 문의")}</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -130,7 +133,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
               {filteredCustomers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    검색 결과가 없습니다.
+                    {t("commonNotFound", "찾을 수 없습니다")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -156,7 +159,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
                       <Button variant="ghost" size="icon" asChild>
                         <Link href={`/admin/customers/${customer.id}`}>
                           <ChevronRight className="w-4 h-4" />
-                          <span className="sr-only">상세 보기</span>
+                          <span className="sr-only">{t("commonView", "보기")}</span>
                         </Link>
                       </Button>
                     </TableCell>
@@ -170,7 +173,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
         <div className="md:hidden divide-y">
           {filteredCustomers.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
-              검색 결과가 없습니다.
+              {t("commonNotFound", "찾을 수 없습니다")}
             </div>
           ) : (
             filteredCustomers.map((customer) => (
@@ -183,7 +186,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
                   <p className="font-medium leading-none">{customer.name}</p>
                   <p className="text-sm text-muted-foreground">{customer.email}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                    <span>티켓 {customer.ticketCount}개</span>
+                    <span>{t("customersTotalTickets", "총 문의")} {customer.ticketCount}개</span>
                     <span>•</span>
                     <span>
                       {customer.lastTicketAt
@@ -191,7 +194,7 @@ export function CustomerList({ initialCustomers }: CustomerListProps) {
                             addSuffix: true,
                             locale: ko,
                           })
-                        : "문의 내역 없음"}
+                        : t("customersNoHistory", "문의 내역 없음")}
                     </span>
                   </div>
                 </div>

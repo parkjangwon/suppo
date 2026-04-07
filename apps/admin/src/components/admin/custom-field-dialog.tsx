@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@crinity/ui/components/ui/select";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CustomField {
   id?: string;
@@ -35,6 +37,7 @@ interface CustomFieldDialogProps {
 }
 
 export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomFieldDialogProps) {
+  const copy = useAdminCopy();
   const [key, setKey] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -76,17 +79,17 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
     const newErrors: Record<string, string> = {};
 
     if (!key.trim()) {
-      newErrors.key = "키는 필수입니다.";
+      newErrors.key = copyText(copy, "customFieldKeyRequired", "키는 필수입니다.");
     } else if (!/^[a-z_][a-z0-9_]*$/i.test(key)) {
-      newErrors.key = "키는 영문, 숫자, 언더스코어만 사용 가능합니다.";
+      newErrors.key = copyText(copy, "customFieldKeyInvalid", "키는 영문, 숫자, 언더스코어만 사용 가능합니다.");
     }
 
     if (!name.trim()) {
-      newErrors.name = "이름은 필수입니다.";
+      newErrors.name = copyText(copy, "customFieldNameRequired", "이름은 필수입니다.");
     }
 
     if (isSelectType && !options.trim()) {
-      newErrors.options = "옵션은 필수입니다.";
+      newErrors.options = copyText(copy, "customFieldOptionsRequired", "옵션은 필수입니다.");
     }
 
     setErrors(newErrors);
@@ -122,35 +125,37 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {field ? "커스텀 필드 수정" : "새 커스텀 필드"}
+            {field
+              ? copyText(copy, "customFieldEditTitle", "커스텀 필드 수정")
+              : copyText(copy, "customFieldNewTitle", "새 커스텀 필드")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="key">
-              키 <span className="text-destructive">*</span>
+              {copyText(copy, "commonName", "키")} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="key"
-              placeholder="예: order_id, product_type"
+              placeholder={copyText(copy, "customFieldKeyExamplePlaceholder", "예: order_id, product_type")}
               value={key}
               onChange={(e) => setKey(e.target.value)}
               disabled={!!field}
             />
             {errors.key && <p className="text-sm text-destructive">{errors.key}</p>}
             <p className="text-xs text-muted-foreground">
-              시스템 내부에서 사용하는 식별자입니다. 수정할 수 없습니다.
+              {copyText(copy, "categoriesSlugReadonly", "시스템 내부에서 사용하는 식별자입니다. 수정할 수 없습니다.")}
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="name">
-              이름 <span className="text-destructive">*</span>
+              {copyText(copy, "commonName", "이름")} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="name"
-              placeholder="예: 주문 번호, 제품 유형"
+              placeholder={copyText(copy, "customFieldNamePlaceholder", "예: 주문 번호, 제품 유형")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -158,18 +163,18 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="fieldType">필드 타입</Label>
+            <Label htmlFor="fieldType">{copyText(copy, "commonType", "필드 타입")}</Label>
             <Select value={fieldType} onValueChange={(value: any) => setFieldType(value)}>
               <SelectTrigger id="fieldType">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="TEXT">텍스트</SelectItem>
-                <SelectItem value="NUMBER">숫자</SelectItem>
-                <SelectItem value="DATE">날짜</SelectItem>
-                <SelectItem value="BOOLEAN">체크박스</SelectItem>
-                <SelectItem value="SELECT">단일 선택</SelectItem>
-                <SelectItem value="MULTI_SELECT">다중 선택</SelectItem>
+                <SelectItem value="TEXT">{copyText(copy, "customFieldTypeText", "텍스트")}</SelectItem>
+                <SelectItem value="NUMBER">{copyText(copy, "customFieldTypeNumber", "숫자")}</SelectItem>
+                <SelectItem value="DATE">{copyText(copy, "customFieldTypeDate", "날짜")}</SelectItem>
+                <SelectItem value="BOOLEAN">{copyText(copy, "customFieldTypeBoolean", "체크박스")}</SelectItem>
+                <SelectItem value="SELECT">{copyText(copy, "customFieldTypeSelect", "단일 선택")}</SelectItem>
+                <SelectItem value="MULTI_SELECT">{copyText(copy, "customFieldTypeMultiSelect", "다중 선택")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -177,11 +182,11 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
           {isSelectType && (
             <div className="space-y-2">
               <Label htmlFor="options">
-                옵션 <span className="text-destructive">*</span>
+                {copyText(copy, "commonOptions", "옵션")} <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 id="options"
-                placeholder="옵션1, 옵션2, 옵션3 (쉼표로 구분)"
+                placeholder={copyText(copy, "customFieldOptionPlaceholder", "옵션1, 옵션2, 옵션3 (쉼표로 구분)")}
                 value={options}
                 onChange={(e) => setOptions(e.target.value)}
                 rows={3}
@@ -191,10 +196,10 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="description">설명</Label>
+            <Label htmlFor="description">{copyText(copy, "commonDescription", "설명")}</Label>
             <Textarea
               id="description"
-              placeholder="필드에 대한 추가 설명"
+              placeholder={copyText(copy, "customFieldDescriptionPlaceholder", "필드에 대한 추가 설명")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
@@ -208,17 +213,17 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
               onCheckedChange={setIsRequired}
             />
             <Label htmlFor="isRequired" className="cursor-pointer">
-              필수 필드
+              {copyText(copy, "commonRequiredField", "필수 필드")}
             </Label>
           </div>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            취소
+            {copy.commonCancel}
           </Button>
           <Button onClick={handleSubmit}>
-            {field ? "수정" : "생성"}
+            {field ? copy.commonEdit : copy.commonCreate}
           </Button>
         </DialogFooter>
       </DialogContent>

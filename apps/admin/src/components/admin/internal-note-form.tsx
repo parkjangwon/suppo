@@ -7,12 +7,15 @@ import { Textarea } from "@crinity/ui/components/ui/textarea";
 import { Checkbox } from "@crinity/ui/components/ui/checkbox";
 import { Label } from "@crinity/ui/components/ui/label";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface InternalNoteFormProps {
   ticketId: string;
 }
 
 export function InternalNoteForm({ ticketId }: InternalNoteFormProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [content, setContent] = useState("");
   const [isInternal, setIsInternal] = useState(false);
@@ -22,7 +25,7 @@ export function InternalNoteForm({ ticketId }: InternalNoteFormProps) {
     e.preventDefault();
     
     if (!content.trim()) {
-      toast.error("내용을 입력해주세요.");
+      toast.error(t("internalNoteContentRequired", "내용을 입력해주세요."));
       return;
     }
 
@@ -39,15 +42,15 @@ export function InternalNoteForm({ ticketId }: InternalNoteFormProps) {
       });
 
       if (!response.ok) {
-        throw new Error("응답 등록 실패");
+        throw new Error(t("internalNoteFailed", "응답 등록 실패"));
       }
 
-      toast.success(isInternal ? "내부 메모가 등록되었습니다." : "응답이 등록되었습니다.");
+      toast.success(isInternal ? t("internalNoteSuccess", "내부 메모가 등록되었습니다.") : t("internalNoteResponseSuccess", "응답이 등록되었습니다."));
       setContent("");
       setIsInternal(false);
       router.refresh();
     } catch (error) {
-      toast.error("응답 등록 중 오류가 발생했습니다.");
+      toast.error(t("internalNoteError", "응답 등록 중 오류가 발생했습니다."));
     } finally {
       setIsSubmitting(false);
     }
@@ -56,15 +59,15 @@ export function InternalNoteForm({ ticketId }: InternalNoteFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 mt-6 border-t pt-6">
       <div className="space-y-2">
-        <Label htmlFor="content" className="sr-only">응답 작성</Label>
+        <Label htmlFor="content" className="sr-only">{t("commentWriteAriaLabel", "응답 작성")}</Label>
         <Textarea
           id="content"
-          placeholder="응답 또는 내부 메모를 작성하세요..."
+          placeholder={t("internalNotePlaceholder", "응답 또는 내부 메모를 작성하세요...")}
           className="min-h-[120px]"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={isSubmitting}
-          aria-label="응답 작성"
+          aria-label={t("commentWriteAriaLabel", "응답 작성")}
         />
       </div>
 
@@ -75,18 +78,18 @@ export function InternalNoteForm({ ticketId }: InternalNoteFormProps) {
             checked={isInternal}
             onCheckedChange={(checked) => setIsInternal(checked as boolean)}
             disabled={isSubmitting}
-            aria-label="내부 메모로 저장"
+            aria-label={t("commentInternalNoteAriaLabel", "내부 메모로 저장")}
           />
           <Label
             htmlFor="isInternal"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
-            내부 메모로 저장 (고객에게 보이지 않음)
+            {t("commentInternalNoteAriaLabel", "내부 메모로 저장 (고객에게 보이지 않음)")}
           </Label>
         </div>
 
         <Button type="submit" disabled={isSubmitting || !content.trim()}>
-          {isSubmitting ? "전송 중..." : "전송"}
+          {isSubmitting ? t("commonSending", "전송 중...") : t("commonSend", "전송")}
         </Button>
       </div>
     </form>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Download, Upload, RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import {
   Card,
   CardContent,
@@ -71,6 +72,7 @@ function enforceDependencies(
 }
 
 export function SystemManagement() {
+  const copy = useAdminCopy() as Record<string, string>;
   // ── 백업 ────────────────────────────────────────────────────
   const [backupLoading, setBackupLoading] = useState(false);
 
@@ -78,7 +80,7 @@ export function SystemManagement() {
     setBackupLoading(true);
     try {
       const res = await fetch("/api/admin/system/backup");
-      if (!res.ok) throw new Error("백업 실패");
+      if (!res.ok) throw new Error(copy.systemBackupFailed ?? "백업 실패");
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -90,9 +92,9 @@ export function SystemManagement() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("백업 파일이 다운로드되었습니다.");
+      toast.success(copy.systemBackupSuccess ?? "백업 파일이 다운로드되었습니다.");
     } catch (err) {
-      toast.error("백업 실패: " + (err instanceof Error ? err.message : "오류"));
+      toast.error((copy.systemBackupFailed ?? "백업 실패") + ": " + (err instanceof Error ? err.message : (copy.commonError ?? "오류")));
     } finally {
       setBackupLoading(false);
     }
@@ -131,17 +133,17 @@ export function SystemManagement() {
         body: formData,
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "복구 실패");
+      if (!res.ok) throw new Error(json.error ?? (copy.systemRestoreError ?? "복구 실패"));
       if (!json.schemaVersionMatch) {
-        toast.warning("스키마 버전이 다릅니다. 복구는 완료되었지만 일부 데이터에 문제가 있을 수 있습니다.");
+        toast.warning(copy.systemRestoreSchemaWarning ?? "스키마 버전이 다릅니다. 복구는 완료되었지만 일부 데이터에 문제가 있을 수 있습니다.");
       } else {
-        toast.success("복구가 완료되었습니다. 로그인 화면으로 이동합니다.");
+        toast.success(copy.systemRestoreSuccess ?? "복구가 완료되었습니다. 로그인 화면으로 이동합니다.");
       }
       setTimeout(() => {
         window.location.href = "/admin/login";
       }, 2000);
     } catch (err) {
-      toast.error("복구 실패: " + (err instanceof Error ? err.message : "오류"));
+      toast.error((copy.systemRestoreError ?? "복구 실패") + ": " + (err instanceof Error ? err.message : (copy.commonError ?? "오류")));
       // 오류 시 파일 선택 초기화
       setRestoreFile(null);
       setFileInputKey((k) => k + 1);
@@ -204,16 +206,16 @@ export function SystemManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
-            데이터 백업
+            {copy.systemBackupTitle ?? "데이터 백업"}
           </CardTitle>
           <CardDescription>
-            현재 모든 데이터와 첨부파일을 ZIP 파일로 다운로드합니다.
+            {copy.systemBackupDescription ?? "현재 모든 데이터와 첨부파일을 ZIP 파일로 다운로드합니다."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={handleBackup} disabled={backupLoading}>
             {backupLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {backupLoading ? "백업 생성 중..." : "백업 다운로드"}
+            {backupLoading ? (copy.commonCreating ?? "백업 생성 중...") : (copy.systemBackupDownload ?? "백업 다운로드")}
           </Button>
         </CardContent>
       </Card>
@@ -223,17 +225,17 @@ export function SystemManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
-            데이터 복구
+            {copy.systemRestoreTitle ?? "데이터 복구"}
           </CardTitle>
           <CardDescription>
-            백업 파일을 업로드하면 현재 모든 데이터가 교체됩니다.
+            {copy.systemRestoreDescription ?? "백업 파일을 업로드하면 현재 모든 데이터가 교체됩니다."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              복구 시 현재 데이터가 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+              {copy.systemRestoreWarning ?? "복구 시 현재 데이터가 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다."}
             </AlertDescription>
           </Alert>
           <div className="flex items-center gap-3">
@@ -249,7 +251,7 @@ export function SystemManagement() {
               disabled={!restoreFile || restoreLoading}
               onClick={handleRestoreClick}
             >
-              {restoreLoading ? "복구 중..." : "복구 시작"}
+              {restoreLoading ? (copy.commonProcessing ?? "복구 중...") : (copy.systemRestoreStart ?? "복구 시작")}
             </Button>
           </div>
         </CardContent>
@@ -321,7 +323,7 @@ export function SystemManagement() {
             disabled={selectedCategories.size === 0 || resetLoading}
             onClick={() => setResetDialogOpen(true)}
           >
-            {resetLoading ? "초기화 중..." : "초기화"}
+            {resetLoading ? (copy.commonDeleting ?? "초기화 중...") : (copy.systemResetButton ?? "초기화")}
           </Button>
         </CardContent>
       </Card>
@@ -330,18 +332,17 @@ export function SystemManagement() {
       <Dialog open={restoreDialogOpen} onOpenChange={setRestoreDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>데이터 복구 확인</DialogTitle>
+            <DialogTitle>{copy.systemRestoreConfirmTitle ?? "데이터 복구 확인"}</DialogTitle>
             <DialogDescription>
-              현재 모든 데이터가 백업 파일의 데이터로 교체됩니다. 이 작업은
-              되돌릴 수 없습니다.
+              {copy.systemRestoreConfirmDescription ?? "현재 모든 데이터가 백업 파일의 데이터로 교체됩니다. 이 작업은 되돌릴 수 없습니다."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRestoreDialogOpen(false)}>
-              취소
+              {copy.commonClose ?? "취소"}
             </Button>
             <Button variant="destructive" onClick={handleRestore}>
-              복구 시작
+              {copy.systemRestoreStart ?? "복구 시작"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -356,16 +357,16 @@ export function SystemManagement() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-              선택한 데이터가 영구 삭제됩니다
+              {copy.systemResetConfirmTitle ?? "선택한 데이터가 영구 삭제됩니다"}
             </DialogTitle>
             <DialogDescription>
-              계속하려면 아래에 <strong>초기화</strong>를 입력하세요.
+              {copy.systemResetConfirmDescription ?? "계속하려면 아래에"} <strong>{copy.systemResetConfirmPlaceholder ?? "초기화"}</strong> {copy.systemResetConfirmTail ?? "를 입력하세요."}
             </DialogDescription>
           </DialogHeader>
           <Input
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
-            placeholder="초기화"
+            placeholder={copy.systemResetConfirmPlaceholder ?? "초기화"}
           />
           <DialogFooter>
             <Button
@@ -375,14 +376,14 @@ export function SystemManagement() {
                 setConfirmText("");
               }}
             >
-              취소
+              {copy.commonClose ?? "취소"}
             </Button>
             <Button
               variant="destructive"
-              disabled={confirmText !== "초기화"}
+              disabled={confirmText !== (copy.systemResetConfirmPlaceholder ?? "초기화")}
               onClick={handleReset}
             >
-              초기화 실행
+              {copy.systemResetExecute ?? "초기화 실행"}
             </Button>
           </DialogFooter>
         </DialogContent>

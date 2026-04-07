@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Button } from "@crinity/ui/components/ui/button";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface CustomerSnapshotCardProps {
   customerId: string;
@@ -19,6 +20,8 @@ interface CustomerSnapshotData {
 }
 
 export function CustomerSnapshotCard({ customerId }: CustomerSnapshotCardProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [data, setData] = useState<CustomerSnapshotData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,22 +61,22 @@ export function CustomerSnapshotCard({ customerId }: CustomerSnapshotCardProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">고객 요약</CardTitle>
+        <CardTitle className="text-lg">{t("customersTitle", "고객 관리")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">고객 요약을 불러오는 중...</p>
+          <p className="text-sm text-muted-foreground">{t("commonLoading", "로딩 중...")}</p>
         ) : data ? (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <SnapshotMetric label="총 문의" value={`${data.stats.totalTickets}건`} />
-              <SnapshotMetric label="열린 티켓" value={`${data.stats.openTickets}건`} />
+              <SnapshotMetric label={t("customersTotalTickets", "총 문의")} value={`${data.stats.totalTickets}건`} />
+              <SnapshotMetric label={t("ticketStatusOpen", "열림")} value={`${data.stats.openTickets}건`} />
               <SnapshotMetric
-                label="고객 만족도"
+                label={t("customersCsat", "고객 만족도")}
                 value={data.stats.avgCsat != null ? `${data.stats.avgCsat.toFixed(1)}점` : "-"}
               />
               <SnapshotMetric
-                label="최근 문의"
+                label={t("customersRecentInquiry", "최근 문의")}
                 value={
                   data.stats.lastTicketAt
                     ? new Date(data.stats.lastTicketAt).toLocaleDateString("ko-KR")
@@ -82,12 +85,12 @@ export function CustomerSnapshotCard({ customerId }: CustomerSnapshotCardProps) 
               />
             </div>
             <Button variant="outline" className="w-full" asChild>
-              <Link href={`/admin/customers/${customerId}`}>고객 상세 보기</Link>
+              <Link href={`/admin/customers/${customerId}`}>{t("commonView", "보기")}</Link>
             </Button>
           </>
         ) : (
           <p className="text-sm text-muted-foreground">
-            고객 요약을 불러올 수 없습니다.
+            {t("commonNotFound", "찾을 수 없습니다")}
           </p>
         )}
       </CardContent>

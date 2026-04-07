@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 
 import { CommentSection } from "./comment-section";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 export function ChatWorkspace({
   conversation,
@@ -31,6 +32,8 @@ export function ChatWorkspace({
   initialCustomerReadAt?: string | null;
   slaState?: "healthy" | "warning" | "breached";
 }) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
   const [customerTyping, setCustomerTyping] = useState(false);
@@ -56,7 +59,7 @@ export function ChatWorkspace({
 
       router.refresh();
     } catch (error) {
-      toast.error("채팅 상태 업데이트에 실패했습니다.");
+      toast.error(t("chatViewSaveFailed", "채팅 상태 업데이트에 실패했습니다."));
     } finally {
       setIsUpdating(false);
     }
@@ -115,8 +118,8 @@ export function ChatWorkspace({
             <h1 className="text-2xl font-bold">{ticket.customerName}</h1>
             <Badge variant="outline">{ticket.ticketNumber}</Badge>
             <Badge>{conversation.status}</Badge>
-            {slaState === "warning" ? <Badge>SLA 임박</Badge> : null}
-            {slaState === "breached" ? <Badge variant="destructive">SLA 초과</Badge> : null}
+            {slaState === "warning" ? <Badge>{t("slaPolicyRunning", "SLA 임박")}</Badge> : null}
+            {slaState === "breached" ? <Badge variant="destructive">{t("slaPolicyStopped", "SLA 초과")}</Badge> : null}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{ticket.customerEmail}</p>
         </div>
@@ -127,14 +130,14 @@ export function ChatWorkspace({
             onValueChange={(value) => handleUpdate("status", value)}
           >
             <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="상태" />
+              <SelectValue placeholder={t("ticketDetailCurrentStatus", "상태")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="OPEN">열림</SelectItem>
-              <SelectItem value="IN_PROGRESS">진행중</SelectItem>
-              <SelectItem value="WAITING">대기중</SelectItem>
-              <SelectItem value="RESOLVED">해결됨</SelectItem>
-              <SelectItem value="CLOSED">종료</SelectItem>
+              <SelectItem value="OPEN">{t("ticketStatusOpen", "열림")}</SelectItem>
+              <SelectItem value="IN_PROGRESS">{t("ticketStatusInProgress", "진행중")}</SelectItem>
+              <SelectItem value="WAITING">{t("ticketStatusWaiting", "대기중")}</SelectItem>
+              <SelectItem value="RESOLVED">{t("ticketStatusResolved", "해결됨")}</SelectItem>
+              <SelectItem value="CLOSED">{t("ticketStatusClosed", "종료")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -144,10 +147,10 @@ export function ChatWorkspace({
             onValueChange={(value) => handleUpdate("assigneeId", value === "unassigned" ? null : value)}
           >
             <SelectTrigger className="w-[170px]">
-              <SelectValue placeholder="담당자" />
+              <SelectValue placeholder={t("ticketDetailAssignee", "담당자")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">미할당</SelectItem>
+              <SelectItem value="unassigned">{t("ticketDetailUnassigned", "미할당")}</SelectItem>
               {agents.map((agent) => (
                 <SelectItem key={agent.id} value={agent.id}>
                   {agent.name}
@@ -186,15 +189,15 @@ export function ChatWorkspace({
 
         <Card>
           <CardHeader>
-            <CardTitle>채팅 정보</CardTitle>
+            <CardTitle>{t("navChats", "채팅 정보")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <div>대화 상태: {conversation.status}</div>
-            {customerTyping ? <div className="text-emerald-700">고객이 입력 중...</div> : null}
-            {customerReadAt ? <div className="text-emerald-700">고객이 마지막 메시지를 읽음</div> : null}
-            <div>최근 메시지: {new Date(conversation.lastMessageAt).toLocaleString("ko-KR")}</div>
-            <div>고객 최근 메시지: {conversation.lastCustomerMessageAt ? new Date(conversation.lastCustomerMessageAt).toLocaleString("ko-KR") : "없음"}</div>
-            <div>상담원 최근 메시지: {conversation.lastAgentMessageAt ? new Date(conversation.lastAgentMessageAt).toLocaleString("ko-KR") : "없음"}</div>
+            <div>{t("chatViewSaveSuccess", "대화 상태")}: {conversation.status}</div>
+            {customerTyping ? <div className="text-emerald-700">{t("commonProcessing", "고객이 입력 중...")}</div> : null}
+            {customerReadAt ? <div className="text-emerald-700">{t("commonConnected", "고객이 마지막 메시지를 읽음")}</div> : null}
+            <div>{t("chatViewSaveSuccess", "최근 메시지")}: {new Date(conversation.lastMessageAt).toLocaleString("ko-KR")}</div>
+            <div>{t("chatViewSaveSuccess", "고객 최근 메시지")}: {conversation.lastCustomerMessageAt ? new Date(conversation.lastCustomerMessageAt).toLocaleString("ko-KR") : t("commonNone", "없음")}</div>
+            <div>{t("chatViewSaveSuccess", "상담원 최근 메시지")}: {conversation.lastAgentMessageAt ? new Date(conversation.lastAgentMessageAt).toLocaleString("ko-KR") : t("commonNone", "없음")}</div>
           </CardContent>
         </Card>
       </div>

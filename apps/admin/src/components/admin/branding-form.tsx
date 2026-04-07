@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Input } from "@crinity/ui/components/ui/input";
 import { Label } from "@crinity/ui/components/ui/label";
@@ -53,6 +54,7 @@ const defaultFormData: SystemBranding = {
 };
 
 export function BrandingForm() {
+  const copy = useAdminCopy() as Record<string, string>;
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -123,6 +125,7 @@ export function BrandingForm() {
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("파일 업로드에 실패했습니다.");
+      toast.error(copy.brandingUploadFailed ?? "파일 업로드에 실패했습니다.");
       return null;
     }
   };
@@ -187,7 +190,7 @@ export function BrandingForm() {
       });
 
       if (response.ok) {
-        toast.success("브랜딩 설정이 저장되었습니다.");
+        toast.success(copy.brandingSaveSuccess ?? "브랜딩 설정이 저장되었습니다.");
       } else {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
         console.error("Server error:", errorData);
@@ -195,7 +198,7 @@ export function BrandingForm() {
       }
     } catch (error) {
       console.error("Failed to save branding:", error);
-      toast.error("브랜딩 설정 저장에 실패했습니다.");
+      toast.error(copy.brandingSaveFailed ?? "브랜딩 설정 저장에 실패했습니다.");
     } finally {
       setIsSaving(false);
     }
@@ -213,72 +216,72 @@ export function BrandingForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>기본 정보</CardTitle>
+          <CardTitle>{copy.commonSystem ?? "기본 정보"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="companyName">회사명 *</Label>
+            <Label htmlFor="companyName">{copy.brandingCompanyLabel ?? "회사명 *"}</Label>
             <Input
               id="companyName"
               value={formData.companyName}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, companyName: e.target.value }))
               }
-              placeholder="회사명을 입력하세요"
+              placeholder={copy.brandingCompanyPlaceholder ?? "회사명을 입력하세요"}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="homepageTitle">홈페이지 메인 제목</Label>
+            <Label htmlFor="homepageTitle">{copy.brandingAppTitleLabel ?? "홈페이지 메인 제목"}</Label>
             <Input
               id="homepageTitle"
               value={formData.homepageTitle}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, homepageTitle: e.target.value }))
               }
-              placeholder="Crinity Helpdesk"
+              placeholder={copy.brandingHomepageTitlePlaceholder ?? "Crinity Helpdesk"}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="homepageSubtitle">홈페이지 부제목</Label>
+            <Label htmlFor="homepageSubtitle">{copy.brandingDescLabel ?? "홈페이지 부제목"}</Label>
             <Input
               id="homepageSubtitle"
               value={formData.homepageSubtitle}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, homepageSubtitle: e.target.value }))
               }
-              placeholder="민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다."
+              placeholder={copy.brandingDescPlaceholder ?? "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다."}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="adminPanelTitle">관리자 패널 제목</Label>
+            <Label htmlFor="adminPanelTitle">{copy.brandingAdminTitleLabel ?? "관리자 패널 제목"}</Label>
             <Input
               id="adminPanelTitle"
               value={formData.adminPanelTitle}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, adminPanelTitle: e.target.value }))
               }
-              placeholder="Crinity Admin"
+              placeholder={copy.brandingAdminTitlePlaceholder ?? "Crinity Admin"}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="appTitle">앱 제목</Label>
+            <Label htmlFor="appTitle">{copy.brandingAppTitleLabel ?? "앱 제목"}</Label>
             <Input
               id="appTitle"
               value={formData.appTitle}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, appTitle: e.target.value }))
               }
-              placeholder="고객 지원 센터"
+              placeholder={copy.brandingAppTitlePlaceholder ?? "고객 지원 센터"}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="welcomeMessage">환영 메시지</Label>
+            <Label htmlFor="welcomeMessage">{copy.brandingWelcomeMessageLabel ?? "환영 메시지"}</Label>
             <Input
               id="welcomeMessage"
               value={formData.welcomeMessage}
@@ -288,7 +291,7 @@ export function BrandingForm() {
                   welcomeMessage: e.target.value,
                 }))
               }
-              placeholder="무엇을 도와드릴까요?"
+              placeholder={copy.brandingWelcomeMessagePlaceholder ?? "무엇을 도와드릴까요?"}
             />
           </div>
         </CardContent>
@@ -296,12 +299,12 @@ export function BrandingForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>로고 및 파비콘</CardTitle>
+          <CardTitle>{copy.brandingLogoTitle ?? "로고 및 파비콘"}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label>로고</Label>
+              <Label>{copy.brandingLogoLabel ?? "로고"}</Label>
               <div className="space-y-2">
                 {formData.logoUrl ? (
                   <div className="relative inline-block">
@@ -325,7 +328,7 @@ export function BrandingForm() {
                   >
                     <Upload className="h-6 w-6 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">
-                      {uploadingLogo ? "업로드 중..." : "클릭하여 업로드"}
+                      {uploadingLogo ? copy.commonUploading ?? "업로드 중..." : copy.commonUploadClick ?? "클릭하여 업로드"}
                     </span>
                   </div>
                 )}
@@ -393,12 +396,12 @@ export function BrandingForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>색상 설정</CardTitle>
+          <CardTitle>{copy.brandingColorTitle ?? "색상 설정"}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="primaryColor">주 색상</Label>
+              <Label htmlFor="primaryColor">{copy.brandingPrimaryColorLabel ?? "주 색상"}</Label>
               <div className="flex gap-2">
                 <Input
                   id="primaryColor"
@@ -425,7 +428,7 @@ export function BrandingForm() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="secondaryColor">보조 색상</Label>
+              <Label htmlFor="secondaryColor">{copy.brandingSecondaryColorLabel ?? "보조 색상"}</Label>
               <div className="flex gap-2">
                 <Input
                   id="secondaryColor"
@@ -457,24 +460,24 @@ export function BrandingForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>푸터 설정</CardTitle>
+          <CardTitle>{copy.brandingFooterTitle ?? "푸터 설정"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="footerText">푸터 텍스트</Label>
+            <Label htmlFor="footerText">{copy.brandingFooterTextLabel ?? "푸터 텍스트"}</Label>
             <Input
               id="footerText"
               value={formData.footerText}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, footerText: e.target.value }))
               }
-              placeholder="© 2024 All rights reserved."
+              placeholder={copy.brandingFooterTextPlaceholder ?? "© 2024 All rights reserved."}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="footerPhone">전화번호</Label>
+              <Label htmlFor="footerPhone">{copy.brandingPhoneLabel ?? "전화번호"}</Label>
               <Input
                 id="footerPhone"
                 value={formData.footerPhone}
@@ -488,7 +491,7 @@ export function BrandingForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="footerEmail">이메일</Label>
+              <Label htmlFor="footerEmail">{copy.brandingEmailLabel ?? "이메일"}</Label>
               <Input
                 id="footerEmail"
                 type="email"
@@ -506,7 +509,7 @@ export function BrandingForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="footerHomepage">홈페이지</Label>
+              <Label htmlFor="footerHomepage">{copy.brandingHomepageLabel ?? "홈페이지"}</Label>
               <Input
                 id="footerHomepage"
                 type="url"
@@ -521,7 +524,7 @@ export function BrandingForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="footerAddress">주소</Label>
+              <Label htmlFor="footerAddress">{copy.brandingAddressLabel ?? "주소"}</Label>
               <Input
                 id="footerAddress"
                 value={formData.footerAddress}
@@ -531,7 +534,7 @@ export function BrandingForm() {
                     footerAddress: e.target.value,
                   }))
                 }
-                placeholder="서울특별시 강남구 ..."
+                placeholder={copy.brandingAddressPlaceholder ?? "서울특별시 강남구 ..."}
               />
             </div>
           </div>
@@ -540,7 +543,7 @@ export function BrandingForm() {
 
       <Card>
         <CardHeader>
-          <CardTitle>고급 설정</CardTitle>
+          <CardTitle>{copy.brandingAdvancedTitle ?? "고급 설정"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">
@@ -552,9 +555,9 @@ export function BrandingForm() {
               }
             />
             <div>
-              <Label htmlFor="knowledgeEnabled">지식 찾기 공개 포털 노출</Label>
+              <Label htmlFor="knowledgeEnabled">{copy.brandingKnowledgeEnabledLabel ?? "지식 찾기 공개 포털 노출"}</Label>
               <p className="text-xs text-muted-foreground mt-0.5">
-                비활성화 시 고객 포털에서 지식 찾기 메뉴와 페이지가 숨겨집니다.
+                {copy.brandingKnowledgeEnabledDesc ?? "비활성화 시 고객 포털에서 지식 찾기 메뉴와 페이지가 숨겨집니다."}
               </p>
             </div>
           </div>
@@ -567,18 +570,18 @@ export function BrandingForm() {
                 setFormData((prev) => ({ ...prev, showPoweredBy: checked }))
               }
             />
-            <Label htmlFor="showPoweredBy">Powered by Crinity 표시</Label>
+            <Label htmlFor="showPoweredBy">{copy.brandingPoweredByLabel ?? "Powered by Crinity 표시"}</Label>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="customCss">커스텀 CSS</Label>
+            <Label htmlFor="customCss">{copy.brandingCustomCssLabel ?? "커스텀 CSS"}</Label>
             <textarea
               id="customCss"
               value={formData.customCss}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, customCss: e.target.value }))
               }
-              placeholder="/* 커스텀 CSS를 입력하세요 */"
+              placeholder={copy.brandingCustomCssPlaceholder ?? "/* 커스텀 CSS를 입력하세요 */"}
               className="w-full h-32 p-3 border rounded-md font-mono text-sm"
             />
           </div>
@@ -587,7 +590,7 @@ export function BrandingForm() {
 
       <div className="flex gap-2">
         <Button type="submit" disabled={isSaving} size="lg">
-          {isSaving ? "저장 중..." : "설정 저장"}
+          {isSaving ? (copy.commonSaving ?? "저장 중...") : (copy.commonSaveSettings ?? "설정 저장")}
         </Button>
       </div>
     </form>

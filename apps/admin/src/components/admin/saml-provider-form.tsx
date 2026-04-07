@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Plus, Edit2, Trash2, Power, PowerOff, Copy, ExternalLink, Download } from "lucide-react";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
@@ -27,6 +28,7 @@ import {
 } from "@crinity/ui/components/ui/alert-dialog";
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { toast } from "sonner";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 type SAMLProvider = {
   id: string;
@@ -38,8 +40,8 @@ type SAMLProvider = {
   idpSloUrl?: string | null;
   spAcsUrl: string;
   spEntityId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 };
 
 interface SAMLProviderFormProps {
@@ -48,6 +50,9 @@ interface SAMLProviderFormProps {
 }
 
 export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLProviderFormProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const [providers, setProviders] = useState<SAMLProvider[]>(initialProviders);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<SAMLProvider | null>(null);
@@ -108,7 +113,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "저장에 실패했습니다");
+        throw new Error(error.message || t("commonSaveFailed", "저장에 실패했습니다", "Failed to save."));
       }
 
       const savedProvider = await response.json();
@@ -116,15 +121,15 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
       if (editingProvider) {
         setProviders(providers.map((p) => (p.id === savedProvider.id ? savedProvider : p)));
         setEditingProvider(null);
-        toast.success("SAML Provider가 수정되었습니다");
+        toast.success(t("samlProviderUpdateSuccess", "SAML Provider가 수정되었습니다", "SAML provider updated."));
       } else {
         setProviders([savedProvider, ...providers]);
         setIsCreateOpen(false);
         resetForm();
-        toast.success("SAML Provider가 생성되었습니다");
+        toast.success(t("samlProviderCreateSuccess", "SAML Provider가 생성되었습니다", "SAML provider created."));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : copy.commonError);
     } finally {
       setIsSubmitting(false);
     }
@@ -139,13 +144,13 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
       });
 
       if (!response.ok) {
-        throw new Error("삭제에 실패했습니다");
+        throw new Error(t("commonDeleteFailed", "삭제에 실패했습니다", "Failed to delete."));
       }
 
       setProviders(providers.filter((p) => p.id !== deletingProvider.id));
-      toast.success("SAML Provider가 삭제되었습니다");
+      toast.success(t("samlProviderDeleteSuccess", "SAML Provider가 삭제되었습니다", "SAML provider deleted."));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : copy.commonError);
     } finally {
       setDeletingProvider(null);
     }
@@ -160,20 +165,20 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
       });
 
       if (!response.ok) {
-        throw new Error("상태 변경에 실패했습니다");
+        throw new Error(t("samlProviderStatusFailed", "상태 변경에 실패했습니다", "Failed to change status."));
       }
 
       const updated = await response.json();
       setProviders(providers.map((p) => (p.id === updated.id ? updated : p)));
-      toast.success(updated.isActive ? "활성화되었습니다" : "비활성화되었습니다");
+      toast.success(updated.isActive ? t("commonActivate", "활성화되었습니다", "Activated.") : t("commonDeactivate", "비활성화되었습니다", "Deactivated."));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : copy.commonError);
     }
   };
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`${label}이(가) 복사되었습니다`);
+    toast.success(t("commonCopiedLabel", `${label}이(가) 복사되었습니다`, `${label} copied.`));
   };
 
   const downloadMetadata = (provider: SAMLProvider) => {
@@ -187,7 +192,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("메타데이터 파일이 다운로드되었습니다");
+    toast.success(t("samlMetaDownloadSuccess", "메타데이터 파일이 다운로드되었습니다", "Metadata file downloaded."));
   };
 
   return (
@@ -195,25 +200,25 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
       {/* Create Button */}
       <div className="flex justify-between items-center">
         <div className="text-sm text-gray-600">
-          총 {providers.length}개의 SAML Provider
+          {t("samlProviderCount", `총 ${providers.length}개의 SAML Provider`, `${providers.length} SAML providers`)}
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
               <Plus className="w-4 h-4 mr-2" />
-              SAML Provider 추가
+              {t("samlProviderAdd", "SAML Provider 추가", "Add SAML provider")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>새 SAML Provider 생성</DialogTitle>
+              <DialogTitle>{t("samlProviderCreateTitle", "새 SAML Provider 생성", "Create SAML provider")}</DialogTitle>
             </DialogHeader>
             <SAMLProviderFormFields
               formData={formData}
               setFormData={setFormData}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
-              submitLabel="생성"
+              submitLabel={copy.commonCreate}
               baseUrl={baseUrl}
             />
           </DialogContent>
@@ -226,6 +231,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
           <Card>
             <CardContent className="py-12 text-center text-gray-500">
               등록된 SAML Provider가 없습니다
+              
             </CardContent>
           </Card>
         ) : (
@@ -238,16 +244,17 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                       <CardTitle className="text-lg">{provider.name}</CardTitle>
                       <Badge variant={provider.isActive ? "default" : "secondary"}>
                         {provider.isActive ? "활성" : "비활성"}
+                        
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600">도메인: {provider.domain}</p>
+                    <p className="text-sm text-gray-600">{t("commonDomain", "도메인", "Domain")}: {provider.domain}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleToggleActive(provider)}
-                      title={provider.isActive ? "비활성화" : "활성화"}
+                      title={provider.isActive ? t("commonDeactivate", "비활성화", "Deactivate") : t("commonActivate", "활성화", "Activate")}
                     >
                       {provider.isActive ? (
                         <Power className="w-4 h-4 text-green-500" />
@@ -259,7 +266,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                       variant="ghost"
                       size="icon"
                       onClick={() => downloadMetadata(provider)}
-                      title="SP 메타데이터 다운로드"
+                      title={t("samlProviderDownloadMetadata", "SP 메타데이터 다운로드", "Download SP metadata")}
                     >
                       <Download className="w-4 h-4" />
                     </Button>
@@ -271,14 +278,14 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                       </DialogTrigger>
                       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                          <DialogTitle>SAML Provider 수정</DialogTitle>
+                          <DialogTitle>{t("samlProviderEditTitle", "SAML Provider 수정", "Edit SAML provider")}</DialogTitle>
                         </DialogHeader>
                         <SAMLProviderFormFields
                           formData={formData}
                           setFormData={setFormData}
                           onSubmit={handleSubmit}
                           isSubmitting={isSubmitting}
-                          submitLabel="저장"
+                          submitLabel={copy.commonSave}
                           baseUrl={baseUrl}
                           isEditing
                         />
@@ -298,7 +305,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                 <div className="space-y-3 text-sm">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label className="text-xs text-gray-500">IdP Entity ID</Label>
+                      <Label className="text-xs text-gray-500">{t("samlIdpEntityId", "IdP Entity ID", "IdP entity ID")}</Label>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 bg-gray-100 px-2 py-1 rounded text-xs truncate">
                           {provider.idpEntityId}
@@ -314,7 +321,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs text-gray-500">SP ACS URL</Label>
+                      <Label className="text-xs text-gray-500">{t("samlSpAcsUrl", "SP ACS URL", "SP ACS URL")}</Label>
                       <div className="flex items-center gap-2">
                         <code className="flex-1 bg-gray-100 px-2 py-1 rounded text-xs truncate">
                           {provider.spAcsUrl}
@@ -331,7 +338,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>SP Entity ID: {provider.spEntityId}</span>
+                    <span>{t("samlSpEntityId", "SP Entity ID", "SP entity ID")}: {provider.spEntityId}</span>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -352,17 +359,17 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
       <AlertDialog open={!!deletingProvider} onOpenChange={() => setDeletingProvider(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>SAML Provider 삭제</AlertDialogTitle>
+            <AlertDialogTitle>{t("samlProviderDeleteTitle", "SAML Provider 삭제", "Delete SAML provider")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {deletingProvider?.name} ({deletingProvider?.domain})을(를) 삭제하시겠습니까?
+              {t("samlProviderDeleteConfirm", `${deletingProvider?.name} (${deletingProvider?.domain})을(를) 삭제하시겠습니까?`, `Delete ${deletingProvider?.name} (${deletingProvider?.domain})?`)}
               <br />
-              이 작업은 되돌릴 수 없습니다.
+              {t("commonIrreversible", "이 작업은 되돌릴 수 없습니다.", "This action cannot be undone.")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel>{copy.commonCancel}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
-              삭제
+              {copy.commonDelete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -371,17 +378,19 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
   );
 }
 
+type SAMLProviderFormData = {
+  name: string;
+  domain: string;
+  idpEntityId: string;
+  idpSsoUrl: string;
+  idpSloUrl: string;
+  idpCertificate: string;
+  isActive: boolean;
+};
+
 interface SAMLProviderFormFieldsProps {
-  formData: {
-    name: string;
-    domain: string;
-    idpEntityId: string;
-    idpSsoUrl: string;
-    idpSloUrl: string;
-    idpCertificate: string;
-    isActive: boolean;
-  };
-  setFormData: (data: typeof formData) => void;
+  formData: SAMLProviderFormData;
+  setFormData: (data: SAMLProviderFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   submitLabel: string;
@@ -398,6 +407,9 @@ function SAMLProviderFormFields({
   baseUrl,
   isEditing,
 }: SAMLProviderFormFieldsProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const spEntityId = `${baseUrl}/api/auth/saml/${formData.domain}`;
   const spAcsUrl = `${baseUrl}/api/auth/callback/boxyhq-saml`;
 
@@ -405,36 +417,36 @@ function SAMLProviderFormFields({
     <form onSubmit={onSubmit} className="space-y-6">
       {/* Basic Info */}
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-gray-900">기본 정보</h4>
+        <h4 className="font-medium text-sm text-gray-900">{t("commonBasicInfo", "기본 정보", "Basic information")}</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="name">
-              회사명 <span className="text-red-500">*</span>
+              {t("brandingCompanyLabel", "회사명", "Company name")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="예: ACME Corporation"
+              placeholder={t("samlCompanyPlaceholder", "예: ACME Corporation", "e.g. ACME Corporation")}
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="domain">
-              이메일 도메인 <span className="text-red-500">*</span>
+              {t("samlEmailDomain", "이메일 도메인", "Email domain")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="domain"
               value={formData.domain}
               onChange={(e) => setFormData({ ...formData, domain: e.target.value.toLowerCase() })}
-              placeholder="예: acme.com"
+              placeholder={t("samlDomainPlaceholder", "예: acme.com", "e.g. acme.com")}
               required
               disabled={isEditing}
               pattern="^[a-z0-9][-a-z0-9]*\.[-a-z0-9]+$"
-              title="유효한 도메인을 입력하세요 (예: acme.com)"
+              title={t("samlDomainTitle", "유효한 도메인을 입력하세요 (예: acme.com)", "Enter a valid domain (e.g. acme.com)")}
             />
             <p className="text-xs text-gray-500">
-              이 도메인의 이메일을 가진 사용자가 SAML로 로그인할 수 있습니다
+              {t("samlDomainHelp", "이 도메인의 이메일을 가진 사용자가 SAML로 로그인할 수 있습니다", "Users with email addresses on this domain can sign in with SAML.")}
             </p>
           </div>
         </div>
@@ -445,19 +457,19 @@ function SAMLProviderFormFields({
             checked={formData.isActive}
             onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
           />
-          <Label htmlFor="isActive">활성화</Label>
+          <Label htmlFor="isActive">{t("commonActivate", "활성화", "Activate")}</Label>
         </div>
       </div>
 
       {/* SP Configuration (Read-only) */}
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-gray-900">Service Provider (SP) 설정</h4>
+        <h4 className="font-medium text-sm text-gray-900">{t("samlSpSettings", "Service Provider (SP) 설정", "Service Provider (SP) settings")}</h4>
         <p className="text-sm text-gray-600">
-          아래 정보를 IdP 관리자에게 제공하세요.
+          {t("samlSpHelp", "아래 정보를 IdP 관리자에게 제공하세요.", "Share the following information with your IdP administrator.")}
         </p>
         <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
           <div className="space-y-2">
-            <Label className="text-xs">SP Entity ID</Label>
+            <Label className="text-xs">{t("samlSpEntityId", "SP Entity ID", "SP entity ID")}</Label>
             <div className="flex items-center gap-2">
               <code className="flex-1 bg-white px-3 py-2 rounded border text-sm truncate">
                 {spEntityId}
@@ -473,7 +485,7 @@ function SAMLProviderFormFields({
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">ACS URL (Assertion Consumer Service)</Label>
+            <Label className="text-xs">{t("samlSpAcsUrlLong", "ACS URL (Assertion Consumer Service)", "ACS URL (Assertion Consumer Service)")}</Label>
             <div className="flex items-center gap-2">
               <code className="flex-1 bg-white px-3 py-2 rounded border text-sm truncate">
                 {spAcsUrl}
@@ -493,48 +505,48 @@ function SAMLProviderFormFields({
 
       {/* IdP Configuration */}
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-gray-900">Identity Provider (IdP) 설정</h4>
+        <h4 className="font-medium text-sm text-gray-900">{t("samlIdpSettings", "Identity Provider (IdP) 설정", "Identity Provider (IdP) settings")}</h4>
         <p className="text-sm text-gray-600">
-          IdP에서 제공하는 정보를 입력하세요.
+          {t("samlIdpHelp", "IdP에서 제공하는 정보를 입력하세요.", "Enter the information provided by your IdP.")}
         </p>
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="idpEntityId">
-              IdP Entity ID <span className="text-red-500">*</span>
+              {t("samlIdpEntityId", "IdP Entity ID", "IdP entity ID")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="idpEntityId"
               value={formData.idpEntityId}
               onChange={(e) => setFormData({ ...formData, idpEntityId: e.target.value })}
-              placeholder="예: https://idp.example.com/metadata"
+              placeholder={t("samlMetadataPlaceholder", "예: https://idp.example.com/metadata", "e.g. https://idp.example.com/metadata")}
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="idpSsoUrl">
-              SSO URL (Single Sign-On) <span className="text-red-500">*</span>
+              {t("samlSsoUrl", "SSO URL (Single Sign-On)", "SSO URL (Single Sign-On)")} <span className="text-red-500">*</span>
             </Label>
             <Input
               id="idpSsoUrl"
               value={formData.idpSsoUrl}
               onChange={(e) => setFormData({ ...formData, idpSsoUrl: e.target.value })}
-              placeholder="예: https://idp.example.com/sso"
+              placeholder={t("samlSsoPlaceholder", "예: https://idp.example.com/sso", "e.g. https://idp.example.com/sso")}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="idpSloUrl">SLO URL (Single Logout) - 선택사항</Label>
+            <Label htmlFor="idpSloUrl">{t("samlSloUrl", "SLO URL (Single Logout) - 선택사항", "SLO URL (Single Logout) - optional")}</Label>
             <Input
               id="idpSloUrl"
               value={formData.idpSloUrl}
               onChange={(e) => setFormData({ ...formData, idpSloUrl: e.target.value })}
-              placeholder="예: https://idp.example.com/slo"
+              placeholder={t("samlSloPlaceholder", "예: https://idp.example.com/slo", "e.g. https://idp.example.com/slo")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="idpCertificate">
-              X.509 Certificate <span className="text-red-500">*</span>
-              {isEditing && <span className="text-gray-500 font-normal"> (변경 시에만 입력)</span>}
+              {t("samlCertificate", "X.509 Certificate", "X.509 certificate")} <span className="text-red-500">*</span>
+              {isEditing && <span className="text-gray-500 font-normal"> {t("samlCertificateEditHint", "(변경 시에만 입력)", "(only when changing)")}</span>}
             </Label>
             <Textarea
               id="idpCertificate"
@@ -546,14 +558,14 @@ function SAMLProviderFormFields({
               className="font-mono text-sm"
             />
             <p className="text-xs text-gray-500">
-              IdP의 공개 인증서를 PEM 형식으로 입력하세요
+              {t("samlCertificateHelp", "IdP의 공개 인증서를 PEM 형식으로 입력하세요", "Enter the IdP public certificate in PEM format.")}
             </p>
           </div>
         </div>
       </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "저장 중..." : submitLabel}
+        {isSubmitting ? copy.commonSaving : submitLabel}
       </Button>
     </form>
   );

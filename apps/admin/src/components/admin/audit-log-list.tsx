@@ -28,6 +28,7 @@ import { Search, Download, ChevronLeft, ChevronRight, Loader2 } from "lucide-rea
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { AiInsightPanel } from "./ai-insight-panel";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface AuditLog {
   id: string;
@@ -70,6 +71,9 @@ interface AuditLogListProps {
 }
 
 export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }: AuditLogListProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, koText: string, enText?: string) =>
+    copy[key] ?? (copy.locale === "en" ? (enText ?? koText) : koText);
   const [logs, setLogs] = useState<AuditLog[]>(initialLogs);
   const [pagination, setPagination] = useState<Pagination>(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
@@ -135,14 +139,14 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
     <div className="space-y-6">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-medium">필터</CardTitle>
+          <CardTitle className="text-lg font-medium">{t("auditLogsFilter", "필터")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="작업자 이름/이메일 검색"
+                placeholder={t("auditLogsActorPlaceholder", "작업자 이름/이메일 검색")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -151,10 +155,10 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
             
             <Select value={action} onValueChange={setAction}>
               <SelectTrigger>
-                <SelectValue placeholder="작업 유형" />
+                <SelectValue placeholder={t("auditLogsActionPlaceholder", "작업 유형")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">모든 작업</SelectItem>
+                <SelectItem value="ALL">{t("commonAll", "전체")}</SelectItem>
                 {AUDIT_ACTIONS.map((a) => (
                   <SelectItem key={a} value={a}>{a}</SelectItem>
                 ))}
@@ -163,10 +167,10 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
 
             <Select value={resourceType} onValueChange={setResourceType}>
               <SelectTrigger>
-                <SelectValue placeholder="리소스 유형" />
+                <SelectValue placeholder={t("auditLogsResourcePlaceholder", "리소스 유형")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">모든 리소스</SelectItem>
+                <SelectItem value="ALL">{t("commonAll", "전체")}</SelectItem>
                 {RESOURCE_TYPES.map((r) => (
                   <SelectItem key={r} value={r}>{r}</SelectItem>
                 ))}
@@ -177,7 +181,7 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              placeholder="시작일"
+              placeholder={t("auditLogsDateFromPlaceholder", "시작일")}
             />
             
             <div className="flex gap-2">
@@ -185,10 +189,10 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                placeholder="종료일"
+                placeholder={t("auditLogsDateToPlaceholder", "종료일")}
               />
               <Button type="submit" variant="secondary">
-                검색
+                {t("commonSearch", "검색")}
               </Button>
             </div>
           </form>
@@ -206,18 +210,18 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
           ) : (
             <Download className="w-4 h-4 mr-2" />
           )}
-          엑셀 다운로드
+          {t("commonSave", "저장")}
         </Button>
       </div>
 
       {analysisEnabled && (
         <AiInsightPanel
-          title="AI 이상 패턴 탐지"
+          title={t("auditLogsAiTitle", "AI 이상 패턴 탐지", "AI anomaly detection")}
           fetchFn={() =>
             fetch("/api/ai/audit-anomaly", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ search, action, resourceType, startDate, endDate }) })
               .then(async (res) => { if (!res.ok) throw new Error("fetch failed"); return (await res.json()).result as string | null; })
           }
-          description="현재 필터 조건의 감사 로그에서 비정상 패턴을 AI가 탐지합니다."
+          description={t("auditLogsAiDescription", "현재 필터 조건의 감사 로그에서 비정상 패턴을 AI가 탐지합니다.", "AI detects anomalous patterns in audit logs for the current filters.")}
         />
       )}
 
@@ -226,12 +230,12 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[180px]">일시</TableHead>
-                <TableHead>작업자</TableHead>
-                <TableHead>작업</TableHead>
-                <TableHead>리소스</TableHead>
-                <TableHead className="max-w-[300px]">설명</TableHead>
-                <TableHead className="w-[120px]">IP 주소</TableHead>
+                <TableHead className="w-[180px]">{t("auditLogsTimestamp", "일시", "Timestamp")}</TableHead>
+                <TableHead>{t("auditLogsActor", "작업자", "Actor")}</TableHead>
+                <TableHead>{t("auditLogsAction", "작업", "Action")}</TableHead>
+                <TableHead>{t("auditLogsResource", "리소스", "Resource")}</TableHead>
+                <TableHead className="max-w-[300px]">{t("commonDescription", "설명", "Description")}</TableHead>
+                <TableHead className="w-[120px]">{t("auditLogsIpAddress", "IP 주소", "IP address")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -244,7 +248,7 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
               ) : logs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                    감사 로그가 없습니다.
+                    {t("commonNotFound", "찾을 수 없습니다")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -301,7 +305,7 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
                 disabled={pagination.page === 1}
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span className="sr-only">이전 페이지</span>
+                <span className="sr-only">{t("commonPreviousPage", "이전 페이지", "Previous page")}</span>
               </Button>
               <div className="text-sm font-medium">
                 {pagination.page} / {pagination.totalPages}
@@ -313,7 +317,7 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
                 disabled={pagination.page === pagination.totalPages}
               >
                 <ChevronRight className="w-4 h-4" />
-                <span className="sr-only">다음 페이지</span>
+                <span className="sr-only">{t("commonNextPage", "다음 페이지", "Next page")}</span>
               </Button>
             </div>
           </div>

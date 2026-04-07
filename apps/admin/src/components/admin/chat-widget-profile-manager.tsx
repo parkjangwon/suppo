@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 import { ChatWidgetButtonPreview } from "@/components/admin/chat-widget-button-preview";
 import { Button } from "@crinity/ui/components/ui/button";
@@ -18,6 +19,7 @@ import { Switch } from "@crinity/ui/components/ui/switch";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
 import { Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 type ChatWidgetProfile = {
   id: string;
@@ -44,10 +46,11 @@ type ChatWidgetProfile = {
   isDefault: boolean;
 };
 
-const EMPTY_FORM = {
+function buildEmptyForm(t: (key: string, ko: string, en?: string) => string) {
+  return {
   name: "",
   widgetKey: "",
-  buttonLabel: "브랜드 상담",
+  buttonLabel: t("chatProfileDefaultButtonLabel", "브랜드 상담", "Brand support"),
   buttonImageUrl: "",
   buttonImageFit: "contain",
   buttonBorderColor: "",
@@ -60,14 +63,18 @@ const EMPTY_FORM = {
   buttonSize: "md",
   buttonShape: "pill",
   buttonShadow: "soft",
-  welcomeTitle: "브랜드 상담",
-  welcomeMessage: "안녕하세요! 무엇을 도와드릴까요?",
+  welcomeTitle: t("chatProfileDefaultWelcomeTitle", "브랜드 상담", "Brand support"),
+  welcomeMessage: t("chatProfileDefaultWelcomeMessage", "안녕하세요! 무엇을 도와드릴까요?", "Hello. How can we help?"),
   accentColor: "#0f172a",
-};
+  };
+}
 
 export function ChatWidgetProfileManager() {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const [profiles, setProfiles] = useState<ChatWidgetProfile[]>([]);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(buildEmptyForm(t));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -75,7 +82,7 @@ export function ChatWidgetProfileManager() {
   async function fetchProfiles() {
     const response = await fetch("/api/admin/chat/widget-profiles");
     if (!response.ok) {
-      toast.error("위젯 프로필을 불러오지 못했습니다.");
+      toast.error(t("chatProfileLoadFailed", "위젯 프로필을 불러오지 못했습니다.", "Failed to load widget profiles."));
       return;
     }
 
@@ -88,7 +95,7 @@ export function ChatWidgetProfileManager() {
   }, []);
 
   function resetForm() {
-    setForm(EMPTY_FORM);
+    setForm(buildEmptyForm(t));
     setEditingId(null);
   }
 
@@ -118,13 +125,17 @@ export function ChatWidgetProfileManager() {
 
     if (!response.ok) {
       const data = await response.json().catch(() => null);
-      toast.error(data?.error ?? (editingId ? "위젯 프로필 수정에 실패했습니다." : "위젯 프로필 생성에 실패했습니다."));
+      toast.error(data?.error ?? (editingId
+        ? t("chatProfileUpdateFailed", "위젯 프로필 수정에 실패했습니다.", "Failed to update widget profile.")
+        : t("chatProfileCreateFailed", "위젯 프로필 생성에 실패했습니다.", "Failed to create widget profile.")));
       return;
     }
 
     resetForm();
     await fetchProfiles();
-    toast.success(editingId ? "위젯 프로필이 수정되었습니다." : "위젯 프로필이 생성되었습니다.");
+    toast.success(editingId
+      ? t("chatProfileUpdateSuccess", "위젯 프로필이 수정되었습니다.", "Widget profile updated.")
+      : t("chatProfileCreateSuccess", "위젯 프로필이 생성되었습니다.", "Widget profile created."));
   }
 
   function beginEdit(profile: ChatWidgetProfile) {
@@ -160,7 +171,7 @@ export function ChatWidgetProfileManager() {
     });
 
     if (!response.ok) {
-      toast.error("위젯 프로필 삭제에 실패했습니다.");
+      toast.error(t("chatProfileDeleteFailed", "위젯 프로필 삭제에 실패했습니다.", "Failed to delete widget profile."));
       return;
     }
 
@@ -168,7 +179,7 @@ export function ChatWidgetProfileManager() {
       resetForm();
     }
     await fetchProfiles();
-    toast.success("위젯 프로필이 삭제되었습니다.");
+    toast.success(t("chatProfileDeleteSuccess", "위젯 프로필이 삭제되었습니다.", "Widget profile deleted."));
   }
 
   async function toggleProfile(profile: ChatWidgetProfile, enabled: boolean) {
@@ -181,7 +192,7 @@ export function ChatWidgetProfileManager() {
     });
 
     if (!response.ok) {
-      toast.error("위젯 프로필 상태 변경에 실패했습니다.");
+      toast.error(t("chatProfileStatusFailed", "위젯 프로필 상태 변경에 실패했습니다.", "Failed to update widget profile status."));
       return;
     }
 
@@ -206,9 +217,9 @@ export function ChatWidgetProfileManager() {
 
       const data = await response.json();
       setForm((prev) => ({ ...prev, buttonImageUrl: data.url }));
-      toast.success("프로필 버튼 이미지를 업로드했습니다.");
+      toast.success(t("chatProfileButtonImageSuccess", "프로필 버튼 이미지를 업로드했습니다.", "Profile button image uploaded."));
     } catch (error) {
-      toast.error("프로필 버튼 이미지 업로드에 실패했습니다.");
+      toast.error(t("chatProfileButtonImageFailed", "프로필 버튼 이미지 업로드에 실패했습니다.", "Failed to upload profile button image."));
     } finally {
       setIsUploading(false);
       if (imageInputRef.current) {
@@ -220,22 +231,22 @@ export function ChatWidgetProfileManager() {
   async function copyEmbedSnippet(profile: ChatWidgetProfile) {
     const snippet = `<script src="YOUR_PUBLIC_HELPDESK_URL/chat-sdk.js" data-crinity-chat-sdk="true" data-widget-key="${profile.widgetKey}"></script>`;
     await navigator.clipboard.writeText(snippet);
-    toast.success("임베드 코드가 복사되었습니다.");
+    toast.success(t("chatProfileEmbedCopied", "임베드 코드가 복사되었습니다.", "Embed code copied."));
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>위젯 프로필</CardTitle>
-        <p className="text-sm text-muted-foreground">브랜드/서비스별로 별도 widgetKey를 발급해 다른 플로팅 위젯을 운영합니다.</p>
+        <CardTitle>{t("chatProfileTitle", "위젯 프로필", "Widget profiles")}</CardTitle>
+        <p className="text-sm text-muted-foreground">{t("chatProfileDescription", "브랜드/서비스별로 별도 widgetKey를 발급해 다른 플로팅 위젯을 운영합니다.", "Issue separate widget keys per brand or service to run different floating widgets.")}</p>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-name">프로필 이름</Label>
+            <Label htmlFor="chat-widget-profile-name">{t("chatProfileName", "프로필 이름", "Profile name")}</Label>
             <Input
               id="chat-widget-profile-name"
-              aria-label="프로필 이름"
+              aria-label={t("chatProfileName", "프로필 이름", "Profile name")}
               value={form.name}
               onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
             />
@@ -250,19 +261,19 @@ export function ChatWidgetProfileManager() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-button-label">버튼 라벨</Label>
+            <Label htmlFor="chat-widget-profile-button-label">{t("chatProfileButtonLabel", "버튼 라벨", "Button label")}</Label>
             <Input
               id="chat-widget-profile-button-label"
-              aria-label="프로필 버튼 라벨"
+              aria-label={t("chatProfileButtonLabel", "버튼 라벨", "Button label")}
               value={form.buttonLabel}
               onChange={(event) => setForm((prev) => ({ ...prev, buttonLabel: event.target.value }))}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-button-image-url">버튼 이미지 URL</Label>
+            <Label htmlFor="chat-widget-profile-button-image-url">{t("chatProfileButtonImageUrl", "버튼 이미지 URL", "Button image URL")}</Label>
             <Input
               id="chat-widget-profile-button-image-url"
-              aria-label="프로필 버튼 이미지 URL"
+              aria-label={t("chatProfileButtonImageUrl", "버튼 이미지 URL", "Button image URL")}
               value={form.buttonImageUrl}
               onChange={(event) => setForm((prev) => ({ ...prev, buttonImageUrl: event.target.value }))}
             />
@@ -270,7 +281,7 @@ export function ChatWidgetProfileManager() {
               <input
                 ref={imageInputRef}
                 type="file"
-                aria-label="프로필 버튼 이미지 업로드"
+                aria-label={t("chatProfileButtonImageUpload", "프로필 버튼 이미지 업로드", "Upload profile button image")}
                 accept=".png,.jpg,.jpeg,.gif,.svg,.webp"
                 className="hidden"
                 onChange={(event) => {
@@ -282,167 +293,167 @@ export function ChatWidgetProfileManager() {
               />
               <Button type="button" variant="outline" onClick={() => imageInputRef.current?.click()} disabled={isUploading}>
                 <Upload className="mr-2 h-4 w-4" />
-                {isUploading ? "업로드 중..." : "이미지 업로드"}
+                {isUploading ? copy.commonUploading : t("chatProfileButtonImageUpload", "이미지 업로드", "Upload image")}
               </Button>
               {form.buttonImageUrl ? (
                 <Button type="button" variant="ghost" onClick={() => setForm((prev) => ({ ...prev, buttonImageUrl: "" }))}>
                   <X className="mr-2 h-4 w-4" />
-                  이미지 제거
+                  {t("chatWidgetRemoveImage", "이미지 제거", "Remove image")}
                 </Button>
               ) : null}
             </div>
           </div>
           <div className="space-y-2">
-            <Label>이미지 맞춤 방식</Label>
+            <Label>{t("chatProfileImageFit", "이미지 맞춤 방식", "Image fit")}</Label>
             <Select value={form.buttonImageFit} onValueChange={(value) => setForm((prev) => ({ ...prev, buttonImageFit: value }))}>
-              <SelectTrigger aria-label="프로필 이미지 맞춤 방식">
+              <SelectTrigger aria-label={t("chatProfileImageFit", "이미지 맞춤 방식", "Image fit")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="contain">비율 유지</SelectItem>
-                <SelectItem value="cover">가득 채우기</SelectItem>
+                <SelectItem value="contain">{t("imageFitContain", "비율 유지", "Contain")}</SelectItem>
+                <SelectItem value="cover">{t("imageFitCover", "가득 채우기", "Cover")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-title">환영 제목</Label>
+            <Label htmlFor="chat-widget-profile-title">{t("chatProfileWelcomeTitle", "환영 제목", "Welcome title")}</Label>
             <Input
               id="chat-widget-profile-title"
-              aria-label="프로필 환영 제목"
+              aria-label={t("chatProfileWelcomeTitle", "환영 제목", "Welcome title")}
               value={form.welcomeTitle}
               onChange={(event) => setForm((prev) => ({ ...prev, welcomeTitle: event.target.value }))}
             />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="chat-widget-profile-message">환영 메시지</Label>
+            <Label htmlFor="chat-widget-profile-message">{t("chatProfileWelcomeMessage", "환영 메시지", "Welcome message")}</Label>
             <Textarea
               id="chat-widget-profile-message"
-              aria-label="프로필 환영 메시지"
+              aria-label={t("chatProfileWelcomeMessage", "환영 메시지", "Welcome message")}
               rows={3}
               value={form.welcomeMessage}
               onChange={(event) => setForm((prev) => ({ ...prev, welcomeMessage: event.target.value }))}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-color">포인트 컬러</Label>
+            <Label htmlFor="chat-widget-profile-color">{t("chatProfilePointColor", "포인트 컬러", "Accent color")}</Label>
             <Input
               id="chat-widget-profile-color"
-              aria-label="프로필 포인트 컬러"
+              aria-label={t("chatProfilePointColor", "포인트 컬러", "Accent color")}
               value={form.accentColor}
               onChange={(event) => setForm((prev) => ({ ...prev, accentColor: event.target.value }))}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-border-color">테두리 색상</Label>
+            <Label htmlFor="chat-widget-profile-border-color">{t("chatProfileBorderColor", "테두리 색상", "Border color")}</Label>
             <Input
               id="chat-widget-profile-border-color"
-              aria-label="프로필 테두리 색상"
+              aria-label={t("chatProfileBorderColor", "테두리 색상", "Border color")}
               value={form.buttonBorderColor}
               onChange={(event) => setForm((prev) => ({ ...prev, buttonBorderColor: event.target.value }))}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-badge-color">배지 색상</Label>
+            <Label htmlFor="chat-widget-profile-badge-color">{t("chatProfileBadgeColor", "배지 색상", "Badge color")}</Label>
             <Input
               id="chat-widget-profile-badge-color"
-              aria-label="프로필 배지 색상"
+              aria-label={t("chatProfileBadgeColor", "배지 색상", "Badge color")}
               value={form.buttonBadgeColor}
               onChange={(event) => setForm((prev) => ({ ...prev, buttonBadgeColor: event.target.value }))}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-border-width">테두리 두께</Label>
+            <Label htmlFor="chat-widget-profile-border-width">{t("chatProfileBorderThickness", "테두리 두께", "Border thickness")}</Label>
             <Input
               id="chat-widget-profile-border-width"
-              aria-label="프로필 테두리 두께"
+              aria-label={t("chatProfileBorderThickness", "테두리 두께", "Border thickness")}
               type="number"
               value={form.buttonBorderWidth}
               onChange={(event) => setForm((prev) => ({ ...prev, buttonBorderWidth: Number(event.target.value) }))}
             />
           </div>
           <div className="space-y-2">
-            <Label>호버 효과</Label>
+            <Label>{t("chatProfileHoverEffect", "호버 효과", "Hover effect")}</Label>
             <Select value={form.buttonHoverEffect} onValueChange={(value) => setForm((prev) => ({ ...prev, buttonHoverEffect: value }))}>
-              <SelectTrigger aria-label="프로필 호버 효과">
+              <SelectTrigger aria-label={t("chatProfileHoverEffect", "호버 효과", "Hover effect")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">없음</SelectItem>
-                <SelectItem value="lift">살짝 뜨기</SelectItem>
-                <SelectItem value="glow">광택 강조</SelectItem>
-                <SelectItem value="pulse">펄스</SelectItem>
+                <SelectItem value="none">{t("noneOption", "없음", "None")}</SelectItem>
+                <SelectItem value="lift">{t("hoverLift", "살짝 뜨기", "Lift")}</SelectItem>
+                <SelectItem value="glow">{t("hoverGlow", "광택 강조", "Glow")}</SelectItem>
+                <SelectItem value="pulse">{t("hoverPulse", "펄스", "Pulse")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>배지 위치</Label>
+            <Label>{t("chatProfileBadgePosition", "배지 위치", "Badge position")}</Label>
             <Select value={form.buttonBadgePosition} onValueChange={(value) => setForm((prev) => ({ ...prev, buttonBadgePosition: value }))}>
-              <SelectTrigger aria-label="프로필 배지 위치">
+              <SelectTrigger aria-label={t("chatProfileBadgePosition", "배지 위치", "Badge position")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="top-right">오른쪽 위</SelectItem>
-                <SelectItem value="top-left">왼쪽 위</SelectItem>
-                <SelectItem value="bottom-right">오른쪽 아래</SelectItem>
-                <SelectItem value="bottom-left">왼쪽 아래</SelectItem>
+                <SelectItem value="top-right">{t("positionTopRight", "오른쪽 위", "Top right")}</SelectItem>
+                <SelectItem value="top-left">{t("positionTopLeft", "왼쪽 위", "Top left")}</SelectItem>
+                <SelectItem value="bottom-right">{t("positionBottomRight", "오른쪽 아래", "Bottom right")}</SelectItem>
+                <SelectItem value="bottom-left">{t("positionBottomLeft", "왼쪽 아래", "Bottom left")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>버튼 크기</Label>
+            <Label>{t("chatProfileButtonSize", "버튼 크기", "Button size")}</Label>
             <Select value={form.buttonSize} onValueChange={(value) => setForm((prev) => ({ ...prev, buttonSize: value }))}>
-              <SelectTrigger aria-label="프로필 버튼 크기">
+              <SelectTrigger aria-label={t("chatProfileButtonSize", "버튼 크기", "Button size")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="sm">작게</SelectItem>
-                <SelectItem value="md">보통</SelectItem>
-                <SelectItem value="lg">크게</SelectItem>
+                <SelectItem value="sm">{t("sizeSmall", "작게", "Small")}</SelectItem>
+                <SelectItem value="md">{t("sizeMedium", "보통", "Medium")}</SelectItem>
+                <SelectItem value="lg">{t("sizeLarge", "크게", "Large")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>버튼 모양</Label>
+            <Label>{t("chatProfileButtonShape", "버튼 모양", "Button shape")}</Label>
             <Select value={form.buttonShape} onValueChange={(value) => setForm((prev) => ({ ...prev, buttonShape: value }))}>
-              <SelectTrigger aria-label="프로필 버튼 모양">
+              <SelectTrigger aria-label={t("chatProfileButtonShape", "버튼 모양", "Button shape")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pill">캡슐형</SelectItem>
-                <SelectItem value="rounded">둥근 사각형</SelectItem>
-                <SelectItem value="circle">원형</SelectItem>
+                <SelectItem value="pill">{t("shapePill", "캡슐형", "Pill")}</SelectItem>
+                <SelectItem value="rounded">{t("shapeRounded", "둥근 사각형", "Rounded")}</SelectItem>
+                <SelectItem value="circle">{t("shapeCircle", "원형", "Circle")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>버튼 그림자</Label>
+            <Label>{t("chatProfileButtonShadow", "버튼 그림자", "Button shadow")}</Label>
             <Select value={form.buttonShadow} onValueChange={(value) => setForm((prev) => ({ ...prev, buttonShadow: value }))}>
-              <SelectTrigger aria-label="프로필 버튼 그림자">
+              <SelectTrigger aria-label={t("chatProfileButtonShadow", "버튼 그림자", "Button shadow")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">없음</SelectItem>
-                <SelectItem value="soft">기본</SelectItem>
-                <SelectItem value="strong">강하게</SelectItem>
+                <SelectItem value="none">{t("noneOption", "없음", "None")}</SelectItem>
+                <SelectItem value="soft">{t("shadowSoft", "기본", "Soft")}</SelectItem>
+                <SelectItem value="strong">{t("shadowStrong", "강하게", "Strong")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chat-widget-profile-badge-text">고정 배지 텍스트</Label>
+            <Label htmlFor="chat-widget-profile-badge-text">{t("chatProfileBadgeFixed", "고정 배지 텍스트", "Fixed badge text")}</Label>
             <Input
               id="chat-widget-profile-badge-text"
-              aria-label="프로필 고정 배지 텍스트"
+              aria-label={t("chatProfileBadgeFixed", "고정 배지 텍스트", "Fixed badge text")}
               value={form.buttonBadgeText}
               onChange={(event) => setForm((prev) => ({ ...prev, buttonBadgeText: event.target.value }))}
             />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3 md:col-span-2">
             <div>
-              <div className="font-medium">미읽음 배지 표시</div>
-              <div className="text-sm text-muted-foreground">새 메시지가 오면 버튼에 숫자를 표시합니다.</div>
+              <div className="font-medium">{t("chatProfileBadgeShow", "미읽음 배지 표시", "Show unread badge")}</div>
+              <div className="text-sm text-muted-foreground">{t("chatProfileBadgeShowDesc", "새 메시지가 오면 버튼에 숫자를 표시합니다.", "Show a count on the button when a new message arrives.")}</div>
             </div>
             <Switch
-              aria-label="프로필 미읽음 배지 표시"
+              aria-label={t("chatProfileBadgeShow", "프로필 미읽음 배지 표시", "Show unread badge")}
               checked={form.showUnreadBadge}
               onCheckedChange={(checked) => setForm((prev) => ({ ...prev, showUnreadBadge: checked }))}
             />
@@ -450,22 +461,22 @@ export function ChatWidgetProfileManager() {
         </div>
 
         <div className="space-y-2">
-          <Label>프로필 버튼 미리보기</Label>
+          <Label>{t("chatProfilePreview", "프로필 버튼 미리보기", "Profile button preview")}</Label>
           <ChatWidgetButtonPreview form={form} className="min-h-[180px]" />
         </div>
 
         <div className="flex justify-end gap-2">
           {editingId ? (
             <Button type="button" variant="outline" onClick={resetForm}>
-              수정 취소
+              {t("chatProfileEditCancel", "수정 취소", "Cancel editing")}
             </Button>
           ) : null}
-          <Button onClick={saveProfile}>{editingId ? "프로필 수정" : "프로필 추가"}</Button>
+          <Button onClick={saveProfile}>{editingId ? t("chatProfileUpdateButton", "프로필 수정", "Update profile") : t("chatProfileAdd", "프로필 추가", "Add profile")}</Button>
         </div>
 
         <div className="space-y-3">
           {profiles.length === 0 ? (
-            <div className="text-sm text-muted-foreground">등록된 위젯 프로필이 없습니다.</div>
+            <div className="text-sm text-muted-foreground">{t("chatProfileEmpty", "등록된 위젯 프로필이 없습니다.", "No widget profiles have been created.")}</div>
           ) : (
             profiles.map((profile) => (
               <div key={profile.id} className="rounded-xl border p-4">
@@ -474,21 +485,21 @@ export function ChatWidgetProfileManager() {
                     <div className="font-medium">{profile.name}</div>
                     <div className="text-sm text-muted-foreground">{profile.widgetKey}</div>
                     <div className="text-sm text-muted-foreground">
-                      {profile.buttonImageUrl ? "이미지 버튼 사용" : profile.buttonLabel} · {profile.welcomeTitle}
+                      {profile.buttonImageUrl ? t("chatProfileUsesImageButton", "이미지 버튼 사용", "Uses image button") : profile.buttonLabel} · {profile.welcomeTitle}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {profile.buttonSize} · {profile.buttonShape} · {profile.buttonShadow}
                     </div>
                     <div className="flex flex-wrap gap-2 pt-1">
                       <Button type="button" size="sm" variant="outline" onClick={() => beginEdit(profile)}>
-                        수정
+                        {copy.commonEdit}
                       </Button>
                       <Button type="button" size="sm" variant="outline" onClick={() => void copyEmbedSnippet(profile)}>
-                        임베드 코드 복사
+                        {t("chatProfileCopyEmbed", "임베드 코드 복사", "Copy embed code")}
                       </Button>
                       {!profile.isDefault ? (
                         <Button type="button" size="sm" variant="ghost" onClick={() => void deleteProfile(profile)}>
-                          삭제
+                          {copy.commonDelete}
                         </Button>
                       ) : null}
                     </div>
@@ -502,7 +513,7 @@ export function ChatWidgetProfileManager() {
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      {profile.isDefault ? <span className="text-xs text-primary">기본</span> : null}
+                      {profile.isDefault ? <span className="text-xs text-primary">{t("chatProfileDefault", "기본", "Default")}</span> : null}
                       <Switch
                         aria-label={`widget-profile-enabled-${profile.name}`}
                         checked={profile.enabled}

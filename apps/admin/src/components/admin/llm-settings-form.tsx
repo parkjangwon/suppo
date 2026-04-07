@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Brain, Loader2, PlugZap, Server } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Input } from "@crinity/ui/components/ui/input";
@@ -40,6 +41,7 @@ const DEFAULT_SETTINGS: LLMSettings = {
 };
 
 export function LLMSettingsForm() {
+  const copy = useAdminCopy() as Record<string, string>;
   const [settings, setSettings] = useState<LLMSettings>(DEFAULT_SETTINGS);
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -83,12 +85,12 @@ export function LLMSettingsForm() {
         throw new Error("Failed to save LLM settings");
       }
 
-      toast.success("LLM 설정이 저장되었습니다.");
+      toast.success(copy.llmSaveSuccess ?? "LLM 설정이 저장되었습니다.");
       setGeminiApiKey("");
       await fetchSettings();
     } catch (error) {
       console.error("Failed to save LLM settings:", error);
-      toast.error("LLM 설정 저장에 실패했습니다.");
+      toast.error(copy.llmSaveFailed ?? "LLM 설정 저장에 실패했습니다.");
     } finally {
       setIsSaving(false);
     }
@@ -115,10 +117,10 @@ export function LLMSettingsForm() {
         throw new Error(error);
       }
 
-      setTestConnectionMessage("연결 성공: Ollama 서버가 응답했습니다.");
+      setTestConnectionMessage(copy.llmOllamaSuccess ?? "연결 성공: Ollama 서버가 응답했습니다.");
     } catch (error) {
       console.error("Failed to test Ollama connection:", error);
-      setTestConnectionMessage("연결 실패: Ollama 서버에 접근할 수 없습니다.");
+      setTestConnectionMessage(copy.llmOllamaFailed ?? "연결 실패: Ollama 서버에 접근할 수 없습니다.");
     } finally {
       setIsTestingConnection(false);
     }
@@ -138,12 +140,12 @@ export function LLMSettingsForm() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Server className="h-5 w-5" />
-            LLM 제공자 설정
+            {copy.llmProviderTitle ?? "LLM 제공자 설정"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>LLM 제공자</Label>
+            <Label>{copy.llmProviderLabel ?? "LLM 제공자"}</Label>
             <select
               value={settings.provider}
               onChange={(event) =>
@@ -162,7 +164,7 @@ export function LLMSettingsForm() {
           {settings.provider === "ollama" && (
             <>
               <div className="space-y-2">
-                <Label>Ollama URL</Label>
+                <Label>{copy.llmOllamaUrlLabel ?? "Ollama URL"}</Label>
                 <Input
                   value={settings.ollamaUrl}
                   onChange={(event) =>
@@ -173,7 +175,7 @@ export function LLMSettingsForm() {
               </div>
 
               <div className="space-y-2">
-                <Label>Ollama 모델명</Label>
+                <Label>{copy.llmOllamaModelLabel ?? "Ollama 모델명"}</Label>
                 <Input
                   value={settings.ollamaModel}
                   onChange={(event) =>
@@ -184,7 +186,7 @@ export function LLMSettingsForm() {
               </div>
 
               <div className="rounded-md border p-3 text-sm text-muted-foreground">
-                로컬 또는 사설 네트워크의 Ollama 서버를 사용할 수 있습니다.
+                {copy.llmOllamaDesc ?? "로컬 또는 사설 네트워크의 Ollama 서버를 사용할 수 있습니다."}
               </div>
             </>
           )}
@@ -192,17 +194,17 @@ export function LLMSettingsForm() {
           {settings.provider === "gemini" && (
             <>
               <div className="space-y-2">
-                <Label>Gemini API Key {settings.hasGeminiApiKey ? "(설정됨)" : ""}</Label>
+                <Label>{copy.llmGeminiApiKeyLabel ?? "Gemini API Key"} {settings.hasGeminiApiKey ? (copy.commonConnected ?? "(설정됨)") : ""}</Label>
                 <Input
                   type="password"
                   value={geminiApiKey}
                   onChange={(event) => setGeminiApiKey(event.target.value)}
-                  placeholder={settings.hasGeminiApiKey ? "변경하려면 입력" : "AIza..."}
+                  placeholder={settings.hasGeminiApiKey ? (copy.commonEdit ?? "변경하려면 입력") : "AIza..."}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Gemini 모델명</Label>
+                <Label>{copy.llmGeminiModelLabel ?? "Gemini 모델명"}</Label>
                 <Input
                   value={settings.geminiModel}
                   onChange={(event) =>
@@ -220,15 +222,15 @@ export function LLMSettingsForm() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5" />
-            분석 설정
+            {copy.llmAnalysisTitle ?? "분석 설정"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label className="text-base">AI 분석 활성화</Label>
+              <Label className="text-base">{copy.llmAnalysisEnabledLabel ?? "AI 분석 활성화"}</Label>
               <p className="text-sm text-muted-foreground">
-                티켓 내용 분석 및 보조 제안을 활성화합니다.
+                {copy.llmAnalysisEnabledDesc ?? "티켓 내용 분석 및 보조 제안을 활성화합니다."}
               </p>
             </div>
             <Switch
@@ -240,17 +242,17 @@ export function LLMSettingsForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>커스텀 프롬프트 (선택)</Label>
+            <Label>{copy.llmAnalysisPromptLabel ?? "커스텀 프롬프트 (선택)"}</Label>
             <Textarea
               value={settings.analysisPrompt}
               onChange={(event) =>
                 setSettings({ ...settings, analysisPrompt: event.target.value })
               }
-              placeholder="추가 분석 지시사항을 입력하세요. 티켓 히스토리는 자동으로 포함됩니다.&#10;&#10;예: 고객 문의를 한국어로 분류하고, 우선순위와 답변 초안을 제안해 주세요."
+              placeholder={copy.llmAnalysisPromptPlaceholder ?? "추가 분석 지시사항을 입력하세요. 티켓 히스토리는 자동으로 포함됩니다.&#10;&#10;예: 고객 문의를 한국어로 분류하고, 우선순위와 답변 초안을 제안해 주세요."}
               rows={5}
             />
             <p className="text-sm text-muted-foreground">
-              비워두면 기본 분석 지시사항이 사용됩니다. 티켓 히스토리 데이터는 항상 포함됩니다.
+              {copy.llmAnalysisPromptDesc ?? "비워두면 기본 분석 지시사항이 사용됩니다. 티켓 히스토리 데이터는 항상 포함됩니다."}
             </p>
           </div>
         </CardContent>
@@ -266,12 +268,12 @@ export function LLMSettingsForm() {
             {isTestingConnection ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                연결 테스트 중...
+                {copy.commonProcessing ?? "연결 테스트 중..."}
               </>
             ) : (
               <>
                 <PlugZap className="mr-2 h-4 w-4" />
-                Ollama 연결 테스트
+                {copy.llmOllamaTestButton ?? "Ollama 연결 테스트"}
               </>
             )}
           </Button>
@@ -281,10 +283,10 @@ export function LLMSettingsForm() {
           {isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              저장 중...
+              {copy.commonSaving ?? "저장 중..."}
             </>
           ) : (
-            "설정 저장"
+            copy.commonSaveSettings ?? "설정 저장"
           )}
         </Button>
       </div>

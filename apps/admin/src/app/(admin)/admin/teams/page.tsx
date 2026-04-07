@@ -1,15 +1,21 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { TeamList } from "@/components/admin/team-list";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
   title: "팀 관리 | Crinity",
 };
 
 export default async function TeamsPage() {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const session = await auth();
 
   if (!session?.user) {
@@ -20,8 +26,8 @@ export default async function TeamsPage() {
   if (!isAdmin) {
     return (
       <AdminOnlyPageState
-        title="팀 관리"
-        description="팀 구성과 배정 정책은 관리자만 변경할 수 있습니다."
+        title={copy.navTeams}
+        description={t("teamsAdminOnlyDesc", "팀 구성과 배정 정책은 관리자만 변경할 수 있습니다.", "Only admins can change team structure and assignment policies.")}
       />
     );
   }
@@ -51,9 +57,9 @@ export default async function TeamsPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">팀 관리</h1>
+          <h1 className="text-2xl font-bold text-foreground">{copy.navTeams}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            팀 생성, 수정, 상담원 배정 관리
+            {t("teamsPageDescription", "팀 생성, 수정, 상담원 배정 관리", "Create teams, edit them, and manage agent assignments.")}
           </p>
         </div>
       </div>

@@ -33,6 +33,7 @@ import {
 import { TemplateForm } from "./template-form";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FileText, Sparkles, Users } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface Template {
   id: string;
@@ -76,6 +77,8 @@ export function TemplateList({
   currentUserId,
   isAdmin,
 }: TemplateListProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
@@ -92,10 +95,10 @@ export function TemplateList({
         router.refresh();
       } else {
         const data = await res.json();
-        toast.error(data.error || "삭제 중 오류가 발생했습니다.");
+        toast.error(data.error || t("templatesDeleteError", "삭제 중 오류가 발생했습니다."));
       }
     } catch (error) {
-      toast.error("삭제 중 오류가 발생했습니다.");
+      toast.error(t("templatesDeleteError", "삭제 중 오류가 발생했습니다."));
     }
     setDeletingTemplate(null);
   }
@@ -112,14 +115,14 @@ export function TemplateList({
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              템플릿 추가
-            </Button>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+              {t("commonCreate", "생성")}
+          </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>새 템플릿 추가</DialogTitle>
+              <DialogTitle>{t("commonCreate", "생성")} {t("templatesTitle", "템플릿")}</DialogTitle>
               <DialogDescription>
                 자주 사용하는 응답 템플릿을 생성합니다.
               </DialogDescription>

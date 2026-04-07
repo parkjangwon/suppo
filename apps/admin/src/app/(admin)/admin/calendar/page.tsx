@@ -36,6 +36,8 @@ import {
 } from "@crinity/ui/components/ui/select";
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface Agent {
   id: string;
@@ -76,6 +78,7 @@ const absenceTypeColors: Record<string, string> = {
 
 export default function CalendarPage() {
   const { data: session } = useSession();
+  const copy = useAdminCopy();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -110,7 +113,7 @@ export default function CalendarPage() {
       const data = await res.json();
       setAbsences(data);
     } catch (error) {
-      toast.error("일정을 불러오는 중 오류가 발생했습니다.");
+      toast.error(copyText(copy, "calendarLoadFailed", "일정을 불러오는 중 오류가 발생했습니다."));
     } finally {
       setLoading(false);
     }
@@ -123,7 +126,7 @@ export default function CalendarPage() {
       const data = await res.json();
       setAgents(data.agents || []);
     } catch (error) {
-      toast.error("상담원 목록을 불러오는 중 오류가 발생했습니다.");
+      toast.error(copyText(copy, "calendarAgentsLoadFailed", "상담원 목록을 불러오는 중 오류가 발생했습니다."));
     }
   };
 
@@ -173,27 +176,27 @@ export default function CalendarPage() {
         throw new Error(error.error || "Failed to save");
       }
 
-      toast.success(editingAbsence ? "일정이 수정되었습니다." : "일정이 등록되었습니다.");
+      toast.success(editingAbsence ? copyText(copy, "calendarUpdateSuccess", "일정이 수정되었습니다.") : copyText(copy, "calendarCreateSuccess", "일정이 등록되었습니다."));
       setIsDialogOpen(false);
       setEditingAbsence(null);
       resetForm();
       fetchAbsences();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "일정 저장 중 오류가 발생했습니다.");
+      toast.error(error instanceof Error ? error.message : copyText(copy, "calendarSaveFailed", "일정 저장 중 오류가 발생했습니다."));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
+    if (!confirm(copyText(copy, "calendarDeleteConfirm", "정말 삭제하시겠습니까?"))) return;
     try {
       const res = await fetch(`/api/admin/agents/absences/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete");
-      toast.success("일정이 삭제되었습니다.");
+      toast.success(copyText(copy, "calendarDeleteSuccess", "일정이 삭제되었습니다."));
       fetchAbsences();
     } catch (error) {
-      toast.error("일정 삭제 중 오류가 발생했습니다.");
+      toast.error(copyText(copy, "calendarDeleteFailed", "일정 삭제 중 오류가 발생했습니다."));
     }
   };
 
@@ -234,13 +237,21 @@ export default function CalendarPage() {
     });
   };
 
-  const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+  const weekDays = [
+    copyText(copy, "daySunday", "일"),
+    copyText(copy, "dayMonday", "월"),
+    copyText(copy, "dayTuesday", "화"),
+    copyText(copy, "dayWednesday", "수"),
+    copyText(copy, "dayThursday", "목"),
+    copyText(copy, "dayFriday", "금"),
+    copyText(copy, "daySaturday", "토"),
+  ];
 
   return (
     <div className="container mx-auto py-8 px-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">상담원 일정 관리</CardTitle>
+          <CardTitle className="text-2xl">{copyText(copy, "calendarTitle", "상담원 일정 관리")}</CardTitle>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Button
@@ -263,14 +274,14 @@ export default function CalendarPage() {
             </div>
             <Button onClick={() => openCreateDialog()}>
               <Plus className="h-4 w-4 mr-2" />
-              일정 등록
+              {copyText(copy, "commonAdd", "일정 등록")}
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center min-h-[400px]">
-              <div className="text-muted-foreground">로딩 중...</div>
+              <div className="text-muted-foreground">{copyText(copy, "commonLoading", "로딩 중...")}</div>
             </div>
           ) : (
             <>
@@ -340,13 +351,13 @@ export default function CalendarPage() {
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {editingAbsence ? "일정 수정" : "일정 등록"}
+              {editingAbsence ? copyText(copy, "calendarEditTitle", "일정 수정") : copyText(copy, "calendarCreateTitle", "일정 등록")}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             {isAdmin && (
               <div className="space-y-2">
-                <Label>상담원</Label>
+                <Label>{copyText(copy, "calendarAgentLabel", "상담원")}</Label>
                 <Select
                   value={formData.agentId}
                   onValueChange={(value) =>
@@ -354,7 +365,7 @@ export default function CalendarPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="상담원을 선택하세요" />
+                    <SelectValue placeholder={copyText(copy, "calendarAgentPlaceholder", "상담원을 선택하세요")} />
                   </SelectTrigger>
                   <SelectContent>
                     {agents.map((agent) => (
@@ -368,7 +379,7 @@ export default function CalendarPage() {
             )}
 
             <div className="space-y-2">
-              <Label>일정 유형</Label>
+              <Label>{copyText(copy, "calendarTypeLabel", "일정 유형")}</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) =>
@@ -389,32 +400,32 @@ export default function CalendarPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>제목</Label>
+              <Label>{copyText(copy, "commonTitle", "제목")}</Label>
               <Input
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
-                placeholder="일정 제목을 입력하세요"
+                placeholder={copyText(copy, "calendarTitlePlaceholder", "일정 제목을 입력하세요")}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label>설명</Label>
+              <Label>{copyText(copy, "commonDescription", "설명")}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="추가 설명을 입력하세요 (선택사항)"
+                placeholder={copyText(copy, "calendarDescriptionPlaceholder", "추가 설명을 입력하세요 (선택사항)")}
                 rows={3}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>시작일</Label>
+                <Label>{copyText(copy, "calendarStartDateLabel", "시작일")}</Label>
                 <Input
                   type="datetime-local"
                   value={formData.startDate}
@@ -425,7 +436,7 @@ export default function CalendarPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>종료일</Label>
+                <Label>{copyText(copy, "calendarEndDateLabel", "종료일")}</Label>
                 <Input
                   type="datetime-local"
                   value={formData.endDate}
@@ -446,11 +457,11 @@ export default function CalendarPage() {
                   className="flex-1"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  삭제
+                  {copyText(copy, "commonDelete", "삭제")}
                 </Button>
               )}
               <Button type="submit" className="flex-1">
-                {editingAbsence ? "수정" : "등록"}
+                {editingAbsence ? copyText(copy, "commonEdit", "수정") : copyText(copy, "commonCreate", "등록")}
               </Button>
             </div>
           </form>

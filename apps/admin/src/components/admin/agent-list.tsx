@@ -29,6 +29,7 @@ import {
 import { Separator } from "@crinity/ui/components/ui/separator";
 import { toast } from "sonner";
 import { getBackofficeRoleLabel, type BackofficeRole } from "@crinity/shared/auth/config";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import {
   Users,
   Plus,
@@ -125,6 +126,8 @@ const EMPTY_FORM: AgentFormState = {
 };
 
 export function AgentList({ initialAgents, categories, teams = [], isAdmin = false }: AgentListProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [agents, setAgents] = useState(initialAgents);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -352,10 +355,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800">
-          <CardContent className="p-4">
+        <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 dark:text-blue-400">전체 상담원</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400">{t("commonAll", "전체")} 상담원</p>
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-blue-500 dark:text-blue-400 opacity-80" />
@@ -363,10 +366,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/20 border-emerald-200 dark:border-emerald-800">
-          <CardContent className="p-4">
+        <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-emerald-600 dark:text-emerald-400">활성 상담원</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">{t("commonActive", "활성")} 상담원</p>
                 <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{stats.active}</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -376,10 +379,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200 dark:border-purple-800">
-          <CardContent className="p-4">
+        <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-600 dark:text-purple-400">관리자</p>
+                <p className="text-sm text-purple-600 dark:text-purple-400">{t("agentsRoleAdmin", "관리자")}</p>
                 <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">{stats.admins}</p>
               </div>
               <Shield className="w-8 h-8 text-purple-500 dark:text-purple-400 opacity-80" />
@@ -387,10 +390,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20 border-amber-200 dark:border-amber-800">
-          <CardContent className="p-4">
+        <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-amber-600 dark:text-amber-400">진행중인 티켓</p>
+                <p className="text-sm text-amber-600 dark:text-amber-400">{t("ticketStatusInProgress", "진행중")} {t("ticketsTitle", "티켓")}</p>
                 <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.totalTickets}</p>
               </div>
               <Inbox className="w-8 h-8 text-amber-500 dark:text-amber-400 opacity-80" />
@@ -403,7 +406,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="이름 또는 이메일로 검색..."
+            placeholder={t("agentsSearchPlaceholder", "이름 또는 이메일로 검색...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -520,7 +523,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                       : ""
                   }
                 >
-                  {agent.isActive ? "활성" : "비활성"}
+                  {agent.isActive ? t("commonActive", "활성") : t("commonInactive", "비활성")}
                 </Badge>
                 {agent.absences && agent.absences.length > 0 && (
                   <Badge
@@ -534,18 +537,18 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div className="bg-muted/50 rounded-lg p-2.5">
-                  <p className="text-xs text-muted-foreground mb-1">진행중인 티켓</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t("ticketStatusInProgress", "진행중")} {t("ticketsTitle", "티켓")}</p>
                   <p className="font-semibold text-lg">{agent._count?.assignedTickets ?? 0}</p>
                 </div>
                 <div className="bg-muted/50 rounded-lg p-2.5">
-                  <p className="text-xs text-muted-foreground mb-1">최대 배정</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t("agentsMaxTickets", "최대 티켓 수")}</p>
                   <p className="font-semibold text-lg">{agent.maxTickets}</p>
                 </div>
               </div>
 
               {agent.teamMemberships && agent.teamMemberships.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground">소속 팀</p>
+                  <p className="text-xs text-muted-foreground">{t("teamsTitle", "팀 관리")}</p>
                   <div className="flex flex-wrap gap-1">
                     {agent.teamMemberships.map((tm) => (
                       <Badge key={tm.team.id} variant="outline" className="text-xs">
@@ -561,7 +564,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
               {agent.categories.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground">전문 분야</p>
+                  <p className="text-xs text-muted-foreground">{t("agentsCategories", "카테고리")}</p>
                   <div className="flex flex-wrap gap-1">
                     {agent.categories.slice(0, 3).map((c) => (
                       <Badge key={c.category.id} variant="secondary" className="text-xs font-normal">
@@ -586,7 +589,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
             <AlertCircle className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium mb-2">검색 결과가 없습니다</h3>
+          <h3 className="text-lg font-medium mb-2">{t("commonNotFound", "찾을 수 없습니다")}</h3>
           <p className="text-sm text-muted-foreground">
             다른 검색어를 시도하거나 상담원을 추가해보세요
           </p>
@@ -596,9 +599,9 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+              <DialogTitle className="flex items-center gap-2">
               <Plus className="w-5 h-5" />
-              새 상담원 추가
+              {t("commonCreate", "생성")} {t("agentsTitle", "상담원 관리")}
             </DialogTitle>
             <DialogDescription>
               새로운 상담원을 등록합니다. 이메일로 로그인 정보가 발송됩니다.
@@ -607,7 +610,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <Label htmlFor="name">이름 *</Label>
+              <Label htmlFor="name">{t("agentsName", "이름")} *</Label>
               <Input
                 id="name"
                 value={createForm.name}
@@ -619,7 +622,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">이메일 *</Label>
+              <Label htmlFor="email">{t("agentsEmail", "이메일")} *</Label>
               <Input
                 id="email"
                 type="email"
@@ -632,7 +635,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">전화번호</Label>
+              <Label htmlFor="phone">{t("agentsPhonePlaceholder", "전화번호")}</Label>
               <Input
                 id="phone"
                 value={createForm.phone}
@@ -648,7 +651,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="role">역할</Label>
+                <Label htmlFor="role">{t("agentsRole", "역할")}</Label>
                 <Select
                   value={createForm.role}
                   onValueChange={(value) =>
@@ -659,16 +662,16 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">관리자</SelectItem>
-                    <SelectItem value="TEAM_LEAD">팀장</SelectItem>
-                    <SelectItem value="AGENT">상담원</SelectItem>
-                    <SelectItem value="VIEWER">읽기전용</SelectItem>
+                    <SelectItem value="ADMIN">{t("agentsRoleAdmin", "관리자")}</SelectItem>
+                    <SelectItem value="TEAM_LEAD">{t("teamsLead", "팀장")}</SelectItem>
+                    <SelectItem value="AGENT">{t("agentsRoleAgent", "상담원")}</SelectItem>
+                    <SelectItem value="VIEWER">{t("commonView", "보기")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="maxTickets">최대 티켓 수</Label>
+                <Label htmlFor="maxTickets">{t("agentsMaxTickets", "최대 티켓 수")}</Label>
                 <Input
                   id="maxTickets"
                   type="number"
@@ -688,7 +691,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             <Separator />
 
             <div className="space-y-3">
-              <Label>전문 카테고리</Label>
+              <Label>{t("agentsCategories", "카테고리")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {categories.map((category) => (
                   <label
@@ -713,7 +716,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
               <>
                 <Separator />
                 <div className="space-y-3">
-                  <Label>소속 팀</Label>
+                  <Label>{t("teamsTitle", "팀 관리")}</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {teams.map((team) => (
                       <label
@@ -734,7 +737,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                   </div>
                   {createForm.teams.length > 0 && (
                     <div className="space-y-2">
-                      <Label>팀장 역할</Label>
+                      <Label>{t("teamsLead", "팀장")}</Label>
                       <Select
                         value={createForm.leaderTeamId || "none"}
                         onValueChange={(value) =>
@@ -742,7 +745,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="팀장으로 지정할 팀 선택" />
+                          <SelectValue placeholder={t("agentsTeamLeadPlaceholder", "팀장으로 지정할 팀 선택")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">팀장 없음</SelectItem>
@@ -763,11 +766,11 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-              취소
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              {t("commonCancel", "취소")}
             </Button>
             <Button onClick={handleCreate} disabled={isSaving}>
-              {isSaving ? "추가 중..." : "추가하기"}
+              {isSaving ? "추가 중..." : t("commonCreate", "생성")}
             </Button>
           </div>
         </DialogContent>
@@ -835,7 +838,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       <Dialog open={!!editingAgent} onOpenChange={() => setEditingAgent(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>상담원 정보 수정</DialogTitle>
+              <DialogTitle>{t("commonEdit", "수정")} {t("agentsTitle", "상담원 관리")}</DialogTitle>
             <DialogDescription>{editingAgent?.name} 상담원의 정보를 수정합니다.</DialogDescription>
           </DialogHeader>
 

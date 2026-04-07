@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
@@ -6,6 +7,8 @@ import { TicketDetailExtended as TicketDetail } from "@/components/admin/ticket-
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@crinity/ui/components/ui/button";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
   title: "티켓 상세 | Crinity Helpdesk",
@@ -19,6 +22,7 @@ interface TicketDetailPageProps {
 }
 
 export default async function TicketDetailPage({ params }: TicketDetailPageProps) {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
   if (!session?.user) {
     redirect("/admin/login");
@@ -72,7 +76,7 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
           <Button variant="ghost" asChild className="-ml-4">
             <Link href="/admin/tickets">
               <ChevronLeft className="mr-2 h-4 w-4" />
-              목록으로 돌아가기
+              {copyText(copy, "commonBackToList", "목록으로 돌아가기")}
             </Link>
           </Button>
         </div>
@@ -89,12 +93,12 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
     if (error instanceof Error && error.message === "Unauthorized") {
       return (
         <div className="container mx-auto py-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">접근 권한이 없습니다</h1>
+          <h1 className="text-2xl font-bold mb-4">{copyText(copy, "ticketDetailUnauthorized", "접근 권한이 없습니다")}</h1>
           <p className="text-muted-foreground mb-8">
-            이 티켓을 볼 수 있는 권한이 없습니다.
+            {copyText(copy, "ticketDetailUnauthorizedDesc", "이 티켓을 볼 수 있는 권한이 없습니다.")}
           </p>
           <Button asChild>
-            <Link href="/admin/tickets">목록으로 돌아가기</Link>
+            <Link href="/admin/tickets">{copyText(copy, "commonBackToList", "목록으로 돌아가기")}</Link>
           </Button>
         </div>
       );

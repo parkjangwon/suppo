@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
@@ -25,6 +26,8 @@ import {
 } from "lucide-react";
 import { getContributorImpactStats, getKnowledgeROIOverview } from "@crinity/shared/knowledge/analytics";
 import { estimateTicketDeflection } from "@crinity/shared/knowledge/deflection";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
   title: "기여자 통계 | Crinity",
@@ -32,6 +35,9 @@ export const metadata: Metadata = {
 
 export default async function ContributorsPage() {
   const session = await auth();
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
 
   if (!session?.user) {
     redirect("/admin/login");
@@ -95,13 +101,13 @@ export default async function ContributorsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">지식 기여자 통계</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("knowledgeContributorTitle", "지식 기여자 통계", "Knowledge contributor stats")}</h1>
 
       {/* 기본 요약 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">전체 문서</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">{t("knowledgeContributorTotalDocs", "전체 문서", "Total articles")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -109,14 +115,14 @@ export default async function ContributorsPage() {
               <span className="text-2xl font-bold">{totalArticles}</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              게시됨: {publishedArticles} / 초안: {totalArticles - publishedArticles}
+              {t("knowledgePublishedDraftSummary", `게시됨: ${publishedArticles} / 초안: ${totalArticles - publishedArticles}`, `Published: ${publishedArticles} / Drafts: ${totalArticles - publishedArticles}`)}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">총 조회수</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">{t("knowledgeContributorTotalViews", "총 조회수", "Total views")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -124,14 +130,14 @@ export default async function ContributorsPage() {
               <span className="text-2xl font-bold">{totalViews.toLocaleString()}</span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              문서당 평균 {totalArticles > 0 ? Math.round(totalViews / totalArticles) : 0}회
+              {t("knowledgeViewsPerArticle", `문서당 평균 ${totalArticles > 0 ? Math.round(totalViews / totalArticles) : 0}회`, `Average ${totalArticles > 0 ? Math.round(totalViews / totalArticles) : 0} per article`)}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">피드백</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">{t("knowledgeContributorFeedback", "피드백", "Feedback")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
@@ -141,7 +147,7 @@ export default async function ContributorsPage() {
               </span>
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              도움됨: {roiOverview.totalHelpfulFeedback} (
+              {t("knowledgeHelpfulVotesPrefix", "도움됨", "Helpful")}: {roiOverview.totalHelpfulFeedback} (
               {roiOverview.totalHelpfulFeedback + roiOverview.totalUnhelpfulFeedback > 0
                 ? Math.round(
                     (roiOverview.totalHelpfulFeedback /
@@ -156,14 +162,14 @@ export default async function ContributorsPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">활성 기여자</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-500">{t("knowledgeContributorActiveAuthors", "활성 기여자", "Active contributors")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-purple-500" />
               <span className="text-2xl font-bold">{sortedStats.length}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">지식 문서를 작성한 상담원</p>
+            <p className="text-xs text-gray-500 mt-1">{t("knowledgeContributorActiveAuthorsDesc", "지식 문서를 작성한 상담원", "Agents who authored knowledge articles")}</p>
           </CardContent>
         </Card>
       </div>
@@ -174,7 +180,7 @@ export default async function ContributorsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-2">
               <TicketCheck className="h-4 w-4" />
-              티켓 해결 기여
+              {t("knowledgeContributorTicketImpact", "티켓 해결 기여", "Ticket resolution impact")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -182,7 +188,7 @@ export default async function ContributorsPage() {
               {roiOverview.ticketLinksOnResolvedTickets}
             </div>
             <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              해결된 티켓에 지식 문서가 기여한 수
+              {t("knowledgeContributorTicketImpactDesc", "해결된 티켓에 지식 문서가 기여한 수", "Resolved tickets influenced by knowledge articles")}
             </p>
           </CardContent>
         </Card>
@@ -191,7 +197,7 @@ export default async function ContributorsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-green-700 dark:text-green-300 flex items-center gap-2">
               <ShieldCheck className="h-4 w-4" />
-              예상 티켓 전환 방지 (30일)
+              {t("knowledgeContributorDeflectionTitle", "예상 티켓 전환 방지 (30일)", "Estimated ticket deflection (30 days)")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -199,7 +205,7 @@ export default async function ContributorsPage() {
               {deflection.estimatedDeflections}
             </div>
             <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-              긍정 피드백 {deflection.positiveKBFeedback}건 기반 추정
+              {t("knowledgeContributorDeflectionDesc", `긍정 피드백 ${deflection.positiveKBFeedback}건 기반 추정`, `Estimate based on ${deflection.positiveKBFeedback} positive feedback entries`)}
             </p>
           </CardContent>
         </Card>
@@ -208,7 +214,7 @@ export default async function ContributorsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300 flex items-center gap-2">
               <Zap className="h-4 w-4" />
-              총 티켓 연결
+              {t("knowledgeContributorTotalLinksTitle", "총 티켓 연결", "Total ticket links")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -216,7 +222,7 @@ export default async function ContributorsPage() {
               {roiOverview.totalTicketLinks}
             </div>
             <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-              AI 추천 + 상담원 삽입 + 수동 연결
+              {t("knowledgeContributorTotalLinksDesc", "AI 추천 + 상담원 삽입 + 수동 연결", "AI suggestions + agent inserts + manual links")}
             </p>
           </CardContent>
         </Card>
@@ -227,29 +233,29 @@ export default async function ContributorsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" />
-            기여자 순위
+            {t("knowledgeContributorRankingTitle", "기여자 순위", "Contributor ranking")}
             <span className="text-sm font-normal text-muted-foreground ml-2">
-              — 영향력 점수 기준 정렬
+              {t("knowledgeContributorRankingDesc", "— 영향력 점수 기준 정렬", "— sorted by impact score")}
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {sortedStats.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
-              아직 지식 문서를 작성한 기여자가 없습니다.
+              {t("knowledgeContributorEmpty", "아직 지식 문서를 작성한 기여자가 없습니다.", "No contributors have authored knowledge articles yet.")}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-16">순위</TableHead>
-                  <TableHead>기여자</TableHead>
-                  <TableHead className="text-center">문서 수</TableHead>
-                  <TableHead className="text-center">게시됨</TableHead>
-                  <TableHead className="text-center">총 조회수</TableHead>
-                  <TableHead className="text-center">도움됨</TableHead>
-                  <TableHead className="text-center">티켓 기여</TableHead>
-                  <TableHead className="text-center">영향력 점수</TableHead>
+                  <TableHead className="w-16">{t("commonRank", "순위", "Rank")}</TableHead>
+                  <TableHead>{t("knowledgeContributorLabel", "기여자", "Contributor")}</TableHead>
+                  <TableHead className="text-center">{t("knowledgeContributorDocCount", "문서 수", "Articles")}</TableHead>
+                  <TableHead className="text-center">{t("knowledgeContributorPublished", "게시됨", "Published")}</TableHead>
+                  <TableHead className="text-center">{t("knowledgeContributorTotalViews", "총 조회수", "Total views")}</TableHead>
+                  <TableHead className="text-center">{t("knowledgeHelpfulVotesPrefix", "도움됨", "Helpful")}</TableHead>
+                  <TableHead className="text-center">{t("knowledgeContributorTicketImpactShort", "티켓 기여", "Ticket impact")}</TableHead>
+                  <TableHead className="text-center">{t("knowledgeContributorImpactScore", "영향력 점수", "Impact score")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -313,7 +319,7 @@ export default async function ContributorsPage() {
                     <TableCell className="text-center">
                       {contributor.articlesLinkedToResolvedTickets > 0 ? (
                         <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                          {contributor.articlesLinkedToResolvedTickets}건
+                          {contributor.articlesLinkedToResolvedTickets}{copy.locale === "en" ? "" : "건"}
                         </Badge>
                       ) : (
                         <span className="text-gray-400">-</span>
@@ -343,12 +349,12 @@ export default async function ContributorsPage() {
       {/* 최근 활동 */}
       <Card>
         <CardHeader>
-          <CardTitle>최근 활동 (30일)</CardTitle>
+          <CardTitle>{t("knowledgeContributorRecentActivity", "최근 활동 (30일)", "Recent activity (30 days)")}</CardTitle>
         </CardHeader>
         <CardContent>
           {recentArticles.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
-              최근 30일간 새로 작성된 문서가 없습니다.
+              {t("knowledgeContributorRecentEmpty", "최근 30일간 새로 작성된 문서가 없습니다.", "No articles were created in the last 30 days.")}
             </p>
           ) : (
             <div className="space-y-3">
@@ -360,7 +366,7 @@ export default async function ContributorsPage() {
                   <div>
                     <p className="font-medium text-sm">{article.title}</p>
                     <p className="text-xs text-gray-500">
-                      작성자: {article.author.name} ·{" "}
+                      {t("knowledgeAuthorLabel", "작성자", "Author")}: {article.author.name} ·{" "}
                       {new Date(article.createdAt).toLocaleDateString("ko-KR")}
                     </p>
                   </div>

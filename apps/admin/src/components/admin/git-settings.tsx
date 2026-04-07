@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { useRouter } from "next/navigation";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Input } from "@crinity/ui/components/ui/input";
@@ -17,11 +18,12 @@ import {
 } from "@crinity/ui/components/ui/dialog";
 import { toast } from "sonner";
 import { Github, Gitlab, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface GitCredential {
   provider: "GITHUB" | "GITLAB";
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
 interface GitSettingsProps {
@@ -48,6 +50,9 @@ const providerInfo = {
 };
 
 export function GitSettings({ initialCredentials }: GitSettingsProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const router = useRouter();
   const [credentials, setCredentials] = useState(initialCredentials);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +62,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
 
   const handleSave = async () => {
     if (!selectedProvider || !token.trim()) {
-      toast.error("프로바이더와 토큰을 입력해주세요");
+      toast.error(t("gitProviderTokenRequired", "프로바이더와 토큰을 입력해주세요", "Enter a provider and token."));
       return;
     }
 
@@ -75,10 +80,10 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "저장에 실패했습니다");
+        throw new Error(error.message || t("gitSaveFailed", "저장에 실패했습니다", "Failed to save."));
       }
 
-      toast.success(`${providerInfo[selectedProvider].name} 자격증명이 저장되었습니다`);
+      toast.success(t("gitSaveSuccess", `${providerInfo[selectedProvider].name} 자격증명이 저장되었습니다`, `${providerInfo[selectedProvider].name} credentials saved.`));
       setCredentials((prev) => [
         ...prev.filter((c) => c.provider !== selectedProvider),
         {
@@ -92,27 +97,27 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
       setSelectedProvider(null);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : t("gitSaveError", "오류가 발생했습니다", "An error occurred."));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (provider: keyof typeof providerInfo) => {
-    if (!confirm(`${providerInfo[provider].name} 자격증명을 삭제하시겠습니까?`)) return;
+    if (!confirm(t("gitDeleteConfirm", `${providerInfo[provider].name} 자격증명을 삭제하시겠습니까?`, `Delete ${providerInfo[provider].name} credentials?`))) return;
 
     try {
       const response = await fetch(`/api/git/credentials?provider=${provider}`, {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("삭제에 실패했습니다");
+      if (!response.ok) throw new Error(t("gitDeleteFailed", "삭제에 실패했습니다", "Failed to delete."));
 
       setCredentials((prev) => prev.filter((c) => c.provider !== provider));
-      toast.success("자격증명이 삭제되었습니다");
+      toast.success(t("gitDeleteSuccess", "자격증명이 삭제되었습니다", "Credentials deleted."));
       router.refresh();
     } catch (error) {
-      toast.error("삭제에 실패했습니다");
+      toast.error(t("gitDeleteError", "삭제에 실패했습니다", "Failed to delete."));
     }
   };
 
@@ -141,19 +146,19 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                     <div>
                       <CardTitle className="text-lg">{info.name}</CardTitle>
                       <CardDescription className="text-xs">
-                        {existing ? "연결됨" : "미연결"}
+                        {existing ? t("gitConnected", "연결됨", "Connected") : t("gitDisconnected", "미연결", "Disconnected")}
                       </CardDescription>
                     </div>
                   </div>
                   {existing ? (
                     <Badge variant="default" className="bg-green-500/10 text-green-600 hover:bg-green-500/20">
                       <CheckCircle2 className="w-3 h-3 mr-1" />
-                      연결됨
+                      {t("gitConnected", "연결됨", "Connected")}
                     </Badge>
                   ) : (
                     <Badge variant="secondary">
                       <AlertCircle className="w-3 h-3 mr-1" />
-                      미연결
+                      {t("gitDisconnected", "미연결", "Disconnected")}
                     </Badge>
                   )}
                 </div>
@@ -162,7 +167,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                 <p className="text-sm text-muted-foreground">{info.description}</p>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">필요한 권한</Label>
+                  <Label className="text-xs">{t("gitRequiredScopes", "필요한 권한", "Required scopes")}</Label>
                   <code className="block p-2 bg-muted rounded text-xs">{info.scopeInfo}</code>
                 </div>
 
@@ -174,7 +179,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                         className="flex-1"
                         onClick={() => openAddDialog(provider)}
                       >
-                        토큰 업데이트
+                        {t("gitUpdateToken", "토큰 업데이트", "Update token")}
                       </Button>
                       <Button
                         variant="outline"
@@ -188,7 +193,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                   ) : (
                     <Button className="w-full" onClick={() => openAddDialog(provider)}>
                       <Plus className="w-4 h-4 mr-2" />
-                      연결하기
+                      {t("gitConnectButton", "연결하기", "Connect")}
                     </Button>
                   )}
                 </div>
@@ -199,7 +204,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                   rel="noopener noreferrer"
                   className="block text-xs text-center text-blue-600 hover:underline"
                 >
-                  토큰 생성 페이지로 이동 →
+                  {t("gitOpenTokenPage", "토큰 생성 페이지로 이동", "Open token page")} →
                 </a>
               </CardContent>
             </Card>
@@ -211,14 +216,14 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {selectedProvider && providerInfo[selectedProvider].name} 연결
+              {selectedProvider && `${providerInfo[selectedProvider].name} ${t("gitConnectDialogSuffix", "연결", "connection")}`}
             </DialogTitle>
           </DialogHeader>
 
           {selectedProvider && (
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label>액세스 토큰</Label>
+                <Label>{t("gitAccessToken", "액세스 토큰", "Access token")}</Label>
                 <Input
                   type="password"
                   value={token}
@@ -232,8 +237,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
 
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
                 <p className="text-xs text-amber-800 dark:text-amber-200">
-                  <strong>보안 안내:</strong> 토큰은 AES-256-GCM으로 암호화되어 저장됩니다.
-                  토큰은 관리자만 접근 가능하며, 절대 외부에 노출되지 않습니다.
+                  <strong>{t("gitSecurityNotice", "보안 안내:", "Security notice:")}</strong> {t("gitSecurityBody", "토큰은 AES-256-GCM으로 암호화되어 저장됩니다. 토큰은 관리자만 접근 가능하며, 절대 외부에 노출되지 않습니다.", "Tokens are stored encrypted with AES-256-GCM. Only admins can access them and they are never exposed externally.")}
                 </p>
               </div>
 
@@ -242,7 +246,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                 disabled={isSubmitting || !token.trim()}
                 className="w-full"
               >
-                {isSubmitting ? "저장 중..." : "저장"}
+                {isSubmitting ? copy.commonSaving : copy.commonSave}
               </Button>
             </div>
           )}
@@ -251,13 +255,13 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
 
       <Card className="bg-muted/50">
         <CardHeader>
-          <CardTitle className="text-base">사용 방법</CardTitle>
+          <CardTitle className="text-base">{t("gitUsageTitle", "사용 방법", "How to use")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>1. 위에서 원하는 Git 프로바이더를 선택하여 연결합니다.</p>
-          <p>2. 티켓 상세 페이지에서 &quot;Git 연동&quot; 섹션을 확인합니다.</p>
-          <p>3. 저장소 이름(owner/repo)을 입력하고 이슈를 검색하거나 생성합니다.</p>
-          <p>4. 티켓과 Git 이슈가 연결되면 타임라인에서 커밋/PR 이력을 확인할 수 있습니다.</p>
+          <p>{t("gitUsageStep1", "1. 위에서 원하는 Git 프로바이더를 선택하여 연결합니다.", "1. Choose the Git provider you want above and connect it.")}</p>
+          <p>{t("gitUsageStep2", '2. 티켓 상세 페이지에서 "Git 연동" 섹션을 확인합니다.', '2. Open the "Git Integration" section on the ticket detail page.')}</p>
+          <p>{t("gitUsageStep3", "3. 저장소 이름(owner/repo)을 입력하고 이슈를 검색하거나 생성합니다.", "3. Enter the repository name (owner/repo) and search for or create issues.")}</p>
+          <p>{t("gitUsageStep4", "4. 티켓과 Git 이슈가 연결되면 타임라인에서 커밋/PR 이력을 확인할 수 있습니다.", "4. Once a ticket and Git issue are linked, you can review commit/PR history in the timeline.")}</p>
         </CardContent>
       </Card>
     </div>

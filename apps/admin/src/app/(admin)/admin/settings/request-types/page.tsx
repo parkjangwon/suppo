@@ -1,16 +1,19 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { RequestTypeList } from "@/components/admin/request-type-list";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
   title: "문의 유형 설정 | Crinity",
 };
 
 export default async function RequestTypesPage() {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {
@@ -20,7 +23,7 @@ export default async function RequestTypesPage() {
   if (session.user.role !== "ADMIN") {
     return (
       <AdminOnlyPageState
-        title="문의 유형 설정"
+        title={copy.settingsRequestTypes}
         description="문의 유형과 자동 분류 정책은 관리자만 변경할 수 있습니다."
       />
     );
@@ -46,11 +49,11 @@ export default async function RequestTypesPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">문의 유형 설정</h1>
+      <h1 className="text-2xl font-bold mb-6">{copy.settingsRequestTypes}</h1>
       
       <Card>
         <CardHeader>
-          <CardTitle>문의 유형 관리</CardTitle>
+          <CardTitle>{copy.settingsRequestTypes}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-6">

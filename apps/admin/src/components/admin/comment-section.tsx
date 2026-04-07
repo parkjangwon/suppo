@@ -16,6 +16,7 @@ import { CommentLockBanner } from "./comment-lock-banner";
 import { useCommentLock } from "@/hooks/use-comment-lock";
 import { Paperclip, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 export interface Comment {
   id: string;
@@ -56,6 +57,8 @@ export function CommentSection({
   templateContext,
   onTypingChange,
 }: CommentSectionProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [reply, setReply] = useState("");
   const [isInternal, setIsInternal] = useState(false);
@@ -99,10 +102,10 @@ export function CommentSection({
       const suggestion = await onAiSuggestion();
       if (suggestion) {
         setReply((prev) => prev + (prev ? "\n\n" : "") + suggestion);
-        toast.success("AI 답변 제안이 입력되었습니다.");
+        toast.success(t("commentAiSuggest", "AI 답변 제안이 입력되었습니다."));
       }
     } catch (error) {
-      toast.error("AI 답변 생성 중 오류가 발생했습니다.");
+      toast.error(t("commentAiSuggestLoading", "AI 답변 생성 중 오류가 발생했습니다."));
     }
   }
 
@@ -139,7 +142,7 @@ export function CommentSection({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>대화 내역</CardTitle>
+          <CardTitle>{t("ticketDetailComments", "대화 내역")}</CardTitle>
         </CardHeader>
         <CardContent>
           <CommentThread
@@ -155,7 +158,7 @@ export function CommentSection({
       {canEdit && (
         <Card>
           <CardHeader>
-            <CardTitle>응답 작성</CardTitle>
+            <CardTitle>{t("commentWriteAriaLabel", "응답 작성")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <CommentLockBanner
@@ -164,12 +167,12 @@ export function CommentSection({
               onRelease={releaseLock}
             />
             <Label htmlFor="reply" className="sr-only">
-              응답 작성
+              {t("commentWriteAriaLabel", "응답 작성")}
             </Label>
             <Textarea
               id="reply"
-              aria-label="응답 작성"
-              placeholder={isLocked && !isLockedByMe ? "다른 상담원이 편집 중입니다..." : "응답을 입력하세요..."}
+              aria-label={t("commentWriteAriaLabel", "응답 작성")}
+              placeholder={isLocked && !isLockedByMe ? t("commentLockedPlaceholder", "다른 상담원이 편집 중입니다...") : t("commentResponsePlaceholder", "응답을 입력하세요...")}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
               onFocus={async () => {
@@ -191,8 +194,8 @@ export function CommentSection({
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Paperclip className="h-4 w-4" />
-                <span>첨부 파일</span>
-                <span className="text-xs text-gray-400">(이미지, 문서 등)</span>
+                <span>{t("commonAdd", "첨부 파일")}</span>
+                <span className="text-xs text-gray-400">{t("commonNone", "(이미지, 문서 등)")}</span>
               </div>
               <AttachmentUpload
                 files={files}
@@ -207,12 +210,12 @@ export function CommentSection({
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="internal"
-                    aria-label="내부 메모로 저장"
+                    aria-label={t("commentInternalNoteAriaLabel", "내부 메모로 저장")}
                     checked={isInternal}
                     onCheckedChange={(checked) => setIsInternal(checked === true)}
                   />
                   <Label htmlFor="internal" className="text-sm cursor-pointer">
-                    내부 메모로 저장
+                    {t("commentInternalNoteAriaLabel", "내부 메모로 저장")}
                   </Label>
                 </div>
                 <TemplateSelector
@@ -232,7 +235,7 @@ export function CommentSection({
                     className="gap-2"
                   >
                     <Sparkles className="h-4 w-4" />
-                    {isGeneratingSuggestion ? "생성 중..." : "AI 답변 제안"}
+                    {isGeneratingSuggestion ? t("commonCreating", "생성 중...") : t("commentAiSuggest", "AI 답변 제안")}
                   </Button>
                 )}
               </div>
@@ -240,7 +243,7 @@ export function CommentSection({
                 onClick={submitReply}
                 disabled={loading || (isLocked && !isLockedByMe) || (!reply.trim() && files.length === 0)}
               >
-                {loading ? "전송중..." : "전송"}
+                {loading ? t("commonSending", "전송중...") : t("commonSend", "전송")}
               </Button>
             </div>
           </CardContent>

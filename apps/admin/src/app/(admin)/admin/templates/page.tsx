@@ -1,15 +1,18 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { TemplateList } from "@/components/admin/template-list";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
   title: "응답 템플릿 관리 | Crinity",
 };
 
 export default async function TemplatesPage() {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {
@@ -51,11 +54,11 @@ export default async function TemplatesPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">응답 템플릿 관리</h1>
+      <h1 className="text-2xl font-bold mb-6">{copy.navTemplates}</h1>
       
       <Card>
         <CardHeader>
-          <CardTitle>템플릿 목록</CardTitle>
+          <CardTitle>{copy.templatesTitle}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-6">

@@ -1,14 +1,19 @@
 "use client";
 
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { CSATBucket } from "@/lib/db/queries/admin-analytics/contracts";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CSATTrendChartProps {
   data: CSATBucket[];
 }
 
 export function CSATTrendChart({ data }: CSATTrendChartProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const chartData = data.map((d) => ({
     date: d.bucket,
     rating: Number(d.avgRating.toFixed(1)),
@@ -18,7 +23,7 @@ export function CSATTrendChart({ data }: CSATTrendChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>고객 만족도 추이</CardTitle>
+        <CardTitle>{t("analyticsCsatTrendTitle", "고객 만족도 추이", "CSAT trend")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64">
@@ -28,8 +33,8 @@ export function CSATTrendChart({ data }: CSATTrendChartProps) {
               <XAxis dataKey="date" tick={{ fontSize: 12 }} />
               <YAxis domain={[0, 5]} tick={{ fontSize: 12 }} />
               <Tooltip 
-                formatter={(value) => [value, "평균 평점"]}
-                labelFormatter={(label) => `날짜: ${label}`}
+                formatter={(value) => [value, t("analyticsAverageRating", "평균 평점", "Average rating")]}
+                labelFormatter={(label) => `${t("commonDateLabel", "날짜", "Date")}: ${label}`}
               />
               <Line 
                 type="monotone" 

@@ -21,6 +21,7 @@ import { TemplateContext } from "@/lib/templates/renderer";
 import { GitIntegrationSection } from "@/components/ticket/git-integration-section";
 import { LinkedIssuesReadonly } from "@/components/ticket/linked-issues-readonly";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface TicketDetailProps {
   ticket: any;
@@ -29,26 +30,26 @@ interface TicketDetailProps {
   isAdmin: boolean;
 }
 
-const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  OPEN: { label: "열림", variant: "default" },
-  IN_PROGRESS: { label: "진행중", variant: "secondary" },
-  WAITING: { label: "대기중", variant: "outline" },
-  RESOLVED: { label: "해결됨", variant: "outline" },
-  CLOSED: { label: "닫힘", variant: "outline" },
-};
-
-const priorityMap: Record<string, { label: string; color: string }> = {
-  URGENT: { label: "긴급", color: "text-red-500" },
-  HIGH: { label: "높음", color: "text-orange-500" },
-  MEDIUM: { label: "보통", color: "text-yellow-500" },
-  LOW: { label: "낮음", color: "text-green-500" },
-};
-
 export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: TicketDetailProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const canEdit = isAdmin || ticket.assigneeId === currentAgentId;
+  const statusMap: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    OPEN: { label: t("ticketStatusOpen", "열림"), variant: "default" },
+    IN_PROGRESS: { label: t("ticketStatusInProgress", "진행중"), variant: "secondary" },
+    WAITING: { label: t("ticketStatusWaiting", "대기중"), variant: "outline" },
+    RESOLVED: { label: t("ticketStatusResolved", "해결됨"), variant: "outline" },
+    CLOSED: { label: t("ticketStatusClosed", "닫힘"), variant: "outline" },
+  };
+  const priorityMap: Record<string, { label: string; color: string }> = {
+    URGENT: { label: t("ticketsPriorityUrgent", "긴급"), color: "text-red-500" },
+    HIGH: { label: t("ticketsPriorityHigh", "높음"), color: "text-orange-500" },
+    MEDIUM: { label: t("ticketsPriorityMedium", "보통"), color: "text-yellow-500" },
+    LOW: { label: t("ticketsPriorityLow", "낮음"), color: "text-green-500" },
+  };
 
   const assignee = agents.find((a) => a.id === ticket.assigneeId);
   const templateContext: TemplateContext = {
@@ -68,7 +69,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
 
   const handleUpdate = async (field: string, value: string | null) => {
     if (!canEdit && field !== "assigneeId") {
-      toast.error("권한이 없습니다.");
+      toast.error(t("ticketDetailUnauthorized", "권한이 없습니다."));
       return;
     }
 
@@ -84,13 +85,13 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
       });
 
       if (!response.ok) {
-        throw new Error("업데이트 실패");
+        throw new Error(t("ticketDetailUpdateFailed", "업데이트 실패"));
       }
 
-      toast.success("업데이트 되었습니다.");
+      toast.success(t("ticketDetailUpdateSuccess", "업데이트 되었습니다."));
       router.refresh();
     } catch (error) {
-      toast.error("업데이트 중 오류가 발생했습니다.");
+      toast.error(t("ticketDetailUpdateFailed", "업데이트 중 오류가 발생했습니다."));
     } finally {
       setIsUpdating(false);
     }
@@ -104,8 +105,8 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
             <h1 className="text-2xl font-bold">{ticket.subject}</h1>
             <Badge variant="outline">{ticket.ticketNumber}</Badge>
           </div>
-          <p className="text-sm text-muted-foreground">
-            생성일: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
+            <p className="text-sm text-muted-foreground">
+            {t("commonCreate", "생성일")}: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
           </p>
         </div>
 
@@ -115,15 +116,15 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
             value={ticket.status}
             onValueChange={(value) => handleUpdate("status", value)}
           >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="상태" />
+              <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder={t("ticketDetailCurrentStatus", "상태")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="OPEN">열림</SelectItem>
-              <SelectItem value="IN_PROGRESS">진행중</SelectItem>
-              <SelectItem value="WAITING">대기중</SelectItem>
-              <SelectItem value="RESOLVED">해결됨</SelectItem>
-              <SelectItem value="CLOSED">닫힘</SelectItem>
+              <SelectItem value="OPEN">{statusMap.OPEN.label}</SelectItem>
+              <SelectItem value="IN_PROGRESS">{statusMap.IN_PROGRESS.label}</SelectItem>
+              <SelectItem value="WAITING">{statusMap.WAITING.label}</SelectItem>
+              <SelectItem value="RESOLVED">{statusMap.RESOLVED.label}</SelectItem>
+              <SelectItem value="CLOSED">{statusMap.CLOSED.label}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -133,13 +134,13 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
             onValueChange={(value) => handleUpdate("priority", value)}
           >
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="우선순위" />
+              <SelectValue placeholder={t("ticketDetailPriority", "우선순위")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="URGENT">긴급</SelectItem>
-              <SelectItem value="HIGH">높음</SelectItem>
-              <SelectItem value="MEDIUM">보통</SelectItem>
-              <SelectItem value="LOW">낮음</SelectItem>
+              <SelectItem value="URGENT">{priorityMap.URGENT.label}</SelectItem>
+              <SelectItem value="HIGH">{priorityMap.HIGH.label}</SelectItem>
+              <SelectItem value="MEDIUM">{priorityMap.MEDIUM.label}</SelectItem>
+              <SelectItem value="LOW">{priorityMap.LOW.label}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -149,10 +150,10 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
             onValueChange={(value) => handleUpdate("assigneeId", value === "unassigned" ? null : value)}
           >
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="담당자" />
+              <SelectValue placeholder={t("ticketDetailAssignee", "담당자")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="unassigned">미할당</SelectItem>
+              <SelectItem value="unassigned">{t("ticketDetailUnassigned", "미할당")}</SelectItem>
               {agents.map((agent) => (
                 <SelectItem key={agent.id} value={agent.id}>
                   {agent.name}
@@ -167,8 +168,8 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
         <div className="md:col-span-2 space-y-6">
           <Tabs defaultValue="thread">
             <TabsList>
-              <TabsTrigger value="thread">대화 내역</TabsTrigger>
-              <TabsTrigger value="activity">활동 로그</TabsTrigger>
+              <TabsTrigger value="thread">{t("ticketDetailComments", "대화 내역")}</TabsTrigger>
+              <TabsTrigger value="activity">{t("auditLogsTitle", "활동 로그")}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="thread" className="space-y-6 mt-4">
@@ -187,7 +188,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
                   <div className="whitespace-pre-wrap">{ticket.description}</div>
                   {ticket.attachments && ticket.attachments.length > 0 && (
                     <div className="mt-4 pt-4 border-t">
-                      <h4 className="text-sm font-medium mb-2">첨부파일</h4>
+                      <h4 className="text-sm font-medium mb-2">{t("commonView", "첨부파일")}</h4>
                       <ul className="space-y-1">
                         {ticket.attachments.map((file: any) => (
                           <li key={file.id}>
@@ -224,25 +225,25 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
                           {format(new Date(activity.createdAt), "MM.dd HH:mm")}
                         </div>
                         <div>
-                          <span className="font-medium">{activity.actor?.name || "시스템"}</span>
-                          <span className="text-muted-foreground mx-1">님이</span>
+                          <span className="font-medium">{activity.actor?.name || t("commonSystem", "시스템")}</span>
+                          <span className="text-muted-foreground mx-1">{t("commonView", "님이")}</span>
                           {activity.action === "STATUS_CHANGED" && (
-                            <span>상태를 <Badge variant="outline">{statusMap[activity.oldValue]?.label || activity.oldValue}</Badge>에서 <Badge variant="outline">{statusMap[activity.newValue]?.label || activity.newValue}</Badge>로 변경했습니다.</span>
+                            <span>{t("ticketDetailCurrentStatus", "상태를")} <Badge variant="outline">{statusMap[activity.oldValue]?.label || activity.oldValue}</Badge>에서 <Badge variant="outline">{statusMap[activity.newValue]?.label || activity.newValue}</Badge>로 변경했습니다.</span>
                           )}
                           {activity.action === "PRIORITY_CHANGED" && (
-                            <span>우선순위를 <span className="font-medium">{priorityMap[activity.oldValue]?.label || activity.oldValue}</span>에서 <span className="font-medium">{priorityMap[activity.newValue]?.label || activity.newValue}</span>로 변경했습니다.</span>
+                            <span>{t("ticketDetailPriority", "우선순위를")} <span className="font-medium">{priorityMap[activity.oldValue]?.label || activity.oldValue}</span>에서 <span className="font-medium">{priorityMap[activity.newValue]?.label || activity.newValue}</span>로 변경했습니다.</span>
                           )}
                           {activity.action === "ASSIGNED" && (
-                            <span>담당자를 할당했습니다.</span>
+                            <span>{t("ticketDetailAssigneeChange", "담당자를 할당했습니다.")}</span>
                           )}
                           {activity.action === "TRANSFERRED" && (
-                            <span>티켓을 양도했습니다.</span>
+                            <span>{t("ticketTransferLabel", "티켓을 양도했습니다.")}</span>
                           )}
                         </div>
                       </div>
                     ))}
                     {(!ticket.activities || ticket.activities.length === 0) && (
-                      <p className="text-muted-foreground text-center py-4">활동 로그가 없습니다.</p>
+                      <p className="text-muted-foreground text-center py-4">{t("commonNotFound", "활동 로그가 없습니다.")}</p>
                     )}
                   </div>
                 </CardContent>
@@ -254,15 +255,15 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">고객 정보</CardTitle>
+              <CardTitle className="text-lg">{t("customersTitle", "고객 정보")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <div className="text-sm font-medium text-muted-foreground">이름</div>
+                <div className="text-sm font-medium text-muted-foreground">{t("customersName", "이름")}</div>
                 <div>{ticket.customerName}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-muted-foreground">이메일</div>
+                <div className="text-sm font-medium text-muted-foreground">{t("customersEmail", "이메일")}</div>
                 <div>
                   {ticket.customerId ? (
                     <Link href={`/admin/customers/${ticket.customerId}`} className="text-blue-600 hover:underline">
@@ -277,7 +278,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
               </div>
               {ticket.customerPhone && (
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">전화번호</div>
+                  <div className="text-sm font-medium text-muted-foreground">{t("customersPhone", "전화번호")}</div>
                   <div>{formatPhoneNumber(ticket.customerPhone)}</div>
                 </div>
               )}
@@ -286,26 +287,26 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">티켓 정보</CardTitle>
+              <CardTitle className="text-lg">{t("ticketsTitle", "티켓 정보")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <div className="text-sm font-medium text-muted-foreground">문의 유형</div>
+                <div className="text-sm font-medium text-muted-foreground">{t("ticketsFilterRequestType", "문의 유형")}</div>
                 <div>{ticket.requestType?.name || "-"}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-muted-foreground">생성일</div>
+                <div className="text-sm font-medium text-muted-foreground">{t("commonCreate", "생성일")}</div>
                 <div>{format(new Date(ticket.createdAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}</div>
               </div>
               {ticket.resolvedAt && (
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">해결일</div>
+                  <div className="text-sm font-medium text-muted-foreground">{t("ticketStatusResolved", "해결일")}</div>
                   <div>{format(new Date(ticket.resolvedAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}</div>
                 </div>
               )}
               {ticket.closedAt && (
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">종료일</div>
+                  <div className="text-sm font-medium text-muted-foreground">{t("ticketStatusClosed", "종료일")}</div>
                   <div>{format(new Date(ticket.closedAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}</div>
                 </div>
               )}
@@ -331,4 +332,3 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
     </div>
   );
 }
-

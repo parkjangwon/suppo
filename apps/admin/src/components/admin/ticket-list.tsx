@@ -18,6 +18,7 @@ import { SavedFilters } from "./saved-filters";
 import { TicketQueueBar } from "./ticket-queue-bar";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 export interface Ticket {
   id: string;
@@ -33,27 +34,12 @@ export interface Ticket {
   createdAt: Date | string;
 }
 
-const statusLabels: Record<string, string> = {
-  OPEN: "접수",
-  IN_PROGRESS: "처리중",
-  WAITING: "대기",
-  RESOLVED: "해결",
-  CLOSED: "종료",
-};
-
 const statusColors: Record<string, string> = {
   OPEN: "bg-blue-100 text-blue-800",
   IN_PROGRESS: "bg-yellow-100 text-yellow-800",
   WAITING: "bg-orange-100 text-orange-800",
   RESOLVED: "bg-green-100 text-green-800",
   CLOSED: "bg-gray-100 text-gray-800",
-};
-
-const priorityLabels: Record<string, string> = {
-  URGENT: "긴급",
-  HIGH: "높음",
-  MEDIUM: "보통",
-  LOW: "낮음",
 };
 
 const priorityColors: Record<string, string> = {
@@ -87,6 +73,8 @@ export function TicketList({
     dateTo?: string;
   };
 }) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [isAdvancedSearch, setIsAdvancedSearch] = useState(false);
@@ -103,6 +91,19 @@ export function TicketList({
   const allVisibleSelected =
     paginatedTickets.length > 0 &&
     paginatedTickets.every((ticket) => selectedTicketIds.includes(ticket.id));
+  const statusLabels: Record<string, string> = {
+    OPEN: t("ticketStatusOpen", "접수"),
+    IN_PROGRESS: t("ticketStatusInProgress", "처리중"),
+    WAITING: t("ticketStatusWaiting", "대기"),
+    RESOLVED: t("ticketStatusResolved", "해결"),
+    CLOSED: t("ticketStatusClosed", "종료"),
+  };
+  const priorityLabels: Record<string, string> = {
+    URGENT: t("ticketsPriorityUrgent", "긴급"),
+    HIGH: t("ticketsPriorityHigh", "높음"),
+    MEDIUM: t("ticketsPriorityMedium", "보통"),
+    LOW: t("ticketsPriorityLow", "낮음"),
+  };
 
   const handleAdvancedSearch = (params: URLSearchParams) => {
     params.delete("cursor");
@@ -142,7 +143,7 @@ export function TicketList({
     if (bulkAssigneeId) payload.assigneeId = bulkAssigneeId === "unassigned" ? null : bulkAssigneeId;
 
     if (!payload.status && !payload.priority && payload.assigneeId === undefined) {
-      toast.error("일괄 변경할 항목을 선택해주세요.");
+      toast.error(t("ticketsBulkSelectRequired", "일괄 변경할 항목을 선택해주세요."));
       return;
     }
 
@@ -160,14 +161,14 @@ export function TicketList({
         throw new Error("bulk update failed");
       }
 
-      toast.success("일괄 변경이 완료되었습니다.");
+      toast.success(t("ticketsBulkSuccess", "일괄 변경이 완료되었습니다."));
       setSelectedTicketIds([]);
       setBulkStatus("");
       setBulkPriority("");
       setBulkAssigneeId("");
       router.refresh();
     } catch (error) {
-      toast.error("일괄 변경에 실패했습니다.");
+      toast.error(t("ticketsBulkFailed", "일괄 변경에 실패했습니다."));
     } finally {
       setIsApplyingBulk(false);
     }
@@ -184,7 +185,7 @@ export function TicketList({
               onClick={() => setIsAdvancedSearch(false)}
             >
               <Search className="h-4 w-4 mr-2" />
-              기본 검색
+              {t("ticketsSearch", "기본 검색")}
             </Button>
             <Button
               variant={isAdvancedSearch ? "default" : "outline"}
@@ -192,7 +193,7 @@ export function TicketList({
               onClick={() => setIsAdvancedSearch(true)}
             >
               <Search className="h-4 w-4 mr-2" />
-              고급 검색
+              {t("advancedSearchPlaceholder", "고급 검색")}
             </Button>
           </div>
 
@@ -234,42 +235,45 @@ export function TicketList({
 
       {selectedTicketIds.length > 0 ? (
         <div className="rounded-lg border bg-muted/20 p-4">
-          <div className="mb-3 text-sm font-medium">{selectedTicketIds.length}개 티켓 선택됨</div>
+          <div className="mb-3 text-sm font-medium">
+            {selectedTicketIds.length}
+            {t("commonAll", "개 티켓 선택됨")}
+          </div>
           <div className="grid gap-3 lg:grid-cols-4">
             <Select value={bulkStatus || "none"} onValueChange={(value) => setBulkStatus(value === "none" ? "" : value)}>
-              <SelectTrigger aria-label="벌크 상태 변경">
-                <SelectValue placeholder="상태 변경" />
+              <SelectTrigger aria-label={t("ticketsBulkStatus", "벌크 상태 변경")}>
+                <SelectValue placeholder={t("ticketsBulkStatus", "상태 변경")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">상태 변경 안 함</SelectItem>
-                <SelectItem value="OPEN">접수</SelectItem>
-                <SelectItem value="IN_PROGRESS">진행중</SelectItem>
-                <SelectItem value="WAITING">대기중</SelectItem>
-                <SelectItem value="RESOLVED">해결됨</SelectItem>
-                <SelectItem value="CLOSED">종료</SelectItem>
+                <SelectItem value="none">{t("commonNone", "상태 변경 안 함")}</SelectItem>
+                <SelectItem value="OPEN">{statusLabels.OPEN}</SelectItem>
+                <SelectItem value="IN_PROGRESS">{statusLabels.IN_PROGRESS}</SelectItem>
+                <SelectItem value="WAITING">{statusLabels.WAITING}</SelectItem>
+                <SelectItem value="RESOLVED">{statusLabels.RESOLVED}</SelectItem>
+                <SelectItem value="CLOSED">{statusLabels.CLOSED}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={bulkPriority || "none"} onValueChange={(value) => setBulkPriority(value === "none" ? "" : value)}>
-              <SelectTrigger aria-label="벌크 우선순위 변경">
-                <SelectValue placeholder="우선순위 변경" />
+              <SelectTrigger aria-label={t("ticketsBulkPriority", "벌크 우선순위 변경")}>
+                <SelectValue placeholder={t("ticketsBulkPriority", "우선순위 변경")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">우선순위 변경 안 함</SelectItem>
-                <SelectItem value="URGENT">긴급</SelectItem>
-                <SelectItem value="HIGH">높음</SelectItem>
-                <SelectItem value="MEDIUM">보통</SelectItem>
-                <SelectItem value="LOW">낮음</SelectItem>
+                <SelectItem value="none">{t("commonNone", "우선순위 변경 안 함")}</SelectItem>
+                <SelectItem value="URGENT">{priorityLabels.URGENT}</SelectItem>
+                <SelectItem value="HIGH">{priorityLabels.HIGH}</SelectItem>
+                <SelectItem value="MEDIUM">{priorityLabels.MEDIUM}</SelectItem>
+                <SelectItem value="LOW">{priorityLabels.LOW}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={bulkAssigneeId || "none"} onValueChange={(value) => setBulkAssigneeId(value === "none" ? "" : value)}>
-              <SelectTrigger aria-label="벌크 담당자 변경">
-                <SelectValue placeholder="담당자 변경" />
+              <SelectTrigger aria-label={t("ticketsBulkAssignee", "벌크 담당자 변경")}>
+                <SelectValue placeholder={t("ticketsBulkAssignee", "담당자 변경")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">담당자 변경 안 함</SelectItem>
-                <SelectItem value="unassigned">미할당</SelectItem>
+                <SelectItem value="none">{t("commonNone", "담당자 변경 안 함")}</SelectItem>
+                <SelectItem value="unassigned">{t("ticketDetailUnassigned", "미할당")}</SelectItem>
                 {agents.map((agent) => (
                   <SelectItem key={agent.id} value={agent.id}>
                     {agent.name}
@@ -280,10 +284,10 @@ export function TicketList({
 
             <div className="flex items-center gap-2">
               <Button onClick={applyBulkUpdate} disabled={isApplyingBulk}>
-                {isApplyingBulk ? "적용 중..." : "벌크 적용"}
+                {isApplyingBulk ? t("commonProcessing", "적용 중...") : t("ticketsBulkApply", "벌크 적용")}
               </Button>
               <Button variant="outline" onClick={() => setSelectedTicketIds([])} disabled={isApplyingBulk}>
-                선택 해제
+                {t("commonClose", "선택 해제")}
               </Button>
             </div>
           </div>
@@ -302,28 +306,28 @@ export function TicketList({
                 />
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                티켓 번호
+                {t("ticketsTitle", "티켓 번호")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                제목
+                {t("ticketDetailTitle", "제목")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                고객
+                {t("customersTitle", "고객")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                상태
+                {t("ticketDetailStatus", "상태")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                우선순위
+                {t("ticketDetailPriority", "우선순위")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                문의 유형
+                {t("ticketsFilterRequestType", "문의 유형")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                담당자
+                {t("ticketDetailAssignee", "담당자")}
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
-                접수일
+                {t("businessHoursDate", "접수일")}
               </th>
             </tr>
           </thead>
@@ -364,8 +368,8 @@ export function TicketList({
                 </td>
                 <td className="px-4 py-3 text-sm">{ticket.requestType?.name || "-"}</td>
                 <td className="px-4 py-3 text-sm">
-                  {ticket.assignee?.name || (
-                    <span className="text-gray-400">미할당</span>
+                    {ticket.assignee?.name || (
+                    <span className="text-gray-400">{t("ticketDetailUnassigned", "미할당")}</span>
                   )}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-500">
@@ -379,7 +383,7 @@ export function TicketList({
 
       {tickets.length === 0 && (
         <div className="text-center py-8 text-gray-500">
-          티켓이 없습니다
+          {t("commonNotFound", "티켓이 없습니다")}
         </div>
       )}
 
@@ -395,7 +399,7 @@ export function TicketList({
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
-              이전
+              {t("commonCancel", "이전")}
             </Button>
             <div className="flex items-center gap-1">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -416,7 +420,7 @@ export function TicketList({
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              다음
+              {t("commonCreate", "다음")}
             </Button>
           </div>
         </div>

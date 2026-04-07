@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@crinity/ui/components/ui/table";
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { DatePreset, VIPCustomer, VIPCustomerResponse } from "@/lib/db/queries/admin-analytics/contracts";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface VIPCustomersTableProps {
   preset: DatePreset;
 }
 
 export function VIPCustomersTable({ preset }: VIPCustomersTableProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const [data, setData] = useState<VIPCustomerResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,7 +42,7 @@ export function VIPCustomersTable({ preset }: VIPCustomersTableProps) {
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">불러오는 중...</div>
+          <div className="text-center text-muted-foreground">{copy.commonLoading}</div>
         </CardContent>
       </Card>
     );
@@ -46,16 +51,16 @@ export function VIPCustomersTable({ preset }: VIPCustomersTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>VIP 고객 ({data?.customers.length ?? 0}명)</CardTitle>
+        <CardTitle>{t("analyticsVipCustomers", "VIP 고객", "VIP customers")} ({data?.customers.length ?? 0}{copy.locale === "en" ? "" : "명"})</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>고객</TableHead>
-              <TableHead className="text-right">최근 90일</TableHead>
-              <TableHead className="text-right">누적</TableHead>
-              <TableHead>분류</TableHead>
+              <TableHead>{t("navCustomers", "고객", "Customers")}</TableHead>
+              <TableHead className="text-right">{t("analyticsRecent90Days", "최근 90일", "Last 90 days")}</TableHead>
+              <TableHead className="text-right">{t("analyticsCumulative", "누적", "Lifetime")}</TableHead>
+              <TableHead>{t("analyticsClassification", "분류", "Classification")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,7 +84,7 @@ export function VIPCustomersTable({ preset }: VIPCustomersTableProps) {
             {data?.customers.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center text-muted-foreground">
-                  VIP 고객이 없습니다
+                  {t("analyticsVipCustomersEmpty", "VIP 고객이 없습니다", "There are no VIP customers.")}
                 </TableCell>
               </TableRow>
             )}

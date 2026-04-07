@@ -42,6 +42,7 @@ import {
 import { useBranding } from "@crinity/shared/branding/context";
 import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { type AdminNavItemKey, getAdminNavSections } from "@/lib/navigation/admin-nav";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 const NAV_ICONS: Record<AdminNavItemKey, React.ComponentType<{ className?: string }>> = {
   dashboard: LayoutDashboard,
@@ -74,7 +75,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const copy = useAdminCopy();
   const { data: session, status } = useSession();
   const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
-  const [currentLocale, setCurrentLocale] = React.useState<"ko" | "en">("ko");
+  const [currentLocale, setCurrentLocale] = React.useState<"ko" | "en">(copy.locale);
   const isAdmin = session?.user?.role === "ADMIN";
   const isLoginPage = pathname === "/admin/login";
   const isPasswordChangePage = pathname === "/admin/change-password";
@@ -100,7 +101,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const isLoading = status === "loading";
   const userName = session?.user?.name;
   const userRole = session?.user?.role as BackofficeRole | undefined;
-  const navSections = getAdminNavSections(userRole);
+  const navSections = getAdminNavSections(userRole, copy);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -133,7 +134,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             variant="ghost"
             size="icon"
             onClick={() => setIsMobileNavOpen(true)}
-            aria-label="메뉴 열기"
+            aria-label={copyText(copy, "commonOpenMenu", "메뉴 열기")}
           >
             <Menu className="h-5 w-5" />
           </Button>
@@ -156,7 +157,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileNavOpen(false)}
-              aria-label="메뉴 닫기"
+              aria-label={copyText(copy, "commonCloseMenu", "메뉴 닫기")}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -251,6 +252,8 @@ function SidebarUserSummary({
   className?: string;
   onSignOut?: () => void;
 }) {
+  const copy = useAdminCopy();
+
   return (
     <div className={cn("p-4 border-t border-border", className)}>
       <div className="flex items-center justify-between gap-3">
@@ -260,10 +263,10 @@ function SidebarUserSummary({
           </div>
           <div className="flex min-w-0 flex-col">
             <span className="text-sm font-medium truncate">
-              {isLoading ? "로딩 중..." : userName || "알 수 없음"}
+              {isLoading ? copy.commonLoading : userName || copyText(copy, "commonUnknown", "알 수 없음")}
             </span>
             <span className="text-xs text-muted-foreground">
-              {userRole ? getBackofficeRoleLabel(userRole as BackofficeRole) : "상담원"}
+              {userRole ? getBackofficeRoleLabel(userRole as BackofficeRole) : copy.agentsRoleAgent}
             </span>
           </div>
         </div>
@@ -271,7 +274,7 @@ function SidebarUserSummary({
           variant="ghost"
           size="icon"
           onClick={onSignOut ?? (() => signOut({ callbackUrl: "/admin/login" }))}
-          title="로그아웃"
+          title={copyText(copy, "commonLogout", "로그아웃")}
           disabled={isLoading}
         >
           <LogOut className="h-4 w-4" />

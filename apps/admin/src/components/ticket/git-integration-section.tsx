@@ -13,6 +13,7 @@ import {
   getPRStateBadgeClass,
   getReviewDecisionText
 } from "./issue-detail-helpers";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 type GitIssue = {
   id: string;
@@ -52,6 +53,8 @@ export function GitIntegrationSection({
   ticketDescription,
   initialLinks
 }: GitIntegrationSectionProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [provider, setProvider] = useState<GitProvider>("GITHUB");
   const [repoFullName, setRepoFullName] = useState("");
   const [query, setQuery] = useState("");
@@ -113,7 +116,7 @@ export function GitIntegrationSection({
 
     if (!response.ok) {
       const payload = (await response.json()) as { error?: string };
-      throw new Error(payload.error || "이슈 연결에 실패했습니다.");
+      throw new Error(payload.error || t("gitIssueLinkFailed", "이슈 연결에 실패했습니다."));
     }
 
     const payload = (await response.json()) as { link: GitLink };
@@ -125,7 +128,7 @@ export function GitIntegrationSection({
     const response = await fetch(`/api/git/links?id=${linkId}`, { method: "DELETE" });
     if (!response.ok) {
       const payload = (await response.json()) as { error?: string };
-      toast.error(payload.error || "연결 해제에 실패했습니다.");
+      toast.error(payload.error || t("gitIssueUnlinkFailed", "연결 해제에 실패했습니다."));
       return;
     }
     setLinkedIssues((prev) => prev.filter((l) => l.id !== linkId));
@@ -144,7 +147,7 @@ export function GitIntegrationSection({
       next.delete(linkId);
       return next;
     });
-    toast.success("이슈 연결이 해제됐습니다.");
+    toast.success(t("gitIssueUnlinkSuccess", "이슈 연결이 해제됐습니다."));
   };
 
   const toggleExpand = async (link: (typeof linkedIssues)[number]) => {
@@ -187,12 +190,12 @@ export function GitIntegrationSection({
       const payload = (await response.json()) as { issues?: GitIssue[]; error?: string };
 
       if (!response.ok) {
-        throw new Error(payload.error || "이슈 검색에 실패했습니다.");
+        throw new Error(payload.error || t("gitIssueSearchFailed", "이슈 검색에 실패했습니다."));
       }
 
       setSearchResults(payload.issues ?? []);
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "이슈 검색에 실패했습니다.";
+      const message = caughtError instanceof Error ? caughtError.message : t("gitIssueSearchError", "이슈 검색에 실패했습니다.");
       setError(message);
       setSearchResults([]);
     } finally {
@@ -224,13 +227,13 @@ export function GitIntegrationSection({
       const payload = (await response.json()) as { issue?: GitIssue; error?: string };
 
       if (!response.ok || !payload.issue) {
-        throw new Error(payload.error || "이슈 생성에 실패했습니다.");
+        throw new Error(payload.error || t("gitIssueCreateFailed", "이슈 생성에 실패했습니다."));
       }
 
       await linkIssue(payload.issue);
       setSearchResults((prev) => [payload.issue as GitIssue, ...prev]);
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : "이슈 생성에 실패했습니다.";
+      const message = caughtError instanceof Error ? caughtError.message : t("gitIssueCreateError", "이슈 생성에 실패했습니다.");
       setError(message);
     } finally {
       setIsCreating(false);
@@ -239,7 +242,7 @@ export function GitIntegrationSection({
 
   return (
     <section className="mt-8 space-y-4 border-t pt-8">
-      <h3 className="text-lg font-medium">Git 연동</h3>
+      <h3 className="text-lg font-medium">{t("settingsGit", "Git 연동")}</h3>
 
       <div className="grid gap-3 md:grid-cols-3">
         <select
@@ -258,7 +261,7 @@ export function GitIntegrationSection({
           type="text"
           value={repoFullName}
           onChange={(event) => setRepoFullName(event.target.value)}
-          placeholder="owner/repo"
+          placeholder={t("gitRepoScopeNote", "owner/repo")}
           className="rounded-md border p-2 md:col-span-2"
         />
       </div>
@@ -268,14 +271,14 @@ export function GitIntegrationSection({
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="이슈 검색어"
+          placeholder={t("gitIssueSearchPlaceholder", "이슈 검색어")}
           className="rounded-md border p-2"
         />
         <Button type="button" onClick={handleSearch} disabled={isSearching || disabledActions}>
-          {isSearching ? "검색 중..." : "이슈 검색"}
+          {isSearching ? t("commonSearching", "검색 중...") : t("gitIssueSearchButton", "이슈 검색")}
         </Button>
         <Button type="button" onClick={handleCreate} disabled={isCreating || disabledActions}>
-          {isCreating ? "생성 중..." : "새 이슈 생성"}
+          {isCreating ? t("commonCreating", "생성 중...") : t("gitIssueCreateButton", "새 이슈 생성")}
         </Button>
       </div>
 
@@ -283,7 +286,7 @@ export function GitIntegrationSection({
 
       {searchResults.length > 0 ? (
         <div className="space-y-2 rounded-md border p-3">
-          <p className="text-sm font-medium">이슈 검색 결과</p>
+          <p className="text-sm font-medium">{t("commonSearch", "이슈 검색 결과")}</p>
           <ul className="space-y-2 text-sm">
             {searchResults.map((issue) => (
               <li key={`${issue.id}-${issue.number}`} className="flex items-center justify-between gap-3">
@@ -298,7 +301,7 @@ export function GitIntegrationSection({
                     variant="outline"
                     onClick={() => void linkIssue(issue)}
                   >
-                    연결
+                    {t("commonConnected", "연결")}
                   </Button>
                 </div>
               </li>
@@ -308,9 +311,9 @@ export function GitIntegrationSection({
       ) : null}
 
       <div className="space-y-2 rounded-md border p-3">
-        <p className="text-sm font-medium">연결된 이슈</p>
+        <p className="text-sm font-medium">{t("commonConnected", "연결된 이슈")}</p>
         {linkedIssues.length === 0 ? (
-          <p className="text-sm text-slate-500">아직 연결된 이슈가 없습니다.</p>
+          <p className="text-sm text-slate-500">{t("commonNone", "아직 연결된 이슈가 없습니다.")}</p>
         ) : (
           <ul className="space-y-2 text-sm">
             {linkedIssues.map((link) => {
@@ -341,7 +344,7 @@ export function GitIntegrationSection({
                     <div className="flex items-center gap-2 shrink-0">
                       {basicDetail != null && (
                         <span className={`rounded px-2 py-0.5 text-xs font-medium ${getStateBadgeClass(basicDetail.state)}`}>
-                          {basicDetail.state}
+                        {basicDetail.state}
                         </span>
                       )}
                       {fullDetail != null && fullDetail.linkedPRs.length > 0 && (
@@ -361,7 +364,7 @@ export function GitIntegrationSection({
                           void unlinkIssue(link.id);
                         }}
                       >
-                        연결 해제
+                        {t("commonDisconnect", "연결 해제")}
                       </Button>
                     </div>
                   </div>
@@ -377,7 +380,7 @@ export function GitIntegrationSection({
                         </div>
                       )}
                       {fullDetail === null && (
-                        <p className="text-xs text-slate-400">상세 정보를 불러올 수 없습니다.</p>
+                        <p className="text-xs text-slate-400">{t("commonNotFound", "상세 정보를 불러올 수 없습니다.")}</p>
                       )}
                       {fullDetail && (
                         <div className="space-y-3 text-xs text-slate-600">
@@ -413,7 +416,7 @@ export function GitIntegrationSection({
                           {/* PR 섹션 */}
                           {fullDetail.linkedPRs.length > 0 && (
                             <div className="space-y-1.5">
-                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">연결된 Pull Request</p>
+                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t("commonConnected", "연결된 Pull Request")}</p>
                               {fullDetail.linkedPRs.map((pr) => {
                                 const reviewText = getReviewDecisionText(pr.reviewDecision);
                                 return (
@@ -464,7 +467,7 @@ export function GitIntegrationSection({
                           {/* 코멘트 섹션 */}
                           {fullDetail.comments.length > 0 && (
                             <div className="space-y-1.5">
-                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">코멘트</p>
+                              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t("commentThread", "코멘트")}</p>
                               {fullDetail.comments.map((comment) => (
                                 <div key={comment.id} className="border rounded-md p-2 bg-white space-y-1">
                                   <div className="flex items-center gap-1.5">
@@ -483,7 +486,7 @@ export function GitIntegrationSection({
                                   rel="noreferrer"
                                   className="text-indigo-600 hover:underline text-xs block text-right"
                                 >
-                                  GitHub에서 전체 보기 ({fullDetail.commentCount}개) →
+                                  {t("commonView", "GitHub에서 전체 보기")} ({fullDetail.commentCount}개) →
                                 </a>
                               )}
                             </div>

@@ -18,6 +18,8 @@ import { Switch } from "@crinity/ui/components/ui/switch";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface SLAPolicyItem {
   id: string;
@@ -40,6 +42,8 @@ const EMPTY_FORM = {
 };
 
 export function SLAPolicyManager() {
+  const copy = useAdminCopy();
+  const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const [policies, setPolicies] = useState<SLAPolicyItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,7 +65,7 @@ export function SLAPolicyManager() {
       const data = await response.json();
       setPolicies(data);
     } catch (error) {
-      toast.error("SLA 정책을 불러오지 못했습니다.");
+      toast.error(t("slaPolicyLoadFailed", "SLA 정책을 불러오지 못했습니다."));
     } finally {
       setIsLoading(false);
     }
@@ -107,11 +111,11 @@ export function SLAPolicyManager() {
         throw new Error("save failed");
       }
 
-      toast.success(editingId ? "SLA 정책이 수정되었습니다." : "SLA 정책이 생성되었습니다.");
+      toast.success(editingId ? t("slaPolicySaveSuccess", "SLA 정책이 수정되었습니다.") : t("slaPolicyCreateSuccess", "SLA 정책이 생성되었습니다."));
       setIsDialogOpen(false);
       await fetchPolicies();
     } catch (error) {
-      toast.error("SLA 정책 저장에 실패했습니다.");
+      toast.error(t("slaPolicySaveError", "SLA 정책 저장에 실패했습니다."));
     } finally {
       setIsSaving(false);
     }
@@ -129,15 +133,15 @@ export function SLAPolicyManager() {
         throw new Error("toggle failed");
       }
 
-      toast.success(policy.isActive ? "정책이 비활성화되었습니다." : "정책이 활성화되었습니다.");
+      toast.success(policy.isActive ? t("slaPolicyDeactivateSuccess", "정책이 비활성화되었습니다.") : t("slaPolicyActivateSuccess", "정책이 활성화되었습니다."));
       await fetchPolicies();
     } catch (error) {
-      toast.error("SLA 정책 상태 변경에 실패했습니다.");
+      toast.error(t("slaPolicyStatusError", "SLA 정책 상태 변경에 실패했습니다."));
     }
   }
 
   async function deletePolicy(policyId: string) {
-    if (!window.confirm("이 SLA 정책을 삭제하시겠습니까?")) {
+    if (!window.confirm(t("slaPolicyDeleteConfirm", "이 SLA 정책을 삭제하시겠습니까?"))) {
       return;
     }
 
@@ -149,10 +153,10 @@ export function SLAPolicyManager() {
         throw new Error("delete failed");
       }
 
-      toast.success("SLA 정책이 삭제되었습니다.");
+      toast.success(t("slaPolicyDeleteSuccess", "SLA 정책이 삭제되었습니다."));
       await fetchPolicies();
     } catch (error) {
-      toast.error("SLA 정책 삭제에 실패했습니다.");
+      toast.error(t("slaPolicyDeleteError", "SLA 정책 삭제에 실패했습니다."));
     }
   }
 
@@ -160,21 +164,21 @@ export function SLAPolicyManager() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>SLA 정책 관리</CardTitle>
+          <CardTitle>{t("slaPolicyTitle", "SLA 정책 관리")}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            우선순위별 첫 응답 및 해결 목표 시간을 운영 기준으로 관리합니다.
+            {t("slaPolicyDescription", "우선순위별 첫 응답 및 해결 목표 시간을 운영 기준으로 관리합니다.")}
           </p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          정책 추가
+          {t("slaPolicyAdd", "정책 추가")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">정책을 불러오는 중...</p>
+          <p className="text-sm text-muted-foreground">{t("slaPolicyLoading", "정책을 불러오는 중...")}</p>
         ) : policies.length === 0 ? (
-          <p className="text-sm text-muted-foreground">등록된 SLA 정책이 없습니다.</p>
+          <p className="text-sm text-muted-foreground">{t("slaPolicyEmpty", "등록된 SLA 정책이 없습니다.")}</p>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {policies.map((policy) => (
@@ -185,11 +189,11 @@ export function SLAPolicyManager() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold">{policy.name}</h3>
                         <Badge variant={policy.isActive ? "default" : "outline"}>
-                          {policy.isActive ? "활성" : "비활성"}
+                          {policy.isActive ? t("slaPolicyActive", "활성") : t("slaPolicyInactive", "비활성")}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {policy.description || "설명 없음"}
+                        {policy.description || t("slaPolicyNoDescription", "설명 없음")}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
@@ -202,14 +206,14 @@ export function SLAPolicyManager() {
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-3 text-sm">
-                    <Metric label="우선순위" value={policy.priority} />
-                    <Metric label="첫 응답" value={`${policy.firstResponseHours}시간`} />
-                    <Metric label="해결 목표" value={`${policy.resolutionHours}시간`} />
+                    <Metric label={t("slaPolicyPriority", "우선순위")} value={policy.priority} />
+                    <Metric label={t("slaPolicyFirstResponse", "첫 응답")} value={`${policy.firstResponseHours}h`} />
+                    <Metric label={t("slaPolicyResolution", "해결 목표")} value={`${policy.resolutionHours}h`} />
                   </div>
                   <div className="flex items-center justify-between border-t pt-3 text-sm text-muted-foreground">
-                    <span>연결된 SLA 클락 {policy._count?.clocks ?? 0}건</span>
+                    <span>{t("slaPolicyClockCount", "연결된 SLA 클락")} {policy._count?.clocks ?? 0}</span>
                     <div className="flex items-center gap-2">
-                      <span>{policy.isActive ? "운영중" : "중지됨"}</span>
+                      <span>{policy.isActive ? t("slaPolicyRunning", "운영중") : t("slaPolicyStopped", "중지됨")}</span>
                       <Switch checked={policy.isActive} onCheckedChange={() => togglePolicy(policy)} />
                     </div>
                   </div>
@@ -223,15 +227,15 @@ export function SLAPolicyManager() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{editingId ? "SLA 정책 수정" : "SLA 정책 추가"}</DialogTitle>
+            <DialogTitle>{editingId ? t("slaPolicyEditTitle", "SLA 정책 수정") : t("slaPolicyAdd", "SLA 정책 추가")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>정책 이름</Label>
+              <Label>{t("slaPolicyName", "정책 이름")}</Label>
               <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} />
             </div>
             <div className="space-y-2">
-              <Label>설명</Label>
+              <Label>{t("commonDescription", "설명")}</Label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
@@ -239,7 +243,7 @@ export function SLAPolicyManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label>우선순위</Label>
+              <Label>{t("slaPolicyPriority", "우선순위")}</Label>
               <Select
                 value={form.priority}
                 onValueChange={(value) => setForm((prev) => ({ ...prev, priority: value as SLAPolicyItem["priority"] }))}
@@ -248,16 +252,16 @@ export function SLAPolicyManager() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="URGENT">긴급</SelectItem>
-                  <SelectItem value="HIGH">높음</SelectItem>
-                  <SelectItem value="MEDIUM">보통</SelectItem>
-                  <SelectItem value="LOW">낮음</SelectItem>
+                  <SelectItem value="URGENT">{copy.ticketsPriorityUrgent}</SelectItem>
+                  <SelectItem value="HIGH">{copy.ticketsPriorityHigh}</SelectItem>
+                  <SelectItem value="MEDIUM">{copy.ticketsPriorityMedium}</SelectItem>
+                  <SelectItem value="LOW">{copy.ticketsPriorityLow}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>첫 응답 시간 (시간)</Label>
+                <Label>{t("slaPolicyFirstResponseHours", "첫 응답 시간 (시간)")}</Label>
                 <Input
                   type="number"
                   step="0.1"
@@ -266,7 +270,7 @@ export function SLAPolicyManager() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>해결 시간 (시간)</Label>
+                <Label>{t("slaPolicyResolutionHours", "해결 시간 (시간)")}</Label>
                 <Input
                   type="number"
                   step="0.1"
@@ -277,8 +281,8 @@ export function SLAPolicyManager() {
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div>
-                <Label className="text-sm">활성화</Label>
-                <p className="text-xs text-muted-foreground">같은 우선순위의 기존 활성 정책은 자동으로 비활성화됩니다.</p>
+                <Label className="text-sm">{t("commonActive", "활성화")}</Label>
+                <p className="text-xs text-muted-foreground">{t("slaPolicyActivationHelp", "같은 우선순위의 기존 활성 정책은 자동으로 비활성화됩니다.")}</p>
               </div>
               <Switch
                 checked={form.isActive}
@@ -287,10 +291,10 @@ export function SLAPolicyManager() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                취소
+                {copy.commonCancel}
               </Button>
               <Button onClick={savePolicy} disabled={isSaving}>
-                {isSaving ? "저장 중..." : "저장"}
+                {isSaving ? t("slaPolicySaving", "저장 중...") : copy.commonSave}
               </Button>
             </div>
           </div>

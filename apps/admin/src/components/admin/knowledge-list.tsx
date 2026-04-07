@@ -35,6 +35,7 @@ import {
 import { Plus, Search, Pencil, Trash2, ExternalLink, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryManager } from "./category-manager";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface KnowledgeListProps {
   articles: any[];
@@ -51,6 +52,8 @@ export function KnowledgeList({
   isAdmin,
   publicBaseUrl,
 }: KnowledgeListProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -113,7 +116,7 @@ export function KnowledgeList({
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="문서 검색..."
+              placeholder={t("knowledgeSearchPlaceholder", "문서 검색...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -121,10 +124,10 @@ export function KnowledgeList({
           </div>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="카테고리" />
+              <SelectValue placeholder={t("knowledgeCategoryPlaceholder", "카테고리")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">모든 카테고리</SelectItem>
+              <SelectItem value="all">{t("commonAll", "전체")}</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id}>
                   {category.name}
@@ -134,12 +137,12 @@ export function KnowledgeList({
           </Select>
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="상태" />
+              <SelectValue placeholder={t("knowledgeStatus", "상태")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">모든 상태</SelectItem>
-              <SelectItem value="published">게시됨</SelectItem>
-              <SelectItem value="draft">초안</SelectItem>
+              <SelectItem value="all">{t("commonAll", "전체")}</SelectItem>
+              <SelectItem value="published">{t("knowledgeStatusPublished", "게시됨")}</SelectItem>
+              <SelectItem value="draft">{t("knowledgeStatusDraft", "초안")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

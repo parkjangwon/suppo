@@ -8,9 +8,12 @@ import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Input } from "@crinity/ui/components/ui/input";
 import { BACKOFFICE_DASHBOARD_PATH } from "@crinity/shared/auth/config";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const copy = useAdminCopy();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,7 +34,7 @@ export default function AdminLoginPage() {
     setIsPending(false);
 
     if (!result || result.error) {
-      setErrorMessage("로그인에 실패했습니다");
+      setErrorMessage(copyText(copy, "loginFailed", "로그인에 실패했습니다"));
       return;
     }
 
@@ -42,8 +45,8 @@ export default function AdminLoginPage() {
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold tracking-tight">관리 콘솔</CardTitle>
-          <CardDescription>관리자 계정으로 로그인하세요</CardDescription>
+          <CardTitle className="text-2xl font-bold tracking-tight">{copyText(copy, "loginTitle", "관리 콘솔")}</CardTitle>
+          <CardDescription>{copyText(copy, "loginDescription", "관리자 계정으로 로그인하세요")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={handleCredentialsLogin}>
@@ -52,12 +55,12 @@ export default function AdminLoginPage() {
                 htmlFor="email"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                이메일
+                {copyText(copy, "commonEmail", "이메일")}
               </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@crinity.com"
+                placeholder={copyText(copy, "loginEmailPlaceholder", "admin@crinity.com")}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
@@ -69,7 +72,7 @@ export default function AdminLoginPage() {
                 htmlFor="password"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                비밀번호
+                {copyText(copy, "commonPassword", "비밀번호")}
               </label>
               <Input
                 id="password"
@@ -82,7 +85,7 @@ export default function AdminLoginPage() {
             </div>
             {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
             <Button type="submit" className="w-full" disabled={isPending}>
-              로그인
+              {copyText(copy, "loginSubmit", "로그인")}
             </Button>
           </form>
 
@@ -93,7 +96,7 @@ export default function AdminLoginPage() {
               className="w-full"
               onClick={() => signIn("google", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
             >
-              Google로 계속하기
+              {copyText(copy, "loginContinueWithGoogle", "Google로 계속하기")}
             </Button>
             <Button
               type="button"
@@ -101,12 +104,12 @@ export default function AdminLoginPage() {
               className="w-full"
               onClick={() => signIn("github", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
             >
-              GitHub로 계속하기
+              {copyText(copy, "loginContinueWithGithub", "GitHub로 계속하기")}
             </Button>
           </div>
         </CardContent>
         <CardFooter className="justify-center text-xs text-muted-foreground">
-          OAuth 공급자 설정은 환경변수를 통해 활성화됩니다.
+          {copyText(copy, "loginOAuthFooter", "OAuth 공급자 설정은 환경변수를 통해 활성화됩니다.")}
         </CardFooter>
       </Card>
     </div>

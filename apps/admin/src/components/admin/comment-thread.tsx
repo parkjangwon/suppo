@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@crinity/ui/components/ui/alert-dialog";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface Comment {
   id: string;
@@ -48,6 +49,8 @@ export function CommentThread({
   ticketAssigneeId,
   onCommentUpdated,
 }: CommentThreadProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +84,7 @@ export function CommentThread({
 
   const handleSaveEdit = async (commentId: string) => {
     if (!editContent.trim()) {
-      toast.error("내용을 입력해주세요");
+      toast.error(t("commentContentRequired", "내용을 입력해주세요"));
       return;
     }
 
@@ -95,15 +98,15 @@ export function CommentThread({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "수정에 실패했습니다");
+        throw new Error(error.error || t("commentUpdateFailed", "수정에 실패했습니다"));
       }
 
-      toast.success("댓글이 수정되었습니다");
+      toast.success(t("commentUpdateSuccess", "댓글이 수정되었습니다"));
       setEditingId(null);
       setEditContent("");
       onCommentUpdated?.();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "수정에 실패했습니다");
+      toast.error(error instanceof Error ? error.message : t("commentUpdateError", "수정에 실패했습니다"));
     } finally {
       setIsSubmitting(false);
     }
@@ -118,13 +121,13 @@ export function CommentThread({
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "삭제에 실패했습니다");
+        throw new Error(error.error || t("commentDeleteFailed", "삭제에 실패했습니다"));
       }
 
-      toast.success("댓글이 삭제되었습니다");
+      toast.success(t("commentDeleteSuccess", "댓글이 삭제되었습니다"));
       onCommentUpdated?.();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "삭제에 실패했습니다");
+      toast.error(error instanceof Error ? error.message : t("commentDeleteError", "삭제에 실패했습니다"));
     } finally {
       setIsSubmitting(false);
     }
@@ -154,15 +157,15 @@ export function CommentThread({
             >
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">
-                  {comment.authorName}
+                    {comment.authorName}
                 </span>
                 {isCustomer ? (
                   <Badge variant="outline" className="text-xs">
-                    고객
+                    {t("commentAuthorCustomer", "고객")}
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="text-xs">
-                    상담원
+                    {t("commentAuthorAgent", "상담원")}
                   </Badge>
                 )}
                 {isInternal && (
@@ -170,11 +173,11 @@ export function CommentThread({
                     variant="destructive"
                     className="text-xs bg-amber-500 hover:bg-amber-600"
                   >
-                    내부 메모
+                    {t("commentInternalNoteAriaLabel", "내부 메모")}
                   </Badge>
                 )}
                 {wasEdited && !isEditing && (
-                  <span className="text-xs text-muted-foreground">(수정됨)</span>
+                  <span className="text-xs text-muted-foreground">({t("commentUpdateSuccess", "수정됨")})</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -209,20 +212,19 @@ export function CommentThread({
                         <AlertDialogHeader>
                           <AlertDialogTitle className="flex items-center gap-2">
                             <AlertCircle className="h-5 w-5 text-destructive" />
-                            댓글 삭제
+                            {t("commentDeleteSuccess", "댓글 삭제")}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            이 댓글을 삭제하시겠습니까? 이 작업은 되돌릴 수
-                            없습니다.
+                            {t("commentDeleteError", "이 댓글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>취소</AlertDialogCancel>
+                          <AlertDialogCancel>{t("commonCancel", "취소")}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(comment.id)}
                             className="bg-destructive hover:bg-destructive/90"
                           >
-                            삭제
+                            {t("commonDelete", "삭제")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -248,7 +250,7 @@ export function CommentThread({
                       disabled={isSubmitting}
                     >
                       <X className="h-4 w-4 mr-1" />
-                      취소
+                      {t("commonCancel", "취소")}
                     </Button>
                     <Button
                       size="sm"
@@ -256,7 +258,7 @@ export function CommentThread({
                       disabled={isSubmitting}
                     >
                       <Check className="h-4 w-4 mr-1" />
-                      저장
+                      {t("commonSave", "저장")}
                     </Button>
                   </div>
                 </div>

@@ -21,6 +21,7 @@ import {
   PopoverTrigger,
 } from "@crinity/ui/components/ui/popover";
 import { cn } from "@crinity/shared/utils";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface TicketFiltersProps {
   categories: { id: string; name: string }[];
@@ -29,6 +30,8 @@ interface TicketFiltersProps {
 }
 
 export function TicketFilters({ categories, agents, showBasicSearch = true }: TicketFiltersProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -88,19 +91,19 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="티켓 번호, 제목, 이메일 검색..."
+                placeholder={t("ticketsSearchPlaceholder", "티켓 번호, 제목, 이메일 검색...")}
                 className="pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button type="submit" variant="secondary">검색</Button>
+            <Button type="submit" variant="secondary">{t("commonSearch", "검색")}</Button>
           </form>
 
           {hasFilters && (
             <Button variant="ghost" onClick={clearFilters} className="shrink-0">
               <X className="mr-2 h-4 w-4" />
-              필터 초기화
+              {t("commonClose", "필터 초기화")}
             </Button>
           )}
         </div>
@@ -117,7 +120,7 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
               )}
             >
               <Calendar className="mr-2 h-4 w-4" />
-              {dateFrom ? format(dateFrom, "yyyy.MM.dd", { locale: ko }) : "시작일"}
+              {dateFrom ? format(dateFrom, "yyyy.MM.dd", { locale: ko }) : t("ticketsDateFrom", "시작일")}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -143,7 +146,7 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
               )}
             >
               <Calendar className="mr-2 h-4 w-4" />
-              {dateTo ? format(dateTo, "yyyy.MM.dd", { locale: ko }) : "종료일"}
+              {dateTo ? format(dateTo, "yyyy.MM.dd", { locale: ko }) : t("ticketsDateTo", "종료일")}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -163,16 +166,16 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
           value={searchParams.get("status") || "all"}
           onValueChange={(value) => handleFilterChange("status", value)}
         >
-          <SelectTrigger aria-label="상태 필터">
-            <SelectValue placeholder="상태" />
+          <SelectTrigger aria-label={t("ticketsFilterStatus", "상태 필터")}>
+            <SelectValue placeholder={t("ticketsFilterStatus", "상태")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 상태</SelectItem>
-            <SelectItem value="OPEN">열림 (OPEN)</SelectItem>
-            <SelectItem value="IN_PROGRESS">진행중 (IN_PROGRESS)</SelectItem>
-            <SelectItem value="WAITING">대기중 (WAITING)</SelectItem>
-            <SelectItem value="RESOLVED">해결됨 (RESOLVED)</SelectItem>
-            <SelectItem value="CLOSED">닫힘 (CLOSED)</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 상태")}</SelectItem>
+            <SelectItem value="OPEN">{t("ticketStatusOpen", "열림")} (OPEN)</SelectItem>
+            <SelectItem value="IN_PROGRESS">{t("ticketStatusInProgress", "진행중")} (IN_PROGRESS)</SelectItem>
+            <SelectItem value="WAITING">{t("ticketStatusWaiting", "대기중")} (WAITING)</SelectItem>
+            <SelectItem value="RESOLVED">{t("ticketStatusResolved", "해결됨")} (RESOLVED)</SelectItem>
+            <SelectItem value="CLOSED">{t("ticketStatusClosed", "닫힘")} (CLOSED)</SelectItem>
           </SelectContent>
         </Select>
 
@@ -180,15 +183,15 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
           value={searchParams.get("priority") || "all"}
           onValueChange={(value) => handleFilterChange("priority", value)}
         >
-          <SelectTrigger aria-label="우선순위 필터">
-            <SelectValue placeholder="우선순위" />
+          <SelectTrigger aria-label={t("ticketsFilterPriority", "우선순위 필터")}>
+            <SelectValue placeholder={t("ticketsFilterPriority", "우선순위")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 우선순위</SelectItem>
-            <SelectItem value="URGENT">긴급 (URGENT)</SelectItem>
-            <SelectItem value="HIGH">높음 (HIGH)</SelectItem>
-            <SelectItem value="MEDIUM">보통 (MEDIUM)</SelectItem>
-            <SelectItem value="LOW">낮음 (LOW)</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 우선순위")}</SelectItem>
+            <SelectItem value="URGENT">{t("ticketsPriorityUrgent", "긴급")} (URGENT)</SelectItem>
+            <SelectItem value="HIGH">{t("ticketsPriorityHigh", "높음")} (HIGH)</SelectItem>
+            <SelectItem value="MEDIUM">{t("ticketsPriorityMedium", "보통")} (MEDIUM)</SelectItem>
+            <SelectItem value="LOW">{t("ticketsPriorityLow", "낮음")} (LOW)</SelectItem>
           </SelectContent>
         </Select>
 
@@ -196,11 +199,11 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
           value={searchParams.get("categoryId") || "all"}
           onValueChange={(value) => handleFilterChange("categoryId", value)}
         >
-          <SelectTrigger aria-label="문의 유형 필터">
-            <SelectValue placeholder="문의 유형" />
+          <SelectTrigger aria-label={t("ticketsFilterRequestType", "문의 유형 필터")}>
+            <SelectValue placeholder={t("ticketsFilterRequestType", "문의 유형")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 문의 유형</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 문의 유형")}</SelectItem>
             {categories.map((category) => (
               <SelectItem key={category.id} value={category.id}>
                 {category.name}
@@ -213,12 +216,12 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
           value={searchParams.get("assigneeId") || "all"}
           onValueChange={(value) => handleFilterChange("assigneeId", value)}
         >
-          <SelectTrigger aria-label="담당자 필터">
-            <SelectValue placeholder="담당자" />
+          <SelectTrigger aria-label={t("ticketsFilterAssignee", "담당자 필터")}>
+            <SelectValue placeholder={t("ticketsFilterAssignee", "담당자")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 담당자</SelectItem>
-            <SelectItem value="unassigned">미할당</SelectItem>
+            <SelectItem value="all">{t("commonAll", "모든 담당자")}</SelectItem>
+            <SelectItem value="unassigned">{t("ticketDetailUnassigned", "미할당")}</SelectItem>
             {agents.map((agent) => (
               <SelectItem key={agent.id} value={agent.id}>
                 {agent.name}

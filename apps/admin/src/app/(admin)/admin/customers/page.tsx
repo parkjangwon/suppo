@@ -1,9 +1,11 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { CustomerList } from "@/components/admin/customer-list";
 import { prisma } from "@crinity/db";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCustomersPage() {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {
@@ -22,7 +25,7 @@ export default async function AdminCustomersPage() {
   if (!isAdmin) {
     return (
       <AdminOnlyPageState
-        title="고객 관리"
+        title={copy.navCustomers}
         description="고객 목록과 메모 관리는 관리자만 접근할 수 있습니다."
       />
     );
@@ -58,9 +61,7 @@ export default async function AdminCustomersPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">
-            고객 관리
-          </h1>
+          <h1 className="text-2xl font-bold">{copy.navCustomers}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             고객 목록 조회 및 관리
           </p>

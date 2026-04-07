@@ -1,10 +1,12 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { TicketList } from "@/components/admin/ticket-list";
 import { Prisma, TicketStatus, TicketPriority } from "@prisma/client";
 import { getVIPCustomers } from "@/lib/db/queries/admin-analytics/vip-customers";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
   title: "티켓 목록 | Crinity",
@@ -15,6 +17,7 @@ export default async function TicketsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {
@@ -211,7 +214,7 @@ export default async function TicketsPage({
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">티켓 목록</h1>
+        <h1 className="text-2xl font-bold">{copy.navTickets}</h1>
       </div>
 
       <TicketList

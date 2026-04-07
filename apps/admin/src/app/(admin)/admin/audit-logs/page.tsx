@@ -1,9 +1,11 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { AuditLogList } from "@/components/admin/audit-log-list";
 import { prisma } from "@crinity/db";
+import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminAuditLogsPage() {
+  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {
@@ -22,7 +25,7 @@ export default async function AdminAuditLogsPage() {
   if (!isAdmin) {
     return (
       <AdminOnlyPageState
-        title="감사 로그"
+        title={copy.navAuditLogs}
         description="시스템 감사 로그는 관리자만 조회할 수 있습니다."
       />
     );
@@ -57,9 +60,7 @@ export default async function AdminAuditLogsPage() {
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">
-            감사 로그
-          </h1>
+          <h1 className="text-2xl font-bold">{copy.navAuditLogs}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             시스템 내 모든 활동 내역을 조회하고 추적합니다.
           </p>

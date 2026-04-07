@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { X, Plus, Eye, Save, Send } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface KnowledgeFormProps {
   article?: any;
@@ -26,6 +27,8 @@ interface KnowledgeFormProps {
 }
 
 export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
   const isEditing = !!article;
 
@@ -79,19 +82,19 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
 
   const validateForm = () => {
     if (!title.trim()) {
-      toast.error("제목을 입력해주세요");
+      toast.error(t("knowledgeTitleRequired", "제목을 입력해주세요"));
       return false;
     }
     if (!slug.trim()) {
-      toast.error("슬러그를 입력해주세요");
+      toast.error(t("knowledgeSlugRequired", "슬러그를 입력해주세요"));
       return false;
     }
     if (!content.trim()) {
-      toast.error("내용을 입력해주세요");
+      toast.error(t("knowledgeContentRequired", "내용을 입력해주세요"));
       return false;
     }
     if (!categoryId) {
-      toast.error("카테고리를 선택해주세요");
+      toast.error(t("knowledgeCategoryRequired", "카테고리를 선택해주세요"));
       return false;
     }
     return true;
@@ -140,7 +143,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
 
       return savedArticle;
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "저장 중 오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : t("knowledgeSaveError", "저장 중 오류가 발생했습니다"));
       return null;
     }
   };
@@ -188,7 +191,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href="/admin/knowledge">취소</Link>
+            <Link href="/admin/knowledge">{t("commonCancel", "취소")}</Link>
           </Button>
           <Button
             variant="outline"
@@ -196,14 +199,14 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
             disabled={isSaving || isPublishing}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "저장 중..." : "초안 저장"}
+            {isSaving ? "저장 중..." : t("commonSaveDraft", "초안 저장")}
           </Button>
           <Button
             onClick={handlePublish}
             disabled={isSaving || isPublishing}
           >
             <Send className="h-4 w-4 mr-2" />
-            {isPublishing ? "게시 중..." : "게시하기"}
+            {isPublishing ? "게시 중..." : t("commonPublish", "게시하기")}
           </Button>
         </div>
       </div>

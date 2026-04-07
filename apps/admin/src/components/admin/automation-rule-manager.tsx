@@ -18,6 +18,8 @@ import { Switch } from "@crinity/ui/components/ui/switch";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface AutomationRuleItem {
   id: string;
@@ -57,6 +59,8 @@ const EMPTY_FORM = {
 };
 
 export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const [rules, setRules] = useState<AutomationRuleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +82,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
       const data = await response.json();
       setRules(data);
     } catch (error) {
-      toast.error("자동화 규칙을 불러오지 못했습니다.");
+      toast.error(t("automationLoadFailed", "자동화 규칙을 불러오지 못했습니다."));
     } finally {
       setIsLoading(false);
     }
@@ -181,11 +185,11 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
         throw new Error("save failed");
       }
 
-      toast.success(editingId ? "자동화 규칙이 수정되었습니다." : "자동화 규칙이 생성되었습니다.");
+      toast.success(editingId ? t("automationUpdateSuccess", "자동화 규칙이 수정되었습니다.") : t("automationCreateSuccess", "자동화 규칙이 생성되었습니다."));
       setIsDialogOpen(false);
       await fetchRules();
     } catch (error) {
-      toast.error("자동화 규칙 저장에 실패했습니다.");
+      toast.error(t("automationSaveFailed", "자동화 규칙 저장에 실패했습니다."));
     } finally {
       setIsSaving(false);
     }
@@ -203,15 +207,15 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
         throw new Error("toggle failed");
       }
 
-      toast.success(rule.isActive ? "규칙이 비활성화되었습니다." : "규칙이 활성화되었습니다.");
+      toast.success(rule.isActive ? t("automationDeactivateSuccess", "규칙이 비활성화되었습니다.") : t("automationActivateSuccess", "규칙이 활성화되었습니다."));
       await fetchRules();
     } catch (error) {
-      toast.error("자동화 규칙 상태 변경에 실패했습니다.");
+      toast.error(t("automationStatusFailed", "자동화 규칙 상태 변경에 실패했습니다."));
     }
   }
 
   async function deleteRule(ruleId: string) {
-    if (!window.confirm("이 자동화 규칙을 삭제하시겠습니까?")) {
+    if (!window.confirm(t("automationDeleteConfirm", "이 자동화 규칙을 삭제하시겠습니까?"))) {
       return;
     }
 
@@ -223,10 +227,10 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
         throw new Error("delete failed");
       }
 
-      toast.success("자동화 규칙이 삭제되었습니다.");
+      toast.success(t("automationDeleteSuccess", "자동화 규칙이 삭제되었습니다."));
       await fetchRules();
     } catch (error) {
-      toast.error("자동화 규칙 삭제에 실패했습니다.");
+      toast.error(t("automationDeleteFailed", "자동화 규칙 삭제에 실패했습니다."));
     }
   }
 
@@ -234,21 +238,21 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>자동화 규칙 관리</CardTitle>
+          <CardTitle>{t("automationTitle", "자동화 규칙 관리")}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            트리거와 조건에 따라 티켓 상태, 우선순위, 담당자, 태그, 알림을 자동으로 제어합니다.
+            {t("automationDescription", "트리거와 조건에 따라 티켓 상태, 우선순위, 담당자, 태그, 알림을 자동으로 제어합니다.")}
           </p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="mr-2 h-4 w-4" />
-          규칙 추가
+          {t("automationAdd", "규칙 추가")}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">자동화 규칙을 불러오는 중...</p>
+          <p className="text-sm text-muted-foreground">{t("automationLoading", "자동화 규칙을 불러오는 중...")}</p>
         ) : rules.length === 0 ? (
-          <p className="text-sm text-muted-foreground">등록된 자동화 규칙이 없습니다.</p>
+          <p className="text-sm text-muted-foreground">{t("automationEmpty", "등록된 자동화 규칙이 없습니다.")}</p>
         ) : (
           <div className="grid gap-4">
             {rules.map((rule) => (
@@ -259,12 +263,12 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold">{rule.name}</h3>
                         <Badge variant={rule.isActive ? "default" : "outline"}>
-                          {rule.isActive ? "활성" : "비활성"}
+                          {rule.isActive ? copyText(copy, "commonActive", "활성") : copyText(copy, "commonInactive", "비활성")}
                         </Badge>
                         <Badge variant="outline">{rule.triggerOn}</Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {rule.description || "설명 없음"}
+                        {rule.description || t("automationNoDescription", "설명 없음")}
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
@@ -277,13 +281,13 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                     </div>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
-                    <RuleSection title="조건" values={summarizeConditions(rule.conditions)} />
-                    <RuleSection title="동작" values={summarizeActions(rule.actions, agents, teams)} />
+                    <RuleSection title={t("automationConditions", "조건")} values={summarizeConditions(rule.conditions)} />
+                    <RuleSection title={t("automationActions", "동작")} values={summarizeActions(rule.actions, agents, teams)} />
                   </div>
                   <div className="flex items-center justify-between border-t pt-3 text-sm text-muted-foreground">
-                    <span>우선순위 {rule.priority}</span>
+                    <span>{t("slaPolicyPriority", "우선순위")} {rule.priority}</span>
                     <div className="flex items-center gap-2">
-                      <span>{rule.isActive ? "운영중" : "중지됨"}</span>
+                      <span>{rule.isActive ? copyText(copy, "slaPolicyRunning", "운영중") : copyText(copy, "slaPolicyStopped", "중지됨")}</span>
                       <Switch checked={rule.isActive} onCheckedChange={() => toggleRule(rule)} />
                     </div>
                   </div>
@@ -297,21 +301,21 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? "자동화 규칙 수정" : "자동화 규칙 추가"}</DialogTitle>
+            <DialogTitle>{editingId ? t("automationEditTitle", "자동화 규칙 수정") : t("automationAdd", "자동화 규칙 추가")}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
-              <Label>규칙 이름</Label>
+              <Label>{t("automationRuleName", "규칙 이름")}</Label>
               <Input
-                aria-label="규칙 이름"
+                aria-label={t("automationRuleNameAriaLabel", "규칙 이름")}
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label>설명</Label>
+              <Label>{copyText(copy, "commonDescription", "설명")}</Label>
               <Textarea
-                aria-label="설명"
+                aria-label={t("automationDescriptionAriaLabel", "설명")}
                 value={form.description}
                 onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                 rows={3}

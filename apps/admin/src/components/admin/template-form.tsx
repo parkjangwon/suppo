@@ -16,6 +16,7 @@ import {
 import { Badge } from "@crinity/ui/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, Info, X } from "lucide-react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 
 interface Category {
   id: string;
@@ -64,6 +65,8 @@ export function TemplateForm({
   requestTypes,
   onSuccess,
 }: TemplateFormProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState(template?.title || "");
   const [content, setContent] = useState(template?.content || "");
@@ -80,7 +83,7 @@ export function TemplateForm({
     e.preventDefault();
 
     if (!title.trim() || !content.trim()) {
-      toast.error("제목과 내용을 입력해주세요.");
+      toast.error(t("templatesTitleContentRequired", "제목과 내용을 입력해주세요."));
       return;
     }
 
@@ -119,10 +122,10 @@ export function TemplateForm({
         onSuccess();
       } else {
         const data = await res.json();
-        toast.error(data.error || "저장 중 오류가 발생했습니다.");
+        toast.error(data.error || t("templatesSaveError", "저장 중 오류가 발생했습니다."));
       }
     } catch (error) {
-      toast.error("저장 중 오류가 발생했습니다.");
+      toast.error(t("templatesSaveError", "저장 중 오류가 발생했습니다."));
     } finally {
       setLoading(false);
     }

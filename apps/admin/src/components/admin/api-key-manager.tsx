@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@crinity/ui/components/ui/dialog";
@@ -19,6 +20,7 @@ interface ApiKeyRecord {
 }
 
 export function ApiKeyManager() {
+  const copy = useAdminCopy() as Record<string, string>;
   const [apiKeys, setApiKeys] = useState<ApiKeyRecord[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
@@ -35,7 +37,7 @@ export function ApiKeyManager() {
 
   useEffect(() => {
     void fetchApiKeys().catch(() => {
-      toast.error("API 키를 불러오지 못했습니다.");
+      toast.error(copy.apiKeyLoadFailed ?? "API 키를 불러오지 못했습니다.");
     });
   }, []);
 
@@ -58,7 +60,7 @@ export function ApiKeyManager() {
       setNewKeyName("");
       await fetchApiKeys();
     } catch (error) {
-      toast.error("API 키 생성에 실패했습니다.");
+      toast.error(copy.apiKeyCreateFailed ?? "API 키 생성에 실패했습니다.");
     }
   }
 
@@ -78,7 +80,7 @@ export function ApiKeyManager() {
 
       await fetchApiKeys();
     } catch (error) {
-      toast.error("API 키 상태 변경에 실패했습니다.");
+      toast.error(copy.apiKeyToggleFailed ?? "API 키 상태 변경에 실패했습니다.");
     }
   }
 
@@ -94,7 +96,7 @@ export function ApiKeyManager() {
 
       await fetchApiKeys();
     } catch (error) {
-      toast.error("API 키 삭제에 실패했습니다.");
+      toast.error(copy.apiKeyDeleteFailed ?? "API 키 삭제에 실패했습니다.");
     }
   }
 
@@ -102,19 +104,19 @@ export function ApiKeyManager() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>공개 API 키</CardTitle>
-          <p className="text-sm text-muted-foreground">외부 시스템이 티켓 API를 호출할 때 사용하는 키입니다.</p>
+          <CardTitle>{copy.apiKeyTitle ?? "공개 API 키"}</CardTitle>
+          <p className="text-sm text-muted-foreground">{copy.apiKeyDescription ?? "외부 시스템이 티켓 API를 호출할 때 사용하는 키입니다."}</p>
         </div>
         <Button onClick={() => {
           setIssuedKey(null);
           setIsDialogOpen(true);
         }}>
-          API 키 발급
+          {copy.apiKeyCreateButton ?? "API 키 발급"}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {apiKeys.length === 0 ? (
-          <p className="text-sm text-muted-foreground">발급된 API 키가 없습니다.</p>
+          <p className="text-sm text-muted-foreground">{copy.commonNone ?? "발급된 API 키가 없습니다."}</p>
         ) : (
           apiKeys.map((apiKey) => (
             <div key={apiKey.id} className="rounded-lg border p-4">
@@ -123,7 +125,7 @@ export function ApiKeyManager() {
                   <div className="font-medium">{apiKey.name}</div>
                   <div className="text-sm text-muted-foreground">{apiKey.keyPrefix}...</div>
                   <div className="text-xs text-muted-foreground">
-                    마지막 사용: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString("ko-KR") : "없음"}
+                    {copy.gitApiKeyLastUsed ?? "마지막 사용"}: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString("ko-KR") : (copy.commonNone ?? "없음")}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -133,7 +135,7 @@ export function ApiKeyManager() {
                     aria-label={`toggle-api-key-${apiKey.name}`}
                   />
                   <Button variant="outline" size="sm" onClick={() => deleteApiKey(apiKey.id)}>
-                    삭제
+                    {copy.commonDelete ?? "삭제"}
                   </Button>
                 </div>
               </div>
@@ -145,22 +147,22 @@ export function ApiKeyManager() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>API 키 발급</DialogTitle>
+            <DialogTitle>{copy.apiKeyIssueTitle ?? "API 키 발급"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="api-key-name">키 이름</Label>
+              <Label htmlFor="api-key-name">{copy.apiKeyNameLabel ?? "키 이름"}</Label>
               <Input
                 id="api-key-name"
-                aria-label="키 이름"
+                aria-label={copy.apiKeyNameAriaLabel ?? "키 이름"}
                 value={newKeyName}
                 onChange={(event) => setNewKeyName(event.target.value)}
-                placeholder="예: Zapier Integration"
+                placeholder={copy.apiKeyNamePlaceholder ?? "예: Zapier Integration"}
               />
             </div>
             {issuedKey ? (
               <div className="rounded-lg border bg-muted/20 p-3">
-                <div className="text-sm font-medium">발급된 키</div>
+                <div className="text-sm font-medium">{copy.apiKeyIssuedLabel ?? "발급된 키"}</div>
                 <div className="mt-2 break-all font-mono text-sm" aria-label="issued-api-key">
                   {issuedKey}
                 </div>
@@ -168,10 +170,10 @@ export function ApiKeyManager() {
             ) : null}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                닫기
+                {copy.commonClose ?? "닫기"}
               </Button>
               <Button onClick={createApiKey} disabled={!newKeyName.trim()}>
-                발급
+                {copy.commonCreate ?? "발급"}
               </Button>
             </div>
           </div>

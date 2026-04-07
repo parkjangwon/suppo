@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Input } from "@crinity/ui/components/ui/input";
 import { Label } from "@crinity/ui/components/ui/label";
@@ -41,6 +42,7 @@ interface BusinessHoursData {
 }
 
 export function BusinessHoursForm() {
+  const copy = useAdminCopy() as Record<string, string>;
   const [data, setData] = useState<BusinessHoursData>({
     timezone: "Asia/Seoul",
     workStartHour: 9,
@@ -60,7 +62,7 @@ export function BusinessHoursForm() {
     fetch("/api/admin/settings/business-hours")
       .then((r) => r.json())
       .then((d) => setData(d))
-      .catch(() => toast.error("설정을 불러오지 못했습니다."))
+      .catch(() => toast.error(copy.businessHoursLoadFailed ?? "설정을 불러오지 못했습니다."))
       .finally(() => setIsLoading(false));
   }, []);
 
@@ -75,7 +77,7 @@ export function BusinessHoursForm() {
 
   const addHoliday = () => {
     if (!newHoliday.name.trim() || !newHoliday.date) {
-      toast.error("휴일 이름과 날짜를 입력해 주세요.");
+      toast.error(copy.businessHoursHolidayRequired ?? "휴일 이름과 날짜를 입력해 주세요.");
       return;
     }
     setData((prev) => ({
@@ -94,7 +96,7 @@ export function BusinessHoursForm() {
 
   const handleSave = async () => {
     if (data.workDays.length === 0) {
-      toast.error("최소 하나 이상의 근무일을 선택해 주세요.");
+      toast.error(copy.businessHoursWorkDayRequired ?? "최소 하나 이상의 근무일을 선택해 주세요.");
       return;
     }
     setIsSaving(true);
@@ -105,9 +107,9 @@ export function BusinessHoursForm() {
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error();
-      toast.success("영업시간 설정이 저장되었습니다.");
+      toast.success(copy.businessHoursSaveSuccess ?? "영업시간 설정이 저장되었습니다.");
     } catch {
-      toast.error("저장에 실패했습니다. 다시 시도해 주세요.");
+      toast.error(copy.businessHoursSaveFailed ?? "저장에 실패했습니다. 다시 시도해 주세요.");
     } finally {
       setIsSaving(false);
     }
@@ -126,14 +128,14 @@ export function BusinessHoursForm() {
       {/* 시간대 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Clock className="h-4 w-4" />
-            시간대 및 근무 시간
-          </CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Clock className="h-4 w-4" />
+            {copy.businessHoursTitle ?? "시간대 및 근무 시간"}
+            </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>시간대</Label>
+            <Label>{copy.businessHoursTimezone ?? "시간대"}</Label>
             <Select
               value={data.timezone}
               onValueChange={(v) => setData((prev) => ({ ...prev, timezone: v }))}
@@ -153,7 +155,7 @@ export function BusinessHoursForm() {
 
           <div className="flex items-center gap-4">
             <div className="space-y-2">
-              <Label>업무 시작 시간</Label>
+              <Label>{copy.businessHoursWorkStart ?? "업무 시작 시간"}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -170,7 +172,7 @@ export function BusinessHoursForm() {
             </div>
             <span className="mt-6 text-muted-foreground">~</span>
             <div className="space-y-2">
-              <Label>업무 종료 시간</Label>
+              <Label>{copy.businessHoursWorkEnd ?? "업무 종료 시간"}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -188,7 +190,7 @@ export function BusinessHoursForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>근무일</Label>
+            <Label>{copy.businessHoursWorkDays ?? "근무일"}</Label>
             <div className="flex gap-2">
               {DAY_LABELS.map((label, day) => {
                 const active = data.workDays.includes(day);
@@ -217,7 +219,7 @@ export function BusinessHoursForm() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <CalendarDays className="h-4 w-4" />
-            공휴일 / 휴무일
+            {copy.businessHoursHolidays ?? "공휴일 / 휴무일"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -232,7 +234,7 @@ export function BusinessHoursForm() {
                     <span className="font-medium text-sm">{holiday.name}</span>
                     <span className="text-sm text-muted-foreground">{holiday.date}</span>
                     {holiday.isRecurring && (
-                      <Badge variant="secondary" className="text-xs">매년 반복</Badge>
+                      <Badge variant="secondary" className="text-xs">{copy.businessHoursRecurring ?? "매년 반복"}</Badge>
                     )}
                   </div>
                   <Button
@@ -249,7 +251,7 @@ export function BusinessHoursForm() {
 
           <div className="flex items-end gap-2 pt-2 border-t">
             <div className="space-y-1 flex-1">
-              <Label className="text-xs">휴일 이름</Label>
+              <Label className="text-xs">{copy.businessHoursHolidayName ?? "휴일 이름"}</Label>
               <Input
                 value={newHoliday.name}
                 onChange={(e) => setNewHoliday((p) => ({ ...p, name: e.target.value }))}
@@ -258,7 +260,7 @@ export function BusinessHoursForm() {
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">날짜</Label>
+              <Label className="text-xs">{copy.businessHoursDate ?? "날짜"}</Label>
               <Input
                 type="date"
                 value={newHoliday.date}
@@ -272,11 +274,11 @@ export function BusinessHoursForm() {
                 onCheckedChange={(v) => setNewHoliday((p) => ({ ...p, isRecurring: v }))}
                 id="recurring"
               />
-              <Label htmlFor="recurring" className="text-xs cursor-pointer">매년 반복</Label>
+              <Label htmlFor="recurring" className="text-xs cursor-pointer">{copy.businessHoursRecurring ?? "매년 반복"}</Label>
             </div>
             <Button variant="outline" size="sm" onClick={addHoliday} className="h-9">
               <Plus className="h-4 w-4 mr-1" />
-              추가
+              {copy.commonAdd ?? "추가"}
             </Button>
           </div>
         </CardContent>
@@ -285,7 +287,7 @@ export function BusinessHoursForm() {
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          저장
+          {isSaving ? copy.commonSaving ?? "저장 중..." : copy.commonSaveSettings ?? "저장"}
         </Button>
       </div>
     </div>
