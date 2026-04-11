@@ -27,9 +27,21 @@ describe("admin webhook route", () => {
     mockAuth.mockReset();
     mockFindManyWebhooks.mockReset();
     mockCreateWebhook.mockReset();
+    mockCreateWebhook.mockResolvedValue({
+      id: "wh-1",
+      name: "Local webhook",
+      url: "http://127.0.0.1:3001/webhook",
+      secret: null,
+      events: ["ticket.created"],
+      isActive: true,
+      lastTriggeredAt: null,
+      lastStatusCode: null,
+      lastError: null,
+      createdAt: "2026-04-12T00:00:00.000Z",
+    });
   });
 
-  it("rejects localhost webhook targets", async () => {
+  it("allows localhost webhook targets outside production", async () => {
     mockAuth.mockResolvedValue({
       user: {
         role: "ADMIN",
@@ -44,14 +56,14 @@ describe("admin webhook route", () => {
       },
       body: JSON.stringify({
         name: "Local webhook",
-        url: "https://localhost/webhook",
+        url: "http://127.0.0.1:3001/webhook",
         events: ["ticket.created"],
       }),
     });
 
     const response = await POST(request);
 
-    expect(response.status).toBe(400);
-    expect(mockCreateWebhook).not.toHaveBeenCalled();
+    expect(response.status).toBe(201);
+    expect(mockCreateWebhook).toHaveBeenCalled();
   });
 });

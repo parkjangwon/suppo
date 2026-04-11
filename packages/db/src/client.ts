@@ -19,8 +19,8 @@ function createPrismaClient(): PrismaClient {
 
   const isLibsql = url.startsWith("http://") || url.startsWith("https://");
   if (isLibsql && !isBuildPhase) {
-    const { PrismaLibSql } = dynamicRequire("@prisma/adapter-libsql") as typeof import("@prisma/adapter-libsql");
-    prismaOptions.adapter = new PrismaLibSql({
+    const { PrismaLibSQL } = dynamicRequire("@prisma/adapter-libsql") as typeof import("@prisma/adapter-libsql");
+    prismaOptions.adapter = new PrismaLibSQL({
       url,
       authToken: process.env.DATABASE_AUTH_TOKEN
     });

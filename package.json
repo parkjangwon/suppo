@@ -12,7 +12,9 @@
     "start:all": "pnpm -r --parallel --filter=@crinity/public --filter=@crinity/admin start",
     "lint": "pnpm -r lint",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "ops:validate-env": "tsx scripts/validate-production-env.ts",
+    "ops:smoke": "node scripts/ops-smoke-test.mjs"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

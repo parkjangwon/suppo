@@ -258,6 +258,25 @@ pnpm dev:all
 
 ### 빌드
 
+## 운영 점검
+
+운영 배포 전에는 아래 문서와 스크립트를 기준으로 점검합니다.
+
+- 운영 점검 문서: `docs/plans/2026-04-11-operational-readiness-and-test-plan.md`
+- 운영 ENV 검증:
+
+```bash
+pnpm ops:validate-env -- --env-file docker/env/.env.production
+```
+
+- 배포 직후 smoke test:
+
+```bash
+pnpm ops:smoke -- --env-file docker/env/.env.production
+```
+
+`docker/env/.env.production`이 로컬/스테이징용 HTTP URL이면 `--allow-http`를 함께 사용합니다.
+
 ```bash
 pnpm build:public
 pnpm build:admin

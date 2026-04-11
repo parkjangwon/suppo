@@ -108,6 +108,25 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production down
 ```
 
+## 운영 전 점검
+
+배포 전에는 프로젝트 루트에서 아래 명령을 먼저 실행합니다.
+
+```bash
+# 운영 ENV 검증
+pnpm ops:validate-env -- --env-file docker/env/.env.production
+
+# 배포 직후 smoke test
+pnpm ops:smoke -- --env-file docker/env/.env.production
+```
+
+로컬 프로덕션 테스트처럼 `PUBLIC_URL`, `ADMIN_URL`이 `http://`라면 아래처럼 실행합니다.
+
+```bash
+pnpm ops:validate-env -- --env-file docker/env/.env.production --allow-http
+pnpm ops:smoke -- --env-file docker/env/.env.production --allow-http
+```
+
 ## 참고
 
 - build context는 프로젝트 루트(`..`)를 사용합니다.

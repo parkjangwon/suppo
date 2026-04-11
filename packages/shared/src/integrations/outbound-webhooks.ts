@@ -56,8 +56,8 @@ export async function dispatchWebhookEvent(
   let sent = 0;
 
   for (const endpoint of matchingEndpoints) {
-    const requestBody = {
     const urlValidation = validateWebhookTargetUrl(endpoint.url);
+    const requestBody = {
       event,
       occurredAt: new Date().toISOString(),
       data,
@@ -79,7 +79,7 @@ export async function dispatchWebhookEvent(
           endpointId: endpoint.id,
           event,
           isTest: Boolean(options.isTest),
-          requestBody: JSON.parse(payload) as Record<string, unknown>,
+          requestBody: toJsonValue(requestBody),
           responseStatusCode: null,
           responseBody: null,
           errorMessage: urlValidation.error,
