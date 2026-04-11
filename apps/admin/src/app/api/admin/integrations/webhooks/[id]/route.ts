@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
+import { validateWebhookTargetUrl } from "@crinity/shared/security/webhook-url";
 
 const webhookEventSchema = z.enum(["ticket.created", "ticket.updated", "ticket.commented"]);
 
@@ -29,6 +30,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
     const body = await request.json();
     const validated = updateWebhookSchema.parse(body);
+
+    if (validated.url) {
+      const urlValidation = validateWebhookTargetUrl(validated.url);
+      if (!urlValidation.valid) {
+        return NextResponse.json({ error: urlValidation.error }, { status: 400 });
+      }
+    }
 
     const webhook = await prisma.webhookEndpoint.update({
       where: { id },

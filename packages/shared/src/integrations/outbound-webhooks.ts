@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@crinity/db";
+import { validateWebhookTargetUrl } from "@crinity/shared/security/webhook-url";
 
 export type HelpdeskWebhookEvent =
   | "ticket.created"
@@ -56,11 +57,37 @@ export async function dispatchWebhookEvent(
 
   for (const endpoint of matchingEndpoints) {
     const requestBody = {
+    const urlValidation = validateWebhookTargetUrl(endpoint.url);
       event,
       occurredAt: new Date().toISOString(),
       data,
     };
     const payload = JSON.stringify(requestBody);
+
+    if (!urlValidation.valid) {
+      await prisma.webhookEndpoint.update({
+        where: { id: endpoint.id },
+        data: {
+          lastTriggeredAt: new Date(),
+          lastStatusCode: null,
+          lastError: urlValidation.error,
+        },
+      });
+
+      await prisma.webhookDeliveryLog.create({
+        data: {
+          endpointId: endpoint.id,
+          event,
+          isTest: Boolean(options.isTest),
+          requestBody: JSON.parse(payload) as Record<string, unknown>,
+          responseStatusCode: null,
+          responseBody: null,
+          errorMessage: urlValidation.error,
+        },
+      });
+
+      continue;
+    }
 
     try {
       const response = await fetch(endpoint.url, {

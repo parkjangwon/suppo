@@ -10,6 +10,7 @@ import { ChevronLeft, Eye, Ticket } from "lucide-react";
 import { ArticleFeedback } from "@/components/knowledge/article-feedback";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
 import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { renderSafeMarkdown } from "@crinity/shared/security/markdown";
 
 interface KnowledgeArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -85,17 +86,6 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
     },
   });
 
-  const renderMarkdown = (text: string) => {
-    return text
-      .replace(/^### (.*$)/gim, "<h3 class='text-lg font-semibold mt-4 mb-2'>$1</h3>")
-      .replace(/^## (.*$)/gim, "<h2 class='text-xl font-semibold mt-6 mb-3'>$1</h2>")
-      .replace(/^# (.*$)/gim, "<h1 class='text-2xl font-bold mt-8 mb-4'>$1</h1>")
-      .replace(/\*\*(.*)\*\*/gim, "<strong>$1</strong>")
-      .replace(/\*(.*)\*/gim, "<em>$1</em>")
-      .replace(/`([^`]+)`/gim, "<code class='bg-gray-100 px-1 py-0.5 rounded text-sm'>$1</code>")
-      .replace(/\n/gim, "<br />");
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
@@ -130,7 +120,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
               <CardContent>
                 <div
                   className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
+                  dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(article.content) }}
                 />
 
                 {article.tags && (article.tags as string[]).length > 0 && (

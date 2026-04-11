@@ -5,6 +5,7 @@ import { getSystemBranding } from "@crinity/shared/db/queries/branding";
 import { PublicCopyProvider } from "@crinity/shared/i18n/public-context";
 import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await getSystemBranding();

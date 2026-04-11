@@ -3,6 +3,23 @@ import { prisma, seedAdmin } from "../fixtures/db";
 
 test.beforeAll(async () => {
   await seedAdmin();
+  await prisma.chatWidgetSettings.upsert({
+    where: { id: "default" },
+    update: {
+      enabled: true,
+      buttonLabel: "실시간 문의",
+      buttonImageUrl: null,
+      welcomeTitle: "실시간 채팅 상담",
+    },
+    create: {
+      id: "default",
+      widgetKey: "crinity-chat-widget",
+      enabled: true,
+      buttonLabel: "실시간 문의",
+      buttonImageUrl: null,
+      welcomeTitle: "실시간 채팅 상담",
+    },
+  });
 });
 
 test.afterAll(async () => {
@@ -22,13 +39,13 @@ test.afterAll(async () => {
 });
 
 test("JS SDK가 외부 페이지에 플로팅 버튼과 iframe 위젯을 삽입한다", async ({ page }) => {
-  await page.goto("http://127.0.0.1:3000/chat/sdk-host");
+  await page.goto("http://127.0.0.1:3000/");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 
   const launcher = page.locator("#crinity-chat-launcher");
   await expect(launcher).toBeVisible({ timeout: 10000 });
-  await expect(launcher).not.toHaveText("");
+  await expect(launcher).toContainText("실시간 문의");
 
   const popupPromise = page.context().waitForEvent("page");
   await launcher.click();

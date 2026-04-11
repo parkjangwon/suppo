@@ -20,6 +20,7 @@ import { Badge } from "@crinity/ui/components/ui/badge";
 import { X, Plus, Eye, Save, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { renderSafeMarkdown } from "@crinity/shared/security/markdown";
 
 interface KnowledgeFormProps {
   article?: any;
@@ -160,17 +161,6 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
     setIsPublishing(false);
   };
 
-  const renderMarkdown = (text: string) => {
-    return text
-      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-      .replace(/\*\*(.*)\*\*/gim, "<strong>$1</strong>")
-      .replace(/\*(.*)\*/gim, "<em>$1</em>")
-      .replace(/`([^`]+)`/gim, "<code>$1</code>")
-      .replace(/\n/gim, "<br />");
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -222,7 +212,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
             )}
             <div
               className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+              dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(content) }}
             />
           </CardContent>
         </Card>

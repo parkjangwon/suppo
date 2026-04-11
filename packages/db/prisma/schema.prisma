@@ -1,6 +1,5 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -930,6 +929,7 @@ model PublicApiKey {
   name        String
   keyPrefix   String   @unique
   keyHash     String   @unique
+  scopes      Json     @default("[\"tickets:read\",\"tickets:create\"]")
   isActive    Boolean  @default(true)
   lastUsedAt  DateTime?
   createdById String

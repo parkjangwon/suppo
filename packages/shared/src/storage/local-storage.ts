@@ -27,7 +27,7 @@ export async function saveToLocal(file: File, ticketId: string, uniqueName: stri
   await fs.mkdir(ticketDir, { recursive: true });
   
   const ext = sanitizeFilename(file.name);
-  const safeFilename = `${uniqueName}${ext}`;
+  const safeFilename = uniqueName.toLowerCase().endsWith(ext) ? uniqueName : `${uniqueName}${ext}`;
   const filePath = path.join(ticketDir, safeFilename);
   
   const arrayBuffer = await file.arrayBuffer();

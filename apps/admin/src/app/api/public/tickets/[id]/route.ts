@@ -4,7 +4,10 @@ import { z } from "zod";
 import { prisma } from "@crinity/db";
 import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 
-import { authenticatePublicApiKey } from "@/lib/public-api/auth";
+import {
+  authenticatePublicApiKey,
+  hasPublicApiScope,
+} from "@/lib/public-api/auth";
 import {
   assignTicket,
   updateTicketPriority,
@@ -26,6 +29,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   if (!apiKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!hasPublicApiScope(apiKey, "tickets:read")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const { id } = await params;
   const ticket = await prisma.ticket.findUnique({
@@ -39,7 +45,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       priority: true,
       assigneeId: true,
       customerName: true,
-      customerEmail: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -56,6 +61,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const apiKey = await authenticatePublicApiKey(request);
   if (!apiKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasPublicApiScope(apiKey, "tickets:update")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

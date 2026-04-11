@@ -3,6 +3,23 @@ import { prisma, seedAdmin } from "../fixtures/db";
 
 test.beforeAll(async () => {
   await seedAdmin();
+  await prisma.chatWidgetSettings.upsert({
+    where: { id: "default" },
+    update: {
+      enabled: true,
+      buttonLabel: "채팅 상담",
+      buttonImageUrl: null,
+      welcomeTitle: "실시간 채팅 상담",
+    },
+    create: {
+      id: "default",
+      widgetKey: "crinity-chat-widget",
+      enabled: true,
+      buttonLabel: "채팅 상담",
+      buttonImageUrl: null,
+      welcomeTitle: "실시간 채팅 상담",
+    },
+  });
 });
 
 test.afterAll(async () => {
@@ -28,8 +45,7 @@ test("채팅 위젯 설정이 SDK에 반영되고 타이핑/읽음 상태가 표
   await page.getByRole("button", { name: "로그인" }).click();
   await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
 
-  await page.goto("http://127.0.0.1:3001/admin/settings/operations");
-  await page.getByRole("tab", { name: "채팅" }).click();
+  await page.goto("http://127.0.0.1:3001/admin/settings/chat");
   await expect(page.getByLabel("위젯 버튼 라벨")).not.toHaveValue("", { timeout: 10000 });
   await page.getByLabel("위젯 버튼 라벨").fill("실시간 문의");
   await page.getByLabel("위젯 환영 제목").fill("지금 바로 상담해보세요");
@@ -43,7 +59,7 @@ test("채팅 위젯 설정이 SDK에 반영되고 타이핑/읽음 상태가 표
   await expect((await settingsResponse).ok()).toBeTruthy();
 
   const hostPage = await browser.newPage();
-  await hostPage.goto("http://127.0.0.1:3000/chat/sdk-host");
+  await hostPage.goto("http://127.0.0.1:3000/");
   await hostPage.evaluate(() => localStorage.clear());
   await hostPage.reload();
 

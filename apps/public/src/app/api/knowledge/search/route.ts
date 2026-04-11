@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@crinity/db";
 import { Prisma } from "@prisma/client";
 import { knowledgeSearchSchema } from "@crinity/shared/validation/knowledge";

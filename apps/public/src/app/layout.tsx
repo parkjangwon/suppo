@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
+import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
 
 import "./globals.css";
 
@@ -55,9 +57,12 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = (await cookies()).get("crinity-locale")?.value;
+  const copy = getPublicCopy(locale);
+
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang={copy.locale} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

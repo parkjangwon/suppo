@@ -4,16 +4,24 @@ import { useEffect, useState } from "react";
 import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { Checkbox } from "@crinity/ui/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@crinity/ui/components/ui/dialog";
 import { Input } from "@crinity/ui/components/ui/input";
 import { Label } from "@crinity/ui/components/ui/label";
 import { Switch } from "@crinity/ui/components/ui/switch";
 import { toast } from "sonner";
 
+const API_KEY_SCOPES = [
+  { id: "tickets:read", label: "티켓 조회" },
+  { id: "tickets:create", label: "티켓 생성" },
+  { id: "tickets:update", label: "티켓 수정" },
+] as const;
+
 interface ApiKeyRecord {
   id: string;
   name: string;
   keyPrefix: string;
+  scopes: string[];
   isActive: boolean;
   lastUsedAt: string | null;
   createdAt: string;
@@ -25,6 +33,7 @@ export function ApiKeyManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [issuedKey, setIssuedKey] = useState<string | null>(null);
+  const [selectedScopes, setSelectedScopes] = useState<string[]>(["tickets:read", "tickets:create"]);
 
   async function fetchApiKeys() {
     const response = await fetch("/api/admin/integrations/api-keys");
@@ -48,7 +57,7 @@ export function ApiKeyManager() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name: newKeyName }),
+        body: JSON.stringify({ name: newKeyName, scopes: selectedScopes }),
       });
 
       if (!response.ok) {
@@ -58,20 +67,21 @@ export function ApiKeyManager() {
       const data = await response.json();
       setIssuedKey(data.plaintextKey);
       setNewKeyName("");
+      setSelectedScopes(["tickets:read", "tickets:create"]);
       await fetchApiKeys();
     } catch (error) {
       toast.error(copy.apiKeyCreateFailed ?? "API 키 생성에 실패했습니다.");
     }
   }
 
-  async function toggleApiKey(id: string, isActive: boolean) {
+  async function updateApiKey(id: string, payload: Record<string, unknown>) {
     try {
       const response = await fetch(`/api/admin/integrations/api-keys/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ isActive }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -82,6 +92,20 @@ export function ApiKeyManager() {
     } catch (error) {
       toast.error(copy.apiKeyToggleFailed ?? "API 키 상태 변경에 실패했습니다.");
     }
+  }
+
+  async function toggleApiKey(id: string, isActive: boolean) {
+    await updateApiKey(id, { isActive });
+  }
+
+  async function updateScopes(id: string, scopes: string[]) {
+    await updateApiKey(id, { scopes });
+  }
+
+  function toggleScope(nextScope: string, checked: boolean) {
+    setSelectedScopes((prev) =>
+      checked ? [...new Set([...prev, nextScope])] : prev.filter((scope) => scope !== nextScope)
+    );
   }
 
   async function deleteApiKey(id: string) {
@@ -109,6 +133,7 @@ export function ApiKeyManager() {
         </div>
         <Button onClick={() => {
           setIssuedKey(null);
+          setSelectedScopes(["tickets:read", "tickets:create"]);
           setIsDialogOpen(true);
         }}>
           {copy.apiKeyCreateButton ?? "API 키 발급"}
@@ -127,6 +152,9 @@ export function ApiKeyManager() {
                   <div className="text-xs text-muted-foreground">
                     {copy.gitApiKeyLastUsed ?? "마지막 사용"}: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString("ko-KR") : (copy.commonNone ?? "없음")}
                   </div>
+                  <div className="text-xs text-muted-foreground">
+                    권한: {apiKey.scopes.join(", ")}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -138,6 +166,27 @@ export function ApiKeyManager() {
                     {copy.commonDelete ?? "삭제"}
                   </Button>
                 </div>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                {API_KEY_SCOPES.map((scope) => {
+                  const checked = apiKey.scopes.includes(scope.id);
+                  const nextScopes = checked
+                    ? apiKey.scopes.filter((value) => value !== scope.id)
+                    : [...apiKey.scopes, scope.id];
+
+                  return (
+                    <label key={scope.id} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={checked}
+                        aria-label={`${apiKey.name}-${scope.id}`}
+                        onCheckedChange={(nextChecked) =>
+                          void updateScopes(apiKey.id, nextChecked ? [...new Set(nextScopes)] : nextScopes)
+                        }
+                      />
+                      <span>{scope.label}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
           ))
@@ -160,6 +209,21 @@ export function ApiKeyManager() {
                 placeholder={copy.apiKeyNamePlaceholder ?? "예: Zapier Integration"}
               />
             </div>
+            <div className="space-y-2">
+              <Label>권한</Label>
+              <div className="space-y-2 rounded-lg border p-3">
+                {API_KEY_SCOPES.map((scope) => (
+                  <label key={scope.id} className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={selectedScopes.includes(scope.id)}
+                      aria-label={`new-api-key-scope-${scope.id}`}
+                      onCheckedChange={(checked) => toggleScope(scope.id, Boolean(checked))}
+                    />
+                    <span>{scope.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
             {issuedKey ? (
               <div className="rounded-lg border bg-muted/20 p-3">
                 <div className="text-sm font-medium">{copy.apiKeyIssuedLabel ?? "발급된 키"}</div>
@@ -172,7 +236,7 @@ export function ApiKeyManager() {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 {copy.commonClose ?? "닫기"}
               </Button>
-              <Button onClick={createApiKey} disabled={!newKeyName.trim()}>
+              <Button onClick={createApiKey} disabled={!newKeyName.trim() || selectedScopes.length === 0}>
                 {copy.commonCreate ?? "발급"}
               </Button>
             </div>

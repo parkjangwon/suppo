@@ -27,14 +27,14 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@crinity/public dev`,
+      command: `DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@crinity/db migrate:deploy && DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@crinity/public dev`,
       url: "http://127.0.0.1:3000",
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
     },
     {
       command: `DATABASE_URL='${e2eDatabaseUrl}' INTERNAL_AUTOMATION_DISPATCH_TOKEN='e2e-automation-token' pnpm --filter=@crinity/admin dev`,
       url: "http://127.0.0.1:3001/admin/login",
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: false,
     },
   ],
 });

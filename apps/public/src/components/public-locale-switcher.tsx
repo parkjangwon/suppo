@@ -3,30 +3,35 @@
 import { Globe } from "lucide-react";
 import { Button } from "@crinity/ui/components/ui/button";
 import { usePublicCopy } from "@crinity/shared/i18n/public-context";
-import { useState, useEffect } from "react";
-
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : null;
-}
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 
 export function PublicLocaleSwitcher() {
   const copy = usePublicCopy();
+  const router = useRouter();
   const [clientLocale, setClientLocale] = useState<"ko" | "en">(copy.locale);
+  const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    const cookieLocale = getCookie("crinity-locale");
-    if (cookieLocale === "ko" || cookieLocale === "en") {
-      setClientLocale(cookieLocale);
+  async function setLocale(locale: "ko" | "en") {
+    if (locale === clientLocale) {
+      return;
     }
-  }, []);
 
-  function setLocale(locale: "ko" | "en") {
-    const expires = new Date();
-    expires.setFullYear(expires.getFullYear() + 1);
-    
-    document.cookie = `crinity-locale=${locale}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+    const response = await fetch("/api/locale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale }),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("locale update failed");
+    }
+
     setClientLocale(locale);
+    startTransition(() => {
+      router.refresh();
+    });
     window.location.reload();
   }
 
@@ -38,16 +43,18 @@ export function PublicLocaleSwitcher() {
       <Button 
         variant={activeLocale === "ko" ? "secondary" : "ghost"} 
         size="sm" 
-        onClick={() => setLocale("ko")}
+        onClick={() => void setLocale("ko")}
         aria-pressed={activeLocale === "ko"}
+        disabled={isPending}
       >
         KO
       </Button>
       <Button 
         variant={activeLocale === "en" ? "secondary" : "ghost"} 
         size="sm" 
-        onClick={() => setLocale("en")}
+        onClick={() => void setLocale("en")}
         aria-pressed={activeLocale === "en"}
+        disabled={isPending}
       >
         EN
       </Button>

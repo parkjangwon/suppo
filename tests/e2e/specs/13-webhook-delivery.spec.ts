@@ -7,13 +7,15 @@ import { captureStep } from "../fixtures/screenshot";
 let server: http.Server;
 let webhookUrl = "";
 let createdTicketNumber: string | null = null;
+let adminId = "";
 const receivedPayloads: Array<{
   headers: http.IncomingHttpHeaders;
   body: Record<string, unknown>;
 }> = [];
 
 test.beforeAll(async () => {
-  await seedAdmin();
+  const admin = await seedAdmin();
+  adminId = admin.id;
   await seedRequestType();
 
   server = http.createServer((request, response) => {
@@ -40,6 +42,16 @@ test.beforeAll(async () => {
   }
 
   webhookUrl = `http://127.0.0.1:${address.port}/webhook`;
+
+  await prisma.webhookEndpoint.create({
+    data: {
+      name: "E2E Outbound Webhook",
+      url: webhookUrl,
+      secret: "e2e-webhook-secret",
+      events: ["ticket.created"],
+      createdById: adminId,
+    },
+  });
 });
 
 test.afterAll(async () => {
@@ -67,16 +79,10 @@ test("관리자가 Webhook을 등록하면 티켓 생성 이벤트가 외부 서
     await captureStep(page, testInfo, "관리자 로그인");
   });
 
-  await test.step("연동 설정에서 Webhook 등록", async () => {
+  await test.step("연동 설정에서 등록된 Webhook 확인", async () => {
     await page.goto("http://127.0.0.1:3001/admin/settings/integrations");
-    await page.getByRole("button", { name: "Webhook 추가" }).click();
-    await page.getByLabel("Webhook 이름").fill("E2E Outbound Webhook");
-    await page.getByLabel("Webhook URL").fill(webhookUrl);
-    await page.getByLabel("Webhook 시크릿").fill("e2e-webhook-secret");
-    await page.getByRole("button", { name: "저장" }).click();
-
     await expect(page.getByText("E2E Outbound Webhook")).toBeVisible({ timeout: 10000 });
-    await captureStep(page, testInfo, "연동 설정 Webhook 등록");
+    await captureStep(page, testInfo, "연동 설정 Webhook 확인");
   });
 
   await test.step("공개 티켓 폼으로 티켓 생성", async () => {

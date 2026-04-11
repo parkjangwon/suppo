@@ -36,7 +36,7 @@ describe("dispatchWebhookEvent", () => {
       {
         id: "wh-1",
         name: "Ticket Created Hook",
-        url: "http://example.com/webhooks/helpdesk",
+        url: "https://example.com/webhooks/helpdesk",
         secret: "hook-secret",
         events: ["ticket.created"],
         isActive: true,
@@ -44,7 +44,7 @@ describe("dispatchWebhookEvent", () => {
       {
         id: "wh-2",
         name: "Comment Hook",
-        url: "http://example.com/webhooks/comments",
+        url: "https://example.com/webhooks/comments",
         secret: null,
         events: ["ticket.commented"],
         isActive: true,
@@ -64,7 +64,7 @@ describe("dispatchWebhookEvent", () => {
 
     expect(result.sent).toBe(1);
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    expect(mockFetch.mock.calls[0][0]).toBe("http://example.com/webhooks/helpdesk");
+    expect(mockFetch.mock.calls[0][0]).toBe("https://example.com/webhooks/helpdesk");
     expect(mockUpdateWebhookEndpoint).toHaveBeenCalledWith({
       where: { id: "wh-1" },
       data: {
@@ -89,7 +89,7 @@ describe("dispatchWebhookEvent", () => {
       {
         id: "wh-1",
         name: "Webhook A",
-        url: "http://example.com/a",
+        url: "https://example.com/a",
         secret: null,
         events: ["ticket.created"],
         isActive: true,
@@ -97,7 +97,7 @@ describe("dispatchWebhookEvent", () => {
       {
         id: "wh-2",
         name: "Webhook B",
-        url: "http://example.com/b",
+        url: "https://example.com/b",
         secret: null,
         events: ["ticket.created"],
         isActive: true,
@@ -119,7 +119,7 @@ describe("dispatchWebhookEvent", () => {
     expect(result.sent).toBe(1);
     expect(mockFetch).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledWith(
-      "http://example.com/b",
+      "https://example.com/b",
       expect.objectContaining({
         method: "POST",
       }),

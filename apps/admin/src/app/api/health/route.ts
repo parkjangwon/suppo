@@ -8,7 +8,7 @@ export async function GET() {
     redis: "unknown",
   };
 
-  let status: "healthy" | "unhealthy" = "healthy";
+  let status: "healthy" | "degraded" | "unhealthy" = "healthy";
 
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -20,13 +20,13 @@ export async function GET() {
 
   try {
     const redisAvailable = await isRedisAvailable();
-    checks.redis = redisAvailable ? "healthy" : "unhealthy";
+    checks.redis = redisAvailable ? "healthy" : "unknown";
     if (!redisAvailable) {
-      status = "unhealthy";
+      status = status === "unhealthy" ? "unhealthy" : "degraded";
     }
   } catch {
-    checks.redis = "unhealthy";
-    status = "unhealthy";
+    checks.redis = "unknown";
+    status = status === "unhealthy" ? "unhealthy" : "degraded";
   }
 
   return NextResponse.json(
@@ -35,6 +35,6 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       checks,
     },
-    { status: status === "healthy" ? 200 : 503 }
+    { status: status === "unhealthy" ? 503 : 200 }
   );
 }

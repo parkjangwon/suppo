@@ -23,6 +23,7 @@ export default async function NewTicketPage() {
   const branding = await getSystemBranding();
   const locale = (await cookies()).get("crinity-locale")?.value;
   const copy = getPublicCopy(locale);
+  const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   let requestTypes: Awaited<ReturnType<typeof listActiveRequestTypes>> = [];
   try {
@@ -48,7 +49,7 @@ export default async function NewTicketPage() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
-            <TicketForm requestTypes={requestTypes} />
+            <TicketForm requestTypes={requestTypes} captchaSiteKey={captchaSiteKey} />
           </div>
         </div>
       </div>

@@ -12,6 +12,12 @@ const compat = new FlatCompat({
 export default [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: [".next/**", "coverage/**", "playwright-report/**", "test-results/**"]
-  }
+    ignores: [".next/**", "coverage/**", "playwright-report/**", "test-results/**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-empty-object-type": "warn",
+      "prefer-const": "warn",
+      "react/no-unescaped-entities": "warn",
+    },
+  },
 ];

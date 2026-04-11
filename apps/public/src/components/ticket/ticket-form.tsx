@@ -12,18 +12,21 @@ import { usePublicCopy } from "@crinity/shared/i18n/public-context";
 import { Label } from "@crinity/ui/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
+import { CaptchaWidget } from "@/components/security/captcha-widget";
 
 interface TicketFormProps {
   requestTypes: { id: string; name: string; description?: string | null }[];
+  captchaSiteKey?: string;
 }
 
-export function TicketForm({ requestTypes }: TicketFormProps) {
+export function TicketForm({ requestTypes, captchaSiteKey }: TicketFormProps) {
   const router = useRouter();
   const branding = useBranding();
   const copy = usePublicCopy();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [files, setFiles] = useState<File[]>([]);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const {
     register,
@@ -56,6 +59,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       files.forEach((file) => {
         formData.append("attachments", file);
       });
+      formData.append("captchaToken", captchaToken);
 
       const response = await fetch("/api/tickets", {
         method: "POST",
@@ -224,6 +228,11 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
       <div className="space-y-2">
         <Label className="text-slate-700">{copy.formAttachments}</Label>
         <AttachmentUpload files={files} onChange={setFiles} />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-slate-700">보안 확인</Label>
+        <CaptchaWidget siteKey={captchaSiteKey} onTokenChange={setCaptchaToken} />
       </div>
 
       {submitError && (

@@ -38,8 +38,6 @@ export async function processAttachments(files: File[], ticketId: string) {
   }
 
   const processedFiles = [];
-  const uuid = uuidv4();
-
   for (const file of files) {
     // 파일 크기 확인
     if (file.size > MAX_FILE_SIZE) {
@@ -58,7 +56,7 @@ export async function processAttachments(files: File[], ticketId: string) {
     }
 
     // 안전한 파일 이름 생성
-    const safeFileName = generateSafeFileName(file.name, uuid);
+    const safeFileName = generateSafeFileName(file.name, uuidv4());
     let url: string;
 
     if (process.env.NODE_ENV === "production" && process.env.AWS_S3_BUCKET_NAME) {

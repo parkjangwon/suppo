@@ -3,8 +3,8 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
 import { auth } from "@/auth";
+import { isAllowedImageUploadMimeType } from "@crinity/shared/security/image-upload";
 
-const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/svg+xml", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 function getUploadDirs() {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    if (!isAllowedImageUploadMimeType(file.type)) {
       return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
     }
 
@@ -38,7 +38,8 @@ export async function POST(request: NextRequest) {
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase() || "png";
-    const filename = `${type}-${crypto.randomUUID()}.${ext}`;
+    const safeType = type.replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 32) || "widget-button";
+    const filename = `${safeType}-${crypto.randomUUID()}.${ext}`;
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

@@ -105,7 +105,6 @@ export function LLMSettingsForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          url: settings.ollamaUrl,
           model: settings.ollamaModel,
           prompt: "test",
           stream: false,

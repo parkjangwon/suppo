@@ -9,6 +9,7 @@ const { mockAuthenticatePublicApiKey, mockCreateTicket, mockFindManyTickets } = 
 
 vi.mock("@/lib/public-api/auth", () => ({
   authenticatePublicApiKey: mockAuthenticatePublicApiKey,
+  hasPublicApiScope: (apiKey: { scopes?: string[] }, scope: string) => apiKey.scopes?.includes(scope) ?? false,
 }));
 
 vi.mock("@crinity/db", () => ({
@@ -46,7 +47,11 @@ describe("public tickets api route", () => {
   });
 
   it("creates a ticket with a valid api key", async () => {
-    mockAuthenticatePublicApiKey.mockResolvedValue({ id: "key-1", name: "Integration Key" });
+    mockAuthenticatePublicApiKey.mockResolvedValue({
+      id: "key-1",
+      name: "Integration Key",
+      scopes: ["tickets:create"],
+    });
     mockCreateTicket.mockResolvedValue({
       ticket: {
         id: "ticket-1",
@@ -75,5 +80,53 @@ describe("public tickets api route", () => {
 
     expect(response.status).toBe(201);
     expect(data.ticketNumber).toBe("TKT-2026-000777");
+  });
+
+  it("returns 403 when the api key lacks read scope", async () => {
+    mockAuthenticatePublicApiKey.mockResolvedValue({
+      id: "key-1",
+      name: "Integration Key",
+      scopes: ["tickets:create"],
+    });
+
+    const request = new NextRequest("http://localhost/api/public/tickets", {
+      headers: {
+        "x-api-key": "crn_live_test",
+      },
+    });
+    const response = await GET(request);
+
+    expect(response.status).toBe(403);
+  });
+
+  it("omits customer email from list responses", async () => {
+    mockAuthenticatePublicApiKey.mockResolvedValue({
+      id: "key-1",
+      name: "Integration Key",
+      scopes: ["tickets:read"],
+    });
+    mockFindManyTickets.mockResolvedValue([
+      {
+        id: "ticket-1",
+        ticketNumber: "TKT-2026-000777",
+        subject: "API 생성 티켓",
+        status: "OPEN",
+        priority: "MEDIUM",
+        customerName: "API 고객",
+        createdAt: new Date("2026-04-11T00:00:00.000Z"),
+        updatedAt: new Date("2026-04-11T00:00:00.000Z"),
+      },
+    ]);
+
+    const request = new NextRequest("http://localhost/api/public/tickets", {
+      headers: {
+        "x-api-key": "crn_live_test",
+      },
+    });
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.tickets[0].customerEmail).toBeUndefined();
   });
 });

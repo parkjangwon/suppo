@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components
 import { Input } from "@crinity/ui/components/ui/input";
 import { Label } from "@crinity/ui/components/ui/label";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
+import { CaptchaWidget } from "@/components/security/captcha-widget";
 
 import { ChatComposer } from "./chat-composer";
 import { ChatThread } from "./chat-thread";
@@ -60,8 +61,10 @@ export function ChatWidgetShell({ settings }: { settings: WidgetSettings }) {
   const [session, setSession] = useState<SessionState | null>(null);
   const [conversation, setConversation] = useState<ConversationPayload | null>(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [agentTyping, setAgentTyping] = useState(false);
   const [lastReadCommentId, setLastReadCommentId] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
   const [form, setForm] = useState({
     customerName: "",
     customerEmail: "",
@@ -159,6 +162,7 @@ export function ChatWidgetShell({ settings }: { settings: WidgetSettings }) {
 
   async function startConversation() {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const response = await fetch("/api/chat/conversations", {
         method: "POST",
@@ -170,11 +174,13 @@ export function ChatWidgetShell({ settings }: { settings: WidgetSettings }) {
           customerEmail: form.customerEmail,
           initialMessage: form.initialMessage,
           widgetKey: settings.widgetKey,
+          captchaToken,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("failed to create conversation");
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? "failed to create conversation");
       }
 
       const data = await response.json();
@@ -187,6 +193,8 @@ export function ChatWidgetShell({ settings }: { settings: WidgetSettings }) {
       writeSession(storageKey, nextSession);
       setSession(nextSession);
       await loadConversation(nextSession);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "채팅을 시작하지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -270,6 +278,18 @@ export function ChatWidgetShell({ settings }: { settings: WidgetSettings }) {
                     rows={5}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>보안 확인</Label>
+                  <CaptchaWidget
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                    onTokenChange={setCaptchaToken}
+                  />
+                </div>
+                {errorMessage ? (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {errorMessage}
+                  </div>
+                ) : null}
                 <div className="flex justify-end">
                   <Button onClick={startConversation} disabled={loading}>
                     {loading ? "시작 중..." : "채팅 시작"}

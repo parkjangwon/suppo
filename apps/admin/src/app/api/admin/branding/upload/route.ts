@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { isAllowedImageUploadMimeType } from "@crinity/shared/security/image-upload";
 
-const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/svg+xml", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 function getUploadDirs() {
@@ -29,9 +29,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    if (!isAllowedImageUploadMimeType(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Allowed: PNG, JPG, GIF, SVG, WebP" },
+        { error: "Invalid file type. Allowed: PNG, JPG, GIF, WebP" },
         { status: 400 }
       );
     }
@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const ext = file.name.split(".").pop()?.toLowerCase() || "png";
-    const filename = `${type || "image"}-${crypto.randomUUID()}.${ext}`;
+    const safeType = (type || "image").replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 32) || "image";
+    const filename = `${safeType}-${crypto.randomUUID()}.${ext}`;
     
     // Save to public/uploads/branding directory
     const bytes = await file.arrayBuffer();

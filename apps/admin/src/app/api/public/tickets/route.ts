@@ -5,7 +5,10 @@ import { prisma } from "@crinity/db";
 import { createTicket } from "@crinity/shared/tickets/create-ticket";
 import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 
-import { authenticatePublicApiKey } from "@/lib/public-api/auth";
+import {
+  authenticatePublicApiKey,
+  hasPublicApiScope,
+} from "@/lib/public-api/auth";
 
 const createPublicTicketSchema = z.object({
   customerName: z.string().min(1),
@@ -22,6 +25,9 @@ export async function GET(request: NextRequest) {
   const apiKey = await authenticatePublicApiKey(request);
   if (!apiKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasPublicApiScope(apiKey, "tickets:read")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);
@@ -41,7 +47,6 @@ export async function GET(request: NextRequest) {
       status: true,
       priority: true,
       customerName: true,
-      customerEmail: true,
       assigneeId: true,
       createdAt: true,
       updatedAt: true,
@@ -58,6 +63,9 @@ export async function POST(request: NextRequest) {
   const apiKey = await authenticatePublicApiKey(request);
   if (!apiKey) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasPublicApiScope(apiKey, "tickets:create")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

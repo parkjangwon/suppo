@@ -3,10 +3,16 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
-import { createPublicApiKey } from "@/lib/public-api/auth";
+import {
+  createPublicApiKey,
+  DEFAULT_PUBLIC_API_KEY_SCOPES,
+  normalizePublicApiKeyScopes,
+  PUBLIC_API_SCOPES,
+} from "@/lib/public-api/auth";
 
 const createApiKeySchema = z.object({
   name: z.string().min(1),
+  scopes: z.array(z.enum(PUBLIC_API_SCOPES)).min(1).default(DEFAULT_PUBLIC_API_KEY_SCOPES),
 });
 
 export async function GET() {
@@ -22,13 +28,19 @@ export async function GET() {
       id: true,
       name: true,
       keyPrefix: true,
+      scopes: true,
       isActive: true,
       lastUsedAt: true,
       createdAt: true,
     },
   });
 
-  return NextResponse.json(apiKeys);
+  return NextResponse.json(
+    apiKeys.map((apiKey) => ({
+      ...apiKey,
+      scopes: normalizePublicApiKeyScopes(apiKey.scopes),
+    }))
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -41,13 +53,18 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const validated = createApiKeySchema.parse(body);
-    const { apiKey, plaintextKey } = await createPublicApiKey(validated.name, session.user.agentId);
+    const { apiKey, plaintextKey } = await createPublicApiKey(
+      validated.name,
+      session.user.agentId,
+      validated.scopes
+    );
 
     return NextResponse.json(
       {
         id: apiKey.id,
         name: apiKey.name,
         keyPrefix: apiKey.keyPrefix,
+        scopes: normalizePublicApiKeyScopes(apiKey.scopes),
         plaintextKey,
         isActive: apiKey.isActive,
         createdAt: apiKey.createdAt,

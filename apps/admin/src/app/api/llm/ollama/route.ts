@@ -1,24 +1,30 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { prisma } from "@crinity/db";
+import { DEFAULT_LLM_SETTINGS } from "@/lib/settings/default-llm-settings";
 
 export async function POST(request: Request) {
   try {
     const session = await auth();
-    if (!session?.user) {
+    if (!session?.user || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { url, model, prompt, stream = false } = body;
+    const { model, prompt, stream = false } = body;
 
-    if (!url || !model || !prompt) {
+    if (!model || !prompt) {
       return NextResponse.json(
-        { error: "url, model, prompt are required" },
+        { error: "model and prompt are required" },
         { status: 400 }
       );
     }
 
-    const baseUrl = url.endsWith("/") ? url.slice(0, -1) : url;
+    const settings = await prisma.lLMSettings.findUnique({
+      where: { id: "default" },
+    });
+    const configuredUrl = settings?.ollamaUrl || DEFAULT_LLM_SETTINGS.ollamaUrl;
+    const baseUrl = configuredUrl.endsWith("/") ? configuredUrl.slice(0, -1) : configuredUrl;
     
     const response = await fetch(`${baseUrl}/api/generate`, {
       method: "POST",
