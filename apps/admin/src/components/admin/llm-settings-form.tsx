@@ -105,9 +105,9 @@ export function LLMSettingsForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          url: settings.ollamaUrl,
           model: settings.ollamaModel,
           prompt: "test",
-          stream: false,
         }),
       });
 
@@ -116,7 +116,14 @@ export function LLMSettingsForm() {
         throw new Error(error);
       }
 
-      setTestConnectionMessage(copy.llmOllamaSuccess ?? "연결 성공: Ollama 서버가 응답했습니다.");
+      const data = await response.json();
+      const resolvedModel =
+        typeof data.resolvedModel === "string" && data.resolvedModel
+          ? data.resolvedModel
+          : settings.ollamaModel;
+      setTestConnectionMessage(
+        `${copy.llmOllamaSuccess ?? "연결 성공: Ollama 서버가 응답했습니다."} (${resolvedModel})`
+      );
     } catch (error) {
       console.error("Failed to test Ollama connection:", error);
       setTestConnectionMessage(copy.llmOllamaFailed ?? "연결 실패: Ollama 서버에 접근할 수 없습니다.");

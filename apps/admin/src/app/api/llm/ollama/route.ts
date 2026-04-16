@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { DEFAULT_LLM_SETTINGS } from "@/lib/settings/default-llm-settings";
+import {
+  generateOllamaText,
+  normalizeOllamaBaseUrl,
+} from "@/lib/llm/providers/ollama";
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { model, prompt, stream = false } = body;
+    const { model, prompt } = body;
 
     if (!model || !prompt) {
       return NextResponse.json(
@@ -23,36 +27,30 @@ export async function POST(request: Request) {
     const settings = await prisma.lLMSettings.findUnique({
       where: { id: "default" },
     });
-    const configuredUrl = settings?.ollamaUrl || DEFAULT_LLM_SETTINGS.ollamaUrl;
-    const baseUrl = configuredUrl.endsWith("/") ? configuredUrl.slice(0, -1) : configuredUrl;
-    
-    const response = await fetch(`${baseUrl}/api/generate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        prompt,
-        stream,
-      }),
-      signal: AbortSignal.timeout(60_000),
+    const configuredUrl =
+      typeof body.url === "string" && body.url.trim()
+        ? body.url.trim()
+        : settings?.ollamaUrl || DEFAULT_LLM_SETTINGS.ollamaUrl;
+    const result = await generateOllamaText({
+      baseUrl: normalizeOllamaBaseUrl(configuredUrl),
+      model,
+      prompt,
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      return NextResponse.json(
-        { error: `Ollama API error (${response.status}): ${text}` },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
+    return NextResponse.json({
+      response: result.text,
+      model,
+      resolvedModel: result.resolvedModel,
+    });
   } catch (error) {
     console.error("Ollama proxy error:", error);
     return NextResponse.json(
-      { error: "Failed to connect to Ollama server" },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to connect to Ollama server",
+      },
       { status: 500 }
     );
   }

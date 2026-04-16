@@ -34,7 +34,7 @@ const defaultBranding: SystemBranding = {
   adminPanelTitle: "Crinity Admin",
   appTitle: "고객 지원 센터",
   welcomeMessage: "무엇을 도와드릴까요?",
-  footerText: "© 2024 Crinity. All rights reserved.",
+  footerText: "© 2026 Crinity. All rights reserved.",
   showPoweredBy: true,
   knowledgeEnabled: true,
   customCss: undefined,
