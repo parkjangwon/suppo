@@ -23,7 +23,7 @@ describe("getAdminNavSections", () => {
     const labels = sections.flatMap((section) => section.items.map((item) => item.label));
 
     expect(labels).toContain("업무 규칙");
-    expect(labels).toContain("채팅 설정");
+    expect(labels).not.toContain("채팅 설정");
     expect(labels).toContain("연동 설정");
     expect(labels).toContain("팀 관리");
     expect(labels).toContain("고객 관리");

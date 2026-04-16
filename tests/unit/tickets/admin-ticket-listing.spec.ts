@@ -20,14 +20,12 @@ describe("admin ticket listing", () => {
     prismaMock.ticket.findMany.mockResolvedValue([]);
   });
 
-  it("excludes live chat tickets from the normal ticket listing", async () => {
+  it("loads ticket list without forcing a live-chat exclusion filter", async () => {
     await getAdminTickets({});
 
     expect(prismaMock.ticket.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: {
-          chatConversation: null,
-        },
+        where: {},
       }),
     );
   });

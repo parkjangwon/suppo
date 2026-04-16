@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { addComment, getAdminTicketDetail, updateTicketStatus } from "@/lib/db/queries/admin-tickets";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import {
   enqueueInternalCommentNotifications,
   enqueueNewCommentEmail,
@@ -86,34 +87,7 @@ export async function POST(request: NextRequest) {
         ticket.ticketNumber,
         authorName
       );
-    }
-
-    const chatConversation = await prisma.chatConversation.findUnique({
-      where: { ticketId },
-      select: { id: true },
-    });
-
-    if (chatConversation && !isInternal) {
-      await prisma.chatConversation.update({
-        where: { id: chatConversation.id },
-        data: {
-          status: "WAITING_CUSTOMER",
-          lastMessageAt: new Date(),
-          lastAgentMessageAt: new Date(),
-        },
-      });
-
-      await prisma.chatEvent.create({
-        data: {
-          conversationId: chatConversation.id,
-          ticketId,
-          type: "message.created",
-          payload: {
-            commentId: comment.id,
-            senderType: "AGENT",
-          },
-        },
-      });
+      dispatchEmailOutboxSoon();
     }
 
     await dispatchWebhookEvent("ticket.commented", {

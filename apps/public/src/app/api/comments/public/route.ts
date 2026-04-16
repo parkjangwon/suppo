@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import { enqueueInternalCommentNotifications } from "@crinity/shared/email/enqueue";
 import { verifyTicketAccessToken } from "@crinity/shared/security/ticket-access";
 import { cookies } from "next/headers";
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
       ticket.ticketNumber,
       ticket.customerName
     );
+    dispatchEmailOutboxSoon();
 
     return NextResponse.json({ success: true, comment });
   } catch (error) {

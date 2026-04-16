@@ -3,6 +3,8 @@ import { randomBytes } from "node:crypto";
 import { prisma } from "@crinity/db";
 import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pick-assignee";
 import { buildChatCustomerTokenHash } from "@crinity/shared/chat/token";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
+import { enqueueTicketCreatedEmails } from "@crinity/shared/email/enqueue";
 import { generateTicketNumber } from "@crinity/shared/tickets/ticket-number";
 
 export { buildChatCustomerTokenHash } from "@crinity/shared/chat/token";
@@ -151,7 +153,7 @@ export async function createChatConversation(input: StartChatConversationInput, 
   const customerToken = issueChatCustomerToken();
   const customerTokenHash = buildChatCustomerTokenHash(customerToken);
 
-  return db.$transaction(async (tx) => {
+  const result = await db.$transaction(async (tx) => {
     const widgetSettings = await tx.chatWidgetSettings.findUnique({
       where: { id: "default" },
     });
@@ -250,10 +252,24 @@ export async function createChatConversation(input: StartChatConversationInput, 
       conversationId: conversation.id,
       ticketId: ticket.id,
       ticketNumber: ticket.ticketNumber,
+      ticketSubject: ticket.subject,
+      customerName: ticket.customerName,
+      customerEmail: ticket.customerEmail,
       customerToken,
       assigneeId: assignee?.id ?? null,
     };
   });
+
+  await enqueueTicketCreatedEmails({
+    ticketId: result.ticketId,
+    ticketNumber: result.ticketNumber,
+    ticketSubject: result.ticketSubject,
+    customerName: result.customerName,
+    customerEmail: result.customerEmail,
+  });
+  dispatchEmailOutboxSoon();
+
+  return result;
 }
 
 export async function postChatMessage(input: PostChatMessageInput, db: ChatDb = prisma as never) {

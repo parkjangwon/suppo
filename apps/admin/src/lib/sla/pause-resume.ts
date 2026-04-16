@@ -1,4 +1,5 @@
 import { prisma } from "@crinity/db";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
 import { enqueueSLABreachEmail } from "@crinity/shared/email/enqueue";
 
@@ -118,6 +119,9 @@ export async function checkSLABreaches(): Promise<void> {
       assignee?.name ?? "담당자",
       targetLabel
     );
+  }
+  if (breachedClocks.length > 0) {
+    dispatchEmailOutboxSoon();
   }
 }
 

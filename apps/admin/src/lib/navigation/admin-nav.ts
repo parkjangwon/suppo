@@ -6,8 +6,6 @@ export type AdminNavItemKey =
   | "dashboard"
   | "analytics"
   | "knowledge"
-  | "chats"
-  | "chat-settings"
   | "integration-settings"
   | "tickets"
   | "agents"
@@ -50,7 +48,6 @@ const NAV_ITEMS: Array<{
   { key: "dashboard", href: "/admin/dashboard", section: "main" },
   { key: "analytics", href: "/admin/analytics", section: "main" },
   { key: "knowledge", href: "/admin/knowledge", section: "main" },
-  { key: "chats", href: "/admin/chats", section: "main" },
   { key: "tickets", href: "/admin/tickets", section: "main" },
   { key: "agents", href: "/admin/agents", section: "main", hiddenForRoles: ["VIEWER"] },
   { key: "calendar", href: "/admin/calendar", section: "main", hiddenForRoles: ["VIEWER"] },
@@ -61,7 +58,6 @@ const NAV_ITEMS: Array<{
   { key: "git", href: "/admin/settings/git", section: "settings", adminOnly: true },
   { key: "email", href: "/admin/settings/email", section: "settings", adminOnly: true },
   { key: "integration-settings", href: "/admin/settings/integrations", section: "settings", adminOnly: true },
-  { key: "chat-settings", href: "/admin/settings/chat", section: "settings", adminOnly: true },
   { key: "branding", href: "/admin/settings/branding", section: "settings", adminOnly: true },
   { key: "business-hours", href: "/admin/settings/business-hours", section: "settings", adminOnly: true },
   { key: "operations", href: "/admin/settings/operations", section: "settings", adminOnly: true },
@@ -77,7 +73,6 @@ function getNavLabel(key: AdminNavItemKey, copy?: AdminCopy): string {
       dashboard: "대시보드",
       analytics: "분석 및 리포트",
       knowledge: "지식",
-      chats: "실시간 채팅",
       tickets: "티켓 목록",
       agents: "상담원 관리",
       calendar: "일정 관리",
@@ -88,7 +83,6 @@ function getNavLabel(key: AdminNavItemKey, copy?: AdminCopy): string {
       git: "Git 연동",
       email: "이메일 연동",
       "integration-settings": "연동 설정",
-      "chat-settings": "채팅 설정",
       branding: "브랜딩",
       "business-hours": "영업시간",
       operations: "업무 규칙",
@@ -104,7 +98,6 @@ function getNavLabel(key: AdminNavItemKey, copy?: AdminCopy): string {
     dashboard: copy.navDashboard,
     analytics: copyText(copy, "navAnalytics", "분석 및 리포트"),
     knowledge: copy.navKnowledge,
-    chats: copyText(copy, "navChats", "실시간 채팅"),
     tickets: copy.navTickets,
     agents: copy.navAgents,
     calendar: copy.navCalendar,
@@ -115,7 +108,6 @@ function getNavLabel(key: AdminNavItemKey, copy?: AdminCopy): string {
     git: copy.settingsGit,
     email: copy.settingsEmail,
     "integration-settings": copyText(copy, "settingsIntegrations", "연동 설정"),
-    "chat-settings": copyText(copy, "settingsChatSettings", "채팅 설정"),
     branding: copy.settingsBranding,
     "business-hours": copy.settingsBusinessHours,
     operations: copy.settingsOperations,

@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
-import { prisma } from "@crinity/db";
-
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { ApiKeyManager } from "@/components/admin/api-key-manager";
@@ -30,8 +28,6 @@ export default async function IntegrationSettingsPage() {
       />
     );
   }
-
-  await prisma.chatWidgetSettings.findUnique({ where: { id: "default" } }).catch(() => null);
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-8 space-y-6">

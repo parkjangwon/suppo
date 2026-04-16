@@ -94,55 +94,6 @@ export async function PATCH(
       updatedTicket = await assignTicket(id, validated.assigneeId, session.user.agentId);
     }
 
-    if (validated.status) {
-      const chatConversation = await prisma.chatConversation.findUnique({
-        where: { ticketId: id },
-        select: { id: true },
-      });
-
-      if (chatConversation) {
-        if (validated.status === "RESOLVED" || validated.status === "CLOSED") {
-          await prisma.chatConversation.update({
-            where: { id: chatConversation.id },
-            data: {
-              status: "ENDED",
-              endedAt: new Date(),
-            },
-          });
-
-          await prisma.chatEvent.create({
-            data: {
-              conversationId: chatConversation.id,
-              ticketId: id,
-              type: "conversation.ended",
-              payload: {
-                ticketStatus: validated.status,
-              },
-            },
-          });
-        } else {
-          await prisma.chatConversation.update({
-            where: { id: chatConversation.id },
-            data: {
-              status: "ACTIVE",
-              endedAt: null,
-            },
-          });
-
-          await prisma.chatEvent.create({
-            data: {
-              conversationId: chatConversation.id,
-              ticketId: id,
-              type: "conversation.reopened",
-              payload: {
-                ticketStatus: validated.status,
-              },
-            },
-          });
-        }
-      }
-    }
-
     if (validated.status || validated.priority || validated.assigneeId !== undefined) {
       await dispatchWebhookEvent("ticket.updated", {
         source: "admin-panel",

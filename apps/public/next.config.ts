@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
     "@libsql/client",
     "libsql",
     "@libsql/darwin-arm64",
-    "@libsql/hrana-client"
+    "@libsql/hrana-client",
+    "nodemailer",
+    "@aws-sdk/client-sesv2"
   ],
   transpilePackages: ["@crinity/ui", "@crinity/shared"],
   eslint: {
@@ -63,36 +65,6 @@ const nextConfig: NextConfig = {
       .join("; ");
 
     return [
-      {
-        source: "/chat/embed",
-        headers: [
-          { key: "Content-Security-Policy", value: embedCspValue },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=(), fullscreen=(), payment=()"
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload"
-          },
-          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
-          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
-          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" }
-        ]
-      },
-      {
-        source: "/chat/sdk",
-        headers: [
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
-          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
-          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
-          { key: "X-Content-Type-Options", value: "nosniff" }
-        ]
-      },
       {
         source: "/:path*",
         headers: [

@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
     "@libsql/client",
     "libsql",
     "@libsql/darwin-arm64",
-    "@libsql/hrana-client"
+    "@libsql/hrana-client",
+    "nodemailer",
+    "@aws-sdk/client-sesv2"
   ],
   transpilePackages: ["@crinity/ui", "@crinity/shared"],
   eslint: {

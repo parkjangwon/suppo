@@ -3,6 +3,7 @@
 
 import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
 import { prisma } from "@crinity/db";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import { enqueueSLAWarningEmail, enqueueSLABreachEmail } from "@crinity/shared/email/enqueue";
 
 interface BusinessHours {
@@ -348,6 +349,9 @@ export async function checkSLABreaches(): Promise<void> {
       data: { warningSentAt: now },
     });
   }
+  if (warningClocks.length > 0) {
+    dispatchEmailOutboxSoon();
+  }
 
   for (const clock of breachedClocks) {
     await prisma.sLAClock.update({
@@ -365,6 +369,9 @@ export async function checkSLABreaches(): Promise<void> {
       assignee?.name ?? "담당자",
       targetLabel
     );
+  }
+  if (breachedClocks.length > 0) {
+    dispatchEmailOutboxSoon();
   }
 }
 

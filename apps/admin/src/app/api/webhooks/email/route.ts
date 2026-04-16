@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import { enqueueInternalCommentNotifications } from "@crinity/shared/email/enqueue";
 import { processAttachments } from "@crinity/shared/storage/attachment-service";
 import { z } from "zod";
@@ -325,6 +326,7 @@ async function addCommentToExistingTicket(
     ticket.ticketNumber,
     email.fromName || email.from.split("@")[0],
   );
+  dispatchEmailOutboxSoon();
 
   return NextResponse.json({
     success: true,

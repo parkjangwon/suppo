@@ -1,2 +1,0 @@
-chat attachment sample
-status=ok

@@ -185,7 +185,6 @@ export default async function TicketsPage({
 
   const where: Prisma.TicketWhereInput = {
     ...(andFilters.length > 0 ? { AND: andFilters } : {}),
-    chatConversation: null,
   };
 
   const tickets = await prisma.ticket.findMany({

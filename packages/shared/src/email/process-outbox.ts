@@ -92,13 +92,23 @@ function getNextRetryAt(now: Date, nextAttemptCount: number): Date | null {
 }
 
 async function getEmailSettings() {
-  const settings = await prisma.emailSettings.findUnique({
+  const prismaLike = prisma as unknown as {
+    emailSettings?: {
+      findUnique?: (args: { where: { id: string } }) => Promise<unknown>;
+    };
+  };
+  const findUnique = prismaLike.emailSettings?.findUnique;
+  if (!findUnique) {
+    return getDefaultEmailSettings();
+  }
+
+  const settings = await findUnique({
     where: { id: "default" },
-  });
+  }) as Record<string, unknown> | null;
 
   return {
     ...getDefaultEmailSettings(),
-    ...settings,
+    ...(settings ?? {}),
   };
 }
 

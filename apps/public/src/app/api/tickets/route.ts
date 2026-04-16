@@ -5,6 +5,7 @@ import { ticketFormSchema } from "@crinity/shared/validation/ticket";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
 import { createTicket } from "@crinity/shared/tickets/create-ticket";
 import { classifyTicket } from "@crinity/shared/ai/classifier";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import { enqueueTicketCreatedEmails } from "@crinity/shared/email/enqueue";
 import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 import { prisma } from "@crinity/db";
@@ -140,6 +141,7 @@ export async function POST(request: NextRequest) {
       customerName: result.ticket.customerName,
       customerEmail: result.ticket.customerEmail,
     });
+    dispatchEmailOutboxSoon();
 
     await dispatchWebhookEvent("ticket.created", {
       source: "public-form",

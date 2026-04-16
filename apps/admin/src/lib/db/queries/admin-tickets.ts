@@ -1,4 +1,5 @@
 import { prisma } from "@crinity/db";
+import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
 import { TicketStatus, TicketPriority, Prisma } from "@prisma/client";
 import {
   enqueueCSATSurveyEmail,
@@ -32,9 +33,7 @@ export async function getAdminTickets(params: GetAdminTicketsParams) {
     agentRole,
   } = params;
 
-  const where: Prisma.TicketWhereInput = {
-    chatConversation: null,
-  };
+  const where: Prisma.TicketWhereInput = {};
 
   if (status) where.status = status;
   if (priority) where.priority = priority;
@@ -187,6 +186,7 @@ export async function updateTicketStatus(
       oldTicket.status,
       status
     );
+    dispatchEmailOutboxSoon();
   }
 
   return ticket;
@@ -284,6 +284,7 @@ export async function assignTicket(
         },
         assignee.name
       );
+      dispatchEmailOutboxSoon();
     }
   }
 
