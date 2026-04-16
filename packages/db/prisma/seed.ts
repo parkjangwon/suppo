@@ -17,13 +17,29 @@ import {
   seedCSAT,
 } from "../../../apps/admin/src/lib/system/seed-functions";
 
+type LibsqlAdapterConfig = {
+  url: string;
+  authToken?: string;
+};
+type PrismaClientOptions = NonNullable<ConstructorParameters<typeof PrismaClient>[0]>;
+type PrismaAdapter = NonNullable<PrismaClientOptions["adapter"]>;
+type PrismaLibsqlAdapterCtor = new (config: LibsqlAdapterConfig) => PrismaAdapter;
+type PrismaLibsqlModule = {
+  PrismaLibSql?: PrismaLibsqlAdapterCtor;
+  PrismaLibSQL?: PrismaLibsqlAdapterCtor;
+};
+
 function createClient(): PrismaClient {
   const url = process.env.DATABASE_URL ?? "";
   if (url.startsWith("http://") || url.startsWith("https://")) {
     // LibSQL (sqld) — 어댑터를 통해 연결
-    const { PrismaLibSQL } = require("@prisma/adapter-libsql");
+    const libsqlModule = require("@prisma/adapter-libsql") as PrismaLibsqlModule;
+    const PrismaLibsql = libsqlModule.PrismaLibSql ?? libsqlModule.PrismaLibSQL;
+    if (!PrismaLibsql) {
+      throw new Error("Unsupported @prisma/adapter-libsql export shape");
+    }
     return new PrismaClient({
-      adapter: new PrismaLibSQL({ url, authToken: process.env.DATABASE_AUTH_TOKEN }),
+      adapter: new PrismaLibsql({ url, authToken: process.env.DATABASE_AUTH_TOKEN }),
     });
   }
   return new PrismaClient();
