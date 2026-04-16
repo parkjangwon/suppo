@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@crinity/ui/co
 import { Input } from "@crinity/ui/components/ui/input";
 import { Label } from "@crinity/ui/components/ui/label";
 import { Switch } from "@crinity/ui/components/ui/switch";
+import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 const API_KEY_SCOPES = [
@@ -34,6 +35,8 @@ export function ApiKeyManager() {
   const [newKeyName, setNewKeyName] = useState("");
   const [issuedKey, setIssuedKey] = useState<string | null>(null);
   const [selectedScopes, setSelectedScopes] = useState<string[]>(["tickets:read", "tickets:create"]);
+  const [sessionPlaintextKeys, setSessionPlaintextKeys] = useState<Record<string, string>>({});
+  const [copiedValue, setCopiedValue] = useState<string | null>(null);
 
   async function fetchApiKeys() {
     const response = await fetch("/api/admin/integrations/api-keys");
@@ -49,6 +52,19 @@ export function ApiKeyManager() {
       toast.error(copy.apiKeyLoadFailed ?? "API 키를 불러오지 못했습니다.");
     });
   }, []);
+
+  function markCopied(value: string) {
+    setCopiedValue(value);
+    window.setTimeout(() => {
+      setCopiedValue((current) => (current === value ? null : current));
+    }, 1500);
+  }
+
+  async function copyToClipboard(text: string, label: string) {
+    await navigator.clipboard.writeText(text);
+    markCopied(text);
+    toast.success(copy.commonCopiedLabel ?? `${label}이(가) 복사되었습니다.`);
+  }
 
   async function createApiKey() {
     try {
@@ -66,6 +82,10 @@ export function ApiKeyManager() {
 
       const data = await response.json();
       setIssuedKey(data.plaintextKey);
+      setSessionPlaintextKeys((prev) => ({
+        ...prev,
+        [data.id]: data.plaintextKey,
+      }));
       setNewKeyName("");
       setSelectedScopes(["tickets:read", "tickets:create"]);
       await fetchApiKeys();
@@ -118,10 +138,37 @@ export function ApiKeyManager() {
         throw new Error("failed to delete key");
       }
 
+      setSessionPlaintextKeys((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
       await fetchApiKeys();
     } catch (error) {
       toast.error(copy.apiKeyDeleteFailed ?? "API 키 삭제에 실패했습니다.");
     }
+  }
+
+  async function handleCopyIssuedKey() {
+    if (!issuedKey) {
+      return;
+    }
+
+    await copyToClipboard(issuedKey, copy.apiKeyIssuedLabel ?? "API 키");
+  }
+
+  async function handleCopyListKey(apiKey: ApiKeyRecord) {
+    const plaintextKey = sessionPlaintextKeys[apiKey.id];
+
+    if (!plaintextKey) {
+      toast.error(
+        copy.apiKeyCopyUnavailable ??
+          "보안상 전체 API 키는 발급 시 1회만 확인할 수 있습니다. 필요하면 새 키를 발급하세요.",
+      );
+      return;
+    }
+
+    await copyToClipboard(plaintextKey, apiKey.name);
   }
 
   return (
@@ -149,6 +196,12 @@ export function ApiKeyManager() {
                 <div className="space-y-1">
                   <div className="font-medium">{apiKey.name}</div>
                   <div className="text-sm text-muted-foreground">{apiKey.keyPrefix}...</div>
+                  {!sessionPlaintextKeys[apiKey.id] ? (
+                    <div className="text-xs text-amber-600">
+                      {copy.apiKeyCopyUnavailableHint ??
+                        "보안상 전체 키는 발급 직후 1회만 복사할 수 있습니다."}
+                    </div>
+                  ) : null}
                   <div className="text-xs text-muted-foreground">
                     {copy.gitApiKeyLastUsed ?? "마지막 사용"}: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString("ko-KR") : (copy.commonNone ?? "없음")}
                   </div>
@@ -157,6 +210,21 @@ export function ApiKeyManager() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {sessionPlaintextKeys[apiKey.id] ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      title={copy.commonCopy ?? "복사"}
+                      onClick={() => void handleCopyListKey(apiKey)}
+                    >
+                      {copiedValue === sessionPlaintextKeys[apiKey.id] ? (
+                        <Check className="mr-2 h-4 w-4" />
+                      ) : (
+                        <Copy className="mr-2 h-4 w-4" />
+                      )}
+                      {copy.commonCopy ?? "복사"}
+                    </Button>
+                  ) : null}
                   <Switch
                     checked={apiKey.isActive}
                     onCheckedChange={(checked) => toggleApiKey(apiKey.id, checked)}
@@ -226,10 +294,23 @@ export function ApiKeyManager() {
             </div>
             {issuedKey ? (
               <div className="rounded-lg border bg-muted/20 p-3">
-                <div className="text-sm font-medium">{copy.apiKeyIssuedLabel ?? "발급된 키"}</div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-sm font-medium">{copy.apiKeyIssuedLabel ?? "발급된 키"}</div>
+                  <Button variant="outline" size="sm" onClick={() => void handleCopyIssuedKey()}>
+                    {copiedValue === issuedKey ? (
+                      <Check className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Copy className="mr-2 h-4 w-4" />
+                    )}
+                    {copy.commonCopy ?? "복사"}
+                  </Button>
+                </div>
                 <div className="mt-2 break-all font-mono text-sm" aria-label="issued-api-key">
                   {issuedKey}
                 </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {copy.apiKeyIssuedHelp ?? "전체 키는 발급 후 이 화면 또는 현재 세션에서만 다시 복사할 수 있습니다."}
+                </p>
               </div>
             ) : null}
             <div className="flex justify-end gap-2">

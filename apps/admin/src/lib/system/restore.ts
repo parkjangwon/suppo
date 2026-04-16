@@ -48,6 +48,118 @@ interface RestoreResult {
   backupSchemaVersion: string;
 }
 
+export const RESTORE_DELETE_ORDER = [
+  "webhookDeliveryLog",
+  "ticketKnowledgeLink",
+  "knowledgeArticleFeedback",
+  "chatEvent",
+  "chatConversation",
+  "knowledgeArticle",
+  "knowledgeCategory",
+  "generatedReport",
+  "reportSchedule",
+  "auditLog",
+  "customerSatisfaction",
+  "ticketMerge",
+  "ticketTransfer",
+  "ticketActivity",
+  "ticketPresence",
+  "ticketCommentLock",
+  "timeEntry",
+  "gitOperationQueue",
+  "gitEvent",
+  "gitLink",
+  "emailDelivery",
+  "emailThreadMapping",
+  "comment",
+  "attachment",
+  "customFieldValue",
+  "sLAClock",
+  "ticket",
+  "savedFilter",
+  "publicApiKey",
+  "webhookEndpoint",
+  "macro",
+  "agentAbsence",
+  "agentCategory",
+  "notificationSetting",
+  "teamMember",
+  "team",
+  "agent",
+  "customer",
+  "automationRule",
+  "sLAPolicy",
+  "holiday",
+  "businessCalendar",
+  "customFieldDefinition",
+  "responseTemplate",
+  "requestType",
+  "gitProviderCredential",
+  "sAMLProvider",
+  "systemBranding",
+  "lLMSettings",
+  "emailSettings",
+  "chatWidgetProfile",
+  "chatWidgetSettings",
+  "category",
+] as const;
+
+export const RESTORE_INSERT_ORDER = [
+  "category",
+  "chatWidgetSettings",
+  "chatWidgetProfile",
+  "emailSettings",
+  "lLMSettings",
+  "systemBranding",
+  "sAMLProvider",
+  "gitProviderCredential",
+  "requestType",
+  "responseTemplate",
+  "customFieldDefinition",
+  "businessCalendar",
+  "holiday",
+  "sLAPolicy",
+  "automationRule",
+  "customer",
+  "agent",
+  "team",
+  "teamMember",
+  "notificationSetting",
+  "agentCategory",
+  "agentAbsence",
+  "macro",
+  "webhookEndpoint",
+  "publicApiKey",
+  "savedFilter",
+  "ticket",
+  "chatConversation",
+  "sLAClock",
+  "customFieldValue",
+  "attachment",
+  "comment",
+  "emailThreadMapping",
+  "emailDelivery",
+  "gitLink",
+  "gitEvent",
+  "gitOperationQueue",
+  "timeEntry",
+  "ticketCommentLock",
+  "ticketPresence",
+  "ticketActivity",
+  "ticketTransfer",
+  "ticketMerge",
+  "customerSatisfaction",
+  "auditLog",
+  "reportSchedule",
+  "generatedReport",
+  "knowledgeCategory",
+  "knowledgeArticle",
+  "ticketKnowledgeLink",
+  "knowledgeArticleFeedback",
+  "chatEvent",
+  "webhookDeliveryLog",
+] as const;
+
 /** ZIP 버퍼로부터 DB + 첨부파일 전체 복구 */
 export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> {
   const zip = await JSZip.loadAsync(zipBuffer);
@@ -86,141 +198,125 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
   // FK-안전 순서로 전체 삭제 후 재삽입
   await prisma.$transaction(
     async (tx) => {
-      // ── 삭제: 자식 먼저 ──────────────────────────────────────
-      await tx.knowledgeArticleFeedback.deleteMany();
-      await tx.knowledgeArticle.deleteMany();
-      await tx.knowledgeCategory.deleteMany();
-      await tx.generatedReport.deleteMany();
-      await tx.reportSchedule.deleteMany();
-      await tx.auditLog.deleteMany();
-      await tx.customerSatisfaction.deleteMany();
-      await tx.ticketMerge.deleteMany();
-      await tx.ticketTransfer.deleteMany();
-      await tx.ticketActivity.deleteMany();
-      await tx.ticketPresence.deleteMany();
-      await tx.ticketCommentLock.deleteMany();
-      await tx.timeEntry.deleteMany();
-      await tx.gitOperationQueue.deleteMany();
-      await tx.gitEvent.deleteMany();
-      await tx.gitLink.deleteMany();
-      await tx.emailDelivery.deleteMany();
-      await tx.emailThreadMapping.deleteMany();
-      await tx.comment.deleteMany();
-      await tx.attachment.deleteMany();
-      await tx.customFieldValue.deleteMany();
-      await tx.sLAClock.deleteMany();
-      await tx.ticket.deleteMany();
-      await tx.savedFilter.deleteMany();
-      await tx.agentAbsence.deleteMany();
-      await tx.agentCategory.deleteMany();
-      await tx.notificationSetting.deleteMany();
-      await tx.teamMember.deleteMany();
-      await tx.team.deleteMany();
-      await tx.agent.deleteMany();
-      await tx.customer.deleteMany();
-      await tx.automationRule.deleteMany();
-      await tx.sLAPolicy.deleteMany();
-      await tx.holiday.deleteMany();
-      await tx.businessCalendar.deleteMany();
-      await tx.customFieldDefinition.deleteMany();
-      await tx.responseTemplate.deleteMany();
-      await tx.requestType.deleteMany();
-      await tx.gitProviderCredential.deleteMany();
-      await tx.sAMLProvider.deleteMany();
-      await tx.systemBranding.deleteMany();
-      await tx.lLMSettings.deleteMany();
-      await tx.emailSettings.deleteMany();
-      await tx.category.deleteMany();
+      const deleters: Record<string, () => Promise<unknown>> = {
+        webhookDeliveryLog: () => tx.webhookDeliveryLog.deleteMany(),
+        ticketKnowledgeLink: () => tx.ticketKnowledgeLink.deleteMany(),
+        knowledgeArticleFeedback: () => tx.knowledgeArticleFeedback.deleteMany(),
+        chatEvent: () => tx.chatEvent.deleteMany(),
+        chatConversation: () => tx.chatConversation.deleteMany(),
+        knowledgeArticle: () => tx.knowledgeArticle.deleteMany(),
+        knowledgeCategory: () => tx.knowledgeCategory.deleteMany(),
+        generatedReport: () => tx.generatedReport.deleteMany(),
+        reportSchedule: () => tx.reportSchedule.deleteMany(),
+        auditLog: () => tx.auditLog.deleteMany(),
+        customerSatisfaction: () => tx.customerSatisfaction.deleteMany(),
+        ticketMerge: () => tx.ticketMerge.deleteMany(),
+        ticketTransfer: () => tx.ticketTransfer.deleteMany(),
+        ticketActivity: () => tx.ticketActivity.deleteMany(),
+        ticketPresence: () => tx.ticketPresence.deleteMany(),
+        ticketCommentLock: () => tx.ticketCommentLock.deleteMany(),
+        timeEntry: () => tx.timeEntry.deleteMany(),
+        gitOperationQueue: () => tx.gitOperationQueue.deleteMany(),
+        gitEvent: () => tx.gitEvent.deleteMany(),
+        gitLink: () => tx.gitLink.deleteMany(),
+        emailDelivery: () => tx.emailDelivery.deleteMany(),
+        emailThreadMapping: () => tx.emailThreadMapping.deleteMany(),
+        comment: () => tx.comment.deleteMany(),
+        attachment: () => tx.attachment.deleteMany(),
+        customFieldValue: () => tx.customFieldValue.deleteMany(),
+        sLAClock: () => tx.sLAClock.deleteMany(),
+        ticket: () => tx.ticket.deleteMany(),
+        savedFilter: () => tx.savedFilter.deleteMany(),
+        publicApiKey: () => tx.publicApiKey.deleteMany(),
+        webhookEndpoint: () => tx.webhookEndpoint.deleteMany(),
+        macro: () => tx.macro.deleteMany(),
+        agentAbsence: () => tx.agentAbsence.deleteMany(),
+        agentCategory: () => tx.agentCategory.deleteMany(),
+        notificationSetting: () => tx.notificationSetting.deleteMany(),
+        teamMember: () => tx.teamMember.deleteMany(),
+        team: () => tx.team.deleteMany(),
+        agent: () => tx.agent.deleteMany(),
+        customer: () => tx.customer.deleteMany(),
+        automationRule: () => tx.automationRule.deleteMany(),
+        sLAPolicy: () => tx.sLAPolicy.deleteMany(),
+        holiday: () => tx.holiday.deleteMany(),
+        businessCalendar: () => tx.businessCalendar.deleteMany(),
+        customFieldDefinition: () => tx.customFieldDefinition.deleteMany(),
+        responseTemplate: () => tx.responseTemplate.deleteMany(),
+        requestType: () => tx.requestType.deleteMany(),
+        gitProviderCredential: () => tx.gitProviderCredential.deleteMany(),
+        sAMLProvider: () => tx.sAMLProvider.deleteMany(),
+        systemBranding: () => tx.systemBranding.deleteMany(),
+        lLMSettings: () => tx.lLMSettings.deleteMany(),
+        emailSettings: () => tx.emailSettings.deleteMany(),
+        chatWidgetProfile: () => tx.chatWidgetProfile.deleteMany(),
+        chatWidgetSettings: () => tx.chatWidgetSettings.deleteMany(),
+        category: () => tx.category.deleteMany(),
+      };
 
-      // ── 삽입: 부모 먼저 (삭제 역순) ─────────────────────────
-      if (get("category").length)
-        await tx.category.createMany({ data: get("category") as never });
-      if (get("emailSettings").length)
-        await tx.emailSettings.createMany({ data: get("emailSettings") as never });
-      if (get("lLMSettings").length)
-        await tx.lLMSettings.createMany({ data: get("lLMSettings") as never });
-      if (get("systemBranding").length)
-        await tx.systemBranding.createMany({ data: get("systemBranding") as never });
-      if (get("sAMLProvider").length)
-        await tx.sAMLProvider.createMany({ data: get("sAMLProvider") as never });
-      if (get("gitProviderCredential").length)
-        await tx.gitProviderCredential.createMany({ data: get("gitProviderCredential") as never });
-      if (get("requestType").length)
-        await tx.requestType.createMany({ data: get("requestType") as never });
-      if (get("responseTemplate").length)
-        await tx.responseTemplate.createMany({ data: get("responseTemplate") as never });
-      if (get("customFieldDefinition").length)
-        await tx.customFieldDefinition.createMany({ data: get("customFieldDefinition") as never });
-      if (get("businessCalendar").length)
-        await tx.businessCalendar.createMany({ data: get("businessCalendar") as never });
-      if (get("holiday").length)
-        await tx.holiday.createMany({ data: get("holiday") as never });
-      if (get("sLAPolicy").length)
-        await tx.sLAPolicy.createMany({ data: get("sLAPolicy") as never });
-      if (get("automationRule").length)
-        await tx.automationRule.createMany({ data: get("automationRule") as never });
-      if (get("customer").length)
-        await tx.customer.createMany({ data: get("customer") as never });
-      if (get("agent").length)
-        await tx.agent.createMany({ data: get("agent") as never });
-      if (get("team").length)
-        await tx.team.createMany({ data: get("team") as never });
-      if (get("teamMember").length)
-        await tx.teamMember.createMany({ data: get("teamMember") as never });
-      if (get("notificationSetting").length)
-        await tx.notificationSetting.createMany({ data: get("notificationSetting") as never });
-      if (get("agentCategory").length)
-        await tx.agentCategory.createMany({ data: get("agentCategory") as never });
-      if (get("agentAbsence").length)
-        await tx.agentAbsence.createMany({ data: get("agentAbsence") as never });
-      if (get("savedFilter").length)
-        await tx.savedFilter.createMany({ data: get("savedFilter") as never });
-      if (get("ticket").length)
-        await tx.ticket.createMany({ data: get("ticket") as never });
-      if (get("sLAClock").length)
-        await tx.sLAClock.createMany({ data: get("sLAClock") as never });
-      if (get("customFieldValue").length)
-        await tx.customFieldValue.createMany({ data: get("customFieldValue") as never });
-      if (get("attachment").length)
-        await tx.attachment.createMany({ data: get("attachment") as never });
-      if (get("comment").length)
-        await tx.comment.createMany({ data: get("comment") as never });
-      if (get("emailThreadMapping").length)
-        await tx.emailThreadMapping.createMany({ data: get("emailThreadMapping") as never });
-      if (get("emailDelivery").length)
-        await tx.emailDelivery.createMany({ data: get("emailDelivery") as never });
-      if (get("gitLink").length)
-        await tx.gitLink.createMany({ data: get("gitLink") as never });
-      if (get("gitEvent").length)
-        await tx.gitEvent.createMany({ data: get("gitEvent") as never });
-      if (get("gitOperationQueue").length)
-        await tx.gitOperationQueue.createMany({ data: get("gitOperationQueue") as never });
-      if (get("timeEntry").length)
-        await tx.timeEntry.createMany({ data: get("timeEntry") as never });
-      if (get("ticketCommentLock").length)
-        await tx.ticketCommentLock.createMany({ data: get("ticketCommentLock") as never });
-      if (get("ticketPresence").length)
-        await tx.ticketPresence.createMany({ data: get("ticketPresence") as never });
-      if (get("ticketActivity").length)
-        await tx.ticketActivity.createMany({ data: get("ticketActivity") as never });
-      if (get("ticketTransfer").length)
-        await tx.ticketTransfer.createMany({ data: get("ticketTransfer") as never });
-      if (get("ticketMerge").length)
-        await tx.ticketMerge.createMany({ data: get("ticketMerge") as never });
-      if (get("customerSatisfaction").length)
-        await tx.customerSatisfaction.createMany({ data: get("customerSatisfaction") as never });
-      if (get("auditLog").length)
-        await tx.auditLog.createMany({ data: get("auditLog") as never });
-      if (get("reportSchedule").length)
-        await tx.reportSchedule.createMany({ data: get("reportSchedule") as never });
-      if (get("generatedReport").length)
-        await tx.generatedReport.createMany({ data: get("generatedReport") as never });
-      if (get("knowledgeCategory").length)
-        await tx.knowledgeCategory.createMany({ data: get("knowledgeCategory") as never });
-      if (get("knowledgeArticle").length)
-        await tx.knowledgeArticle.createMany({ data: get("knowledgeArticle") as never });
-      if (get("knowledgeArticleFeedback").length)
-        await tx.knowledgeArticleFeedback.createMany({ data: get("knowledgeArticleFeedback") as never });
+      for (const table of RESTORE_DELETE_ORDER) {
+        await deleters[table]();
+      }
+
+      const inserters: Record<string, () => Promise<unknown>> = {
+        category: () => get("category").length ? tx.category.createMany({ data: get("category") as never }) : Promise.resolve(),
+        chatWidgetSettings: () => get("chatWidgetSettings").length ? tx.chatWidgetSettings.createMany({ data: get("chatWidgetSettings") as never }) : Promise.resolve(),
+        chatWidgetProfile: () => get("chatWidgetProfile").length ? tx.chatWidgetProfile.createMany({ data: get("chatWidgetProfile") as never }) : Promise.resolve(),
+        emailSettings: () => get("emailSettings").length ? tx.emailSettings.createMany({ data: get("emailSettings") as never }) : Promise.resolve(),
+        lLMSettings: () => get("lLMSettings").length ? tx.lLMSettings.createMany({ data: get("lLMSettings") as never }) : Promise.resolve(),
+        systemBranding: () => get("systemBranding").length ? tx.systemBranding.createMany({ data: get("systemBranding") as never }) : Promise.resolve(),
+        sAMLProvider: () => get("sAMLProvider").length ? tx.sAMLProvider.createMany({ data: get("sAMLProvider") as never }) : Promise.resolve(),
+        gitProviderCredential: () => get("gitProviderCredential").length ? tx.gitProviderCredential.createMany({ data: get("gitProviderCredential") as never }) : Promise.resolve(),
+        requestType: () => get("requestType").length ? tx.requestType.createMany({ data: get("requestType") as never }) : Promise.resolve(),
+        responseTemplate: () => get("responseTemplate").length ? tx.responseTemplate.createMany({ data: get("responseTemplate") as never }) : Promise.resolve(),
+        customFieldDefinition: () => get("customFieldDefinition").length ? tx.customFieldDefinition.createMany({ data: get("customFieldDefinition") as never }) : Promise.resolve(),
+        businessCalendar: () => get("businessCalendar").length ? tx.businessCalendar.createMany({ data: get("businessCalendar") as never }) : Promise.resolve(),
+        holiday: () => get("holiday").length ? tx.holiday.createMany({ data: get("holiday") as never }) : Promise.resolve(),
+        sLAPolicy: () => get("sLAPolicy").length ? tx.sLAPolicy.createMany({ data: get("sLAPolicy") as never }) : Promise.resolve(),
+        automationRule: () => get("automationRule").length ? tx.automationRule.createMany({ data: get("automationRule") as never }) : Promise.resolve(),
+        customer: () => get("customer").length ? tx.customer.createMany({ data: get("customer") as never }) : Promise.resolve(),
+        agent: () => get("agent").length ? tx.agent.createMany({ data: get("agent") as never }) : Promise.resolve(),
+        team: () => get("team").length ? tx.team.createMany({ data: get("team") as never }) : Promise.resolve(),
+        teamMember: () => get("teamMember").length ? tx.teamMember.createMany({ data: get("teamMember") as never }) : Promise.resolve(),
+        notificationSetting: () => get("notificationSetting").length ? tx.notificationSetting.createMany({ data: get("notificationSetting") as never }) : Promise.resolve(),
+        agentCategory: () => get("agentCategory").length ? tx.agentCategory.createMany({ data: get("agentCategory") as never }) : Promise.resolve(),
+        agentAbsence: () => get("agentAbsence").length ? tx.agentAbsence.createMany({ data: get("agentAbsence") as never }) : Promise.resolve(),
+        macro: () => get("macro").length ? tx.macro.createMany({ data: get("macro") as never }) : Promise.resolve(),
+        webhookEndpoint: () => get("webhookEndpoint").length ? tx.webhookEndpoint.createMany({ data: get("webhookEndpoint") as never }) : Promise.resolve(),
+        publicApiKey: () => get("publicApiKey").length ? tx.publicApiKey.createMany({ data: get("publicApiKey") as never }) : Promise.resolve(),
+        savedFilter: () => get("savedFilter").length ? tx.savedFilter.createMany({ data: get("savedFilter") as never }) : Promise.resolve(),
+        ticket: () => get("ticket").length ? tx.ticket.createMany({ data: get("ticket") as never }) : Promise.resolve(),
+        chatConversation: () => get("chatConversation").length ? tx.chatConversation.createMany({ data: get("chatConversation") as never }) : Promise.resolve(),
+        sLAClock: () => get("sLAClock").length ? tx.sLAClock.createMany({ data: get("sLAClock") as never }) : Promise.resolve(),
+        customFieldValue: () => get("customFieldValue").length ? tx.customFieldValue.createMany({ data: get("customFieldValue") as never }) : Promise.resolve(),
+        attachment: () => get("attachment").length ? tx.attachment.createMany({ data: get("attachment") as never }) : Promise.resolve(),
+        comment: () => get("comment").length ? tx.comment.createMany({ data: get("comment") as never }) : Promise.resolve(),
+        emailThreadMapping: () => get("emailThreadMapping").length ? tx.emailThreadMapping.createMany({ data: get("emailThreadMapping") as never }) : Promise.resolve(),
+        emailDelivery: () => get("emailDelivery").length ? tx.emailDelivery.createMany({ data: get("emailDelivery") as never }) : Promise.resolve(),
+        gitLink: () => get("gitLink").length ? tx.gitLink.createMany({ data: get("gitLink") as never }) : Promise.resolve(),
+        gitEvent: () => get("gitEvent").length ? tx.gitEvent.createMany({ data: get("gitEvent") as never }) : Promise.resolve(),
+        gitOperationQueue: () => get("gitOperationQueue").length ? tx.gitOperationQueue.createMany({ data: get("gitOperationQueue") as never }) : Promise.resolve(),
+        timeEntry: () => get("timeEntry").length ? tx.timeEntry.createMany({ data: get("timeEntry") as never }) : Promise.resolve(),
+        ticketCommentLock: () => get("ticketCommentLock").length ? tx.ticketCommentLock.createMany({ data: get("ticketCommentLock") as never }) : Promise.resolve(),
+        ticketPresence: () => get("ticketPresence").length ? tx.ticketPresence.createMany({ data: get("ticketPresence") as never }) : Promise.resolve(),
+        ticketActivity: () => get("ticketActivity").length ? tx.ticketActivity.createMany({ data: get("ticketActivity") as never }) : Promise.resolve(),
+        ticketTransfer: () => get("ticketTransfer").length ? tx.ticketTransfer.createMany({ data: get("ticketTransfer") as never }) : Promise.resolve(),
+        ticketMerge: () => get("ticketMerge").length ? tx.ticketMerge.createMany({ data: get("ticketMerge") as never }) : Promise.resolve(),
+        customerSatisfaction: () => get("customerSatisfaction").length ? tx.customerSatisfaction.createMany({ data: get("customerSatisfaction") as never }) : Promise.resolve(),
+        auditLog: () => get("auditLog").length ? tx.auditLog.createMany({ data: get("auditLog") as never }) : Promise.resolve(),
+        reportSchedule: () => get("reportSchedule").length ? tx.reportSchedule.createMany({ data: get("reportSchedule") as never }) : Promise.resolve(),
+        generatedReport: () => get("generatedReport").length ? tx.generatedReport.createMany({ data: get("generatedReport") as never }) : Promise.resolve(),
+        knowledgeCategory: () => get("knowledgeCategory").length ? tx.knowledgeCategory.createMany({ data: get("knowledgeCategory") as never }) : Promise.resolve(),
+        knowledgeArticle: () => get("knowledgeArticle").length ? tx.knowledgeArticle.createMany({ data: get("knowledgeArticle") as never }) : Promise.resolve(),
+        ticketKnowledgeLink: () => get("ticketKnowledgeLink").length ? tx.ticketKnowledgeLink.createMany({ data: get("ticketKnowledgeLink") as never }) : Promise.resolve(),
+        knowledgeArticleFeedback: () => get("knowledgeArticleFeedback").length ? tx.knowledgeArticleFeedback.createMany({ data: get("knowledgeArticleFeedback") as never }) : Promise.resolve(),
+        chatEvent: () => get("chatEvent").length ? tx.chatEvent.createMany({ data: get("chatEvent") as never }) : Promise.resolve(),
+        webhookDeliveryLog: () => get("webhookDeliveryLog").length ? tx.webhookDeliveryLog.createMany({ data: get("webhookDeliveryLog") as never }) : Promise.resolve(),
+      };
+
+      for (const table of RESTORE_INSERT_ORDER) {
+        await inserters[table]();
+      }
     },
     { timeout: 60000 }
   );
