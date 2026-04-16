@@ -68,13 +68,7 @@ export function CaptchaWidget({
   }, [onTokenChange, scriptLoaded, siteKey]);
 
   if (!siteKey) {
-    return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-        {process.env.NODE_ENV === "production"
-          ? "CAPTCHA 설정이 필요합니다."
-          : "개발 환경에서는 CAPTCHA 검증이 자동 우회됩니다."}
-      </div>
-    );
+    return null;
   }
 
   return (

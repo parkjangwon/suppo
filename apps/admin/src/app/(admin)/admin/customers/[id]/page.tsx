@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components
 import { Button } from "@crinity/ui/components/ui/button";
 import { Textarea } from "@crinity/ui/components/ui/textarea";
 import { Badge } from "@crinity/ui/components/ui/badge";
+import { MarkdownContent } from "@crinity/shared/components/markdown-content";
 import { formatPhoneNumber } from "@crinity/shared/utils/phone-format";
-import { renderSafeMarkdown } from "@crinity/shared/security/markdown";
 import { CustomerInsightsPanel } from "@/components/admin/customer-insights-panel";
 import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
@@ -224,11 +224,9 @@ export default function CustomerDetailPage() {
             </CardHeader>
             <CardContent className="pt-4">
               {customer.analysis ? (
-                <div
-                  className="prose prose-sm max-w-none rounded-md bg-muted/50 p-4 text-sm"
-                  dangerouslySetInnerHTML={{
-                    __html: renderSafeMarkdown(customer.analysis),
-                  }}
+                <MarkdownContent
+                  content={customer.analysis}
+                  className="rounded-md bg-muted/50 p-4 text-sm"
                 />
               ) : (
                 <div className="text-center py-8 text-muted-foreground text-sm bg-muted/20 rounded-md">

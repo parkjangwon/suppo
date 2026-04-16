@@ -6,11 +6,11 @@ import { prisma } from "@crinity/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Button } from "@crinity/ui/components/ui/button";
 import { Badge } from "@crinity/ui/components/ui/badge";
+import { MarkdownContent } from "@crinity/shared/components/markdown-content";
 import { ChevronLeft, Eye, Ticket } from "lucide-react";
 import { ArticleFeedback } from "@/components/knowledge/article-feedback";
 import { getSystemBranding } from "@crinity/shared/db/queries/branding";
 import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
-import { renderSafeMarkdown } from "@crinity/shared/security/markdown";
 
 interface KnowledgeArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -118,10 +118,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
                 )}
               </CardHeader>
               <CardContent>
-                <div
-                  className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(article.content) }}
-                />
+                <MarkdownContent content={article.content} />
 
                 {article.tags && (article.tags as string[]).length > 0 && (
                   <div className="mt-8 pt-6 border-t">

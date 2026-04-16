@@ -278,13 +278,20 @@ export function ChatWidgetShell({ settings }: { settings: WidgetSettings }) {
                     rows={5}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>보안 확인</Label>
+                {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
+                  <div className="space-y-2">
+                    <Label>보안 확인</Label>
+                    <CaptchaWidget
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                      onTokenChange={setCaptchaToken}
+                    />
+                  </div>
+                ) : (
                   <CaptchaWidget
                     siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
                     onTokenChange={setCaptchaToken}
                   />
-                </div>
+                )}
                 {errorMessage ? (
                   <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                     {errorMessage}

@@ -21,6 +21,49 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       where: { id },
       include: {
         tickets: {
+          include: {
+            category: {
+              select: {
+                name: true,
+              },
+            },
+            requestType: {
+              select: {
+                name: true,
+              },
+            },
+            team: {
+              select: {
+                name: true,
+              },
+            },
+            assignee: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+            comments: {
+              orderBy: {
+                createdAt: "asc",
+              },
+              select: {
+                authorType: true,
+                authorName: true,
+                authorEmail: true,
+                content: true,
+                isInternal: true,
+                createdAt: true,
+              },
+            },
+            attachments: {
+              select: {
+                fileName: true,
+                mimeType: true,
+                fileSize: true,
+              },
+            },
+          },
           orderBy: {
             createdAt: "desc",
           },
@@ -39,7 +82,24 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const analysis = await analyzeCustomer(id, customer.tickets);
+    const organization =
+      customer.tickets.find((ticket) => ticket.customerOrganization)?.customerOrganization ?? null;
+
+    const analysis = await analyzeCustomer({
+      customer: {
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        memo: customer.memo,
+        ticketCount: customer.ticketCount,
+        lastTicketAt: customer.lastTicketAt,
+        createdAt: customer.createdAt,
+        updatedAt: customer.updatedAt,
+        organization,
+      },
+      tickets: customer.tickets,
+    });
 
     if (!analysis) {
       return NextResponse.json(

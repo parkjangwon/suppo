@@ -230,10 +230,14 @@ export function TicketForm({ requestTypes, captchaSiteKey }: TicketFormProps) {
         <AttachmentUpload files={files} onChange={setFiles} />
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-slate-700">보안 확인</Label>
+      {captchaSiteKey ? (
+        <div className="space-y-2">
+          <Label className="text-slate-700">보안 확인</Label>
+          <CaptchaWidget siteKey={captchaSiteKey} onTokenChange={setCaptchaToken} />
+        </div>
+      ) : (
         <CaptchaWidget siteKey={captchaSiteKey} onTokenChange={setCaptchaToken} />
-      </div>
+      )}
 
       {submitError && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl">

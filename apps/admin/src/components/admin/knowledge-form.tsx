@@ -17,10 +17,10 @@ import {
 } from "@crinity/ui/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
 import { Badge } from "@crinity/ui/components/ui/badge";
+import { MarkdownContent } from "@crinity/shared/components/markdown-content";
 import { X, Plus, Eye, Save, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { renderSafeMarkdown } from "@crinity/shared/security/markdown";
 
 interface KnowledgeFormProps {
   article?: any;
@@ -210,10 +210,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
             {excerpt && (
               <p className="text-gray-600 mb-4 italic">{excerpt}</p>
             )}
-            <div
-              className="prose max-w-none"
-              dangerouslySetInnerHTML={{ __html: renderSafeMarkdown(content) }}
-            />
+            <MarkdownContent content={content} />
           </CardContent>
         </Card>
       ) : (
