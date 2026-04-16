@@ -63,6 +63,11 @@ enum EmailDeliveryStatus {
   FAILED
 }
 
+enum EmailDeliveryCategory {
+  CUSTOMER
+  INTERNAL
+}
+
 enum SLATarget {
   FIRST_RESPONSE
   RESOLUTION
@@ -539,6 +544,11 @@ model EmailDelivery {
   to           String
   subject      String
   body         String
+  category     EmailDeliveryCategory
+  ticketId     String?
+  messageId    String?
+  inReplyTo    String?
+  references   String?
   status       EmailDeliveryStatus @default(PENDING)
   attemptCount Int                 @default(0)
   nextRetryAt  DateTime?
@@ -547,6 +557,9 @@ model EmailDelivery {
   updatedAt    DateTime            @updatedAt
 
   @@index([status, nextRetryAt])
+  @@index([category, status, nextRetryAt])
+  @@index([ticketId])
+  @@index([messageId])
 }
 
 // SAML SSO Provider Configuration
@@ -635,12 +648,23 @@ model EmailSettings {
   // Resend API Key
   resendApiKey String?
 
-  // Notification Settings
-  notificationsEnabled Boolean @default(true)
+  // Delivery master switches
+  customerEmailsEnabled      Boolean @default(false)
+  internalNotificationsEnabled Boolean @default(false)
+
+  // Internal Notification Settings
   notifyOnNewTicket    Boolean @default(true)
   notifyOnAssign       Boolean @default(true)
   notifyOnComment      Boolean @default(true)
   notifyOnStatusChange Boolean @default(true)
+  notifyOnSlaWarning   Boolean @default(true)
+  notifyOnSlaBreach    Boolean @default(true)
+
+  // Customer Email Settings
+  notifyCustomerOnTicketCreated Boolean @default(false)
+  notifyCustomerOnAgentReply    Boolean @default(false)
+  notifyCustomerOnStatusChange  Boolean @default(false)
+  notifyCustomerOnCsatSurvey    Boolean @default(false)
   notificationEmail    String?
 
   // Test Settings

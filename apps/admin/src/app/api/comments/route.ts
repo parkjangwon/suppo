@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { addComment, getAdminTicketDetail, updateTicketStatus } from "@/lib/db/queries/admin-tickets";
+import {
+  enqueueInternalCommentNotifications,
+  enqueueNewCommentEmail,
+} from "@crinity/shared/email/enqueue";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
 import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 import { prisma } from "@crinity/db";
@@ -56,8 +60,32 @@ export async function POST(request: NextRequest) {
       attachments: processedAttachments,
     });
 
+    const emailSettings = await prisma.emailSettings.findUnique({
+      where: { id: "default" },
+      select: { notificationEmail: true },
+    });
+
+    if (!isInternal) {
+      await enqueueNewCommentEmail(
+        ticket.customerEmail,
+        ticket.ticketNumber,
+        authorName,
+        true,
+        prisma,
+        { ticketId }
+      );
+    }
+
     if (!isInternal && ticket.assigneeId && ticket.status !== "IN_PROGRESS") {
       await updateTicketStatus(ticketId, "IN_PROGRESS", session.user.agentId);
+    }
+
+    if (!isInternal) {
+      await enqueueInternalCommentNotifications(
+        [ticket.assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
+        ticket.ticketNumber,
+        authorName
+      );
     }
 
     const chatConversation = await prisma.chatConversation.findUnique({

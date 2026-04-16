@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
+import { enqueueInternalCommentNotifications } from "@crinity/shared/email/enqueue";
 import { verifyTicketAccessToken } from "@crinity/shared/security/ticket-access";
 import { cookies } from "next/headers";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
@@ -74,6 +75,26 @@ export async function POST(request: Request) {
         attachments: true,
       },
     });
+
+    const assignee = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: {
+        assignee: {
+          select: { email: true },
+        },
+      },
+    });
+
+    const emailSettings = await prisma.emailSettings.findUnique({
+      where: { id: "default" },
+      select: { notificationEmail: true },
+    });
+
+    await enqueueInternalCommentNotifications(
+      [assignee?.assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
+      ticket.ticketNumber,
+      ticket.customerName
+    );
 
     return NextResponse.json({ success: true, comment });
   } catch (error) {

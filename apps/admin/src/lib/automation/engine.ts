@@ -314,6 +314,8 @@ async function applyAutomationRuleToTicket(
         data: {
           to: ticket.customerEmail,
           subject: `티켓 ${ticket.ticketNumber} 업데이트`,
+          category: "CUSTOMER",
+          ticketId,
           body: `
               <p>티켓 <strong>${ticket.ticketNumber}</strong>이 자동화 규칙에 의해 업데이트되었습니다.</p>
               <p>규칙: ${rule.name}</p>

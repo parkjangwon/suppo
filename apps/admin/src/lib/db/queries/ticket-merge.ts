@@ -202,6 +202,8 @@ export async function mergeTickets(params: MergeTicketsParams) {
         return {
           to: assignee.email,
           subject: `티켓 ${sourceTicket.ticketNumber}이 병합되었습니다`,
+          category: "INTERNAL" as const,
+          ticketId: targetTicketId,
           body: `
                 <p>티켓 <strong>${sourceTicket.ticketNumber}</strong>이 티켓 <strong>${targetTicket.ticketNumber}</strong>으로 병합되었습니다.</p>
                 <p>대상 티켓: ${targetTicket.subject}</p>

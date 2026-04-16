@@ -1,6 +1,11 @@
 import { prisma } from "@crinity/db";
 import { TicketStatus, TicketPriority, Prisma } from "@prisma/client";
-import { enqueueCSATSurveyEmail } from "@crinity/shared/email/enqueue";
+import {
+  enqueueCSATSurveyEmail,
+  enqueueInternalStatusNotifications,
+  enqueueStatusChangedEmail,
+  enqueueTicketAssignedEmail,
+} from "@crinity/shared/email/enqueue";
 
 export interface GetAdminTicketsParams {
   status?: TicketStatus;
@@ -140,6 +145,11 @@ export async function updateTicketStatus(
     },
   });
 
+  const emailSettings = await prisma.emailSettings.findUnique({
+    where: { id: "default" },
+    select: { notificationEmail: true },
+  });
+
   // RESOLVED 상태로 변경 시 CSAT 설문 이메일 발송 (이전 상태가 RESOLVED가 아닌 경우)
   if (status === "RESOLVED" && oldTicket.status !== "RESOLVED") {
     await enqueueCSATSurveyEmail(
@@ -148,6 +158,34 @@ export async function updateTicketStatus(
       ticket.subject,
       ticket.customerEmail,
       ticket.customerName
+    );
+  }
+
+  if (oldTicket.status !== status) {
+    await enqueueStatusChangedEmail(
+      ticket.customerEmail,
+      ticket.ticketNumber,
+      oldTicket.status,
+      status,
+      prisma,
+      {
+        recipientCategory: "CUSTOMER",
+        ticketId: ticket.id,
+      }
+    );
+
+    const assigneeEmail = ticket.assigneeId
+      ? (await prisma.agent.findUnique({
+          where: { id: ticket.assigneeId },
+          select: { email: true },
+        }))?.email
+      : null;
+
+    await enqueueInternalStatusNotifications(
+      [assigneeEmail, emailSettings?.notificationEmail ?? null],
+      ticket.ticketNumber,
+      oldTicket.status,
+      status
     );
   }
 
@@ -226,6 +264,27 @@ export async function assignTicket(
         newValue: assigneeId || "unassigned",
       },
     });
+  }
+
+  if (assigneeId && assigneeId !== oldTicket.assigneeId) {
+    const assignee = await prisma.agent.findUnique({
+      where: { id: assigneeId },
+      select: { email: true, name: true },
+    });
+
+    if (assignee?.email) {
+      await enqueueTicketAssignedEmail(
+        assignee.email,
+        {
+          ticketId: ticket.id,
+          ticketNumber: ticket.ticketNumber,
+          ticketSubject: ticket.subject,
+          customerName: ticket.customerName,
+          customerEmail: ticket.customerEmail,
+        },
+        assignee.name
+      );
+    }
   }
 
   return ticket;

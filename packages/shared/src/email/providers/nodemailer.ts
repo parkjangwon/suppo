@@ -1,12 +1,4 @@
-export interface ProviderSendInput {
-  to: string;
-  subject: string;
-  html: string;
-}
-
-export interface EmailProvider {
-  send: (input: ProviderSendInput) => Promise<void>;
-}
+import type { EmailProvider, EmailSendInput } from "@crinity/shared/email/provider-types";
 
 interface NodemailerLike {
   createTransport: (config: Record<string, unknown>) => {
@@ -15,6 +7,7 @@ interface NodemailerLike {
       to: string;
       subject: string;
       html: string;
+      headers?: Record<string, string>;
     }) => Promise<unknown>;
   };
 }
@@ -38,7 +31,6 @@ async function loadNodemailer(): Promise<NodemailerLike> {
 
 export async function createNodemailerProvider(): Promise<EmailProvider> {
   const nodemailer = await loadNodemailer();
-  const from = process.env.EMAIL_FROM ?? "no-reply@localhost";
 
   const hasSmtpHost = Boolean(process.env.SMTP_HOST);
   const transporter = nodemailer.createTransport(
@@ -61,12 +53,13 @@ export async function createNodemailerProvider(): Promise<EmailProvider> {
   );
 
   return {
-    async send(input) {
+    async send(input: EmailSendInput) {
       await transporter.sendMail({
-        from,
+        from: input.from,
         to: input.to,
         subject: input.subject,
-        html: input.html
+        html: input.html,
+        headers: input.headers,
       });
     }
   };

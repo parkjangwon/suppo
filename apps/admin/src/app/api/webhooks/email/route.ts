@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
+import { enqueueInternalCommentNotifications } from "@crinity/shared/email/enqueue";
+import { processAttachments } from "@crinity/shared/storage/attachment-service";
 import { z } from "zod";
 import { createHmac, timingSafeEqual } from "crypto";
 
@@ -81,16 +83,21 @@ export async function POST(request: NextRequest) {
     const body = JSON.parse(rawBody);
     const validated = emailWebhookSchema.parse(body);
 
-    // 티켓 번호 추출 (Subject에서 [TKT-123] 형식 검색)
-    const ticketNumber = extractTicketNumber(validated.subject);
+    const threadedTicketId = await findTicketByMessageId(
+      validated.inReplyTo,
+      validated.references
+    );
 
-    if (ticketNumber) {
-      // 기존 티켓에 댓글 추가
-      return await addCommentToTicket(ticketNumber, validated);
-    } else {
-      // 새 티켓 생성
-      return await createTicketFromEmail(validated);
+    if (threadedTicketId) {
+      return await addCommentToTicketById(threadedTicketId, validated);
     }
+
+    const ticketNumber = extractTicketNumber(validated.subject);
+    if (ticketNumber) {
+      return await addCommentToTicket(ticketNumber, validated);
+    }
+
+    return await createTicketFromEmail(validated);
   } catch (error) {
     console.error("Email webhook error:", error);
     
@@ -113,6 +120,11 @@ export async function POST(request: NextRequest) {
  * - [TKT-123], [#123], Ticket 123 등 다양한 형식 지원
  */
 function extractTicketNumber(subject: string): string | null {
+  const fullTicketMatch = subject.match(/\b(TKT-\d{4}-\d{6})\b/i);
+  if (fullTicketMatch) {
+    return fullTicketMatch[1].toUpperCase();
+  }
+
   // [TKT-123] 또는 [#123] 형식
   const bracketMatch = subject.match(/\[(?:TKT-|#)(\d+)\]/i);
   if (bracketMatch) {
@@ -153,6 +165,53 @@ async function findTicketByMessageId(
   return mapping?.ticketId || null;
 }
 
+async function processInboundAttachments(
+  attachments: z.infer<typeof emailWebhookSchema>["attachments"],
+  ticketId: string,
+) {
+  const processed: Awaited<ReturnType<typeof processAttachments>> = [];
+  const errors: string[] = [];
+
+  for (const attachment of attachments ?? []) {
+    try {
+      const content = Buffer.from(attachment.content, "base64");
+      const file = new File([content], attachment.filename, {
+        type: attachment.contentType,
+      });
+      const [saved] = await processAttachments([file], ticketId);
+      if (saved) {
+        processed.push(saved);
+      }
+    } catch (error) {
+      errors.push(
+        error instanceof Error
+          ? `${attachment.filename}: ${error.message}`
+          : `${attachment.filename}: attachment processing failed`,
+      );
+    }
+  }
+
+  return {
+    processed,
+    processingError: errors.length > 0 ? errors.join(" | ") : null,
+  };
+}
+
+async function addCommentToTicketById(
+  ticketId: string,
+  email: z.infer<typeof emailWebhookSchema>
+) {
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+  });
+
+  if (!ticket) {
+    return createTicketFromEmail(email);
+  }
+
+  return addCommentToExistingTicket(ticket, email);
+}
+
 /**
  * 기존 티켓에 댓글 추가
  */
@@ -169,6 +228,26 @@ async function addCommentToTicket(
     return createTicketFromEmail(email);
   }
 
+  return addCommentToExistingTicket(ticket, email);
+}
+
+async function addCommentToExistingTicket(
+  ticket: {
+    id: string;
+    ticketNumber: string;
+    status: string;
+    customerEmail: string;
+    customerName: string;
+    subject: string;
+    assigneeId: string | null;
+  },
+  email: z.infer<typeof emailWebhookSchema>
+): Promise<NextResponse> {
+  const { processed, processingError } = await processInboundAttachments(
+    email.attachments,
+    ticket.id,
+  );
+
   // 이메일 본문 정제 (인용문, 서명 제거)
   const cleanContent = cleanEmailContent(email.text || email.html || "");
 
@@ -181,6 +260,18 @@ async function addCommentToTicket(
       authorEmail: email.from,
       content: cleanContent,
       isInternal: false,
+      attachments: processed.length > 0
+        ? {
+            create: processed.map((attachment) => ({
+              ticketId: ticket.id,
+              fileName: attachment.fileName,
+              fileSize: attachment.fileSize,
+              mimeType: attachment.mimeType,
+              fileUrl: attachment.fileUrl,
+              uploadedBy: email.fromName || email.from,
+            })),
+          }
+        : undefined,
     },
   });
 
@@ -196,6 +287,7 @@ async function addCommentToTicket(
       toAddress: email.to,
       isProcessed: true,
       processedAt: new Date(),
+      processingError,
     },
   });
 
@@ -217,10 +309,27 @@ async function addCommentToTicket(
     },
   });
 
+  const assignee = ticket.assigneeId
+    ? await prisma.agent.findUnique({
+        where: { id: ticket.assigneeId },
+        select: { email: true },
+      })
+    : null;
+  const emailSettings = await prisma.emailSettings.findUnique({
+    where: { id: "default" },
+    select: { notificationEmail: true },
+  });
+
+  await enqueueInternalCommentNotifications(
+    [assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
+    ticket.ticketNumber,
+    email.fromName || email.from.split("@")[0],
+  );
+
   return NextResponse.json({
     success: true,
     action: "comment_added",
-    ticketNumber,
+    ticketNumber: ticket.ticketNumber,
     commentId: comment.id,
   });
 }
@@ -264,6 +373,24 @@ async function createTicketFromEmail(
     },
   });
 
+  const { processed, processingError } = await processInboundAttachments(
+    email.attachments,
+    ticket.id,
+  );
+
+  if (processed.length > 0) {
+    await prisma.attachment.createMany({
+      data: processed.map((attachment) => ({
+        ticketId: ticket.id,
+        fileName: attachment.fileName,
+        fileSize: attachment.fileSize,
+        mimeType: attachment.mimeType,
+        fileUrl: attachment.fileUrl,
+        uploadedBy: email.fromName || email.from,
+      })),
+    });
+  }
+
   // 이메일 스레드 매핑 저장
   await prisma.emailThreadMapping.create({
     data: {
@@ -276,6 +403,7 @@ async function createTicketFromEmail(
       toAddress: email.to,
       isProcessed: true,
       processedAt: new Date(),
+      processingError,
     },
   });
 

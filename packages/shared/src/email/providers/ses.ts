@@ -1,12 +1,4 @@
-export interface ProviderSendInput {
-  to: string;
-  subject: string;
-  html: string;
-}
-
-export interface EmailProvider {
-  send: (input: ProviderSendInput) => Promise<void>;
-}
+import type { EmailProvider, EmailSendInput } from "@crinity/shared/email/provider-types";
 
 interface SesClientLike {
   send: (command: unknown) => Promise<unknown>;
@@ -34,14 +26,9 @@ async function loadSesModule(): Promise<{ SESv2Client: SesClientCtor; SendEmailC
 
 export async function createSesProvider(): Promise<EmailProvider> {
   const region = process.env.AWS_REGION;
-  const from = process.env.SES_FROM_EMAIL ?? process.env.EMAIL_FROM;
 
   if (!region) {
     throw new Error("AWS_REGION is required for SES provider");
-  }
-
-  if (!from) {
-    throw new Error("SES_FROM_EMAIL or EMAIL_FROM is required for SES provider");
   }
 
   const { SESv2Client, SendEmailCommand } = await loadSesModule();
@@ -60,28 +47,36 @@ export async function createSesProvider(): Promise<EmailProvider> {
         : undefined
   });
 
+  function encodeHeaderText(value: string) {
+    return `=?UTF-8?B?${Buffer.from(value, "utf8").toString("base64")}?=`;
+  }
+
+  function toRawEmail(input: EmailSendInput) {
+    const headers = Object.entries(input.headers ?? {}).map(([key, value]) => `${key}: ${value}`);
+    const raw = [
+      `From: ${input.from}`,
+      `To: ${input.to}`,
+      `Subject: ${encodeHeaderText(input.subject)}`,
+      "MIME-Version: 1.0",
+      "Content-Type: text/html; charset=UTF-8",
+      "Content-Transfer-Encoding: 8bit",
+      ...headers,
+      "",
+      input.html,
+    ].join("\r\n");
+
+    return Buffer.from(raw, "utf8");
+  }
+
   return {
-    async send(input) {
+    async send(input: EmailSendInput) {
       await client.send(
         new SendEmailCommand({
-          FromEmailAddress: from,
-          Destination: {
-            ToAddresses: [input.to]
-          },
           Content: {
-            Simple: {
-              Subject: {
-                Data: input.subject,
-                Charset: "UTF-8"
-              },
-              Body: {
-                Html: {
-                  Data: input.html,
-                  Charset: "UTF-8"
-                }
-              }
+            Raw: {
+              Data: toRawEmail(input),
             }
-          }
+          },
         })
       );
     }

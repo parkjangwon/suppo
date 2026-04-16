@@ -38,6 +38,7 @@ interface StatusChangedInput {
 }
 
 interface CSATSurveyInput {
+  ticketId: string;
   ticketNumber: string;
   customerName: string;
   ticketSubject: string;
@@ -217,7 +218,7 @@ export function renderSLABreachEmail(input: SLABreachInput): RenderedEmail {
 }
 
 export function renderCSATSurveyEmail(input: CSATSurveyInput): RenderedEmail {
-  const surveyUrl = getSurveyUrl(input.ticketNumber);
+  const surveyUrl = getSurveyUrl(input.ticketId);
 
   return {
     subject: `[크리니티 티켓] 고객 만족도 조사에 참여해주세요 (#${input.ticketNumber})`,

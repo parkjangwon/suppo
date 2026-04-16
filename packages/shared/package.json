@@ -6,6 +6,7 @@
     "./*": "./src/*"
   },
   "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.1030.0",
     "@crinity/db": "workspace:*",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
@@ -14,6 +15,7 @@
     "nanoid": "^5.1.6",
     "next": "^15.5.15",
     "next-auth": "5.0.0-beta.30",
+    "nodemailer": "^6.10.1",
     "react-markdown": "^10.1.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",

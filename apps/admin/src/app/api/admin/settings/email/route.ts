@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { createAuditLog } from "@/lib/audit/logger";
+import {
+  getDefaultEmailSettings,
+  validateEmailSettings,
+} from "@crinity/shared/email/settings";
 
 const DEFAULT_SETTINGS_ID = "default";
 
@@ -20,25 +24,7 @@ export async function GET() {
     if (!settings) {
       return NextResponse.json({
         id: DEFAULT_SETTINGS_ID,
-        provider: "nodemailer",
-        smtpHost: "",
-        smtpPort: 587,
-        smtpSecure: false,
-        smtpUser: "",
-        smtpPassword: "",
-        fromEmail: "no-reply@company.com",
-        fromName: "Crinity Helpdesk",
-        sesAccessKey: "",
-        sesSecretKey: "",
-        sesRegion: "ap-northeast-2",
-        resendApiKey: "",
-        notificationsEnabled: true,
-        notifyOnNewTicket: true,
-        notifyOnAssign: true,
-        notifyOnComment: true,
-        notifyOnStatusChange: true,
-        notificationEmail: "",
-        testMode: false,
+        ...getDefaultEmailSettings(),
       });
     }
 
@@ -68,23 +54,36 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
+    const defaults = getDefaultEmailSettings();
 
     const data: Record<string, unknown> = {
-      provider: body.provider || "nodemailer",
+      provider: body.provider || defaults.provider,
       smtpHost: body.smtpHost || null,
-      smtpPort: body.smtpPort || 587,
+      smtpPort: body.smtpPort || defaults.smtpPort,
       smtpSecure: body.smtpSecure || false,
       smtpUser: body.smtpUser || null,
-      fromEmail: body.fromEmail || "no-reply@crinity.io",
-      fromName: body.fromName || "Crinity Helpdesk",
+      fromEmail: body.fromEmail || defaults.fromEmail,
+      fromName: body.fromName || defaults.fromName,
       sesAccessKey: body.sesAccessKey || null,
-      sesRegion: body.sesRegion || "ap-northeast-2",
+      sesRegion: body.sesRegion || defaults.sesRegion,
       resendApiKey: body.resendApiKey || null,
-      notificationsEnabled: body.notificationsEnabled ?? true,
-      notifyOnNewTicket: body.notifyOnNewTicket ?? true,
-      notifyOnAssign: body.notifyOnAssign ?? true,
-      notifyOnComment: body.notifyOnComment ?? true,
-      notifyOnStatusChange: body.notifyOnStatusChange ?? true,
+      customerEmailsEnabled: body.customerEmailsEnabled ?? defaults.customerEmailsEnabled,
+      internalNotificationsEnabled:
+        body.internalNotificationsEnabled ?? defaults.internalNotificationsEnabled,
+      notifyOnNewTicket: body.notifyOnNewTicket ?? defaults.notifyOnNewTicket,
+      notifyOnAssign: body.notifyOnAssign ?? defaults.notifyOnAssign,
+      notifyOnComment: body.notifyOnComment ?? defaults.notifyOnComment,
+      notifyOnStatusChange: body.notifyOnStatusChange ?? defaults.notifyOnStatusChange,
+      notifyOnSlaWarning: body.notifyOnSlaWarning ?? defaults.notifyOnSlaWarning,
+      notifyOnSlaBreach: body.notifyOnSlaBreach ?? defaults.notifyOnSlaBreach,
+      notifyCustomerOnTicketCreated:
+        body.notifyCustomerOnTicketCreated ?? defaults.notifyCustomerOnTicketCreated,
+      notifyCustomerOnAgentReply:
+        body.notifyCustomerOnAgentReply ?? defaults.notifyCustomerOnAgentReply,
+      notifyCustomerOnStatusChange:
+        body.notifyCustomerOnStatusChange ?? defaults.notifyCustomerOnStatusChange,
+      notifyCustomerOnCsatSurvey:
+        body.notifyCustomerOnCsatSurvey ?? defaults.notifyCustomerOnCsatSurvey,
       notificationEmail: body.notificationEmail || null,
       testMode: body.testMode || false,
     };
@@ -94,6 +93,32 @@ export async function PUT(request: NextRequest) {
     }
     if (body.sesSecretKey) {
       data.sesSecretKey = body.sesSecretKey;
+    }
+
+    const validationErrors = validateEmailSettings(
+      {
+        ...defaults,
+        ...data,
+        smtpHost: (data.smtpHost as string | null) ?? "",
+        smtpUser: (data.smtpUser as string | null) ?? "",
+        smtpPassword: (data.smtpPassword as string | undefined) ?? body.smtpPassword ?? "",
+        sesAccessKey: (data.sesAccessKey as string | null) ?? "",
+        sesSecretKey: (data.sesSecretKey as string | undefined) ?? body.sesSecretKey ?? "",
+        resendApiKey: (data.resendApiKey as string | null) ?? "",
+        notificationEmail: (data.notificationEmail as string | null) ?? "",
+      },
+      {
+        requireConfiguredProvider:
+          Boolean(data.customerEmailsEnabled) ||
+          Boolean(data.internalNotificationsEnabled),
+      },
+    );
+
+    if (validationErrors.length > 0) {
+      return NextResponse.json(
+        { error: validationErrors[0] },
+        { status: 400 },
+      );
     }
 
     const settings = await prisma.emailSettings.upsert({
@@ -117,7 +142,8 @@ export async function PUT(request: NextRequest) {
       newValue: {
         provider: settings.provider,
         fromEmail: settings.fromEmail,
-        notificationsEnabled: settings.notificationsEnabled
+        customerEmailsEnabled: settings.customerEmailsEnabled,
+        internalNotificationsEnabled: settings.internalNotificationsEnabled,
       }
     });
 

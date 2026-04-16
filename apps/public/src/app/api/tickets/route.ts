@@ -5,6 +5,7 @@ import { ticketFormSchema } from "@crinity/shared/validation/ticket";
 import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
 import { createTicket } from "@crinity/shared/tickets/create-ticket";
 import { classifyTicket } from "@crinity/shared/ai/classifier";
+import { enqueueTicketCreatedEmails } from "@crinity/shared/email/enqueue";
 import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
 import { prisma } from "@crinity/db";
 import { validateFile } from "@crinity/shared/security/file-upload";
@@ -131,6 +132,14 @@ export async function POST(request: NextRequest) {
         throw error;
       }
     }
+
+    await enqueueTicketCreatedEmails({
+      ticketId: result.ticket.id,
+      ticketNumber: result.ticket.ticketNumber,
+      ticketSubject: result.ticket.subject,
+      customerName: result.ticket.customerName,
+      customerEmail: result.ticket.customerEmail,
+    });
 
     await dispatchWebhookEvent("ticket.created", {
       source: "public-form",
