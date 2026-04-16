@@ -1,9 +1,7 @@
-const DEFAULT_PUBLIC_APP_URL = "http://localhost:3000";
+import { getPublicAppUrl as getSharedPublicAppUrl } from "./app-urls";
 
 export function getPublicAppUrl(configuredUrl?: string): string {
-  const baseUrl = configuredUrl ?? process.env.PUBLIC_URL ?? DEFAULT_PUBLIC_APP_URL;
-
-  return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  return getSharedPublicAppUrl(configuredUrl);
 }
 
 export function createPublicKnowledgeUrl(slug: string, configuredUrl?: string): string {

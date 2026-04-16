@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { SAMLProviderForm } from "@/components/admin/saml-provider-form";
 import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { createSamlMetadataBaseUrl } from "@crinity/shared/utils/app-urls";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ export default async function SAMLSettingsPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = createSamlMetadataBaseUrl();
 
   return (
     <div className="container mx-auto py-8 px-4">

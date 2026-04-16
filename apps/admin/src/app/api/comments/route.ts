@@ -85,7 +85,9 @@ export async function POST(request: NextRequest) {
       await enqueueInternalCommentNotifications(
         [ticket.assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
         ticket.ticketNumber,
-        authorName
+        authorName,
+        prisma,
+        { ticketId }
       );
       dispatchEmailOutboxSoon();
     }

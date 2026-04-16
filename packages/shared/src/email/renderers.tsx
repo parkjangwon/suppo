@@ -1,5 +1,11 @@
 // 이메일 템플릿 렌더러 (Next.js 15에서 서버 컴포넌트 사용)
 // Note: react-dom/server 제거, 대신 문자열 템플릿 사용
+import {
+  createAdminTicketDetailUrl,
+  createAdminTicketSearchUrl,
+  createPublicSurveyUrl,
+  createPublicTicketUrl,
+} from "@crinity/shared/utils/app-urls";
 
 export interface RenderedEmail {
   subject: string;
@@ -13,12 +19,14 @@ interface TicketCreatedCustomerInput {
 }
 
 interface TicketCreatedNotificationInput {
+  ticketId: string;
   ticketNumber: string;
   ticketSubject: string;
   customerName: string;
 }
 
 interface TicketAssignedInput {
+  ticketId: string;
   ticketNumber: string;
   ticketSubject: string;
   customerName: string;
@@ -26,12 +34,14 @@ interface TicketAssignedInput {
 }
 
 interface NewCommentInput {
+  ticketId?: string;
   ticketNumber: string;
   commenterName: string;
   recipientType: "CUSTOMER" | "AGENT";
 }
 
 interface StatusChangedInput {
+  ticketId?: string;
   ticketNumber: string;
   oldStatus: string;
   newStatus: string;
@@ -42,24 +52,6 @@ interface CSATSurveyInput {
   ticketNumber: string;
   customerName: string;
   ticketSubject: string;
-}
-
-function getTicketUrl(ticketNumber: string): string {
-  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
-  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-  return `${normalizedBaseUrl}/ticket/${ticketNumber}`;
-}
-
-function getAdminTicketUrl(ticketNumber: string): string {
-  const baseUrl = process.env.ADMIN_BASE_URL ?? process.env.APP_BASE_URL ?? "http://localhost:3001";
-  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-  return `${normalizedBaseUrl}/admin/tickets?q=${ticketNumber}`;
-}
-
-function getSurveyUrl(ticketId: string): string {
-  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
-  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
-  return `${normalizedBaseUrl}/survey/${ticketId}`;
 }
 
 function renderShell(title: string, content: string): string {
@@ -90,7 +82,7 @@ function renderShell(title: string, content: string): string {
 }
 
 export function renderTicketCreatedCustomerEmail(input: TicketCreatedCustomerInput): RenderedEmail {
-  const ticketUrl = getTicketUrl(input.ticketNumber);
+  const ticketUrl = createPublicTicketUrl(input.ticketNumber);
 
   return {
     subject: `[크리니티 티켓] 문의가 접수되었습니다 (#${input.ticketNumber})`,
@@ -105,7 +97,7 @@ export function renderTicketCreatedCustomerEmail(input: TicketCreatedCustomerInp
 }
 
 export function renderTicketCreatedNotificationEmail(input: TicketCreatedNotificationInput): RenderedEmail {
-  const ticketUrl = getTicketUrl(input.ticketNumber);
+  const ticketUrl = createAdminTicketDetailUrl(input.ticketId);
 
   return {
     subject: `[크리니티 티켓] 신규 문의가 등록되었습니다 (#${input.ticketNumber})`,
@@ -121,7 +113,7 @@ export function renderTicketCreatedNotificationEmail(input: TicketCreatedNotific
 }
 
 export function renderTicketAssignedEmail(input: TicketAssignedInput): RenderedEmail {
-  const ticketUrl = getTicketUrl(input.ticketNumber);
+  const ticketUrl = createAdminTicketDetailUrl(input.ticketId);
 
   return {
     subject: `[크리니티 티켓] 담당 티켓이 배정되었습니다 (#${input.ticketNumber})`,
@@ -137,7 +129,12 @@ export function renderTicketAssignedEmail(input: TicketAssignedInput): RenderedE
 }
 
 export function renderNewCommentEmail(input: NewCommentInput): RenderedEmail {
-  const ticketUrl = getTicketUrl(input.ticketNumber);
+  const ticketUrl =
+    input.recipientType === "CUSTOMER"
+      ? createPublicTicketUrl(input.ticketNumber)
+      : input.ticketId
+        ? createAdminTicketDetailUrl(input.ticketId)
+        : createAdminTicketSearchUrl(input.ticketNumber);
   const receiverLabel = input.recipientType === "CUSTOMER" ? "고객" : "담당자";
 
   return {
@@ -153,7 +150,9 @@ export function renderNewCommentEmail(input: NewCommentInput): RenderedEmail {
 }
 
 export function renderStatusChangedEmail(input: StatusChangedInput): RenderedEmail {
-  const ticketUrl = getTicketUrl(input.ticketNumber);
+  const ticketUrl = input.ticketId
+    ? createAdminTicketDetailUrl(input.ticketId)
+    : createPublicTicketUrl(input.ticketNumber);
 
   return {
     subject: `[크리니티 티켓] 처리 상태가 변경되었습니다 (#${input.ticketNumber})`,
@@ -182,7 +181,7 @@ interface SLABreachInput {
 }
 
 export function renderSLAWarningEmail(input: SLAWarningInput): RenderedEmail {
-  const ticketUrl = getAdminTicketUrl(input.ticketNumber);
+  const ticketUrl = createAdminTicketSearchUrl(input.ticketNumber);
   const hours = Math.floor(input.minutesRemaining / 60);
   const minutes = input.minutesRemaining % 60;
   const timeLabel = hours > 0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
@@ -202,7 +201,7 @@ export function renderSLAWarningEmail(input: SLAWarningInput): RenderedEmail {
 }
 
 export function renderSLABreachEmail(input: SLABreachInput): RenderedEmail {
-  const ticketUrl = getAdminTicketUrl(input.ticketNumber);
+  const ticketUrl = createAdminTicketSearchUrl(input.ticketNumber);
 
   return {
     subject: `[SLA 위반] 티켓 #${input.ticketNumber} — ${input.targetLabel} 마감 초과`,
@@ -218,7 +217,7 @@ export function renderSLABreachEmail(input: SLABreachInput): RenderedEmail {
 }
 
 export function renderCSATSurveyEmail(input: CSATSurveyInput): RenderedEmail {
-  const surveyUrl = getSurveyUrl(input.ticketId);
+  const surveyUrl = createPublicSurveyUrl(input.ticketId);
 
   return {
     subject: `[크리니티 티켓] 고객 만족도 조사에 참여해주세요 (#${input.ticketNumber})`,

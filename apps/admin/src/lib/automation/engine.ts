@@ -1,4 +1,5 @@
 import { prisma } from "@crinity/db";
+import { createPublicTicketUrl } from "@crinity/shared/utils/app-urls";
 import { TicketStatus, TicketPriority, Prisma } from "@prisma/client";
 
 export interface AutomationCondition {
@@ -320,7 +321,7 @@ async function applyAutomationRuleToTicket(
               <p>티켓 <strong>${ticket.ticketNumber}</strong>이 자동화 규칙에 의해 업데이트되었습니다.</p>
               <p>규칙: ${rule.name}</p>
               ${logs.map((log) => `<p>- ${log}</p>`).join("")}
-              <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/ticket/${ticket.ticketNumber}">티켓 보기</a></p>
+              <p><a href="${createPublicTicketUrl(ticket.ticketNumber)}">티켓 보기</a></p>
             `,
           status: "PENDING",
         },

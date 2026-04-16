@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@crinity/db";
+import { createSamlMetadataBaseUrl } from "@crinity/shared/utils/app-urls";
 
 interface RouteParams {
   params: Promise<{ domain: string }>;
@@ -20,11 +21,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
     
-    const baseUrl =
-      process.env.PUBLIC_URL ||
-      process.env.ADMIN_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      "http://localhost:3000";
+    const baseUrl = createSamlMetadataBaseUrl();
     const entityId = `${baseUrl}/api/auth/saml/${provider.domain}`;
     const acsUrl = `${baseUrl}/api/auth/callback/boxyhq-saml`;
     

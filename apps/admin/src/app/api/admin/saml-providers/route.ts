@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@crinity/db";
 import { z } from "zod";
+import { createSamlMetadataBaseUrl } from "@crinity/shared/utils/app-urls";
 
 const createSchema = z.object({
   name: z.string().min(1, "회사명을 입력하세요"),
@@ -14,7 +15,7 @@ const createSchema = z.object({
 });
 
 function getBaseUrl() {
-  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  return createSamlMetadataBaseUrl();
 }
 
 function generateSpUrls(domain: string) {

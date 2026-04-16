@@ -252,6 +252,7 @@ export async function enqueueTicketCreatedEmails(
   if (shouldSendInternalEmail(settings, "newTicket") && notificationEmail) {
     await enqueueSafely(async () => {
       const notification = renderTicketCreatedNotificationEmail({
+        ticketId: context.ticketId,
         ticketNumber: context.ticketNumber,
         customerName: context.customerName,
         ticketSubject: context.ticketSubject,
@@ -283,6 +284,7 @@ export async function enqueueTicketAssignedEmail(
 
   await enqueueSafely(async () => {
     const email = renderTicketAssignedEmail({
+      ticketId: context.ticketId,
       assigneeName,
       ticketNumber: context.ticketNumber,
       ticketSubject: context.ticketSubject,
@@ -320,6 +322,7 @@ export async function enqueueNewCommentEmail(
 
   await enqueueSafely(async () => {
     const email = renderNewCommentEmail({
+      ticketId: options?.ticketId,
       recipientType: isCustomerRecipient ? "CUSTOMER" : "AGENT",
       ticketNumber,
       commenterName,
@@ -347,9 +350,17 @@ export async function enqueueInternalCommentNotifications(
   ticketNumber: string,
   commenterName: string,
   db: EmailQueueDbClient = prisma,
+  options?: { ticketId?: string },
 ): Promise<void> {
   for (const recipient of uniqueRecipients(...recipients)) {
-    await enqueueNewCommentEmail(recipient, ticketNumber, commenterName, false, db);
+    await enqueueNewCommentEmail(
+      recipient,
+      ticketNumber,
+      commenterName,
+      false,
+      db,
+      options
+    );
   }
 }
 
@@ -377,6 +388,7 @@ export async function enqueueStatusChangedEmail(
 
   await enqueueSafely(async () => {
     const email = renderStatusChangedEmail({
+      ticketId: options?.ticketId,
       ticketNumber,
       oldStatus,
       newStatus,
@@ -405,6 +417,7 @@ export async function enqueueInternalStatusNotifications(
   oldStatus: string,
   newStatus: string,
   db: EmailQueueDbClient = prisma,
+  options?: { ticketId?: string },
 ): Promise<void> {
   for (const recipient of uniqueRecipients(...recipients)) {
     await enqueueStatusChangedEmail(
@@ -413,7 +426,7 @@ export async function enqueueInternalStatusNotifications(
       oldStatus,
       newStatus,
       db,
-      { recipientCategory: "INTERNAL" },
+      { recipientCategory: "INTERNAL", ticketId: options?.ticketId },
     );
   }
 }

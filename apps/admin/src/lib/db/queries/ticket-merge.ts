@@ -1,4 +1,5 @@
 import { prisma } from "@crinity/db";
+import { createAdminTicketDetailUrl } from "@crinity/shared/utils/app-urls";
 
 export interface MergeTicketsParams {
   targetTicketId: string;
@@ -207,7 +208,7 @@ export async function mergeTickets(params: MergeTicketsParams) {
           body: `
                 <p>티켓 <strong>${sourceTicket.ticketNumber}</strong>이 티켓 <strong>${targetTicket.ticketNumber}</strong>으로 병합되었습니다.</p>
                 <p>대상 티켓: ${targetTicket.subject}</p>
-                <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/tickets/${targetTicketId}">티켓 보기</a></p>
+                <p><a href="${createAdminTicketDetailUrl(targetTicketId)}">티켓 보기</a></p>
               `,
           status: "PENDING" as const,
         };

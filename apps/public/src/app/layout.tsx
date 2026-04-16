@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { getPublicAppUrl } from "@crinity/shared/utils/app-urls";
 
 import "./globals.css";
 
-const baseUrl = process.env.PUBLIC_URL || "http://localhost:3000";
+const baseUrl = getPublicAppUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

@@ -184,7 +184,9 @@ export async function updateTicketStatus(
       [assigneeEmail, emailSettings?.notificationEmail ?? null],
       ticket.ticketNumber,
       oldTicket.status,
-      status
+      status,
+      prisma,
+      { ticketId: ticket.id }
     );
     dispatchEmailOutboxSoon();
   }
