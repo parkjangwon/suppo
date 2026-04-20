@@ -1,4 +1,5 @@
 import { prisma } from "@crinity/db";
+import { getSystemBranding } from "@crinity/shared/db/queries/branding";
 
 export interface PortalTicket {
   id: string;
@@ -78,22 +79,27 @@ export async function getPortalTicketDetail(
   ticketNumber: string,
   customerEmail: string
 ): Promise<PortalTicketDetail | null> {
-  const ticket = await prisma.ticket.findFirst({
-    where: {
-      ticketNumber,
-      customerEmail
-    },
-    include: {
-      comments: {
-        where: { isInternal: false },
-        orderBy: { createdAt: "asc" },
-        include: { agent: true }
+  const [ticket, branding] = await Promise.all([
+    prisma.ticket.findFirst({
+      where: {
+        ticketNumber,
+        customerEmail
       },
-      attachments: true
-    }
-  });
+      include: {
+        comments: {
+          where: { isInternal: false },
+          orderBy: { createdAt: "asc" },
+          include: { agent: true }
+        },
+        attachments: true
+      }
+    }),
+    getSystemBranding(),
+  ]);
   
   if (!ticket) return null;
+
+  const publicAgentDisplayName = branding.companyName?.trim() || "고객 지원팀";
   
   return {
     id: ticket.id,
@@ -110,7 +116,7 @@ export async function getPortalTicketDetail(
       content: c.content,
       isInternal: c.isInternal,
       createdAt: c.createdAt,
-      authorName: c.agent?.name ?? ticket.customerName,
+      authorName: c.agentId ? publicAgentDisplayName : ticket.customerName,
       authorType: c.agentId ? "AGENT" : "CUSTOMER"
     })),
     attachments: ticket.attachments.map(a => ({

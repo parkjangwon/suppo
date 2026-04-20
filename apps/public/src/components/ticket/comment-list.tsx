@@ -13,6 +13,7 @@ interface Comment {
 
 interface CommentListProps {
   comments: Comment[];
+  agentDisplayName?: string;
 }
 
 function isImageFile(mimeType?: string): boolean {
@@ -29,7 +30,10 @@ function getFileIcon(mimeType?: string) {
   return <FileText className="h-4 w-4" />;
 }
 
-export function CommentList({ comments }: CommentListProps) {
+export function CommentList({
+  comments,
+  agentDisplayName = "고객 지원팀",
+}: CommentListProps) {
   if (!comments || comments.length === 0) {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
@@ -71,7 +75,7 @@ export function CommentList({ comments }: CommentListProps) {
                 </div>
                 <div>
                   <span className="font-semibold text-sm">
-                    {isCustomer ? "고객" : comment.author?.name || "상담원"}
+                    {isCustomer ? "고객" : agentDisplayName}
                   </span>
                   <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
                     isCustomer 

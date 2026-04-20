@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getSystemBranding } from "@crinity/shared/db/queries/branding";
 import { verifyTicketAccessToken } from "@crinity/shared/security/ticket-access";
 import { getPublicTicketThread } from "@crinity/shared/tickets/public-thread";
 import { PublicTicketDetail } from "@/components/ticket/public-ticket-detail";
@@ -22,10 +23,15 @@ export default async function TicketPage({ params }: TicketPageProps) {
     redirect("/ticket/lookup");
   }
 
-  const ticket = await getPublicTicketThread(number, access.email);
+  const [ticket, branding] = await Promise.all([
+    getPublicTicketThread(number, access.email),
+    getSystemBranding(),
+  ]);
   if (!ticket) {
     redirect("/ticket/lookup");
   }
+
+  const publicAgentDisplayName = branding.companyName?.trim() || "고객 지원팀";
 
   const mappedTicket = {
     id: ticket.id,
@@ -46,7 +52,7 @@ export default async function TicketPage({ params }: TicketPageProps) {
       content: c.content,
       createdAt: c.createdAt,
       isInternal: c.isInternal,
-      author: c.author ? { name: c.author.name } : null,
+      author: c.author ? { name: publicAgentDisplayName } : null,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       attachments: c.attachments.map((a: any) => ({
         id: a.id,
@@ -68,7 +74,10 @@ export default async function TicketPage({ params }: TicketPageProps) {
 
   return (
     <div className="py-8">
-      <PublicTicketDetail ticket={mappedTicket} />
+      <PublicTicketDetail
+        ticket={mappedTicket}
+        agentDisplayName={publicAgentDisplayName}
+      />
     </div>
   );
 }

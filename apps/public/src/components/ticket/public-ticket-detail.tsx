@@ -22,6 +22,7 @@ interface PublicTicketDetailProps {
     }[];
 
   };
+  agentDisplayName?: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -38,7 +39,10 @@ const statusLabels: Record<string, string> = {
   CLOSED: "종료",
 };
 
-export function PublicTicketDetail({ ticket }: PublicTicketDetailProps) {
+export function PublicTicketDetail({
+  ticket,
+  agentDisplayName = "고객 지원팀",
+}: PublicTicketDetailProps) {
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-sm">
       <div className="mb-8 pb-6 border-b">
@@ -88,7 +92,7 @@ export function PublicTicketDetail({ ticket }: PublicTicketDetailProps) {
 
       <div className="mb-8">
         <h3 className="text-lg font-medium mb-6">답변 내역</h3>
-        <CommentList comments={ticket.comments} />
+        <CommentList comments={ticket.comments} agentDisplayName={agentDisplayName} />
       </div>
 
       {ticket.status !== "CLOSED" && (
