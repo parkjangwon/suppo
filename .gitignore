@@ -82,6 +82,5 @@ public/uploads/
 
 # Docker env
 docker/env/.env.backend
-docker/env/.env.apache
 docker/env/.env.production
 docker/env/.env.production.local

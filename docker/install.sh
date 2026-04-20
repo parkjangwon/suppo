@@ -9,7 +9,6 @@ COMPOSE_FILE="${DOCKER_DIR}/docker-compose.yml"
 MODE="all-in-one"
 
 PREPARE_ONLY=0
-GENERATED_ADMIN_PASSWORD=""
 
 log() {
   printf '\n[%s] %s\n' "$1" "$2"
@@ -75,7 +74,7 @@ configure_mode() {
       ENV_EXAMPLE_FILE="${DOCKER_DIR}/env/.env.production.example"
       COMPOSE_FILE="${DOCKER_DIR}/docker-compose.yml"
       ;;
-    backend|apache)
+    backend)
       MODE="backend"
       ENV_FILE="${DOCKER_DIR}/env/.env.backend"
       ENV_EXAMPLE_FILE="${DOCKER_DIR}/env/.env.backend.example"
@@ -94,17 +93,6 @@ generate_secret() {
     python3 - <<'PY'
 import secrets
 print(secrets.token_urlsafe(32), end="")
-PY
-  fi
-}
-
-generate_password() {
-  if command -v openssl >/dev/null 2>&1; then
-    openssl rand -base64 18 | tr -d '\n'
-  else
-    python3 - <<'PY'
-import secrets
-print(secrets.token_urlsafe(18), end="")
 PY
   fi
 }
@@ -239,13 +227,12 @@ ensure_local_defaults() {
     upsert_env_value "$ENV_FILE" GIT_TOKEN_ENCRYPTION_KEY "$(generate_secret)"
   fi
 
-  if [ -z "$admin_email" ] || [ "$admin_email" = "admin@company.com" ]; then
-    upsert_env_value "$ENV_FILE" INITIAL_ADMIN_EMAIL "admin@admin.localhost"
+  if [ -z "$admin_email" ] || [ "$admin_email" = "admin@company.com" ] || [ "$admin_email" = "admin@admin.localhost" ]; then
+    upsert_env_value "$ENV_FILE" INITIAL_ADMIN_EMAIL "admin@suppo.io"
   fi
 
-  if [ -z "$admin_password" ] || [[ "$admin_password" == \<* ]]; then
-    GENERATED_ADMIN_PASSWORD="$(generate_password)"
-    upsert_env_value "$ENV_FILE" INITIAL_ADMIN_PASSWORD "$GENERATED_ADMIN_PASSWORD"
+  if [ -z "$admin_password" ] || [[ "$admin_password" == \<* ]] || [ "$admin_email" = "admin@company.com" ] || [ "$admin_email" = "admin@admin.localhost" ]; then
+    upsert_env_value "$ENV_FILE" INITIAL_ADMIN_PASSWORD "admin1234"
   fi
 
   if [ -z "$(get_env_value "$ENV_FILE" AUTO_BOOTSTRAP)" ]; then
@@ -326,11 +313,7 @@ print_success() {
 - Admin Email: ${admin_email}
 EOF
 
-  if [ -n "$GENERATED_ADMIN_PASSWORD" ]; then
-    printf '%s\n' "- Generated Admin Password: ${GENERATED_ADMIN_PASSWORD}"
-  else
-    printf '%s\n' "- Admin Password: ${ENV_FILE} 값을 사용합니다."
-  fi
+  printf '%s\n' "- Admin Password: ${ENV_FILE} 값을 사용합니다."
 
   if [ "$PREPARE_ONLY" = "1" ]; then
     cat <<EOF

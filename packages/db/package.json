@@ -13,6 +13,7 @@
     "bootstrap": "tsx prisma/bootstrap.ts",
     "migrate:dev": "prisma migrate dev --schema=./prisma/schema.prisma",
     "migrate:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
+    "migrate:libsql": "tsx prisma/migrate.ts",
     "seed": "tsx prisma/seed.ts",
     "studio": "prisma studio --schema=./prisma/schema.prisma"
   },

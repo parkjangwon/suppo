@@ -45,7 +45,7 @@ export async function seedInitialAdmin(
   prisma: PrismaClient
 ): Promise<string> {
   const email = process.env.INITIAL_ADMIN_EMAIL ?? "admin@suppo.io";
-  const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin123";
+  const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin1234";
   const passwordHash = await hash(password, 10);
 
   const admin = await prisma.agent.upsert({
@@ -76,7 +76,7 @@ export async function seedInitialAdmin(
 export async function seedSampleAgents(
   prisma: PrismaClient
 ): Promise<Record<string, string>> {
-  const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin123";
+  const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin1234";
   const passwordHash = await hash(password, 10);
 
   const agents = [
@@ -102,7 +102,7 @@ export async function seedSampleAgents(
 export async function seedMoreAgents(
   prisma: PrismaClient
 ): Promise<Record<string, string>> {
-  const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin123";
+  const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin1234";
   const passwordHash = await hash(password, 10);
 
   const agents = [

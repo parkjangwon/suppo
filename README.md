@@ -264,14 +264,38 @@ Docker 배포는 두 가지 모드를 지원합니다.
 
 1. 환경 변수 파일 준비
 
+올인원:
+
 ```bash
 cp docker/env/.env.production.example docker/env/.env.production
 ```
 
-2. `docker/env/.env.production`에서 최소 항목 수정
+백엔드:
+
+```bash
+cp docker/env/.env.backend.example docker/env/.env.backend
+```
+
+2. env 파일에서 최소 항목 수정
+
+올인원은 `docker/env/.env.production`:
 
 - `PUBLIC_URL`
 - `ADMIN_URL`
+- `AUTH_SECRET`
+- `TICKET_ACCESS_SECRET`
+- `GIT_TOKEN_ENCRYPTION_KEY`
+- `INITIAL_ADMIN_EMAIL`
+- `INITIAL_ADMIN_PASSWORD`
+- 필요 시 `AUTO_BOOTSTRAP`, `SEED_PROFILE`
+
+백엔드는 `docker/env/.env.backend`:
+
+- `PUBLIC_URL`
+- `ADMIN_URL`
+- `BACKEND_BIND_IP`
+- `PUBLIC_APP_PORT`
+- `ADMIN_APP_PORT`
 - `AUTH_SECRET`
 - `TICKET_ACCESS_SECRET`
 - `GIT_TOKEN_ENCRYPTION_KEY`
@@ -305,7 +329,7 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend logs -f
 ```
 
-Docker 첫 기동 시 내부 순서는 다음과 같습니다.
+올인원 첫 기동 시 내부 순서는 다음과 같습니다.
 
 - `sqld`
 - `migrate`
@@ -314,7 +338,11 @@ Docker 첫 기동 시 내부 순서는 다음과 같습니다.
 - `admin`
 - `nginx`
 
-`bootstrap`은 빈 DB일 때만 최소 운영 기본 데이터를 넣고, `SEED_PROFILE=demo`일 때만 데모 데이터를 자동 주입합니다.
+백엔드 모드는 `sqld -> migrate -> bootstrap -> public -> admin` 순서로 동작합니다.
+
+`migrate`는 Docker에서 `prisma migrate deploy`를 직접 호출하지 않고, [packages/db/prisma/migrate.ts](/Users/pjw/dev/project/suppo/packages/db/prisma/migrate.ts:1) 가 `migration.sql` 파일들을 LibSQL에 순서대로 적용합니다.
+
+`bootstrap`은 시작 시 `prisma generate`를 먼저 수행한 뒤, 빈 DB일 때만 최소 운영 기본 데이터를 넣고 `SEED_PROFILE=demo`일 때만 데모 데이터를 자동 주입합니다.
 
 백엔드 모드에서는 `nginx`가 빠지고, `public/admin`이 `BACKEND_BIND_IP`와 `PUBLIC_APP_PORT`/`ADMIN_APP_PORT`로 바인딩됩니다. 외부 Apache나 다른 프록시 서버는 그 주소로 직접 reverse proxy 하면 됩니다.
 
@@ -405,6 +433,8 @@ pnpm --filter=@suppo/db seed
 pnpm --filter=@suppo/db studio
 ```
 
+로컬 SQLite 개발에서는 위 Prisma 명령을 그대로 사용합니다. Docker + LibSQL(sqld) 경로에서는 `migrate` 서비스가 [packages/db/prisma/migrate.ts](/Users/pjw/dev/project/suppo/packages/db/prisma/migrate.ts:1) 를 통해 SQL 마이그레이션을 적용합니다.
+
 ## 테스트
 
 ### Unit Test
@@ -445,8 +475,8 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 구성:
 
 - `sqld`: LibSQL 서버
-- `migrate`: Prisma migration 실행
-- `bootstrap`: 빈 DB일 때 최소 운영 기본 데이터 생성, 필요 시 데모 데이터 주입
+- `migrate`: `migration.sql` 파일을 LibSQL에 순서대로 적용
+- `bootstrap`: `prisma generate` 후 빈 DB일 때 최소 운영 기본 데이터 생성, 필요 시 데모 데이터 주입
 - `public`: 공개 앱 컨테이너
 - `admin`: 관리자 앱 컨테이너
 - `nginx`: 도메인별 리버스 프록시

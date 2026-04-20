@@ -9,27 +9,18 @@ COPY apps/public/package.json ./apps/public/
 COPY packages/db/package.json ./packages/db/
 COPY packages/ui/package.json ./packages/ui/
 COPY packages/shared/package.json ./packages/shared/
-RUN pnpm install --frozen-lockfile
-
-FROM base AS prod-deps
-WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/admin/package.json ./apps/admin/
-COPY apps/public/package.json ./apps/public/
-COPY packages/db/package.json ./packages/db/
-COPY packages/ui/package.json ./packages/ui/
-COPY packages/shared/package.json ./packages/shared/
-RUN pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 FROM base AS migrator
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/admin/src/lib/system/seed-functions.ts ./apps/admin/src/lib/system/seed-functions.ts
 COPY packages/db/package.json ./packages/db/
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
 COPY packages/db/prisma ./packages/db/prisma
 COPY packages/db/src ./packages/db/src
 COPY package.json pnpm-workspace.yaml ./
-CMD ["pnpm", "--filter=@suppo/db", "migrate:deploy"]
+CMD ["sh", "-lc", "cd /app/packages/db && ./node_modules/.bin/tsx prisma/migrate.ts"]
 
 FROM base AS builder
 ARG APP_NAME
@@ -44,6 +35,7 @@ ENV AUTH_SECRET=$AUTH_SECRET \
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p /app/apps/${APP_NAME}/public
 RUN pnpm --filter=@suppo/db generate
 RUN pnpm --filter=@suppo/${APP_NAME} build
 ENV AUTH_SECRET="" DATABASE_URL="" TICKET_ACCESS_SECRET="" GIT_TOKEN_ENCRYPTION_KEY=""
@@ -56,8 +48,6 @@ ENV APP_NAME=$APP_NAME \
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
 
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=builder /app/packages/db/node_modules/.prisma ./packages/db/node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/static ./apps/${APP_NAME}/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/public ./apps/${APP_NAME}/public

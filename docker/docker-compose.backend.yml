@@ -31,7 +31,7 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
-    command: ["pnpm", "--filter=@suppo/db", "bootstrap"]
+    command: ["sh", "-lc", "cd /app/packages/db && ./node_modules/.bin/prisma generate --schema=./prisma/schema.prisma && ./node_modules/.bin/tsx prisma/bootstrap.ts"]
     environment:
       DATABASE_URL: http://sqld:8889
       DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}

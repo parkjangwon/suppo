@@ -106,6 +106,11 @@ docker compose --env-file env/.env.production up --build -d
 
 ```bash
 cp docker/env/.env.production.example docker/env/.env.production
+```
+
+백엔드 모드를 쓸 경우:
+
+```bash
 cp docker/env/.env.backend.example docker/env/.env.backend
 ```
 
@@ -114,12 +119,17 @@ cp docker/env/.env.backend.example docker/env/.env.backend
 ```bash
 cd docker
 cp env/.env.production.example env/.env.production
+```
+
+백엔드 모드를 쓸 경우:
+
+```bash
 cp env/.env.backend.example env/.env.backend
 ```
 
 ### 2. 필수 값 수정
 
-`env/.env.production`에서 최소한 아래 값들은 실제 운영 환경에 맞게 바꿔야 합니다.
+올인원은 `env/.env.production`에서 최소한 아래 값들은 실제 운영 환경에 맞게 바꿔야 합니다.
 
 - `PUBLIC_URL`
 - `ADMIN_URL`
@@ -129,17 +139,47 @@ cp env/.env.backend.example env/.env.backend
 - `INITIAL_ADMIN_EMAIL`
 - `INITIAL_ADMIN_PASSWORD`
 
+백엔드는 `env/.env.backend`에서 아래 값들을 확인해야 합니다.
+
+- `PUBLIC_URL`
+- `ADMIN_URL`
+- `BACKEND_BIND_IP`
+- `PUBLIC_APP_PORT`
+- `ADMIN_APP_PORT`
+- `AUTH_SECRET`
+- `TICKET_ACCESS_SECRET`
+- `GIT_TOKEN_ENCRYPTION_KEY`
+- `INITIAL_ADMIN_EMAIL`
+- `INITIAL_ADMIN_PASSWORD`
+
 ### 3. 컨테이너 기동
+
+올인원:
 
 ```bash
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
 ```
 
+백엔드:
+
+```bash
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up --build -d
+```
+
 ### 4. 상태 확인
+
+올인원:
 
 ```bash
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production ps
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production logs -f
+```
+
+백엔드:
+
+```bash
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend ps
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend logs -f
 ```
 
 ### 5. 첫 접속
@@ -177,8 +217,8 @@ AUTH_SECRET=<32자 이상 랜덤 문자열>
 TICKET_ACCESS_SECRET=<32자 이상 랜덤 문자열>
 GIT_TOKEN_ENCRYPTION_KEY=<32바이트 키>
 
-INITIAL_ADMIN_EMAIL=admin@company.com
-INITIAL_ADMIN_PASSWORD=<초기 비밀번호>
+INITIAL_ADMIN_EMAIL=admin@suppo.io
+INITIAL_ADMIN_PASSWORD=admin1234
 
 AUTO_BOOTSTRAP=if-empty
 SEED_PROFILE=none
@@ -197,8 +237,8 @@ ADMIN_APP_PORT=3001
 
 ### 자동 초기화 정책
 
-- `migrate`는 항상 실행되어 스키마를 최신 상태로 맞춥니다.
-- `bootstrap`은 DB가 비어 있는지 확인한 뒤 동작합니다.
+- `migrate`는 항상 실행되며, [packages/db/prisma/migrate.ts](/Users/pjw/dev/project/suppo/packages/db/prisma/migrate.ts:1) 가 `migration.sql` 파일들을 LibSQL에 순서대로 적용합니다.
+- `bootstrap`은 시작 시 `prisma generate`를 먼저 수행하고 DB가 비어 있는지 확인한 뒤 동작합니다.
 - `AUTO_BOOTSTRAP=if-empty`이면 빈 DB에서만 최소 운영용 기본 데이터가 생성됩니다.
   - 초기 관리자
   - 기본 카테고리
