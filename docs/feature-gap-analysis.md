@@ -1,4 +1,4 @@
-# Suppo Helpdesk 기능 갭 분석 보고서
+# Suppo 기능 갭 분석 보고서
 
 > **작성일**: 2026-03-17
 > **비교 대상**: Zendesk, Freshdesk, Intercom, Jira Service Management, ServiceNow

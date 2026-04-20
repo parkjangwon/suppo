@@ -223,7 +223,7 @@ packages:
 
 ```json
 {
-  "name": "suppo-helpdesk",
+  "name": "suppo",
   "private": true,
   "scripts": {
     "dev:admin":   "pnpm --filter=@suppo/admin dev",
@@ -1027,7 +1027,7 @@ cp src/middleware.ts apps/admin/src/middleware.ts  # 아래 Step 4에서 수정
 `apps/admin/src/` 전체에서 수행:
 
 ```bash
-cd /path/to/suppo-helpdesk
+cd /path/to/suppo
 
 find apps/admin/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' \
   -e 's|@/lib/db/client|@suppo/db|g' \

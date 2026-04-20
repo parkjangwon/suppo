@@ -105,7 +105,7 @@ test("admin login and public routes render different shells", async ({
   await page.goto("/admin/login");
   await expect(page.getByText("상담원 로그인")).toBeVisible();
   await page.goto("/");
-  await expect(page.getByText("Suppo Support")).toBeVisible();
+  await expect(page.getByText("Suppo")).toBeVisible();
 });
 ```
 

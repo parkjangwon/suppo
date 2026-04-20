@@ -1,6 +1,6 @@
 # Docker 배포 가이드
 
-이 디렉터리는 Suppo Helpdesk의 Docker 배포 자산을 모아둔 위치입니다.
+이 디렉터리는 Suppo의 Docker 배포 자산을 모아둔 위치입니다.
 
 ## 구성
 

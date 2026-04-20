@@ -11,7 +11,7 @@ import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
-  title: "티켓 상세 | Suppo Helpdesk",
+  title: "티켓 상세 | Suppo",
   description: "티켓 상세 정보 및 관리",
 };
 

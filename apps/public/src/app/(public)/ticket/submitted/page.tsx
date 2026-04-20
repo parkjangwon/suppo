@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 export const metadata = {
-  title: "티켓 제출 완료 | Suppo Helpdesk",
+  title: "티켓 제출 완료 | Suppo",
   description: "문의가 성공적으로 접수되었습니다.",
 };
 

@@ -403,7 +403,7 @@ import { captureStep } from "../fixtures/screenshot";
 test("공개 홈페이지 렌더링 확인", async ({ page }, testInfo) => {
   await test.step("홈 페이지 접근", async () => {
     await page.goto("/");
-    await expect(page.getByText("Suppo Helpdesk").first()).toBeVisible();
+    await expect(page.getByText("Suppo").first()).toBeVisible();
     await captureStep(page, testInfo, "홈 페이지 접근");
   });
 

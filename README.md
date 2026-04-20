@@ -1,4 +1,4 @@
-# Suppo Helpdesk System
+# Suppo
 
 <p align="center">
   <strong>pnpm workspace 기반 Public/Admin 분리형 헬프데스크 시스템</strong>
@@ -17,7 +17,7 @@
 
 ## 개요
 
-Suppo Helpdesk System은 고객용 공개 채널과 관리자용 백오피스를 분리한 헬프데스크 애플리케이션입니다.
+Suppo은 고객용 공개 채널과 관리자용 백오피스를 분리한 헬프데스크 애플리케이션입니다.
 
 - `apps/public`: 고객 티켓 생성, 조회, 지식베이스, 설문
 - `apps/admin`: 상담원/관리자 대시보드, 티켓 처리, 분석, 설정
@@ -183,7 +183,7 @@ public 포털은 기본적으로 플로팅 채팅 버튼을 자동 삽입할 수
 ## 모노레포 구조
 
 ```text
-suppo-helpdesk/
+suppo/
 ├── apps/
 │   ├── admin/
 │   │   ├── src/

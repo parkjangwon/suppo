@@ -1200,7 +1200,7 @@ export async function seedKnowledgeBase(
       title: "서비스 시작 가이드 (Getting Started)",
       slug: "getting-started-guide",
       categoryKey: "getting-started",
-      excerpt: "Suppo Helpdesk 서비스를 처음 시작하는 방법을 단계별로 안내합니다.",
+      excerpt: "Suppo 서비스를 처음 시작하는 방법을 단계별로 안내합니다.",
       content: `# 서비스 시작 가이드
 
 ## 1. 계정 생성

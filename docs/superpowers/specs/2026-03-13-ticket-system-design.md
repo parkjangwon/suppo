@@ -1,4 +1,4 @@
-# Suppo Helpdesk System — Design Spec
+# Suppo — Design Spec
 
 ## Context
 
@@ -207,7 +207,7 @@ Suppo는 SaaS 제품에 대한 기술지원 및 VOC(Voice of Customer) 처리를
 ## Directory Structure
 
 ```
-suppo-helpdesk/
+suppo/
 ├── src/
 │   ├── app/
 │   │   ├── (public)/                # 고객용 라우트 그룹

@@ -23,7 +23,7 @@ export const DEFAULT_EMAIL_SETTINGS = {
   smtpUser: "",
   smtpPassword: "",
   fromEmail: "no-reply@company.com",
-  fromName: "Suppo Helpdesk",
+  fromName: "Suppo",
   sesAccessKey: "",
   sesSecretKey: "",
   sesRegion: "ap-northeast-2",

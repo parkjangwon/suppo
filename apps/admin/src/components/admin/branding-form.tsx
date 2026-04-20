@@ -38,7 +38,7 @@ const defaultFormData: SystemBranding = {
   faviconUrl: "",
   primaryColor: "#0f172a",
   secondaryColor: "#3b82f6",
-  homepageTitle: "Suppo Helpdesk",
+  homepageTitle: "Suppo",
   homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
   adminPanelTitle: "Suppo Admin",
   appTitle: "고객 지원 센터",
@@ -240,7 +240,7 @@ export function BrandingForm() {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, homepageTitle: e.target.value }))
               }
-              placeholder={copy.brandingHomepageTitlePlaceholder ?? "Suppo Helpdesk"}
+              placeholder={copy.brandingHomepageTitlePlaceholder ?? "Suppo"}
             />
           </div>
 

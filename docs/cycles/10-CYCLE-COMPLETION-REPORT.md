@@ -1,6 +1,6 @@
-# Suppo Helpdesk 10-Cycle Enhancement Complete 🎉
+# Suppo 10-Cycle Enhancement Complete 🎉
 
-**프로젝트:** Suppo Helpdesk System 개선  
+**프로젝트:** Suppo 개선  
 **기간:** 2026-03-29  
 **총 사이클:** 10개  
 **참여 역할:** CEO, CTO, PM, 백엔드 개발자, 프론트엔드 개발자, 마케터, 세일즈

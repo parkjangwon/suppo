@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
-  title: "Suppo Helpdesk",
+  title: "Suppo",
   description: "Suppo helpdesk system"
 };
 

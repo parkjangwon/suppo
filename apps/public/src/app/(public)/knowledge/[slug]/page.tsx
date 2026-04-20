@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: KnowledgeArticlePageProps): P
   }
 
   return {
-    title: `${article.title} | Suppo Helpdesk`,
+    title: `${article.title} | Suppo`,
     description: article.excerpt || undefined,
   };
 }

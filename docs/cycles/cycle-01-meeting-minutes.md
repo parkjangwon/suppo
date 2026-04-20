@@ -77,7 +77,7 @@
 **핵심 발견:**
 1. **No pricing, demo, or signup flow** - 고객이 self-serve로 평가/구매 불가
 2. **Missing SEO fundamentals** - OG tags, sitemap, structured data 없음
-3. **Generic homepage messaging** - "Suppo Helpdesk"만 표시
+3. **Generic homepage messaging** - "Suppo"만 표시
 4. **Email templates are Korean-only** - 영어 변형 없음
 5. **Knowledge base is empty** - 게시된 기사 없음
 

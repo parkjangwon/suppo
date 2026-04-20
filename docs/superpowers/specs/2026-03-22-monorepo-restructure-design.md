@@ -38,7 +38,7 @@
 ## 3. 디렉터리 구조
 
 ```
-suppo-helpdesk/                    ← git 루트 (단일 레포 유지)
+suppo/                    ← git 루트 (단일 레포 유지)
 ├── pnpm-workspace.yaml
 ├── package.json                     ← 루트: 워크스페이스 툴링만 (lint, test 스크립트)
 ├── tsconfig.base.json               ← 공통 TypeScript 설정

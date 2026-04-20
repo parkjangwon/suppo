@@ -322,7 +322,7 @@ CMD ["node", "server.js"]
 **이미지 빌드 명령:**
 ```bash
 # 앱 이미지
-docker build --target runner -t suppo-helpdesk:latest .
+docker build --target runner -t suppo:latest .
 
 # 마이그레이션 이미지 (별도 빌드)
 docker build --target migrator -t suppo-migrate:latest .
@@ -351,7 +351,7 @@ services:
       retries: 5
 
   public:
-    image: suppo-helpdesk:latest
+    image: suppo:latest
     restart: unless-stopped
     depends_on:
       sqld:
@@ -372,7 +372,7 @@ services:
     # 수평 확장: docker-compose up --scale public=3
 
   admin:
-    image: suppo-helpdesk:latest
+    image: suppo:latest
     restart: unless-stopped
     depends_on:
       sqld:
@@ -501,7 +501,7 @@ DATABASE_AUTH_TOKEN=
 
 ```bash
 # 1. 이미지 빌드
-docker build --target runner  -t suppo-helpdesk:latest .
+docker build --target runner  -t suppo:latest .
 docker build --target migrator -t suppo-migrate:latest .
 
 # 2. sqld 먼저 기동
@@ -524,7 +524,7 @@ docker compose up -d
 ### 업데이트 배포
 
 ```bash
-docker build --target runner  -t suppo-helpdesk:latest .
+docker build --target runner  -t suppo:latest .
 docker build --target migrator -t suppo-migrate:latest .
 
 # 마이그레이션 (스키마 변경이 없으면 생략 가능)

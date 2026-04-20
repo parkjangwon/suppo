@@ -8,7 +8,7 @@ CREATE TABLE "new_SystemBranding" (
     "faviconUrl" TEXT,
     "primaryColor" TEXT NOT NULL DEFAULT '#0f172a',
     "secondaryColor" TEXT NOT NULL DEFAULT '#3b82f6',
-    "homepageTitle" TEXT NOT NULL DEFAULT 'Suppo Helpdesk',
+    "homepageTitle" TEXT NOT NULL DEFAULT 'Suppo',
     "homepageSubtitle" TEXT NOT NULL DEFAULT '민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.',
     "adminPanelTitle" TEXT NOT NULL DEFAULT 'Suppo Admin',
     "appTitle" TEXT NOT NULL DEFAULT '고객 지원 센터',

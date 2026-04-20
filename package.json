@@ -1,5 +1,5 @@
 {
-  "name": "suppo-helpdesk",
+  "name": "suppo",
   "private": true,
   "scripts": {
     "dev": "pnpm dev:all",

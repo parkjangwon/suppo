@@ -1500,7 +1500,7 @@ In `ADMIN_COPY.en`, add after `daySaturday`:
 - [ ] **Step 4: Also remove `businessHoursDayLabels: string` from the interface** (it was listed but isn't needed — day labels come from `daySunday`...`daySaturday` array built at runtime). Verify TypeScript compiles:
 
 ```bash
-cd /Users/pjw/dev/project/suppo-helpdesk
+cd /Users/pjw/dev/project/suppo
 pnpm --filter=@suppo/shared build 2>&1 | tail -20
 ```
 
@@ -1673,7 +1673,7 @@ Find line `const navSections = getAdminNavSections(userRole);` and change to:
 - [ ] **Step 3: Verify TypeScript compiles**
 
 ```bash
-cd /Users/pjw/dev/project/suppo-helpdesk
+cd /Users/pjw/dev/project/suppo
 pnpm --filter=@suppo/admin build 2>&1 | tail -30
 ```
 
@@ -2656,7 +2656,7 @@ grep -n '"[가-힣]' apps/admin/src/components/admin/chat-queue.tsx
 - [ ] **Step 3: Final full build**
 
 ```bash
-cd /Users/pjw/dev/project/suppo-helpdesk
+cd /Users/pjw/dev/project/suppo
 pnpm build:admin 2>&1 | tail -40
 ```
 
