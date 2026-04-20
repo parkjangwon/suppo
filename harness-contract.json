@@ -1,0 +1,117 @@
+{
+  "harness_version": 2,
+  "_file_role": "durable_project_contract",
+  "_commit_policy": "Commit this file. It contains only durable project defaults and guardrails.",
+  "shared_contract_fields": [
+    "communication_language",
+    "project_type",
+    "definition_of_done",
+    "change_posture",
+    "change_guardrails",
+    "verification_policy",
+    "approval_policy",
+    "project_commands",
+    "project_constraints",
+    "rule_strengths",
+    "communication_tone",
+    "stack_summary",
+    "environment"
+  ],
+  "communication_language": "ko",
+  "project_type": "monorepo",
+  "definition_of_done": "코드 변경은 기본적으로 `pnpm test`, `pnpm lint`, `pnpm build:all`을 통과해야 하며, 필요 시 `pnpm tsc --noEmit`로 타입 검증을 보강한다.",
+  "change_posture": "conservative",
+  "change_guardrails": [
+    "인증, 권한, 세션, 미들웨어, SAML/SSO 흐름 변경은 먼저 확인받는다.",
+    "공개 API 계약, 외부 연동, 시크릿/암호화 처리 변경은 먼저 확인받는다.",
+    "데이터 마이그레이션, Prisma 스키마 파괴적 변경, 운영 배포 영향이 큰 수정은 먼저 확인받는다."
+  ],
+  "verification_policy": "required",
+  "approval_policy": "explicit_for_risky_changes",
+  "project_commands": {
+    "test": "pnpm test",
+    "lint": "pnpm lint",
+    "build": "pnpm build:all",
+    "dev": "pnpm dev:all",
+    "typecheck": "pnpm tsc --noEmit"
+  },
+  "project_constraints": [
+    "Prisma 스키마 변경 뒤에는 `pnpm --filter=@crinity/db generate`와 적절한 마이그레이션 흐름을 반드시 반영한다.",
+    "Edge 미들웨어와 Edge에서 호출될 수 있는 JWT callback 경로에는 Prisma 직접 조회를 추가하지 않는다.",
+    "필수 시크릿(`AUTH_SECRET`, `TICKET_ACCESS_SECRET`, `GIT_TOKEN_ENCRYPTION_KEY`)은 기본값 없이 관리하고 길이 요건을 지킨다.",
+    "운영 배포에서는 sqld 외부 노출 금지와 shared uploads 볼륨 규칙을 깨지 않는다."
+  ],
+  "rule_strengths": {
+    "change_guardrails": "enforced",
+    "verification_policy": "enforced",
+    "approval_policy": "enforced",
+    "project_constraints": "enforced",
+    "communication_tone": "advisory"
+  },
+  "communication_tone": "supportive",
+  "stack_summary": [
+    "pnpm workspace monorepo",
+    "Next.js 15 App Router",
+    "React 19",
+    "TypeScript 5",
+    "Prisma 6 with @prisma/adapter-libsql",
+    "SQLite for local development",
+    "LibSQL/sqld for production",
+    "Vitest for unit tests",
+    "Playwright for E2E tests",
+    "Docker Compose and Nginx for deployment"
+  ],
+  "environment": {
+    "development": "Local development uses pnpm workspace commands with SQLite and dual Next.js apps.",
+    "runtime": "Node.js 22 Alpine container runtime for admin/public apps and migrator jobs.",
+    "primary_os": "macOS for local development; Linux containers for deployment."
+  },
+  "change_history": [
+    {
+      "date": "2026-04-20",
+      "change": "Initialized local harness bootstrap and confirmed collaboration language.",
+      "target": "harness-contract.json, harness-runtime.json",
+      "reason": "Bootstrap durable harness state for this repository."
+    },
+    {
+      "date": "2026-04-20",
+      "change": "Confirmed default completion gate, verification policy, and root execution commands.",
+      "target": "harness-contract.json",
+      "reason": "Repository owner confirmed the default done criteria for routine work."
+    },
+    {
+      "date": "2026-04-20",
+      "change": "Confirmed conservative default change posture.",
+      "target": "harness-contract.json",
+      "reason": "Repository owner prefers small, low-risk changes unless broader work is explicitly requested."
+    },
+    {
+      "date": "2026-04-20",
+      "change": "Confirmed sensitive-area change guardrails for auth, APIs, secrets, and database-impacting work.",
+      "target": "harness-contract.json",
+      "reason": "Repository owner wants explicit confirmation before high-risk or security-sensitive changes."
+    },
+    {
+      "date": "2026-04-20",
+      "change": "Confirmed approval policy for risky changes only.",
+      "target": "harness-contract.json",
+      "reason": "Safe small changes may proceed directly, but risky changes require explicit confirmation."
+    },
+    {
+      "date": "2026-04-20",
+      "change": "Captured repository constraints and inferred stack/environment defaults from strong repo signals.",
+      "target": "harness-contract.json",
+      "reason": "Existing README, Docker assets, and package manifests provide stable canonical project context."
+    },
+    {
+      "date": "2026-04-20",
+      "change": "Confirmed a more detailed and explanatory collaboration tone.",
+      "target": "harness-contract.json",
+      "reason": "Repository owner prefers detailed guidance over terse responses."
+    }
+  ],
+  "notes": [
+    "Existing root documentation is primarily Korean, so communication_language was confirmed as ko during bootstrap.",
+    "Root scripts and existing docs indicate `pnpm tsc --noEmit` is a documented fallback typecheck command even though it is not exposed as a root package.json script."
+  ]
+}
