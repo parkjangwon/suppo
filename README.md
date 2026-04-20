@@ -231,7 +231,36 @@ pnpm start:all
 
 ### Docker 설치
 
-Docker 배포는 `public`, `admin`, `sqld`를 분리한 멀티 컨테이너 구성을 사용합니다.
+Docker 배포는 두 가지 모드를 지원합니다.
+
+- `all-in-one`: compose 안에 `nginx`까지 포함하는 단일 스택
+- `backend`: 리버스 프록시 없이 `public/admin/sqld`만 올리는 스택
+
+가장 빠른 방법은 아래 스크립트를 사용하는 것입니다.
+
+```bash
+./docker/install.sh
+```
+
+백엔드 모드:
+
+```bash
+./docker/install.sh --mode backend
+```
+
+환경 파일만 준비하고 실제 `docker compose up`은 나중에 하고 싶다면:
+
+```bash
+./docker/install.sh --prepare-only
+```
+
+백엔드 모드에서 환경 파일만 먼저 준비하려면:
+
+```bash
+./docker/install.sh --mode backend --prepare-only
+```
+
+수동 설치 흐름은 다음과 같습니다.
 
 1. 환경 변수 파일 준비
 
@@ -252,14 +281,28 @@ cp docker/env/.env.production.example docker/env/.env.production
 
 3. 컨테이너 기동
 
+올인원:
+
 ```bash
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
+```
+
+백엔드:
+
+```bash
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up --build -d
 ```
 
 4. 로그 확인
 
 ```bash
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production logs -f
+```
+
+백엔드 모드는 아래처럼 확인합니다.
+
+```bash
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend logs -f
 ```
 
 Docker 첫 기동 시 내부 순서는 다음과 같습니다.
@@ -272,6 +315,8 @@ Docker 첫 기동 시 내부 순서는 다음과 같습니다.
 - `nginx`
 
 `bootstrap`은 빈 DB일 때만 최소 운영 기본 데이터를 넣고, `SEED_PROFILE=demo`일 때만 데모 데이터를 자동 주입합니다.
+
+백엔드 모드에서는 `nginx`가 빠지고, `public/admin`이 `BACKEND_BIND_IP`와 `PUBLIC_APP_PORT`/`ADMIN_APP_PORT`로 바인딩됩니다. 외부 Apache나 다른 프록시 서버는 그 주소로 직접 reverse proxy 하면 됩니다.
 
 ## 운영 점검
 
@@ -405,6 +450,12 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 - `public`: 공개 앱 컨테이너
 - `admin`: 관리자 앱 컨테이너
 - `nginx`: 도메인별 리버스 프록시
+
+백엔드 전용 배포는 아래 파일을 사용합니다.
+
+```bash
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up --build -d
+```
 
 ### 이미지 빌드 예시
 

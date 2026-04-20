@@ -7,6 +7,8 @@
 ```text
 docker/
 ├── Dockerfile
+├── apache-vhosts.conf.example
+├── docker-compose.backend.yml
 ├── docker-compose.yml
 ├── nginx.entrypoint.sh
 ├── certs/
@@ -15,6 +17,8 @@ docker/
 │   ├── public.crt
 │   └── public.key
 └── env/
+    ├── .env.backend
+    ├── .env.backend.example
     ├── .env.production
     ├── .env.production.example
     └── .env.production.local
@@ -23,10 +27,14 @@ docker/
 ## 파일 설명
 
 - `Dockerfile`: admin/public 공용 멀티스테이지 이미지 빌드
-- `docker-compose.yml`: `sqld`, `migrate`, `bootstrap`, `public`, `admin`, `nginx` 구성
+- `docker-compose.yml`: 올인원 배포용. `sqld`, `migrate`, `bootstrap`, `public`, `admin`, `nginx` 구성
+- `docker-compose.backend.yml`: 백엔드 전용 배포용. `nginx` 없이 `public/admin`을 `3000/3001`로 직접 리슨
+- `apache-vhosts.conf.example`: 외부 Apache reverse proxy 예시
 - `nginx.entrypoint.sh`: 환경변수 기반 Nginx 설정 생성 스크립트
 - `env/.env.production`: 운영 배포용 환경 변수
 - `env/.env.production.example`: 운영 환경 변수 템플릿
+- `env/.env.backend`: 백엔드 전용 환경 변수
+- `env/.env.backend.example`: 백엔드 전용 환경 변수 템플릿
 - `env/.env.production.local`: 로컬 프로덕션 테스트용 오버라이드
 - `certs/`: 인증서 파일 보관 위치
 
@@ -47,9 +55,50 @@ cd docker
 docker compose --env-file env/.env.production up --build -d
 ```
 
-기본 부팅 순서는 `sqld -> migrate -> bootstrap -> public/admin -> nginx` 입니다.
+올인원 기본 부팅 순서는 `sqld -> migrate -> bootstrap -> public/admin -> nginx` 입니다.
+
+백엔드 모드는 `sqld -> migrate -> bootstrap -> public/admin` 입니다.
 
 ## 설치 절차
+
+가장 빠른 방법:
+
+```bash
+./docker/install.sh
+```
+
+백엔드 모드:
+
+```bash
+./docker/install.sh --mode backend
+```
+
+환경 파일만 준비하고 실제 기동은 나중에 하려면:
+
+```bash
+./docker/install.sh --prepare-only
+```
+
+백엔드 모드에서 환경 파일만 준비하려면:
+
+```bash
+./docker/install.sh --mode backend --prepare-only
+```
+
+## 배포 모드
+
+### 1. 올인원 (`docker-compose.yml`)
+
+- 같은 서버 안에 `nginx + public + admin + sqld`를 모두 같이 올립니다.
+- 외부 사용자는 `nginx`로만 접속합니다.
+- 새 서버 한 대에 통째로 배포할 때 가장 단순합니다.
+
+### 2. 백엔드 전용 (`docker-compose.backend.yml`)
+
+- 외부 리버스 프록시는 호스트 OS 또는 별도 서버에 둡니다.
+- compose는 `public`, `admin`, `sqld`, `migrate/bootstrap`만 담당합니다.
+- `public/admin`은 `BACKEND_BIND_IP`에만 바인딩되므로 외부에 직접 노출하지 않고 내부망이나 loopback으로만 둘 수 있습니다.
+- 외부 Apache는 `apache-vhosts.conf.example`처럼 reverse proxy를 설정해 `public/admin`으로 전달할 수 있습니다.
 
 ### 1. 환경 변수 파일 생성
 
@@ -57,6 +106,7 @@ docker compose --env-file env/.env.production up --build -d
 
 ```bash
 cp docker/env/.env.production.example docker/env/.env.production
+cp docker/env/.env.backend.example docker/env/.env.backend
 ```
 
 또는 `docker/` 디렉터리에서:
@@ -64,6 +114,7 @@ cp docker/env/.env.production.example docker/env/.env.production
 ```bash
 cd docker
 cp env/.env.production.example env/.env.production
+cp env/.env.backend.example env/.env.backend
 ```
 
 ### 2. 필수 값 수정
@@ -133,6 +184,17 @@ AUTO_BOOTSTRAP=if-empty
 SEED_PROFILE=none
 ```
 
+백엔드용 `env/.env.backend`에서는 아래 값도 함께 봐야 합니다.
+
+```bash
+BACKEND_BIND_IP=127.0.0.1
+PUBLIC_APP_PORT=3000
+ADMIN_APP_PORT=3001
+```
+
+- 같은 서버의 Apache가 프록시하면 `BACKEND_BIND_IP=127.0.0.1`
+- 별도 내부망 Apache가 프록시하면 compose 서버의 사설 IP로 변경
+
 ### 자동 초기화 정책
 
 - `migrate`는 항상 실행되어 스키마를 최신 상태로 맞춥니다.
@@ -180,6 +242,22 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 
 # 종료
 docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production down
+```
+
+백엔드 모드:
+
+```bash
+# 전체 기동
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up -d
+
+# 재빌드 포함 기동
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up --build -d
+
+# 로그 확인
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend logs -f
+
+# 종료
+docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend down
 ```
 
 ## 운영 전 점검
