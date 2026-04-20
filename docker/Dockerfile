@@ -24,8 +24,10 @@ RUN pnpm install --frozen-lockfile --prod
 FROM base AS migrator
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY apps/admin/src/lib/system/seed-functions.ts ./apps/admin/src/lib/system/seed-functions.ts
 COPY packages/db/package.json ./packages/db/
 COPY packages/db/prisma ./packages/db/prisma
+COPY packages/db/src ./packages/db/src
 COPY package.json pnpm-workspace.yaml ./
 CMD ["pnpm", "--filter=@suppo/db", "migrate:deploy"]
 

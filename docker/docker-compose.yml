@@ -20,6 +20,25 @@ services:
       - sqld
     environment:
       DATABASE_URL: http://sqld:8889
+      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+
+  bootstrap:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: migrator
+    restart: "no"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    command: ["pnpm", "--filter=@suppo/db", "bootstrap"]
+    environment:
+      DATABASE_URL: http://sqld:8889
+      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      AUTO_BOOTSTRAP: ${AUTO_BOOTSTRAP:-if-empty}
+      SEED_PROFILE: ${SEED_PROFILE:-none}
 
   public:
     build:
@@ -31,10 +50,11 @@ services:
     image: suppo-public:latest
     restart: unless-stopped
     depends_on:
-      migrate:
+      bootstrap:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: http://sqld:8889
+      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
       PUBLIC_URL: ${PUBLIC_URL}
       ADMIN_URL: ${ADMIN_URL}
       AUTH_URL: ${PUBLIC_URL}
@@ -56,10 +76,11 @@ services:
     image: suppo-admin:latest
     restart: unless-stopped
     depends_on:
-      migrate:
+      bootstrap:
         condition: service_completed_successfully
     environment:
       DATABASE_URL: http://sqld:8889
+      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
       PUBLIC_URL: ${PUBLIC_URL}
       ADMIN_URL: ${ADMIN_URL}
       AUTH_URL: ${ADMIN_URL}

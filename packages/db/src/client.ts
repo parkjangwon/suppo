@@ -17,7 +17,7 @@ type PrismaLibsqlModule = {
   PrismaLibSQL?: PrismaLibsqlAdapterCtor;
 };
 
-function createPrismaClient(): PrismaClient {
+export function createPrismaClient(): PrismaClient {
   const url = resolveDatabaseUrl();
   const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const dynamicRequire = eval("require") as NodeRequire;

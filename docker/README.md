@@ -23,7 +23,7 @@ docker/
 ## 파일 설명
 
 - `Dockerfile`: admin/public 공용 멀티스테이지 이미지 빌드
-- `docker-compose.yml`: `sqld`, `migrate`, `public`, `admin`, `nginx` 구성
+- `docker-compose.yml`: `sqld`, `migrate`, `bootstrap`, `public`, `admin`, `nginx` 구성
 - `nginx.entrypoint.sh`: 환경변수 기반 Nginx 설정 생성 스크립트
 - `env/.env.production`: 운영 배포용 환경 변수
 - `env/.env.production.example`: 운영 환경 변수 템플릿
@@ -46,6 +46,57 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 cd docker
 docker compose --env-file env/.env.production up --build -d
 ```
+
+기본 부팅 순서는 `sqld -> migrate -> bootstrap -> public/admin -> nginx` 입니다.
+
+## 설치 절차
+
+### 1. 환경 변수 파일 생성
+
+프로젝트 루트에서:
+
+```bash
+cp docker/env/.env.production.example docker/env/.env.production
+```
+
+또는 `docker/` 디렉터리에서:
+
+```bash
+cd docker
+cp env/.env.production.example env/.env.production
+```
+
+### 2. 필수 값 수정
+
+`env/.env.production`에서 최소한 아래 값들은 실제 운영 환경에 맞게 바꿔야 합니다.
+
+- `PUBLIC_URL`
+- `ADMIN_URL`
+- `AUTH_SECRET`
+- `TICKET_ACCESS_SECRET`
+- `GIT_TOKEN_ENCRYPTION_KEY`
+- `INITIAL_ADMIN_EMAIL`
+- `INITIAL_ADMIN_PASSWORD`
+
+### 3. 컨테이너 기동
+
+```bash
+docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
+```
+
+### 4. 상태 확인
+
+```bash
+docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production ps
+docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production logs -f
+```
+
+### 5. 첫 접속
+
+- Public: `PUBLIC_URL`
+- Admin: `ADMIN_URL`
+
+최초 관리자 계정은 `INITIAL_ADMIN_EMAIL`, `INITIAL_ADMIN_PASSWORD` 값을 사용합니다.
 
 ## 운영팀이 주로 바꾸는 값
 
@@ -70,7 +121,30 @@ ADMIN_TLS_KEY=/etc/nginx/certs/admin.key
 
 PUBLIC_CLIENT_MAX_BODY_SIZE=600M
 ADMIN_CLIENT_MAX_BODY_SIZE=100M
+
+AUTH_SECRET=<32자 이상 랜덤 문자열>
+TICKET_ACCESS_SECRET=<32자 이상 랜덤 문자열>
+GIT_TOKEN_ENCRYPTION_KEY=<32바이트 키>
+
+INITIAL_ADMIN_EMAIL=admin@company.com
+INITIAL_ADMIN_PASSWORD=<초기 비밀번호>
+
+AUTO_BOOTSTRAP=if-empty
+SEED_PROFILE=none
 ```
+
+### 자동 초기화 정책
+
+- `migrate`는 항상 실행되어 스키마를 최신 상태로 맞춥니다.
+- `bootstrap`은 DB가 비어 있는지 확인한 뒤 동작합니다.
+- `AUTO_BOOTSTRAP=if-empty`이면 빈 DB에서만 최소 운영용 기본 데이터가 생성됩니다.
+  - 초기 관리자
+  - 기본 카테고리
+  - 기본 문의 유형
+  - 기본 업무 달력
+  - 기본 브랜딩 레코드
+- `SEED_PROFILE=demo`이면 빈 DB에서만 샘플 상담원, 고객, 티켓, 감사로그 등 데모 데이터까지 자동으로 채웁니다.
+- 이미 데이터가 있는 DB에서는 자동 데모 시드를 건너뜁니다. 강제로 다시 넣고 싶으면 수동으로 `pnpm --filter=@suppo/db seed`를 실행하면 됩니다.
 
 ### server_name 자동 추출
 
