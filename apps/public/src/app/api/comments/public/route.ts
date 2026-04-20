@@ -95,8 +95,8 @@ export async function POST(request: Request) {
       [assignee?.assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
       ticket.ticketNumber,
       ticket.customerName,
-      prisma,
-      { ticketId }
+      undefined,
+      { ticketId, commentId: comment.id }
     );
     dispatchEmailOutboxSoon();
 

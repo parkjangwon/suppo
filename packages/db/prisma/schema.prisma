@@ -546,6 +546,7 @@ model EmailDelivery {
   body         String
   category     EmailDeliveryCategory
   ticketId     String?
+  dedupeKey    String?
   messageId    String?
   inReplyTo    String?
   references   String?
@@ -559,6 +560,7 @@ model EmailDelivery {
   @@index([status, nextRetryAt])
   @@index([category, status, nextRetryAt])
   @@index([ticketId])
+  @@index([dedupeKey])
   @@index([messageId])
 }
 

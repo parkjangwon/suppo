@@ -30,6 +30,7 @@ import { processOutbox } from "@crinity/shared/email/process-outbox";
 function createDbMock() {
   return {
     emailDelivery: {
+      findFirst: vi.fn(),
       create: vi.fn(),
       findMany: vi.fn(),
       update: vi.fn(),
@@ -85,6 +86,7 @@ describe("email outbox", () => {
       body: "본문",
       category: "CUSTOMER",
       ticketId: null,
+      dedupeKey: null,
       messageId: null,
       inReplyTo: null,
       references: null,
@@ -113,6 +115,7 @@ describe("email outbox", () => {
         body: "본문",
         category: "CUSTOMER",
         ticketId: null,
+        dedupeKey: null,
         messageId: null,
         inReplyTo: null,
         references: null,
@@ -133,6 +136,7 @@ describe("email outbox", () => {
         body: "본문",
         category: "CUSTOMER",
         ticketId: "ticket-1",
+        dedupeKey: null,
         messageId: "<message-1@crinity.io>",
         inReplyTo: "<parent@crinity.io>",
         references: JSON.stringify(["<first@crinity.io>", "<parent@crinity.io>"]),
@@ -218,6 +222,7 @@ describe("email outbox", () => {
         body: "본문",
         category: "CUSTOMER",
         ticketId: null,
+        dedupeKey: null,
         messageId: null,
         inReplyTo: null,
         references: null,
@@ -249,6 +254,7 @@ describe("email outbox", () => {
         body: "본문",
         category: "INTERNAL",
         ticketId: null,
+        dedupeKey: null,
         messageId: null,
         inReplyTo: null,
         references: null,
@@ -292,6 +298,7 @@ describe("email outbox", () => {
         body: "본문",
         category: "INTERNAL",
         ticketId: null,
+        dedupeKey: null,
         messageId: null,
         inReplyTo: null,
         references: null,
@@ -322,5 +329,49 @@ describe("email outbox", () => {
     expect(result.sent).toBe(0);
     expect(result.failed).toBe(1);
     expect(result.retried).toBe(0);
+  });
+
+  it("does not enqueue duplicate deliveries when dedupeKey already exists", async () => {
+    const db = createDbMock();
+    const existing = {
+      id: "delivery-existing",
+      to: "agent@example.com",
+      subject: "댓글 알림",
+      body: "본문",
+      category: "INTERNAL" as const,
+      ticketId: "ticket-1",
+      dedupeKey: "comment:comment-1:internal:agent@example.com",
+      messageId: null,
+      inReplyTo: null,
+      references: null,
+      status: "PENDING" as const,
+      attemptCount: 0,
+      nextRetryAt: null,
+      lastError: null,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    };
+    db.emailDelivery.findFirst.mockResolvedValue(existing);
+
+    const result = await enqueueEmail(
+      {
+        to: "agent@example.com",
+        subject: "댓글 알림",
+        body: "본문",
+        category: "INTERNAL",
+        ticketId: "ticket-1",
+        dedupeKey: "comment:comment-1:internal:agent@example.com",
+      },
+      db,
+    );
+
+    expect(db.emailDelivery.findFirst).toHaveBeenCalledWith({
+      where: {
+        dedupeKey: "comment:comment-1:internal:agent@example.com",
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    expect(db.emailDelivery.create).not.toHaveBeenCalled();
+    expect(result).toEqual(existing);
   });
 });

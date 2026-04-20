@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         ticket.ticketNumber,
         authorName,
         true,
-        prisma,
+        undefined,
         { ticketId }
       );
     }
@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
         [ticket.assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
         ticket.ticketNumber,
         authorName,
-        prisma,
-        { ticketId }
+        undefined,
+        { ticketId, commentId: comment.id }
       );
       dispatchEmailOutboxSoon();
     }

@@ -166,7 +166,7 @@ export async function updateTicketStatus(
       ticket.ticketNumber,
       oldTicket.status,
       status,
-      prisma,
+      undefined,
       {
         recipientCategory: "CUSTOMER",
         ticketId: ticket.id,
@@ -185,7 +185,7 @@ export async function updateTicketStatus(
       ticket.ticketNumber,
       oldTicket.status,
       status,
-      prisma,
+      undefined,
       { ticketId: ticket.id }
     );
     dispatchEmailOutboxSoon();

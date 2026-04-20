@@ -27,6 +27,7 @@ interface EmailDeliveryRecord {
   body: string;
   category: EmailDeliveryCategory;
   ticketId: string | null;
+  dedupeKey: string | null;
   messageId: string | null;
   inReplyTo: string | null;
   references: string | null;
@@ -40,19 +41,8 @@ interface EmailDeliveryRecord {
 
 interface EmailQueueDbClient {
   emailDelivery: {
-    create: (args: {
-      data: {
-        to: string;
-        subject: string;
-        body: string;
-        category: EmailDeliveryCategory;
-        ticketId?: string | null;
-        messageId?: string | null;
-        inReplyTo?: string | null;
-        references?: string | null;
-        status: "PENDING";
-      };
-    }) => Promise<EmailDeliveryRecord>;
+    findFirst?: (args: unknown) => Promise<EmailDeliveryRecord | null>;
+    create: (args: unknown) => Promise<EmailDeliveryRecord>;
   };
 }
 
@@ -62,6 +52,7 @@ export interface EnqueueEmailInput {
   body: string;
   category: EmailDeliveryCategory;
   ticketId?: string;
+  dedupeKey?: string;
   threadHeaders?: {
     messageId: string;
     inReplyTo?: string;
@@ -182,8 +173,21 @@ async function persistQueuedThreadMapping(
 
 export async function enqueueEmail(
   input: EnqueueEmailInput,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
 ): Promise<EmailDeliveryRecord> {
+  if (input.dedupeKey && db.emailDelivery.findFirst) {
+    const existing = await db.emailDelivery.findFirst({
+      where: {
+        dedupeKey: input.dedupeKey,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (existing) {
+      return existing;
+    }
+  }
+
   const result = await db.emailDelivery.create({
     data: {
       to: input.to,
@@ -191,6 +195,7 @@ export async function enqueueEmail(
       body: input.body,
       category: input.category,
       ticketId: input.ticketId ?? null,
+      dedupeKey: input.dedupeKey ?? null,
       messageId: input.threadHeaders?.messageId ?? null,
       inReplyTo: input.threadHeaders?.inReplyTo ?? null,
       references: input.threadHeaders?.references
@@ -221,7 +226,7 @@ function uniqueRecipients(...values: Array<string | null | undefined>) {
 export async function enqueueTicketCreatedEmails(
   context: TicketEmailContext,
   _notificationEmail?: string,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
 ): Promise<void> {
   const settings = await getEmailSettings();
 
@@ -275,7 +280,7 @@ export async function enqueueTicketAssignedEmail(
   assigneeEmail: string,
   context: TicketEmailContext,
   assigneeName: string,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
 ): Promise<void> {
   const settings = await getEmailSettings();
   if (!shouldSendInternalEmail(settings, "assign")) {
@@ -308,8 +313,8 @@ export async function enqueueNewCommentEmail(
   ticketNumber: string,
   commenterName: string,
   isCustomerRecipient: boolean,
-  db: EmailQueueDbClient = prisma,
-  options?: { ticketId?: string },
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
+  options?: { ticketId?: string; dedupeKey?: string },
 ): Promise<void> {
   const settings = await getEmailSettings();
   const allowed = isCustomerRecipient
@@ -335,6 +340,7 @@ export async function enqueueNewCommentEmail(
         body: email.body,
         category: isCustomerRecipient ? "CUSTOMER" : "INTERNAL",
         ticketId: isCustomerRecipient ? options?.ticketId : undefined,
+        dedupeKey: options?.dedupeKey,
         threadHeaders:
           isCustomerRecipient && options?.ticketId
             ? await createDeliveryThreadHeaders(options.ticketId)
@@ -349,8 +355,8 @@ export async function enqueueInternalCommentNotifications(
   recipients: Array<string | null | undefined>,
   ticketNumber: string,
   commenterName: string,
-  db: EmailQueueDbClient = prisma,
-  options?: { ticketId?: string },
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
+  options?: { ticketId?: string; commentId?: string },
 ): Promise<void> {
   for (const recipient of uniqueRecipients(...recipients)) {
     await enqueueNewCommentEmail(
@@ -359,7 +365,12 @@ export async function enqueueInternalCommentNotifications(
       commenterName,
       false,
       db,
-      options
+      {
+        ticketId: options?.ticketId,
+        dedupeKey: options?.commentId
+          ? `comment:${options.commentId}:internal:${recipient}`
+          : undefined,
+      }
     );
   }
 }
@@ -369,7 +380,7 @@ export async function enqueueStatusChangedEmail(
   ticketNumber: string,
   oldStatus: string,
   newStatus: string,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
   options?: {
     recipientCategory?: EmailDeliveryCategory;
     ticketId?: string;
@@ -416,7 +427,7 @@ export async function enqueueInternalStatusNotifications(
   ticketNumber: string,
   oldStatus: string,
   newStatus: string,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
   options?: { ticketId?: string },
 ): Promise<void> {
   for (const recipient of uniqueRecipients(...recipients)) {
@@ -438,7 +449,7 @@ export async function enqueueSLAWarningEmail(
   assigneeName: string,
   targetLabel: string,
   minutesRemaining: number,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
 ): Promise<void> {
   const settings = await getEmailSettings();
   if (!shouldSendInternalEmail(settings, "slaWarning")) {
@@ -460,7 +471,7 @@ export async function enqueueSLABreachEmail(
   ticketNumber: string,
   assigneeName: string,
   targetLabel: string,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
 ): Promise<void> {
   const settings = await getEmailSettings();
   if (!shouldSendInternalEmail(settings, "slaBreach")) {
@@ -482,7 +493,7 @@ export async function enqueueCSATSurveyEmail(
   ticketSubject: string,
   customerEmail: string,
   customerName: string,
-  db: EmailQueueDbClient = prisma,
+  db: EmailQueueDbClient = prisma as unknown as EmailQueueDbClient,
 ): Promise<void> {
   const settings = await getEmailSettings();
   if (!shouldSendCustomerEmail(settings, "csatSurvey")) {

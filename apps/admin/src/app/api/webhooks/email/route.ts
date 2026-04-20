@@ -325,8 +325,8 @@ async function addCommentToExistingTicket(
     [assignee?.email ?? null, emailSettings?.notificationEmail ?? null],
     ticket.ticketNumber,
     email.fromName || email.from.split("@")[0],
-    prisma,
-    { ticketId: ticket.id },
+    undefined,
+    { ticketId: ticket.id, commentId: comment.id },
   );
   dispatchEmailOutboxSoon();
 
