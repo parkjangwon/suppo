@@ -20,7 +20,10 @@ const mockLogs = [
   { actorName: "김관리자", actorEmail: "admin@test.com", action: "DELETE", resourceType: "Ticket", resourceId: "t2", description: "티켓 삭제", createdAt: "2026-03-22T03:18:00Z" },
 ];
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.spyOn(console, "error").mockImplementation(() => undefined);
+});
 
 describe("generateAuditAnomalyReport", () => {
   it("analysisEnabled false → null", async () => {

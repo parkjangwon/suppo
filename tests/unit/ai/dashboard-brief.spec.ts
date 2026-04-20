@@ -47,6 +47,7 @@ const mockStats = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 
 describe("generateDashboardBrief", () => {

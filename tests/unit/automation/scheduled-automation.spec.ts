@@ -37,6 +37,7 @@ import { executeScheduledAutomationRules } from "@/lib/automation/engine";
 
 describe("executeScheduledAutomationRules", () => {
   beforeEach(() => {
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
     mockFindManyRules.mockReset();
     mockFindManyTickets.mockReset();
     mockFindUniqueTicket.mockReset();

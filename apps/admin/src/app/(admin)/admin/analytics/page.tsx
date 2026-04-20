@@ -1,8 +1,7 @@
-import { prisma } from "@suppo/db";
 import { AnalyticsContent } from "./analytics-content";
+import { getAnalysisEnabled } from "@/lib/settings/get-analysis-enabled";
 
 export default async function AnalyticsPage() {
-  const llmSettings = await prisma.lLMSettings.findFirst();
-  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
+  const analysisEnabled = await getAnalysisEnabled();
   return <AnalyticsContent analysisEnabled={analysisEnabled} />;
 }

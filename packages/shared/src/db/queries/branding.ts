@@ -31,9 +31,21 @@ export async function getSystemBranding(): Promise<SystemBranding> {
   const cached = await getCache<SystemBranding>(BRANDING_CACHE_KEY);
   if (cached) return cached;
 
-  const branding = await prisma.systemBranding.findUnique({
-    where: { id: DEFAULT_BRANDING_ID },
-  });
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    await setCache(BRANDING_CACHE_KEY, defaultBranding, { ttl: BRANDING_CACHE_TTL });
+    return defaultBranding;
+  }
+
+  let branding = null;
+  try {
+    branding = await prisma.systemBranding.findUnique({
+      where: { id: DEFAULT_BRANDING_ID },
+    });
+  } catch (error) {
+    if (!(typeof error === "object" && error !== null && "code" in error && error.code === "P2021")) {
+      throw error;
+    }
+  }
 
   const result = branding ? {
     companyName: branding.companyName,

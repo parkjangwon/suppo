@@ -2,6 +2,7 @@
   "name": "suppo",
   "private": true,
   "scripts": {
+    "postinstall": "pnpm --filter=@suppo/db generate",
     "dev": "pnpm dev:all",
     "dev:admin": "pnpm --filter=@suppo/admin dev",
     "dev:public": "pnpm --filter=@suppo/public dev",

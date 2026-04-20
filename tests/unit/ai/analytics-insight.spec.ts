@@ -40,7 +40,10 @@ const mockMetrics = {
   bottomAgents: [{ name: "이민준", resolved: 5, csatAvg: 3.2 }],
 };
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.spyOn(console, "error").mockImplementation(() => undefined);
+});
 
 describe("generateAnalyticsInsight", () => {
   it("analysisEnabled false → null", async () => {

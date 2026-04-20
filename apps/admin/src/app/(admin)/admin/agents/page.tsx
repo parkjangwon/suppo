@@ -6,6 +6,7 @@ import { AgentList } from "@/components/admin/agent-list";
 import { AgentAiSection } from "@/components/admin/agent-ai-section";
 import { prisma } from "@suppo/db";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
+import { getAnalysisEnabled } from "@/lib/settings/get-analysis-enabled";
 
 export const dynamic = "force-dynamic";
 
@@ -40,8 +41,7 @@ export default async function AdminAgentsPage() {
 
   const now = new Date();
 
-  const llmSettings = await prisma.lLMSettings.findFirst();
-  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
+  const analysisEnabled = await getAnalysisEnabled();
 
   const [agents, categories, teams] = await Promise.all([
     prisma.agent.findMany({

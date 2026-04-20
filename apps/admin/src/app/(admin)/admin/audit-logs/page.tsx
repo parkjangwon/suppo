@@ -6,6 +6,7 @@ import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { AuditLogList } from "@/components/admin/audit-log-list";
 import { prisma } from "@suppo/db";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
+import { getAnalysisEnabled } from "@/lib/settings/get-analysis-enabled";
 
 export const dynamic = "force-dynamic";
 
@@ -31,8 +32,7 @@ export default async function AdminAuditLogsPage() {
     );
   }
 
-  const llmSettings = await prisma.lLMSettings.findFirst();
-  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
+  const analysisEnabled = await getAnalysisEnabled();
 
   const limit = 20;
   const [total, logs] = await Promise.all([

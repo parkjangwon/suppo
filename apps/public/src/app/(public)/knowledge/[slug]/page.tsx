@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { prisma } from "@suppo/db";
+import type { Prisma } from "@suppo/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Badge } from "@suppo/ui/components/ui/badge";
@@ -15,6 +16,15 @@ import { getPublicCopy } from "@suppo/shared/i18n/public-copy";
 interface KnowledgeArticlePageProps {
   params: Promise<{ slug: string }>;
 }
+
+type RelatedKnowledgeArticle = Prisma.KnowledgeArticleGetPayload<{
+  select: {
+    id: true;
+    title: true;
+    slug: true;
+    excerpt: true;
+  };
+}>;
 
 export async function generateMetadata({ params }: KnowledgeArticlePageProps): Promise<Metadata> {
   const [{ slug }, locale] = await Promise.all([
@@ -69,7 +79,7 @@ export default async function KnowledgeArticlePage({ params }: KnowledgeArticleP
     data: { viewCount: { increment: 1 } },
   });
 
-  const relatedArticles = await prisma.knowledgeArticle.findMany({
+  const relatedArticles: RelatedKnowledgeArticle[] = await prisma.knowledgeArticle.findMany({
     where: {
       categoryId: article.categoryId,
       isPublished: true,

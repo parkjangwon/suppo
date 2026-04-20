@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/u
 import { DashboardAiSection } from "@/components/admin/dashboard-ai-section";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
+import { getAnalysisEnabled } from "@/lib/settings/get-analysis-enabled";
 
 export const metadata: Metadata = {
   title: "운영 대시보드 | Suppo",
@@ -20,8 +21,7 @@ export default async function DashboardPage() {
     redirect("/admin/login");
   }
 
-  const llmSettings = await prisma.lLMSettings.findFirst();
-  const analysisEnabled = llmSettings?.analysisEnabled ?? false;
+  const analysisEnabled = await getAnalysisEnabled();
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
