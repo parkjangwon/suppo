@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
     "nodemailer",
     "@aws-sdk/client-sesv2"
   ],
-  transpilePackages: ["@crinity/ui", "@crinity/shared"],
+  transpilePackages: ["@suppo/ui", "@suppo/shared"],
   eslint: {
     ignoreDuringBuilds: true
   },

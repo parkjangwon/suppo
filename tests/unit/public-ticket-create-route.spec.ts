@@ -17,33 +17,33 @@ const {
   mockFindManyTeams: vi.fn(),
 }));
 
-vi.mock("@crinity/shared/security/rate-limit", () => ({
+vi.mock("@suppo/shared/security/rate-limit", () => ({
   checkRateLimit: mockCheckRateLimit,
   createRateLimitHeaders: vi.fn().mockReturnValue({}),
 }));
 
-vi.mock("@crinity/shared/security/captcha", () => ({
+vi.mock("@suppo/shared/security/captcha", () => ({
   verifyCaptcha: mockVerifyCaptcha,
 }));
 
-vi.mock("@crinity/shared/tickets/create-ticket", () => ({
+vi.mock("@suppo/shared/tickets/create-ticket", () => ({
   createTicket: mockCreateTicket,
 }));
 
-vi.mock("@crinity/shared/ai/classifier", () => ({
+vi.mock("@suppo/shared/ai/classifier", () => ({
   classifyTicket: mockClassifyTicket,
 }));
 
-vi.mock("@crinity/shared/storage/attachment-service", () => ({
+vi.mock("@suppo/shared/storage/attachment-service", () => ({
   AttachmentError: class AttachmentError extends Error {},
   processAttachments: vi.fn(),
 }));
 
-vi.mock("@crinity/shared/integrations/outbound-webhooks", () => ({
+vi.mock("@suppo/shared/integrations/outbound-webhooks", () => ({
   dispatchWebhookEvent: vi.fn().mockResolvedValue({ sent: 0 }),
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     category: {
       findMany: mockFindManyCategories,

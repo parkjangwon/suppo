@@ -2,10 +2,10 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useRef, useTransition } from "react";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Button } from "@suppo/ui/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
 
 export function KnowledgeSearchInput({ defaultValue }: { defaultValue?: string }) {
   const router = useRouter();

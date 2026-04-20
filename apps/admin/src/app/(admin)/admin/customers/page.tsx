@@ -4,17 +4,17 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { CustomerList } from "@/components/admin/customer-list";
-import { prisma } from "@crinity/db";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { prisma } from "@suppo/db";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "고객 관리 | Crinity",
+  title: "고객 관리 | Suppo",
 };
 
 export default async function AdminCustomersPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {

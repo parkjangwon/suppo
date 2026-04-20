@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
+import { prisma } from "@suppo/db";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
 
 interface RouteParams {
   params: Promise<{ id: string }>;

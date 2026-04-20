@@ -1,5 +1,5 @@
-import { prisma } from "@crinity/db";
-import { createAdminTicketDetailUrl } from "@crinity/shared/utils/app-urls";
+import { prisma } from "@suppo/db";
+import { createAdminTicketDetailUrl } from "@suppo/shared/utils/app-urls";
 
 export interface MergeTicketsParams {
   targetTicketId: string;

@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useBranding } from "@crinity/shared/branding/context";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
+import { useBranding } from "@suppo/shared/branding/context";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
 import { Phone, Mail, Globe, MapPin, BookOpen } from "lucide-react";
-import { formatPhoneNumber } from "@crinity/shared/utils/phone-format";
+import { formatPhoneNumber } from "@suppo/shared/utils/phone-format";
 import { PublicLocaleSwitcher } from "./public-locale-switcher";
 
 export function PublicShell({
@@ -176,7 +176,7 @@ export function PublicShell({
               </p>
               {branding.showPoweredBy && (
                 <p className="text-xs text-slate-600">
-                  Powered by <span className="text-slate-500">Crinity</span>
+                  Powered by <span className="text-slate-500">Suppo</span>
                 </p>
               )}
             </div>

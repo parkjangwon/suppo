@@ -1,5 +1,5 @@
-import type { BackofficeRole } from "@crinity/shared/auth/config";
-import type { AdminCopy } from "@crinity/shared/i18n/admin-copy";
+import type { BackofficeRole } from "@suppo/shared/auth/config";
+import type { AdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export type AdminNavItemKey =

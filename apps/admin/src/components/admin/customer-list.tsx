@@ -2,15 +2,15 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Button } from "@suppo/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@crinity/ui/components/ui/card";
+} from "@suppo/ui/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,11 +18,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@crinity/ui/components/ui/table";
+} from "@suppo/ui/components/ui/table";
 import { Search, Users, Inbox, Calendar, ChevronRight, AlertCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface CustomerItem {
   id: string;

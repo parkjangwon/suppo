@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { prisma } from "@crinity/db";
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
+import { prisma } from "@suppo/db";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
 
 import {
   authenticatePublicApiKey,

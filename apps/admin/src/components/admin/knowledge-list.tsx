@@ -10,17 +10,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@crinity/ui/components/ui/table";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Input } from "@crinity/ui/components/ui/input";
+} from "@suppo/ui/components/ui/table";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Input } from "@suppo/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
+} from "@suppo/ui/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,11 +31,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@crinity/ui/components/ui/alert-dialog";
+} from "@suppo/ui/components/ui/alert-dialog";
 import { Plus, Search, Pencil, Trash2, ExternalLink, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryManager } from "./category-manager";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface KnowledgeListProps {
   articles: any[];

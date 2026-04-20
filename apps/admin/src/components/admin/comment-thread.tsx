@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Card, CardContent, CardHeader } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
+import { Card, CardContent, CardHeader } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
 import { Pencil, Trash2, X, Check, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -19,8 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@crinity/ui/components/ui/alert-dialog";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+} from "@suppo/ui/components/ui/alert-dialog";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface Comment {
   id: string;

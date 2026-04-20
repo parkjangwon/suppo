@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import { Button } from "@crinity/ui/components/ui/button";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface TransferAgent {
   id: string;

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@crinity/ui/components/ui/dialog";
+} from "@suppo/ui/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,10 +23,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@crinity/ui/components/ui/alert-dialog";
+} from "@suppo/ui/components/ui/alert-dialog";
 import { FolderTree, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface Category {
   id: string;

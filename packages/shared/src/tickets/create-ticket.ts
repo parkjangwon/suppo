@@ -1,4 +1,4 @@
-import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pick-assignee";
+import { pickAssignee, type CandidateAgent } from "@suppo/shared/assignment/pick-assignee";
 import {
   AgentRole,
   type Prisma,
@@ -7,9 +7,9 @@ import {
   type TicketActivity,
   type TicketPriority as PrismaTicketPriority
 } from "@prisma/client";
-import { prisma } from "@crinity/db";
-import { logActivity } from "@crinity/shared/tickets/activity";
-import { generateTicketNumber } from "@crinity/shared/tickets/ticket-number";
+import { prisma } from "@suppo/db";
+import { logActivity } from "@suppo/shared/tickets/activity";
+import { generateTicketNumber } from "@suppo/shared/tickets/ticket-number";
 
 const ACTIVE_STATUSES: Array<"OPEN" | "IN_PROGRESS" | "WAITING"> = [
   "OPEN",

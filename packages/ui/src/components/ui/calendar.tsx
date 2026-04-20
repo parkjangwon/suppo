@@ -12,7 +12,7 @@ import {
   type DayButton,
 } from "react-day-picker"
 
-import { cn } from "@crinity/shared/utils"
+import { cn } from "@suppo/shared/utils"
 import { Button, buttonVariants } from "./button"
 
 function Calendar({

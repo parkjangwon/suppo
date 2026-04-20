@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { z } from "zod";
-import { createSamlMetadataBaseUrl } from "@crinity/shared/utils/app-urls";
+import { createSamlMetadataBaseUrl } from "@suppo/shared/utils/app-urls";
 
 const createSchema = z.object({
   name: z.string().min(1, "회사명을 입력하세요"),

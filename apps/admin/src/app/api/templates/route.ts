@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export async function GET() {
   try {

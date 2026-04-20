@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailSendInput } from "@crinity/shared/email/provider-types";
+import type { EmailProvider, EmailSendInput } from "@suppo/shared/email/provider-types";
 
 interface NodemailerLike {
   createTransport: (config: Record<string, unknown>) => {

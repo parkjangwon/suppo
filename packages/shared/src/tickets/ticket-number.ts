@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 const MAX_GENERATION_ATTEMPTS = 5;
 

@@ -29,7 +29,7 @@ test("관리자가 API 키를 발급하고 공개 티켓 API로 생성/수정한
 
   await test.step("관리자 로그인", async () => {
     await page.goto("http://127.0.0.1:3001/admin/login");
-    await page.getByLabel("이메일").fill("admin@crinity.io");
+    await page.getByLabel("이메일").fill("admin@suppo.io");
     await page.getByLabel("비밀번호").fill("admin1234");
     await page.getByRole("button", { name: "로그인" }).click();
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
@@ -62,7 +62,7 @@ test("관리자가 API 키를 발급하고 공개 티켓 API로 생성/수정한
       },
       data: {
         customerName: "공개 API 고객",
-        customerEmail: "public-api-e2e@crinity-test.io",
+        customerEmail: "public-api-e2e@suppo-test.io",
         requestTypeId: requestType.id,
         priority: "MEDIUM",
         subject: "[E2E] 공개 API 생성",

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { transferTicket } from "@/lib/agents/transfer-ticket";
-import { getBackofficeSession } from "@crinity/shared/auth/session";
-import { prisma } from "@crinity/db";
+import { getBackofficeSession } from "@suppo/shared/auth/session";
+import { prisma } from "@suppo/db";
 
 const transferSchema = z.object({
   toAgentId: z.string().trim().min(1, "양도 대상 상담원을 선택해주세요"),

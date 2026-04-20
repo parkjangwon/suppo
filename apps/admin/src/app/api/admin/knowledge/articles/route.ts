@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import {
   createKnowledgeArticleSchema,
   updateKnowledgeArticleSchema,
-} from "@crinity/shared/validation/knowledge";
-import { generateSlug } from "@crinity/shared/knowledge/slug";
+} from "@suppo/shared/validation/knowledge";
+import { generateSlug } from "@suppo/shared/knowledge/slug";
 import { createAuditLog } from "@/lib/audit/logger";
 
 export async function GET(request: NextRequest) {

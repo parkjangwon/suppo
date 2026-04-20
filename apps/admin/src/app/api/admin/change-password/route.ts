@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { hash, compare } from "bcryptjs";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { z } from "zod";
 
 const changePasswordSchema = z.object({

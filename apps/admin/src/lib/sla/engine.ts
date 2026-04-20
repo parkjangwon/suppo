@@ -2,9 +2,9 @@
 // 비즈니스 시간 기준으로 SLA 시간을 계산하고 관리합니다
 
 import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
-import { prisma } from "@crinity/db";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
-import { enqueueSLAWarningEmail, enqueueSLABreachEmail } from "@crinity/shared/email/enqueue";
+import { prisma } from "@suppo/db";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
+import { enqueueSLAWarningEmail, enqueueSLABreachEmail } from "@suppo/shared/email/enqueue";
 
 interface BusinessHours {
   workStartHour: number; // 9 = 9AM

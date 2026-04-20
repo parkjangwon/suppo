@@ -20,7 +20,7 @@ vi.mock("@/lib/public-api/auth", () => ({
   hasPublicApiScope: (apiKey: { scopes?: string[] }, scope: string) => apiKey.scopes?.includes(scope) ?? false,
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     ticket: {
       findUnique: mockFindUniqueTicket,
@@ -34,7 +34,7 @@ vi.mock("@/lib/db/queries/admin-tickets", () => ({
   assignTicket: mockAssignTicket,
 }));
 
-vi.mock("@crinity/shared/integrations/outbound-webhooks", () => ({
+vi.mock("@suppo/shared/integrations/outbound-webhooks", () => ({
   dispatchWebhookEvent: vi.fn().mockResolvedValue({ sent: 0 }),
 }));
 

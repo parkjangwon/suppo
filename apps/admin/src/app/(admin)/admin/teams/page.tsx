@@ -2,18 +2,18 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { TeamList } from "@/components/admin/team-list";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
-  title: "팀 관리 | Crinity",
+  title: "팀 관리 | Suppo",
 };
 
 export default async function TeamsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const t = (key: string, ko: string, en?: string) =>
     copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const session = await auth();

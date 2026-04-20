@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
 import { AttachmentUpload } from "@/components/ticket/attachment-upload";
 import { TemplateSelector } from "./template-selector";
 import { TemplateContext } from "@/lib/templates/renderer";
@@ -16,7 +16,7 @@ import { CommentLockBanner } from "./comment-lock-banner";
 import { useCommentLock } from "@/hooks/use-comment-lock";
 import { Paperclip, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 export interface Comment {
   id: string;

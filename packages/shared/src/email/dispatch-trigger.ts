@@ -1,4 +1,4 @@
-import { processOutbox } from "@crinity/shared/email/process-outbox";
+import { processOutbox } from "@suppo/shared/email/process-outbox";
 
 export function dispatchEmailOutboxSoon(limit = 25) {
   void processOutbox({ limit }).catch((error) => {

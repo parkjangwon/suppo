@@ -6,14 +6,14 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { MarkdownContent } from "@crinity/shared/components/markdown-content";
-import { formatPhoneNumber } from "@crinity/shared/utils/phone-format";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { MarkdownContent } from "@suppo/shared/components/markdown-content";
+import { formatPhoneNumber } from "@suppo/shared/utils/phone-format";
 import { CustomerInsightsPanel } from "@/components/admin/customer-insights-panel";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface Ticket {

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkRateLimit, createRateLimitHeaders } from "@crinity/shared/security/rate-limit";
-import { verifyCaptcha } from "@crinity/shared/security/captcha";
-import { ticketFormSchema } from "@crinity/shared/validation/ticket";
-import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
-import { createTicket } from "@crinity/shared/tickets/create-ticket";
-import { classifyTicket } from "@crinity/shared/ai/classifier";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
-import { enqueueTicketCreatedEmails } from "@crinity/shared/email/enqueue";
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
-import { prisma } from "@crinity/db";
-import { validateFile } from "@crinity/shared/security/file-upload";
+import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
+import { verifyCaptcha } from "@suppo/shared/security/captcha";
+import { ticketFormSchema } from "@suppo/shared/validation/ticket";
+import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
+import { createTicket } from "@suppo/shared/tickets/create-ticket";
+import { classifyTicket } from "@suppo/shared/ai/classifier";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
+import { enqueueTicketCreatedEmails } from "@suppo/shared/email/enqueue";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
+import { prisma } from "@suppo/db";
+import { validateFile } from "@suppo/shared/security/file-upload";
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@crinity/ui/components/ui/table";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@suppo/ui/components/ui/table";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import Link from "next/link";
 import { CustomerInsightsResponse } from "@/lib/db/queries/admin-analytics/contracts";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CustomerInsightsPanelProps {

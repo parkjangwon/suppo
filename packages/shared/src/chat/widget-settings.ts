@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export async function ensureChatWidgetSettings() {
   return prisma.chatWidgetSettings.upsert({
@@ -6,7 +6,7 @@ export async function ensureChatWidgetSettings() {
     update: {},
     create: {
       id: "default",
-      widgetKey: "crinity-chat-widget",
+      widgetKey: "suppo-chat-widget",
       enabled: true,
       buttonImageUrl: null,
       buttonImageFit: "contain",

@@ -1,5 +1,5 @@
 {
-  "name": "@crinity/shared",
+  "name": "@suppo/shared",
   "version": "0.1.0",
   "private": true,
   "exports": {
@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-sesv2": "^3.1030.0",
-    "@crinity/db": "workspace:*",
+    "@suppo/db": "workspace:*",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "ioredis": "^5.10.1",

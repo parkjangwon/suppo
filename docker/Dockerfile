@@ -27,7 +27,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY packages/db/package.json ./packages/db/
 COPY packages/db/prisma ./packages/db/prisma
 COPY package.json pnpm-workspace.yaml ./
-CMD ["pnpm", "--filter=@crinity/db", "migrate:deploy"]
+CMD ["pnpm", "--filter=@suppo/db", "migrate:deploy"]
 
 FROM base AS builder
 ARG APP_NAME
@@ -42,8 +42,8 @@ ENV AUTH_SECRET=$AUTH_SECRET \
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm --filter=@crinity/db generate
-RUN pnpm --filter=@crinity/${APP_NAME} build
+RUN pnpm --filter=@suppo/db generate
+RUN pnpm --filter=@suppo/${APP_NAME} build
 ENV AUTH_SECRET="" DATABASE_URL="" TICKET_ACCESS_SECRET="" GIT_TOKEN_ENCRYPTION_KEY=""
 
 FROM base AS runner

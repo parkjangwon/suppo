@@ -2,14 +2,14 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { TicketList } from "@/components/admin/ticket-list";
 import { Prisma, TicketStatus, TicketPriority } from "@prisma/client";
 import { getVIPCustomers } from "@/lib/db/queries/admin-analytics/vip-customers";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
-  title: "티켓 목록 | Crinity",
+  title: "티켓 목록 | Suppo",
 };
 
 export default async function TicketsPage({
@@ -17,7 +17,7 @@ export default async function TicketsPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth-edge";
-import { BACKOFFICE_DASHBOARD_PATH, BACKOFFICE_LOGIN_PATH } from "@crinity/shared/auth/config";
+import { BACKOFFICE_DASHBOARD_PATH, BACKOFFICE_LOGIN_PATH } from "@suppo/shared/auth/config";
 
 const PASSWORD_CHANGE_PATH = "/admin/change-password";
 

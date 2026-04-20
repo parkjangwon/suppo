@@ -7,7 +7,7 @@ import crypto from "crypto";
 export function generateMessageId(): string {
   const timestamp = Date.now();
   const random = crypto.randomBytes(8).toString("hex");
-  const hostname = process.env.EMAIL_DOMAIN || "crinity.io";
+  const hostname = process.env.EMAIL_DOMAIN || "suppo.io";
   return `<${timestamp}.${random}@${hostname}>`;
 }
 

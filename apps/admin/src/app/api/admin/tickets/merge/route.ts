@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { mergeTickets, validateMergeTickets } from "@/lib/db/queries/ticket-merge";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export async function POST(req: NextRequest) {
   try {

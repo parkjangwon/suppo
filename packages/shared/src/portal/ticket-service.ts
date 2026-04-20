@@ -1,5 +1,5 @@
-import { prisma } from "@crinity/db";
-import { getSystemBranding } from "@crinity/shared/db/queries/branding";
+import { prisma } from "@suppo/db";
+import { getSystemBranding } from "@suppo/shared/db/queries/branding";
 
 export interface PortalTicket {
   id: string;

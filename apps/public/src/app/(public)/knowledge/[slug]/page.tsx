@@ -2,15 +2,15 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { prisma } from "@crinity/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { MarkdownContent } from "@crinity/shared/components/markdown-content";
+import { prisma } from "@suppo/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { MarkdownContent } from "@suppo/shared/components/markdown-content";
 import { ChevronLeft, Eye, Ticket } from "lucide-react";
 import { ArticleFeedback } from "@/components/knowledge/article-feedback";
-import { getSystemBranding } from "@crinity/shared/db/queries/branding";
-import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { getSystemBranding } from "@suppo/shared/db/queries/branding";
+import { getPublicCopy } from "@suppo/shared/i18n/public-copy";
 
 interface KnowledgeArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -19,7 +19,7 @@ interface KnowledgeArticlePageProps {
 export async function generateMetadata({ params }: KnowledgeArticlePageProps): Promise<Metadata> {
   const [{ slug }, locale] = await Promise.all([
     params,
-    cookies().then((c) => c.get("crinity-locale")?.value),
+    cookies().then((c) => c.get("suppo-locale")?.value),
   ]);
   const copy = getPublicCopy(locale);
 
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: KnowledgeArticlePageProps): P
   }
 
   return {
-    title: `${article.title} | Crinity Helpdesk`,
+    title: `${article.title} | Suppo Helpdesk`,
     description: article.excerpt || undefined,
   };
 }
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: KnowledgeArticlePageProps): P
 export default async function KnowledgeArticlePage({ params }: KnowledgeArticlePageProps) {
   const [{ slug }, locale] = await Promise.all([
     params,
-    cookies().then((c) => c.get("crinity-locale")?.value),
+    cookies().then((c) => c.get("suppo-locale")?.value),
   ]);
 
   const branding = await getSystemBranding();

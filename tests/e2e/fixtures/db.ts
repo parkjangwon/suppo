@@ -20,14 +20,14 @@ export { prisma };
 
 export async function seedAdmin() {
   const existing = await prisma.agent.findUnique({
-    where: { email: "admin@crinity.io" },
+    where: { email: "admin@suppo.io" },
   });
   if (existing) return existing;
 
   return prisma.agent.create({
     data: {
       name: "Admin",
-      email: "admin@crinity.io",
+      email: "admin@suppo.io",
       passwordHash: await bcrypt.hash("admin1234", 10),
       role: "ADMIN",
       isActive: true,

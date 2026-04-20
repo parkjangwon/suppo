@@ -4,14 +4,14 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { LLMSettingsForm } from "@/components/admin/llm-settings-form";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
-  title: "AI 연동 | Crinity",
+  title: "AI 연동 | Suppo",
 };
 
 export default async function LLMSettingsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {

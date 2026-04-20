@@ -18,7 +18,7 @@ test.describe("고급 검색 필터", () => {
 
   test.beforeAll(async () => {
     const rt = await seedRequestType();
-    const admin = await prisma.agent.findFirst({ where: { email: "admin@crinity.io" } });
+    const admin = await prisma.agent.findFirst({ where: { email: "admin@suppo.io" } });
 
     // 테스트용 티켓 3개 생성 (다른 날짜)
     for (let i = 0; i < 3; i++) {
@@ -27,7 +27,7 @@ test.describe("고급 검색 필터", () => {
         data: {
           ticketNumber: `CRN-E2E-SEARCH-${Date.now()}-${i}`,
           customerName: `Search Test Customer ${i}`,
-          customerEmail: `search${i}@crinity-test.io`,
+          customerEmail: `search${i}@suppo-test.io`,
           subject: `[E2E] 검색 테스트 티켓 ${i}`,
           description: `Description for ticket ${i}`,
           priority: ["HIGH", "MEDIUM", "LOW"][i] as "HIGH" | "MEDIUM" | "LOW",
@@ -50,7 +50,7 @@ test.describe("고급 검색 필터", () => {
   test("날짜 범위로 티켓을 필터링한다", async ({ page }, testInfo) => {
     await test.step("관리자 로그인", async () => {
       await page.goto("http://127.0.0.1:3001/admin/login");
-      await page.getByLabel("이메일").fill("admin@crinity.io");
+      await page.getByLabel("이메일").fill("admin@suppo.io");
       await page.getByLabel("비밀번호").fill("admin1234");
       await page.getByRole("button", { name: "로그인" }).click();
       await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
@@ -85,7 +85,7 @@ test.describe("고급 검색 필터", () => {
   test("상태 + 우선순위 조합 필터링", async ({ page }, testInfo) => {
     await test.step("관리자 로그인", async () => {
       await page.goto("http://127.0.0.1:3001/admin/login");
-      await page.getByLabel("이메일").fill("admin@crinity.io");
+      await page.getByLabel("이메일").fill("admin@suppo.io");
       await page.getByLabel("비밀번호").fill("admin1234");
       await page.getByRole("button", { name: "로그인" }).click();
       await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
@@ -132,7 +132,7 @@ test.describe("고급 검색 필터", () => {
   test("검색어로 티켓을 검색한다", async ({ page }, testInfo) => {
     await test.step("관리자 로그인 및 티켓 목록", async () => {
       await page.goto("http://127.0.0.1:3001/admin/login");
-      await page.getByLabel("이메일").fill("admin@crinity.io");
+      await page.getByLabel("이메일").fill("admin@suppo.io");
       await page.getByLabel("비밀번호").fill("admin1234");
       await page.getByRole("button", { name: "로그인" }).click();
       await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
@@ -159,12 +159,12 @@ test.describe("고급 검색 필터", () => {
       await page.waitForTimeout(500);
 
       const searchInput = page.getByPlaceholder("티켓 번호, 제목, 이메일 검색...");
-      await searchInput.fill("search1@crinity-test.io");
+      await searchInput.fill("search1@suppo-test.io");
       await page.getByRole("button", { name: "검색", exact: true }).click();
       await page.waitForTimeout(500);
 
       await expect(page.getByRole("heading", { name: "티켓 목록" })).toBeVisible();
-      await expect(searchInput).toHaveValue("search1@crinity-test.io");
+      await expect(searchInput).toHaveValue("search1@suppo-test.io");
 
       await captureStep(page, testInfo, "이메일-검색");
     });
@@ -173,7 +173,7 @@ test.describe("고급 검색 필터", () => {
   test("담당자 필터링 (미할당 / 특정 상담원)", async ({ page }, testInfo) => {
     await test.step("관리자 로그인 및 티켓 목록", async () => {
       await page.goto("http://127.0.0.1:3001/admin/login");
-      await page.getByLabel("이메일").fill("admin@crinity.io");
+      await page.getByLabel("이메일").fill("admin@suppo.io");
       await page.getByLabel("비밀번호").fill("admin1234");
       await page.getByRole("button", { name: "로그인" }).click();
       await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });

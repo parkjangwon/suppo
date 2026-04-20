@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@crinity/ui/components/ui/dialog";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@suppo/ui/components/ui/dialog";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 

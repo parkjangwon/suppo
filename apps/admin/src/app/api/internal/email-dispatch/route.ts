@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { processOutbox } from "@crinity/shared/email/process-outbox";
+import { processOutbox } from "@suppo/shared/email/process-outbox";
 
 export const runtime = "nodejs";
 

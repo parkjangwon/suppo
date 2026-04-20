@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface TicketRelationRecord {
   id: string;

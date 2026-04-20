@@ -2,23 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
+} from "@suppo/ui/components/ui/select";
 import { TicketFilters } from "./ticket-filters";
 import { AdvancedSearch } from "./advanced-search";
 import { SavedFilters } from "./saved-filters";
 import { TicketQueueBar } from "./ticket-queue-bar";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 export interface Ticket {
   id: string;

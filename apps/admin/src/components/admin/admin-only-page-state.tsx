@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface AdminOnlyPageStateProps {
   title: string;

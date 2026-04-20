@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@crinity/db";
-import { knowledgeSearchSchema } from "@crinity/shared/validation/knowledge";
+import { prisma } from "@suppo/db";
+import { knowledgeSearchSchema } from "@suppo/shared/validation/knowledge";
 
 export async function GET(request: NextRequest) {
   try {

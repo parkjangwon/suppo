@@ -1,8 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
 
-import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pick-assignee";
-import { prisma } from "@crinity/db";
-import { logActivity } from "@crinity/shared/tickets/activity";
+import { pickAssignee, type CandidateAgent } from "@suppo/shared/assignment/pick-assignee";
+import { prisma } from "@suppo/db";
+import { logActivity } from "@suppo/shared/tickets/activity";
 
 const REASSIGNABLE_STATUSES: Array<"OPEN" | "IN_PROGRESS" | "WAITING"> = ["OPEN", "IN_PROGRESS", "WAITING"];
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@crinity/ui/components/ui/table";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@suppo/ui/components/ui/table";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import { DatePreset, RepeatInquiry, RepeatInquiryResponse } from "@/lib/db/queries/admin-analytics/contracts";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Star, MessageSquare } from "lucide-react";
 
 interface CSATData {

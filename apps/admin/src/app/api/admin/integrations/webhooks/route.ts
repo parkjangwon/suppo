@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { validateWebhookTargetUrl } from "@crinity/shared/security/webhook-url";
+import { prisma } from "@suppo/db";
+import { validateWebhookTargetUrl } from "@suppo/shared/security/webhook-url";
 
 const webhookEventSchema = z.enum(["ticket.created", "ticket.updated", "ticket.commented"]);
 

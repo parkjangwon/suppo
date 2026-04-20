@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss";
-import { uiTailwindConfig } from "@crinity/ui/tailwind.config.base";
+import { uiTailwindConfig } from "@suppo/ui/tailwind.config.base";
 
 const config: Config = {
   ...uiTailwindConfig,

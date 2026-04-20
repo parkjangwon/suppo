@@ -1,1 +1,1 @@
-export { classifyTicket, type ClassificationResult } from "@crinity/shared/ai/classifier";
+export { classifyTicket, type ClassificationResult } from "@suppo/shared/ai/classifier";

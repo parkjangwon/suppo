@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build the v1 Crinity ticket system described in `docs/superpowers/specs/2026-03-13-ticket-system-design.md` as a Next.js 15 monolith with customer and admin flows, auto-assignment, notifications, attachments, and Git linking.
+**Goal:** Build the v1 Suppo ticket system described in `docs/superpowers/specs/2026-03-13-ticket-system-design.md` as a Next.js 15 monolith with customer and admin flows, auto-assignment, notifications, attachments, and Git linking.
 
 **Architecture:** Start from the current docs-only workspace and bootstrap a single Next.js App Router application. Keep business logic in `src/lib/**` service modules, keep Route Handlers and Server Actions thin, use Prisma/PostgreSQL for source-of-truth state, and add a DB-backed email outbox so notification failures never block ticket workflows. Public ticket detail access should be protected by a signed cookie minted after a successful ticket-number-plus-email lookup.
 
@@ -105,7 +105,7 @@ test("admin login and public routes render different shells", async ({
   await page.goto("/admin/login");
   await expect(page.getByText("상담원 로그인")).toBeVisible();
   await page.goto("/");
-  await expect(page.getByText("Crinity Support")).toBeVisible();
+  await expect(page.getByText("Suppo Support")).toBeVisible();
 });
 ```
 

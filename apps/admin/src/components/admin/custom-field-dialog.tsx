@@ -1,20 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@crinity/ui/components/ui/dialog";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@suppo/ui/components/ui/dialog";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+} from "@suppo/ui/components/ui/select";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CustomField {

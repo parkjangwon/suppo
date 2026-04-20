@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import {
   authConfig,
   isBackofficeRole
-} from "@crinity/shared/auth/config";
+} from "@suppo/shared/auth/config";
 
 export const { auth } = NextAuth({
   ...authConfig,

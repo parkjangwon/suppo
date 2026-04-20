@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Label } from "@crinity/ui/components/ui/label";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Label } from "@suppo/ui/components/ui/label";
 import { AttachmentUpload } from "./attachment-upload";
 import { Paperclip } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface CustomerReplyFormProps {
   ticketId: string;

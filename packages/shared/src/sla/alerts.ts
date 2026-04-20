@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { SLAClockStatus, SLATarget } from "@prisma/client";
 
 export interface SLABreachAlert {

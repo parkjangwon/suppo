@@ -1,24 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@crinity/ui/components/ui/dialog";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@suppo/ui/components/ui/dialog";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
-import { Switch } from "@crinity/ui/components/ui/switch";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
+} from "@suppo/ui/components/ui/select";
+import { Switch } from "@suppo/ui/components/ui/switch";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface SLAPolicyItem {

@@ -9,9 +9,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@crinity/ui/components/ui/table";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Badge } from "@crinity/ui/components/ui/badge";
+} from "@suppo/ui/components/ui/table";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@crinity/ui/components/ui/dialog";
+} from "@suppo/ui/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,11 +29,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@crinity/ui/components/ui/alert-dialog";
+} from "@suppo/ui/components/ui/alert-dialog";
 import { TemplateForm } from "./template-form";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, FileText, Sparkles, Users } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface Template {
   id: string;

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { TicketLookupForm } from "@/components/ticket/ticket-lookup-form";
-import { getSystemBranding } from "@crinity/shared/db/queries/branding";
-import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { getSystemBranding } from "@suppo/shared/db/queries/branding";
+import { getPublicCopy } from "@suppo/shared/i18n/public-copy";
 import { Search } from "lucide-react";
 
 export async function generateMetadata() {
@@ -13,7 +13,7 @@ export async function generateMetadata() {
 
 export default async function TicketLookupPage() {
   const branding = await getSystemBranding();
-  const locale = (await cookies()).get("crinity-locale")?.value;
+  const locale = (await cookies()).get("suppo-locale")?.value;
   const copy = getPublicCopy(locale);
 
   return (

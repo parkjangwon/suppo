@@ -1,6 +1,6 @@
-import { Alert, AlertDescription, AlertTitle } from "@crinity/ui/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { Alert, AlertDescription, AlertTitle } from "@suppo/ui/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface TicketWorkspaceSummaryProps {
   statusLabel: string;

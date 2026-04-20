@@ -2,23 +2,23 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@crinity/ui/components/ui/dialog";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
+} from "@suppo/ui/components/ui/dialog";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Edit2, Users } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface Team {
   id: string;

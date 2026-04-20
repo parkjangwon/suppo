@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   MarkdownContent,
   normalizeMarkdownContent,
-} from "@crinity/shared/components/markdown-content";
+} from "@suppo/shared/components/markdown-content";
 
 describe("MarkdownContent", () => {
   it("renders headings, emphasis, links, and tables with react-markdown", () => {

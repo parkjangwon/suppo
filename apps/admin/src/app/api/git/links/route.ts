@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { parseProvider, validateRepoFullName, type GitProvider } from "@crinity/shared/git/provider";
+import { prisma } from "@suppo/db";
+import { parseProvider, validateRepoFullName, type GitProvider } from "@suppo/shared/git/provider";
 import { createAuditLog } from "@/lib/audit/logger";
 import { AuditAction } from "@prisma/client";
-import { decryptToken } from "@crinity/shared/crypto/encrypt";
-import type { IssueDetail } from "@crinity/shared/git/provider";
+import { decryptToken } from "@suppo/shared/crypto/encrypt";
+import type { IssueDetail } from "@suppo/shared/git/provider";
 import { GitHubProvider } from "@/lib/git/providers/github";
 import { GitLabProvider } from "@/lib/git/providers/gitlab";
 

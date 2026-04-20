@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import { Lightbulb, ExternalLink, BookOpen } from "lucide-react";
 
 interface KnowledgeSuggestionsProps {

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { FileText } from "lucide-react";
 
 interface TicketSummaryProps {

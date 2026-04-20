@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { getContributorImpactStats, getKnowledgeROIOverview } from "@crinity/shared/knowledge/analytics";
-import { estimateTicketDeflection } from "@crinity/shared/knowledge/deflection";
+import { getContributorImpactStats, getKnowledgeROIOverview } from "@suppo/shared/knowledge/analytics";
+import { estimateTicketDeflection } from "@suppo/shared/knowledge/deflection";
 
 export async function GET(request: NextRequest) {
   const session = await auth();

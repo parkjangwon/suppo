@@ -1,7 +1,7 @@
 import JSZip from "jszip";
 import fs from "fs/promises";
 import path from "path";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 /**
  * 현재 스키마 버전을 파일시스템에서 직접 읽어옴.

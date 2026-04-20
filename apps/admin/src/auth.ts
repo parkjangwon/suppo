@@ -11,9 +11,9 @@ import {
   authConfig,
   isBackofficeRole,
   type BackofficeRole
-} from "@crinity/shared/auth/config";
-import BoxyHQSAML from "@crinity/shared/auth/providers/boxyhq-saml";
-import { prisma } from "@crinity/db";
+} from "@suppo/shared/auth/config";
+import BoxyHQSAML from "@suppo/shared/auth/providers/boxyhq-saml";
+import { prisma } from "@suppo/db";
 
 const HAS_DATABASE = Boolean(process.env.DATABASE_URL);
 

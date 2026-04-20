@@ -8,7 +8,7 @@ const { prismaMock } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: prismaMock,
 }));
 

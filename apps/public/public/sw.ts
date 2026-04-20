@@ -2,7 +2,7 @@
 export {};
 
 // PWA Service Worker - Offline support and caching
-const CACHE_NAME = "crinity-helpdesk-v1";
+const CACHE_NAME = "suppo-helpdesk-v1";
 const STATIC_ASSETS = [
   "/",
   "/ticket/new",
@@ -85,7 +85,7 @@ self.addEventListener("push", (event: PushEvent) => {
   
   event.waitUntil(
     (self as unknown as ServiceWorkerGlobalScope).registration.showNotification(
-      data.title || "Crinity Helpdesk",
+      data.title || "Suppo Helpdesk",
       {
         body: data.body || "New notification",
         icon: "/icon-192x192.png",

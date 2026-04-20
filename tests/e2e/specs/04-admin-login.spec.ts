@@ -19,7 +19,7 @@ test("관리자가 올바른 자격증명으로 로그인하여 대시보드에 
   });
 
   await test.step("자격증명 입력", async () => {
-    await page.getByLabel("이메일").fill("admin@crinity.io");
+    await page.getByLabel("이메일").fill("admin@suppo.io");
     await page.getByLabel("비밀번호").fill("admin1234");
     await captureStep(page, testInfo, "자격증명 입력");
   });

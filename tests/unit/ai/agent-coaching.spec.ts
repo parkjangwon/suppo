@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     lLMSettings: {
       upsert: vi.fn(),
@@ -17,7 +17,7 @@ vi.mock("@/lib/llm/providers/ollama", () => ({
 }));
 
 import { generateAgentCoaching } from "@/lib/ai/agent-coaching";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { callGemini } from "@/lib/llm/providers/gemini";
 
 const mockSettings = {

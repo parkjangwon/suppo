@@ -1,8 +1,8 @@
 "use client";
 
 import { Globe } from "lucide-react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 

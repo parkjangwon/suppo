@@ -88,7 +88,7 @@ const defaultCategories = [
 ];
 
 export async function seedInitialAdmin(prisma: PrismaClient) {
-  const email = process.env.INITIAL_ADMIN_EMAIL ?? "admin@crinity.io";
+  const email = process.env.INITIAL_ADMIN_EMAIL ?? "admin@suppo.io";
   const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin123";
   const passwordHash = await hash(password, 10);
 
@@ -129,9 +129,9 @@ export async function seedSampleAgents(prisma: PrismaClient) {
   const passwordHash = await hash(password, 10);
 
   const sampleAgents = [
-    { name: "이수진", email: "agent1@crinity.io", maxTickets: 15 },
-    { name: "박도현", email: "agent2@crinity.io", maxTickets: 10 },
-    { name: "최민서", email: "agent3@crinity.io", maxTickets: 8 },
+    { name: "이수진", email: "agent1@suppo.io", maxTickets: 15 },
+    { name: "박도현", email: "agent2@suppo.io", maxTickets: 10 },
+    { name: "최민서", email: "agent3@suppo.io", maxTickets: 8 },
   ];
 
   for (const agent of sampleAgents) {
@@ -1397,7 +1397,7 @@ import { auth } from "@/auth";
 import { SystemManagement } from "@/components/admin/system-management";
 
 export const metadata: Metadata = {
-  title: "시스템 관리 | Crinity",
+  title: "시스템 관리 | Suppo",
 };
 
 export default async function SystemSettingsPage() {

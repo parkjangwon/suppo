@@ -4,8 +4,8 @@ import { z } from "zod";
 import { getCSATTrend } from "@/lib/db/queries/admin-analytics/csat";
 import { getCategoryFrequency } from "@/lib/db/queries/admin-analytics/categories";
 import { getDateRangeFromPreset } from "@/lib/db/queries/admin-analytics/filters";
-import { prisma } from "@crinity/db";
-import { db } from "@crinity/db/raw";
+import { prisma } from "@suppo/db";
+import { db } from "@suppo/db/raw";
 
 const querySchema = z.object({
   preset: z.enum(["7d", "30d", "90d", "custom"]).default("30d"),

@@ -1,11 +1,11 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import type {
   KnowledgeArticleListItem,
   KnowledgeArticleDetail,
   KnowledgeCategory,
   KnowledgeContributor,
   KnowledgeFilters,
-} from "@crinity/shared/knowledge/types";
+} from "@suppo/shared/knowledge/types";
 
 export async function getKnowledgeCategories(): Promise<KnowledgeCategory[]> {
   const categories = await prisma.knowledgeCategory.findMany({

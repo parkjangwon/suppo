@@ -44,7 +44,7 @@ export async function seedDefaultCategories(
 export async function seedInitialAdmin(
   prisma: PrismaClient
 ): Promise<string> {
-  const email = process.env.INITIAL_ADMIN_EMAIL ?? "admin@crinity.io";
+  const email = process.env.INITIAL_ADMIN_EMAIL ?? "admin@suppo.io";
   const password = process.env.INITIAL_ADMIN_PASSWORD ?? "admin123";
   const passwordHash = await hash(password, 10);
 
@@ -80,9 +80,9 @@ export async function seedSampleAgents(
   const passwordHash = await hash(password, 10);
 
   const agents = [
-    { key: "sujin", name: "이수진", email: "agent1@crinity.io", maxTickets: 15, phone: "010-1234-5678" },
-    { key: "dohyun", name: "박도현", email: "agent2@crinity.io", maxTickets: 10, phone: "010-2345-6789" },
-    { key: "minseo", name: "최민서", email: "agent3@crinity.io", maxTickets: 8, phone: "010-3456-7890" },
+    { key: "sujin", name: "이수진", email: "agent1@suppo.io", maxTickets: 15, phone: "010-1234-5678" },
+    { key: "dohyun", name: "박도현", email: "agent2@suppo.io", maxTickets: 10, phone: "010-2345-6789" },
+    { key: "minseo", name: "최민서", email: "agent3@suppo.io", maxTickets: 8, phone: "010-3456-7890" },
   ];
 
   const ids: Record<string, string> = {};
@@ -106,9 +106,9 @@ export async function seedMoreAgents(
   const passwordHash = await hash(password, 10);
 
   const agents = [
-    { key: "jihun", name: "김지훈", email: "agent4@crinity.io", maxTickets: 12, phone: "010-4567-8901" },
-    { key: "minji", name: "이민지", email: "agent5@crinity.io", maxTickets: 10, phone: "010-5678-9012" },
-    { key: "hyunwoo", name: "강현우", email: "agent6@crinity.io", maxTickets: 10, phone: "010-6789-0123" },
+    { key: "jihun", name: "김지훈", email: "agent4@suppo.io", maxTickets: 12, phone: "010-4567-8901" },
+    { key: "minji", name: "이민지", email: "agent5@suppo.io", maxTickets: 10, phone: "010-5678-9012" },
+    { key: "hyunwoo", name: "강현우", email: "agent6@suppo.io", maxTickets: 10, phone: "010-6789-0123" },
   ];
 
   const ids: Record<string, string> = {};
@@ -897,14 +897,14 @@ function getAgentName(key: string): string {
 
 function getAgentEmail(key: string): string {
   const emails: Record<string, string> = {
-    sujin: "agent1@crinity.io",
-    dohyun: "agent2@crinity.io",
-    minseo: "agent3@crinity.io",
-    jihun: "agent4@crinity.io",
-    minji: "agent5@crinity.io",
-    hyunwoo: "agent6@crinity.io",
+    sujin: "agent1@suppo.io",
+    dohyun: "agent2@suppo.io",
+    minseo: "agent3@suppo.io",
+    jihun: "agent4@suppo.io",
+    minji: "agent5@suppo.io",
+    hyunwoo: "agent6@suppo.io",
   };
-  return emails[key] ?? "agent@crinity.io";
+  return emails[key] ?? "agent@suppo.io";
 }
 
 function getFirstResponseComment(status: string, requestTypeKey?: string): string {
@@ -1200,7 +1200,7 @@ export async function seedKnowledgeBase(
       title: "서비스 시작 가이드 (Getting Started)",
       slug: "getting-started-guide",
       categoryKey: "getting-started",
-      excerpt: "Crinity Helpdesk 서비스를 처음 시작하는 방법을 단계별로 안내합니다.",
+      excerpt: "Suppo Helpdesk 서비스를 처음 시작하는 방법을 단계별로 안내합니다.",
       content: `# 서비스 시작 가이드
 
 ## 1. 계정 생성
@@ -1504,7 +1504,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 웹훅 검증
 
-보안을 위해 요청 헤더의 \`X-Crinity-Signature\`를 검증하세요.`,
+보안을 위해 요청 헤더의 \`X-Suppo-Signature\`를 검증하세요.`,
       isPublished: true,
       isPublic: false,
       viewCount: 634,
@@ -1672,114 +1672,114 @@ export async function seedAuditLogs(
 
   const logs = [
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.LOGIN, resourceType: "Session", description: "관리자 로그인",
       createdAt: d(0, 9), ipAddress: "192.168.1.100",
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.CREATE, resourceType: "Agent", description: "새 상담원 계정 생성: 이민지",
-      newValue: { name: "이민지", email: "agent5@crinity.io", role: "AGENT" },
+      newValue: { name: "이민지", email: "agent5@suppo.io", role: "AGENT" },
       createdAt: d(-1, 10),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.CREATE, resourceType: "Agent", description: "새 상담원 계정 생성: 강현우",
-      newValue: { name: "강현우", email: "agent6@crinity.io", role: "AGENT" },
+      newValue: { name: "강현우", email: "agent6@suppo.io", role: "AGENT" },
       createdAt: d(-1, 10),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.SETTINGS_CHANGE, resourceType: "SystemSettings", description: "SLA 정책 업데이트: 긴급 SLA 첫 응답 시간 변경",
       oldValue: { firstResponseHours: 2 }, newValue: { firstResponseHours: 1 },
       createdAt: d(-3, 14),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.CREATE, resourceType: "Team", description: "새 팀 생성: 제품팀",
       newValue: { name: "제품팀", description: "기능 요청 및 제품 개선 처리" },
       createdAt: d(-5, 11),
     },
     {
-      actorId: agentIds.sujin ?? adminId, actorName: "이수진", actorEmail: "agent1@crinity.io",
+      actorId: agentIds.sujin ?? adminId, actorName: "이수진", actorEmail: "agent1@suppo.io",
       action: AuditAction.ASSIGN, resourceType: "Ticket", resourceId: "TK-2026-0001",
       description: "티켓 TK-2026-0001 자신에게 할당",
       createdAt: d(0, 9),
     },
     {
-      actorId: agentIds.dohyun ?? adminId, actorName: "박도현", actorEmail: "agent2@crinity.io",
+      actorId: agentIds.dohyun ?? adminId, actorName: "박도현", actorEmail: "agent2@suppo.io",
       action: AuditAction.STATUS_CHANGE, resourceType: "Ticket", resourceId: "TK-2026-0002",
       description: "티켓 상태 변경: OPEN → IN_PROGRESS",
       oldValue: { status: "OPEN" }, newValue: { status: "IN_PROGRESS" },
       createdAt: d(-1, 10),
     },
     {
-      actorId: agentIds.minseo ?? adminId, actorName: "최민서", actorEmail: "agent3@crinity.io",
+      actorId: agentIds.minseo ?? adminId, actorName: "최민서", actorEmail: "agent3@suppo.io",
       action: AuditAction.STATUS_CHANGE, resourceType: "Ticket", resourceId: "TK-2026-0007",
       description: "티켓 상태 변경: IN_PROGRESS → RESOLVED",
       oldValue: { status: "IN_PROGRESS" }, newValue: { status: "RESOLVED" },
       createdAt: d(-6, 15),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.UPDATE, resourceType: "ResponseTemplate", description: "응답 템플릿 수정: 초기 접수 확인 인사",
       createdAt: d(-7, 16),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.CREATE, resourceType: "KnowledgeArticle", description: "지식 베이스 아티클 등록: 서비스 시작 가이드",
       createdAt: d(-15, 10),
     },
     {
-      actorId: agentIds.jihun ?? adminId, actorName: "김지훈", actorEmail: "agent4@crinity.io",
+      actorId: agentIds.jihun ?? adminId, actorName: "김지훈", actorEmail: "agent4@suppo.io",
       action: AuditAction.LOGIN, resourceType: "Session", description: "상담원 로그인",
       createdAt: d(0, 8), ipAddress: "10.0.0.55",
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.DEACTIVATE, resourceType: "Agent", description: "상담원 비활성화 (퇴사 처리)",
       createdAt: d(-20, 11),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.SETTINGS_CHANGE, resourceType: "SystemBranding", description: "시스템 브랜딩 설정 변경: 회사명 업데이트",
-      oldValue: { companyName: "Helpdesk" }, newValue: { companyName: "Crinity" },
+      oldValue: { companyName: "Helpdesk" }, newValue: { companyName: "Suppo" },
       createdAt: d(-30, 14),
     },
     {
-      actorId: agentIds.sujin ?? adminId, actorName: "이수진", actorEmail: "agent1@crinity.io",
+      actorId: agentIds.sujin ?? adminId, actorName: "이수진", actorEmail: "agent1@suppo.io",
       action: AuditAction.TRANSFER, resourceType: "Ticket", resourceId: "TK-2026-0012",
       description: "티켓 TK-2026-0012 담당자 이관: 이수진 → 박도현",
       createdAt: d(-4, 11),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.EXPORT, resourceType: "Report", description: "월간 운영 보고서 Excel 내보내기",
       createdAt: d(-10, 9), metadata: { format: "EXCEL", period: "2026-02" },
     },
     {
-      actorId: agentIds.hyunwoo ?? adminId, actorName: "강현우", actorEmail: "agent6@crinity.io",
+      actorId: agentIds.hyunwoo ?? adminId, actorName: "강현우", actorEmail: "agent6@suppo.io",
       action: AuditAction.LOGIN, resourceType: "Session", description: "상담원 로그인",
       createdAt: d(-2, 9), ipAddress: "172.16.0.23",
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.CREATE, resourceType: "RequestType", description: "문의 유형 생성: 장애 신고",
       newValue: { name: "장애 신고", defaultPriority: "URGENT" },
       createdAt: d(-25, 15),
     },
     {
-      actorId: adminId, actorName: "관리자", actorEmail: "admin@crinity.io",
+      actorId: adminId, actorName: "관리자", actorEmail: "admin@suppo.io",
       action: AuditAction.PASSWORD_RESET, resourceType: "Agent", description: "상담원 비밀번호 초기화: 최민서",
       createdAt: d(-12, 13),
     },
     {
-      actorId: agentIds.minji ?? adminId, actorName: "이민지", actorEmail: "agent5@crinity.io",
+      actorId: agentIds.minji ?? adminId, actorName: "이민지", actorEmail: "agent5@suppo.io",
       action: AuditAction.USE, resourceType: "ResponseTemplate", description: "응답 템플릿 사용: 계정 잠금 해제 안내",
       createdAt: d(-6, 15),
     },
     {
-      actorId: agentIds.dohyun ?? adminId, actorName: "박도현", actorEmail: "agent2@crinity.io",
+      actorId: agentIds.dohyun ?? adminId, actorName: "박도현", actorEmail: "agent2@suppo.io",
       action: AuditAction.PRIORITY_CHANGE, resourceType: "Ticket", resourceId: "TK-2026-0019",
       description: "티켓 우선순위 변경: MEDIUM → HIGH",
       oldValue: { priority: "MEDIUM" }, newValue: { priority: "HIGH" },

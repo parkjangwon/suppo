@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@crinity/db": ["./src/index.ts"]
+      "@suppo/db": ["./src/index.ts"]
     }
   },
   "include": ["src", "prisma"]

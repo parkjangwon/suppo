@@ -10,7 +10,7 @@ async function seedInitialAdmin() {
   if (!email || !password) {
     console.log("⚠️  INITIAL_ADMIN_EMAIL 또는 INITIAL_ADMIN_PASSWORD가 설정되지 않았습니다.");
     console.log("   .env 파일에 다음을 추가하세요:");
-    console.log("   INITIAL_ADMIN_EMAIL=admin@crinity.io");
+    console.log("   INITIAL_ADMIN_EMAIL=admin@suppo.io");
     console.log("   INITIAL_ADMIN_PASSWORD=your-secure-password");
     process.exit(1);
   }

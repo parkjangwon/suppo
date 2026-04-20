@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@crinity/db", () => {
+vi.mock("@suppo/db", () => {
   const emailSettings = {
     findUnique: vi.fn(),
   };
@@ -23,9 +23,9 @@ vi.mock("@crinity/db", () => {
   };
 });
 
-import { prisma } from "@crinity/db";
-import { enqueueEmail } from "@crinity/shared/email/enqueue";
-import { processOutbox } from "@crinity/shared/email/process-outbox";
+import { prisma } from "@suppo/db";
+import { enqueueEmail } from "@suppo/shared/email/enqueue";
+import { processOutbox } from "@suppo/shared/email/process-outbox";
 
 function createDbMock() {
   return {
@@ -50,7 +50,7 @@ describe("email outbox", () => {
       smtpUser: "mailer@example.com",
       smtpPassword: "secret",
       fromEmail: "no-reply@example.com",
-      fromName: "Crinity Helpdesk",
+      fromName: "Suppo Helpdesk",
       sesAccessKey: null,
       sesSecretKey: null,
       sesRegion: "ap-northeast-2",
@@ -137,9 +137,9 @@ describe("email outbox", () => {
         category: "CUSTOMER",
         ticketId: "ticket-1",
         dedupeKey: null,
-        messageId: "<message-1@crinity.io>",
-        inReplyTo: "<parent@crinity.io>",
-        references: JSON.stringify(["<first@crinity.io>", "<parent@crinity.io>"]),
+        messageId: "<message-1@suppo.io>",
+        inReplyTo: "<parent@suppo.io>",
+        references: JSON.stringify(["<first@suppo.io>", "<parent@suppo.io>"]),
         status: "PENDING",
         attemptCount: 0,
         nextRetryAt: null,
@@ -159,11 +159,11 @@ describe("email outbox", () => {
       to: "customer@example.com",
       subject: "문의 접수 안내",
       html: "본문",
-      from: '"Crinity Helpdesk" <no-reply@example.com>',
+      from: '"Suppo Helpdesk" <no-reply@example.com>',
       headers: {
-        "Message-ID": "<message-1@crinity.io>",
-        "In-Reply-To": "<parent@crinity.io>",
-        References: "<first@crinity.io> <parent@crinity.io>",
+        "Message-ID": "<message-1@suppo.io>",
+        "In-Reply-To": "<parent@suppo.io>",
+        References: "<first@suppo.io> <parent@suppo.io>",
       },
     });
     expect(db.emailDelivery.update).toHaveBeenCalledWith({
@@ -191,7 +191,7 @@ describe("email outbox", () => {
       smtpUser: "mailer@example.com",
       smtpPassword: "secret",
       fromEmail: "no-reply@example.com",
-      fromName: "Crinity Helpdesk",
+      fromName: "Suppo Helpdesk",
       sesAccessKey: null,
       sesSecretKey: null,
       sesRegion: "ap-northeast-2",

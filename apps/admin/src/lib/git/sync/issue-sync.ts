@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { TicketStatus, GitProvider, GitEventType, AuditAction, AuthorType } from "@prisma/client";
 
 interface GitIssuePayload {
@@ -66,7 +66,7 @@ export async function syncTicketStatusFromGitEvent(
     actorId: 'system',
     actorType: AuthorType.AGENT,
     actorName: 'Git Sync',
-    actorEmail: 'system@crinity.io',
+    actorEmail: 'system@suppo.io',
     action: AuditAction.UPDATE,
     resourceType: 'ticket',
     resourceId: ticketId,

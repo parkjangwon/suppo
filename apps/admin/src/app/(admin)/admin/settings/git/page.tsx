@@ -2,17 +2,17 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { GitSettings } from "@/components/admin/git-settings";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
-  title: "Git 설정 | Crinity",
+  title: "Git 설정 | Suppo",
 };
 
 export default async function GitSettingsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {

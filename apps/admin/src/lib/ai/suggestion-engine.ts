@@ -1,8 +1,8 @@
 import type { LLMSettings } from "@prisma/client";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { callGemini } from "@/lib/llm/providers/gemini";
 import { callOllama } from "@/lib/llm/providers/ollama";
-import { searchRelevantArticles } from "@crinity/shared/knowledge/search";
+import { searchRelevantArticles } from "@suppo/shared/knowledge/search";
 
 const DEFAULT_SETTINGS_ID = "default";
 

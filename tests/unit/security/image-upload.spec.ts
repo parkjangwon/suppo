@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isAllowedImageUploadMimeType } from "@crinity/shared/security/image-upload";
+import { isAllowedImageUploadMimeType } from "@suppo/shared/security/image-upload";
 
 describe("isAllowedImageUploadMimeType", () => {
   it("allows raster image uploads", () => {

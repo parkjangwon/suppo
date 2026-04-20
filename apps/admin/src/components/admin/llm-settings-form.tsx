@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Brain, Loader2, PlugZap, Server } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Switch } from "@crinity/ui/components/ui/switch";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Switch } from "@suppo/ui/components/ui/switch";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
 import { toast } from "sonner";
 import { DEFAULT_LLM_SETTINGS } from "@/lib/settings/default-llm-settings";
 

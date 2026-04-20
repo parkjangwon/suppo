@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-21
 **Status:** Approved
-**Project:** crinity-helpdesk
+**Project:** suppo-helpdesk
 
 ---
 
@@ -154,7 +154,7 @@ backup-2026-03-21T12-00-00.zip
 
 **Simplified UI rule:** Selecting `agents` automatically forces selection of `tickets`, `knowledge`, and `settings`. Selecting `settings` automatically forces selection of `tickets`. These dependencies are shown as explanatory notes in the UI.
 
-**Initial admin preservation:** When `agents` is selected, the initial admin is always recreated using `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` env vars. The seed functions must read these env vars directly (the current `prisma/seed.ts` hardcodes `admin@crinity.io` / `admin123` — this will be updated as part of implementation to read env vars with those as fallback defaults).
+**Initial admin preservation:** When `agents` is selected, the initial admin is always recreated using `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` env vars. The seed functions must read these env vars directly (the current `prisma/seed.ts` hardcodes `admin@suppo.io` / `admin123` — this will be updated as part of implementation to read env vars with those as fallback defaults).
 
 ---
 

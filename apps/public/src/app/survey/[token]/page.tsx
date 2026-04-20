@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { SurveyForm } from "@/components/survey/survey-form";
 
 export const metadata: Metadata = {
-  title: "고객 만족도 조사 | Crinity",
+  title: "고객 만족도 조사 | Suppo",
   description: "티켓 해결에 대한 만족도를 평가해주세요.",
 };
 

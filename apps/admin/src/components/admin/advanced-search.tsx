@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@crinity/ui/components/ui/select";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@suppo/ui/components/ui/select";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import { Search, X, Folder, Filter } from "lucide-react";
-import { cn } from "@crinity/shared/utils";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { cn } from "@suppo/shared/utils";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface AdvancedSearchProps {
   categories: { id: string; name: string }[];

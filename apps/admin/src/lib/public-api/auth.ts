@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import type { NextRequest } from "next/server";
 
 export const PUBLIC_API_SCOPES = ["tickets:read", "tickets:create", "tickets:update"] as const;

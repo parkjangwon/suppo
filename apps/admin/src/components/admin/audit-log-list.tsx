@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Button } from "@suppo/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@crinity/ui/components/ui/card";
+} from "@suppo/ui/components/ui/card";
 import {
   Table,
   TableBody,
@@ -16,19 +16,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@crinity/ui/components/ui/table";
+} from "@suppo/ui/components/ui/table";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
+} from "@suppo/ui/components/ui/select";
 import { Search, Download, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { AiInsightPanel } from "./ai-insight-panel";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface AuditLog {
   id: string;

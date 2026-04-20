@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { prisma } from "@suppo/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@crinity/ui/components/ui/table";
+} from "@suppo/ui/components/ui/table";
 import {
   Trophy,
   FileText,
@@ -24,18 +24,18 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
-import { getContributorImpactStats, getKnowledgeROIOverview } from "@crinity/shared/knowledge/analytics";
-import { estimateTicketDeflection } from "@crinity/shared/knowledge/deflection";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getContributorImpactStats, getKnowledgeROIOverview } from "@suppo/shared/knowledge/analytics";
+import { estimateTicketDeflection } from "@suppo/shared/knowledge/deflection";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
-  title: "기여자 통계 | Crinity",
+  title: "기여자 통계 | Suppo",
 };
 
 export default async function ContributorsPage() {
   const session = await auth();
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const t = (key: string, ko: string, en?: string) =>
     copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
 

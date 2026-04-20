@@ -1,7 +1,7 @@
 "use client";
 
 import { Lock } from "lucide-react";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Button } from "@suppo/ui/components/ui/button";
 
 interface LockInfo {
   agentId: string;

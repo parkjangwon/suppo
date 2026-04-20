@@ -1,35 +1,35 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@crinity/ui/components/ui/card";
+} from "@suppo/ui/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@crinity/ui/components/ui/dialog";
+} from "@suppo/ui/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
-import { Separator } from "@crinity/ui/components/ui/separator";
+} from "@suppo/ui/components/ui/select";
+import { Separator } from "@suppo/ui/components/ui/separator";
 import { toast } from "sonner";
-import { getBackofficeRoleLabel, type BackofficeRole } from "@crinity/shared/auth/config";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { getBackofficeRoleLabel, type BackofficeRole } from "@suppo/shared/auth/config";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import {
   Users,
   Plus,
@@ -45,14 +45,14 @@ import {
   Copy,
   Check,
 } from "lucide-react";
-import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
+import { formatPhoneNumberInput } from "@suppo/shared/utils/phone-format";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@crinity/ui/components/ui/dropdown-menu";
+} from "@suppo/ui/components/ui/dropdown-menu";
 
 interface CategoryItem {
   id: string;

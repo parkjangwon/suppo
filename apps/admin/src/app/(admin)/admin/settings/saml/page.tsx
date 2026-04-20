@@ -2,20 +2,20 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { prisma } from "@suppo/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { SAMLProviderForm } from "@/components/admin/saml-provider-form";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
-import { createSamlMetadataBaseUrl } from "@crinity/shared/utils/app-urls";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
+import { createSamlMetadataBaseUrl } from "@suppo/shared/utils/app-urls";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
-  title: "SAML SSO 설정 | Crinity",
+  title: "SAML SSO 설정 | Suppo",
 };
 
 export default async function SAMLSettingsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const t = (key: string, ko: string, en?: string) =>
     copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const session = await auth();

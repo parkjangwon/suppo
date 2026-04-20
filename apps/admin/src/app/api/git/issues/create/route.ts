@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { decryptToken } from "@crinity/shared/crypto/encrypt";
-import { parseProvider, validateRepoFullName } from "@crinity/shared/git/provider";
+import { prisma } from "@suppo/db";
+import { decryptToken } from "@suppo/shared/crypto/encrypt";
+import { parseProvider, validateRepoFullName } from "@suppo/shared/git/provider";
 import { GitHubProvider } from "@/lib/git/providers/github";
 import { GitLabProvider } from "@/lib/git/providers/gitlab";
 import { createAuditLog } from "@/lib/audit/logger";

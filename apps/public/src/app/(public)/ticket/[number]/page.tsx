@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getSystemBranding } from "@crinity/shared/db/queries/branding";
-import { verifyTicketAccessToken } from "@crinity/shared/security/ticket-access";
-import { getPublicTicketThread } from "@crinity/shared/tickets/public-thread";
+import { getSystemBranding } from "@suppo/shared/db/queries/branding";
+import { verifyTicketAccessToken } from "@suppo/shared/security/ticket-access";
+import { getPublicTicketThread } from "@suppo/shared/tickets/public-thread";
 import { PublicTicketDetail } from "@/components/ticket/public-ticket-detail";
 
 interface TicketPageProps {

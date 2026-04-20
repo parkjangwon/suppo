@@ -21,10 +21,10 @@ afterEach(async () => {
 
 describe("saveToLocal", () => {
   it("does not append the file extension twice", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "crinity-upload-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "suppo-upload-"));
     createdDirs.push(tempDir);
     process.env.UPLOAD_DIR = tempDir;
-    const { saveToLocal } = await import("@crinity/shared/storage/local-storage");
+    const { saveToLocal } = await import("@suppo/shared/storage/local-storage");
 
     const file = {
       name: "report.pdf",

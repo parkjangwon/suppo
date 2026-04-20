@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 const PRESENCE_STALE_MS = 35_000; // 35초 후 stale로 간주
 const LOCK_DURATION_MS = 60_000; // 60초 락 유효기간

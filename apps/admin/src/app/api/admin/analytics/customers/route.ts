@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getRepeatInquiries } from "@/lib/db/queries/admin-analytics/repeat-inquiries";
 import { getVIPCustomers } from "@/lib/db/queries/admin-analytics/vip-customers";
 import { getDateRangeFromPreset } from "@/lib/db/queries/admin-analytics/filters";
-import { db } from "@crinity/db/raw";
+import { db } from "@suppo/db/raw";
 
 const querySchema = z.object({
   preset: z.enum(["7d", "30d", "90d", "custom"]).default("30d"),

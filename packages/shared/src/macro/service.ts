@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import type { Macro, CreateMacroInput, UpdateMacroInput } from "./types";
 
 export async function listMacros(agentId: string, isAdmin: boolean): Promise<Macro[]> {

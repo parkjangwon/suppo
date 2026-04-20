@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { validateWebhookTargetUrl } from "@crinity/shared/security/webhook-url";
+import { validateWebhookTargetUrl } from "@suppo/shared/security/webhook-url";
 
 describe("validateWebhookTargetUrl", () => {
   it("allows public https webhook targets", () => {

@@ -1,4 +1,4 @@
-import type { EmailProvider, EmailSendInput } from "@crinity/shared/email/provider-types";
+import type { EmailProvider, EmailSendInput } from "@suppo/shared/email/provider-types";
 
 export function createResendProvider(): EmailProvider {
   const apiKey = process.env.RESEND_API_KEY;

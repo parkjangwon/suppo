@@ -1,7 +1,7 @@
 # E2E 테스트 자동화 설계
 
 **날짜:** 2026-03-18
-**프로젝트:** crinity-helpdesk
+**프로젝트:** suppo-helpdesk
 **범위:** 실제 DB 기반 E2E 테스트 + Excel 체크리스트 자동 생성
 
 ---
@@ -43,7 +43,7 @@ test-report/           ← 실행 결과 저장 디렉토리
 ## 테스트 시나리오 (6개)
 
 ### 01. 공개 홈페이지
-- `/` 접근 → "Crinity Support" 렌더링 확인
+- `/` 접근 → "Suppo Support" 렌더링 확인
 - 스크린샷: 홈 화면
 
 ### 02. 티켓 생성
@@ -138,7 +138,7 @@ test.step("단계명", async () => {    onStepEnd(step, result)
 
 ### 시드 데이터
 `tests/e2e/fixtures/seed.ts` — PrismaClient 싱글턴, `DATABASE_URL`은 `.env` 그대로 사용:
-- 관리자 계정(`admin@crinity.io`) 존재 확인, 없으면 생성
+- 관리자 계정(`admin@suppo.io`) 존재 확인, 없으면 생성
 - 테스트에 필요한 `RequestType` 레코드 확인/생성
 
 ### 테스트 데이터 격리

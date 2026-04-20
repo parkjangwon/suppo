@@ -12,7 +12,7 @@ test.beforeAll(async () => {
   const requestType = await seedRequestType();
 
   const teamLead = await prisma.agent.upsert({
-    where: { email: "teamlead@crinity.io" },
+    where: { email: "teamlead@suppo.io" },
     update: {
       name: "팀장",
       role: "TEAM_LEAD",
@@ -20,7 +20,7 @@ test.beforeAll(async () => {
       maxTickets: 20,
     },
     create: {
-      email: "teamlead@crinity.io",
+      email: "teamlead@suppo.io",
       name: "팀장",
       role: "TEAM_LEAD",
       isActive: true,
@@ -44,7 +44,7 @@ test.beforeAll(async () => {
     data: {
       ticketNumber: `CRN-E2E-SCHED-${Date.now()}`,
       customerName: "스케줄 자동화 고객",
-      customerEmail: "scheduled-e2e@crinity-test.io",
+      customerEmail: "scheduled-e2e@suppo-test.io",
       subject: "[E2E] SLA 위반 자동 에스컬레이션",
       description: "스케줄 자동화 테스트용 티켓입니다.",
       priority: "HIGH",
@@ -85,7 +85,7 @@ test("관리자가 스케줄 자동화 규칙을 만들고 내부 디스패치�
 }, testInfo) => {
   await test.step("관리자 로그인", async () => {
     await page.goto("http://127.0.0.1:3001/admin/login");
-    await page.getByLabel("이메일").fill("admin@crinity.io");
+    await page.getByLabel("이메일").fill("admin@suppo.io");
     await page.getByLabel("비밀번호").fill("admin1234");
     await page.getByRole("button", { name: "로그인" }).click();
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });

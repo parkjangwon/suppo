@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { addComment, getAdminTicketDetail, updateTicketStatus } from "@/lib/db/queries/admin-tickets";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import {
   enqueueInternalCommentNotifications,
   enqueueNewCommentEmail,
-} from "@crinity/shared/email/enqueue";
-import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
-import { prisma } from "@crinity/db";
+} from "@suppo/shared/email/enqueue";
+import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
+import { prisma } from "@suppo/db";
 
 export async function POST(request: NextRequest) {
   try {

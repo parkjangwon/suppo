@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { ThumbsUp, ThumbsDown, CheckCircle } from "lucide-react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
 
 interface ArticleFeedbackProps {
   articleId: string;

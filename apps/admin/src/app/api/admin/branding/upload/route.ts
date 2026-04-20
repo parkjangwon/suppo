@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import { isAllowedImageUploadMimeType } from "@crinity/shared/security/image-upload";
+import { isAllowedImageUploadMimeType } from "@suppo/shared/security/image-upload";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 

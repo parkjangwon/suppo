@@ -1,4 +1,4 @@
-# Crinity Helpdesk System
+# Suppo Helpdesk System
 
 <p align="center">
   <strong>pnpm workspace 기반 Public/Admin 분리형 헬프데스크 시스템</strong>
@@ -17,7 +17,7 @@
 
 ## 개요
 
-Crinity Helpdesk System은 고객용 공개 채널과 관리자용 백오피스를 분리한 헬프데스크 애플리케이션입니다.
+Suppo Helpdesk System은 고객용 공개 채널과 관리자용 백오피스를 분리한 헬프데스크 애플리케이션입니다.
 
 - `apps/public`: 고객 티켓 생성, 조회, 지식베이스, 설문
 - `apps/admin`: 상담원/관리자 대시보드, 티켓 처리, 분석, 설정
@@ -103,7 +103,7 @@ curl -X POST https://YOUR_ADMIN_DOMAIN/api/public/tickets \
   - `ticket.updated`
   - `ticket.commented`
 - 선택 사항
-  - `서명 시크릿`: 설정하면 `x-crinity-signature` 헤더로 `sha256 HMAC` 서명이 붙습니다.
+  - `서명 시크릿`: 설정하면 `x-suppo-signature` 헤더로 `sha256 HMAC` 서명이 붙습니다.
 
 payload 예시:
 
@@ -156,7 +156,7 @@ public 포털은 기본적으로 플로팅 채팅 버튼을 자동 삽입할 수
 ```html
 <script
   src="https://your-public-domain/chat-sdk.js"
-  data-crinity-chat-sdk="true"
+  data-suppo-chat-sdk="true"
 ></script>
 ```
 
@@ -165,7 +165,7 @@ public 포털은 기본적으로 플로팅 채팅 버튼을 자동 삽입할 수
 ```html
 <script
   src="https://your-public-domain/chat-sdk.js"
-  data-crinity-chat-sdk="true"
+  data-suppo-chat-sdk="true"
   data-widget-key="brand-a-widget"
 ></script>
 ```
@@ -183,7 +183,7 @@ public 포털은 기본적으로 플로팅 채팅 버튼을 자동 삽입할 수
 ## 모노레포 구조
 
 ```text
-crinity-helpdesk/
+suppo-helpdesk/
 ├── apps/
 │   ├── admin/
 │   │   ├── src/
@@ -238,9 +238,9 @@ crinity-helpdesk/
 
 ```bash
 pnpm install
-pnpm --filter=@crinity/db generate
-pnpm --filter=@crinity/db migrate:deploy
-pnpm --filter=@crinity/db seed
+pnpm --filter=@suppo/db generate
+pnpm --filter=@suppo/db migrate:deploy
+pnpm --filter=@suppo/db seed
 ```
 
 ### 개발 서버
@@ -296,7 +296,7 @@ AUTH_SECRET="your-auth-secret"
 AUTH_URL="http://localhost:3000"
 TICKET_ACCESS_SECRET="your-ticket-access-secret"
 GIT_TOKEN_ENCRYPTION_KEY="your-32-byte-key"
-INITIAL_ADMIN_EMAIL="admin@crinity.io"
+INITIAL_ADMIN_EMAIL="admin@suppo.io"
 INITIAL_ADMIN_PASSWORD="admin1234"
 ```
 
@@ -319,7 +319,7 @@ DATABASE_URL=file:/absolute/path/to/packages/db/dev.db
 AUTH_SECRET=local-dev-secret-32-chars-minimum
 TICKET_ACCESS_SECRET=local-dev-ticket-secret
 GIT_TOKEN_ENCRYPTION_KEY=local-dev-encryption-key-32bytexx
-INITIAL_ADMIN_EMAIL=admin@crinity.io
+INITIAL_ADMIN_EMAIL=admin@suppo.io
 INITIAL_ADMIN_PASSWORD=admin1234
 AUTH_URL=http://localhost:3001
 ```
@@ -346,11 +346,11 @@ Prisma 스키마와 마이그레이션은 `packages/db/prisma/`에 있습니다.
 주요 명령어:
 
 ```bash
-pnpm --filter=@crinity/db generate
-pnpm --filter=@crinity/db migrate:dev --name <name>
-pnpm --filter=@crinity/db migrate:deploy
-pnpm --filter=@crinity/db seed
-pnpm --filter=@crinity/db studio
+pnpm --filter=@suppo/db generate
+pnpm --filter=@suppo/db migrate:dev --name <name>
+pnpm --filter=@suppo/db migrate:deploy
+pnpm --filter=@suppo/db seed
+pnpm --filter=@suppo/db studio
 ```
 
 ## 테스트
@@ -405,8 +405,8 @@ docker compose -f docker/docker-compose.yml --env-file docker/env/.env.productio
 ### 이미지 빌드 예시
 
 ```bash
-docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=public -t crinity-public:latest .
-docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t crinity-admin:latest .
+docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=public -t suppo-public:latest .
+docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t suppo-admin:latest .
 ```
 
 ## 라우팅 원칙
@@ -448,8 +448,8 @@ docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t 
 
 ## 참고 문서
 
-- [AGENTS.md](/Users/pjw/dev/project/crinity/crinity-helpdesk/AGENTS.md)
-- [CLAUDE.md](/Users/pjw/dev/project/crinity/crinity-helpdesk/CLAUDE.md)
+- [AGENTS.md](/Users/pjw/dev/project/crinity-helpdesk/AGENTS.md)
+- [CLAUDE.md](/Users/pjw/dev/project/crinity-helpdesk/CLAUDE.md)
 - `docs/superpowers/plans/2026-03-22-monorepo-restructure.md`
 
 ## Paperclip E2E verification

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { z } from "zod";
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";

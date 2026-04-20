@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Download, Upload, RotateCcw, AlertTriangle, Loader2 } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Input } from "@crinity/ui/components/ui/input";
+} from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Input } from "@suppo/ui/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -22,8 +22,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@crinity/ui/components/ui/dialog";
-import { Alert, AlertDescription } from "@crinity/ui/components/ui/alert";
+} from "@suppo/ui/components/ui/dialog";
+import { Alert, AlertDescription } from "@suppo/ui/components/ui/alert";
 
 type ResetCategory = "tickets" | "agents" | "settings" | "knowledge" | "audit_logs";
 

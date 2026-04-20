@@ -140,30 +140,30 @@
 
 | 기존 import | 새 import |
 |---|---|
-| `@/lib/db/client` | `@crinity/db` |
-| `@/lib/auth/config` | `@crinity/shared/auth/config` |
-| `@/lib/auth/guards` | `@crinity/shared/auth/guards` |
-| `@/lib/auth/session` | `@crinity/shared/auth/session` |
-| `@/lib/auth/providers/boxyhq-saml` | `@crinity/shared/auth/providers/boxyhq-saml` |
-| `@/lib/security/...` | `@crinity/shared/security/...` |
-| `@/lib/email/enqueue` | `@crinity/shared/email/enqueue` |
-| `@/lib/email/process-outbox` | `@crinity/shared/email/process-outbox` |
-| `@/lib/email/threading` | `@crinity/shared/email/threading` |
-| `@/lib/email/providers/...` | `@crinity/shared/email/providers/...` |
-| `@/lib/tickets/create-ticket` | `@crinity/shared/tickets/create-ticket` |
-| `@/lib/tickets/public-thread` | `@crinity/shared/tickets/public-thread` |
-| `@/lib/tickets/ticket-number` | `@crinity/shared/tickets/ticket-number` |
-| `@/lib/knowledge/...` | `@crinity/shared/knowledge/...` |
-| `@/lib/branding/...` | `@crinity/shared/branding/...` |
-| `@/lib/storage/...` | `@crinity/shared/storage/...` |
-| `@/lib/utils` | `@crinity/shared/utils` |
-| `@/lib/utils/...` | `@crinity/shared/utils/...` |
-| `@/lib/validation/...` | `@crinity/shared/validation/...` |
-| `@/lib/crypto/...` | `@crinity/shared/crypto/...` |
-| `@/lib/db/queries/tickets` | `@crinity/shared/db/queries/tickets` |
-| `@/lib/db/queries/categories` | `@crinity/shared/db/queries/categories` |
-| `@/lib/db/queries/branding` | `@crinity/shared/db/queries/branding` |
-| `@/components/ui/...` | `@crinity/ui/components/ui/...` |
+| `@/lib/db/client` | `@suppo/db` |
+| `@/lib/auth/config` | `@suppo/shared/auth/config` |
+| `@/lib/auth/guards` | `@suppo/shared/auth/guards` |
+| `@/lib/auth/session` | `@suppo/shared/auth/session` |
+| `@/lib/auth/providers/boxyhq-saml` | `@suppo/shared/auth/providers/boxyhq-saml` |
+| `@/lib/security/...` | `@suppo/shared/security/...` |
+| `@/lib/email/enqueue` | `@suppo/shared/email/enqueue` |
+| `@/lib/email/process-outbox` | `@suppo/shared/email/process-outbox` |
+| `@/lib/email/threading` | `@suppo/shared/email/threading` |
+| `@/lib/email/providers/...` | `@suppo/shared/email/providers/...` |
+| `@/lib/tickets/create-ticket` | `@suppo/shared/tickets/create-ticket` |
+| `@/lib/tickets/public-thread` | `@suppo/shared/tickets/public-thread` |
+| `@/lib/tickets/ticket-number` | `@suppo/shared/tickets/ticket-number` |
+| `@/lib/knowledge/...` | `@suppo/shared/knowledge/...` |
+| `@/lib/branding/...` | `@suppo/shared/branding/...` |
+| `@/lib/storage/...` | `@suppo/shared/storage/...` |
+| `@/lib/utils` | `@suppo/shared/utils` |
+| `@/lib/utils/...` | `@suppo/shared/utils/...` |
+| `@/lib/validation/...` | `@suppo/shared/validation/...` |
+| `@/lib/crypto/...` | `@suppo/shared/crypto/...` |
+| `@/lib/db/queries/tickets` | `@suppo/shared/db/queries/tickets` |
+| `@/lib/db/queries/categories` | `@suppo/shared/db/queries/categories` |
+| `@/lib/db/queries/branding` | `@suppo/shared/db/queries/branding` |
+| `@/components/ui/...` | `@suppo/ui/components/ui/...` |
 | `@/components/admin/...` | `@/components/admin/...` (**admin 앱 내부에서 `@` = `apps/admin/src`**) |
 | `@/components/app/admin-shell` | `@/components/admin-shell` |
 | `@/components/app/auth-provider` | `@/components/auth-provider` |
@@ -223,13 +223,13 @@ packages:
 
 ```json
 {
-  "name": "crinity-helpdesk",
+  "name": "suppo-helpdesk",
   "private": true,
   "scripts": {
-    "dev:admin":   "pnpm --filter=@crinity/admin dev",
-    "dev:public":  "pnpm --filter=@crinity/public dev",
-    "build:admin": "pnpm --filter=@crinity/admin build",
-    "build:public":"pnpm --filter=@crinity/public build",
+    "dev:admin":   "pnpm --filter=@suppo/admin dev",
+    "dev:public":  "pnpm --filter=@suppo/public dev",
+    "build:admin": "pnpm --filter=@suppo/admin build",
+    "build:public":"pnpm --filter=@suppo/public build",
     "lint":        "pnpm -r lint",
     "test":        "vitest run",
     "test:e2e":    "playwright test"
@@ -251,7 +251,7 @@ packages:
 
 ```json
 {
-  "name": "@crinity/db",
+  "name": "@suppo/db",
   "version": "0.1.0",
   "private": true,
   "exports": {
@@ -281,7 +281,7 @@ packages:
 
 ```json
 {
-  "name": "@crinity/ui",
+  "name": "@suppo/ui",
   "version": "0.1.0",
   "private": true,
   "exports": {
@@ -289,7 +289,7 @@ packages:
     "./tailwind.config.base": "./tailwind.config.base.ts"
   },
   "dependencies": {
-    "@crinity/shared": "workspace:*",
+    "@suppo/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
@@ -315,14 +315,14 @@ packages:
 
 ```json
 {
-  "name": "@crinity/shared",
+  "name": "@suppo/shared",
   "version": "0.1.0",
   "private": true,
   "exports": {
     "./*": "./src/*"
   },
   "dependencies": {
-    "@crinity/db": "workspace:*",
+    "@suppo/db": "workspace:*",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
     "nanoid": "^5.1.6",
@@ -344,7 +344,7 @@ packages:
 
 ```json
 {
-  "name": "@crinity/admin",
+  "name": "@suppo/admin",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -354,9 +354,9 @@ packages:
     "lint":  "next lint"
   },
   "dependencies": {
-    "@crinity/db":     "workspace:*",
-    "@crinity/ui":     "workspace:*",
-    "@crinity/shared": "workspace:*",
+    "@suppo/db":     "workspace:*",
+    "@suppo/ui":     "workspace:*",
+    "@suppo/shared": "workspace:*",
     "@auth/prisma-adapter": "^2.11.1",
     "@hookform/resolvers": "^5.2.2",
     "bcryptjs": "^3.0.3",
@@ -400,7 +400,7 @@ packages:
 
 ```json
 {
-  "name": "@crinity/public",
+  "name": "@suppo/public",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -410,9 +410,9 @@ packages:
     "lint":  "next lint"
   },
   "dependencies": {
-    "@crinity/db":     "workspace:*",
-    "@crinity/ui":     "workspace:*",
-    "@crinity/shared": "workspace:*",
+    "@suppo/db":     "workspace:*",
+    "@suppo/ui":     "workspace:*",
+    "@suppo/shared": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.577.0",
@@ -446,7 +446,7 @@ packages:
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "paths": { "@crinity/db": ["./src/index.ts"] }
+    "paths": { "@suppo/db": ["./src/index.ts"] }
   },
   "include": ["src", "prisma"]
 }
@@ -457,7 +457,7 @@ packages:
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "paths": { "@crinity/db": ["../db/src/index.ts"] }
+    "paths": { "@suppo/db": ["../db/src/index.ts"] }
   },
   "include": ["src"]
 }
@@ -469,8 +469,8 @@ packages:
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@crinity/db": ["../db/src/index.ts"],
-      "@crinity/shared": ["./src"]
+      "@suppo/db": ["../db/src/index.ts"],
+      "@suppo/shared": ["./src"]
     }
   },
   "include": ["src"]
@@ -487,9 +487,9 @@ packages:
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@crinity/db": ["../../packages/db/src/index.ts"],
-      "@crinity/ui": ["../../packages/ui/src"],
-      "@crinity/shared": ["../../packages/shared/src"]
+      "@suppo/db": ["../../packages/db/src/index.ts"],
+      "@suppo/ui": ["../../packages/ui/src"],
+      "@suppo/shared": ["../../packages/shared/src"]
     },
     "types": ["vitest/globals"]
   },
@@ -508,9 +508,9 @@ packages:
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@crinity/db": ["../../packages/db/src/index.ts"],
-      "@crinity/ui": ["../../packages/ui/src"],
-      "@crinity/shared": ["../../packages/shared/src"]
+      "@suppo/db": ["../../packages/db/src/index.ts"],
+      "@suppo/ui": ["../../packages/ui/src"],
+      "@suppo/shared": ["../../packages/shared/src"]
     }
   },
   "include": ["src", "next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
@@ -631,7 +631,7 @@ export * from "./raw";
 - [ ] **Step 6: Prisma 클라이언트 생성 실행**
 
 ```bash
-pnpm --filter=@crinity/db generate
+pnpm --filter=@suppo/db generate
 ```
 
 Expected: `✔ Generated Prisma Client` — `packages/db/node_modules/.prisma/client/` 디렉터리 생성 확인.
@@ -671,7 +671,7 @@ cp -r src/components/ui/. packages/ui/src/components/ui/
 
 - [ ] **Step 2: packages/ui 내 `@/lib/utils` import 경로 수정**
 
-shadcn/ui 컴포넌트들은 `cn()` 유틸리티를 `@/lib/utils`에서 import한다. 복사 후 이 경로를 `@crinity/shared/utils`로 변경해야 한다:
+shadcn/ui 컴포넌트들은 `cn()` 유틸리티를 `@/lib/utils`에서 import한다. 복사 후 이 경로를 `@suppo/shared/utils`로 변경해야 한다:
 
 ```bash
 grep -r "@/lib/utils" packages/ui/src/components/ui/ --include="*.tsx"
@@ -681,7 +681,7 @@ Expected: 각 컴포넌트에서 `from "@/lib/utils"` 발견 (~18개). 일괄 �
 
 ```bash
 find packages/ui/src -name "*.tsx" -o -name "*.ts" | \
-  xargs sed -i '' 's|from "@/lib/utils"|from "@crinity/shared/utils"|g'
+  xargs sed -i '' 's|from "@/lib/utils"|from "@suppo/shared/utils"|g'
 ```
 
 수정 후 재확인:
@@ -806,8 +806,8 @@ git commit -m "feat: add packages/ui with shadcn/ui components and shared Tailwi
 - [ ] **Step 1: shared 디렉터리 구조 생성 및 파일 복사**
 
 다음 순서로 복사. **파일을 복사한 후** 각 파일 내 import 경로를 아래 규칙으로 변경한다:
-- `@/lib/db/client` → `@crinity/db`
-- `@/lib/...` (shared 범위 내 상호 참조) → `./` 또는 `../` 상대경로 또는 `@crinity/shared/...`
+- `@/lib/db/client` → `@suppo/db`
+- `@/lib/...` (shared 범위 내 상호 참조) → `./` 또는 `../` 상대경로 또는 `@suppo/shared/...`
 
 ```bash
 mkdir -p \
@@ -874,43 +874,43 @@ cp src/lib/db/queries/branding.ts       packages/shared/src/db/queries/branding.
 `packages/shared/src/` 전체에서 다음 교체를 수행:
 
 ```bash
-# @/lib/db/client → @crinity/db
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/db/client|@crinity/db|g'
+# @/lib/db/client → @suppo/db
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/db/client|@suppo/db|g'
 
-# @/lib/auth/... → @crinity/shared/auth/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/auth/|@crinity/shared/auth/|g'
+# @/lib/auth/... → @suppo/shared/auth/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/auth/|@suppo/shared/auth/|g'
 
-# @/lib/security/... → @crinity/shared/security/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/security/|@crinity/shared/security/|g'
+# @/lib/security/... → @suppo/shared/security/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/security/|@suppo/shared/security/|g'
 
-# @/lib/email/... → @crinity/shared/email/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/email/|@crinity/shared/email/|g'
+# @/lib/email/... → @suppo/shared/email/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/email/|@suppo/shared/email/|g'
 
-# @/lib/tickets/... → @crinity/shared/tickets/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/tickets/|@crinity/shared/tickets/|g'
+# @/lib/tickets/... → @suppo/shared/tickets/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/tickets/|@suppo/shared/tickets/|g'
 
-# @/lib/knowledge/... → @crinity/shared/knowledge/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/knowledge/|@crinity/shared/knowledge/|g'
+# @/lib/knowledge/... → @suppo/shared/knowledge/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/knowledge/|@suppo/shared/knowledge/|g'
 
-# @/lib/storage/... → @crinity/shared/storage/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/storage/|@crinity/shared/storage/|g'
+# @/lib/storage/... → @suppo/shared/storage/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/storage/|@suppo/shared/storage/|g'
 
-# @/lib/utils → @crinity/shared/utils
+# @/lib/utils → @suppo/shared/utils
 find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' \
-  -e 's|from "@/lib/utils"|from "@crinity/shared/utils"|g' \
-  -e 's|from "@/lib/utils/|from "@crinity/shared/utils/|g'
+  -e 's|from "@/lib/utils"|from "@suppo/shared/utils"|g' \
+  -e 's|from "@/lib/utils/|from "@suppo/shared/utils/|g'
 
-# @/lib/validation/... → @crinity/shared/validation/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/validation/|@crinity/shared/validation/|g'
+# @/lib/validation/... → @suppo/shared/validation/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/validation/|@suppo/shared/validation/|g'
 
-# @/lib/crypto/... → @crinity/shared/crypto/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/crypto/|@crinity/shared/crypto/|g'
+# @/lib/crypto/... → @suppo/shared/crypto/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/crypto/|@suppo/shared/crypto/|g'
 
-# @/lib/db/queries/... → @crinity/shared/db/queries/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/db/queries/|@crinity/shared/db/queries/|g'
+# @/lib/db/queries/... → @suppo/shared/db/queries/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/db/queries/|@suppo/shared/db/queries/|g'
 
-# @/lib/branding/... → @crinity/shared/branding/...
-find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/branding/|@crinity/shared/branding/|g'
+# @/lib/branding/... → @suppo/shared/branding/...
+find packages/shared/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' 's|@/lib/branding/|@suppo/shared/branding/|g'
 ```
 
 **macOS 주의**: `sed -i ''` (빈 문자열 필수). Linux에서는 `sed -i`
@@ -1027,30 +1027,30 @@ cp src/middleware.ts apps/admin/src/middleware.ts  # 아래 Step 4에서 수정
 `apps/admin/src/` 전체에서 수행:
 
 ```bash
-cd /path/to/crinity-helpdesk
+cd /path/to/suppo-helpdesk
 
 find apps/admin/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' \
-  -e 's|@/lib/db/client|@crinity/db|g' \
-  -e 's|@/lib/auth/|@crinity/shared/auth/|g' \
-  -e 's|@/lib/security/|@crinity/shared/security/|g' \
-  -e 's|@/lib/email/enqueue|@crinity/shared/email/enqueue|g' \
-  -e 's|@/lib/email/process-outbox|@crinity/shared/email/process-outbox|g' \
-  -e 's|@/lib/email/threading|@crinity/shared/email/threading|g' \
-  -e 's|@/lib/email/providers/|@crinity/shared/email/providers/|g' \
-  -e 's|@/lib/tickets/create-ticket|@crinity/shared/tickets/create-ticket|g' \
-  -e 's|@/lib/tickets/public-thread|@crinity/shared/tickets/public-thread|g' \
-  -e 's|@/lib/tickets/ticket-number|@crinity/shared/tickets/ticket-number|g' \
-  -e 's|@/lib/knowledge/|@crinity/shared/knowledge/|g' \
-  -e 's|@/lib/branding/|@crinity/shared/branding/|g' \
-  -e 's|@/lib/storage/|@crinity/shared/storage/|g' \
-  -e 's|from "@/lib/utils"|from "@crinity/shared/utils"|g' \
-  -e 's|from "@/lib/utils/|from "@crinity/shared/utils/|g' \
-  -e 's|@/lib/validation/|@crinity/shared/validation/|g' \
-  -e 's|@/lib/crypto/|@crinity/shared/crypto/|g' \
-  -e 's|@/lib/db/queries/tickets|@crinity/shared/db/queries/tickets|g' \
-  -e 's|@/lib/db/queries/categories|@crinity/shared/db/queries/categories|g' \
-  -e 's|@/lib/db/queries/branding|@crinity/shared/db/queries/branding|g' \
-  -e 's|@/components/ui/|@crinity/ui/components/ui/|g' \
+  -e 's|@/lib/db/client|@suppo/db|g' \
+  -e 's|@/lib/auth/|@suppo/shared/auth/|g' \
+  -e 's|@/lib/security/|@suppo/shared/security/|g' \
+  -e 's|@/lib/email/enqueue|@suppo/shared/email/enqueue|g' \
+  -e 's|@/lib/email/process-outbox|@suppo/shared/email/process-outbox|g' \
+  -e 's|@/lib/email/threading|@suppo/shared/email/threading|g' \
+  -e 's|@/lib/email/providers/|@suppo/shared/email/providers/|g' \
+  -e 's|@/lib/tickets/create-ticket|@suppo/shared/tickets/create-ticket|g' \
+  -e 's|@/lib/tickets/public-thread|@suppo/shared/tickets/public-thread|g' \
+  -e 's|@/lib/tickets/ticket-number|@suppo/shared/tickets/ticket-number|g' \
+  -e 's|@/lib/knowledge/|@suppo/shared/knowledge/|g' \
+  -e 's|@/lib/branding/|@suppo/shared/branding/|g' \
+  -e 's|@/lib/storage/|@suppo/shared/storage/|g' \
+  -e 's|from "@/lib/utils"|from "@suppo/shared/utils"|g' \
+  -e 's|from "@/lib/utils/|from "@suppo/shared/utils/|g' \
+  -e 's|@/lib/validation/|@suppo/shared/validation/|g' \
+  -e 's|@/lib/crypto/|@suppo/shared/crypto/|g' \
+  -e 's|@/lib/db/queries/tickets|@suppo/shared/db/queries/tickets|g' \
+  -e 's|@/lib/db/queries/categories|@suppo/shared/db/queries/categories|g' \
+  -e 's|@/lib/db/queries/branding|@suppo/shared/db/queries/branding|g' \
+  -e 's|@/components/ui/|@suppo/ui/components/ui/|g' \
   -e 's|@/components/app/admin-shell|@/components/admin-shell|g' \
   -e 's|@/components/app/auth-provider|@/components/auth-provider|g'
 ```
@@ -1066,7 +1066,7 @@ APP_TYPE 분기를 완전히 제거하고, 인증 체크 + 헤더 주입만 남�
 ```typescript
 import { NextResponse } from "next/server";
 import { auth } from "./auth";
-import { BACKOFFICE_DASHBOARD_PATH, BACKOFFICE_LOGIN_PATH } from "@crinity/shared/auth/config";
+import { BACKOFFICE_DASHBOARD_PATH, BACKOFFICE_LOGIN_PATH } from "@suppo/shared/auth/config";
 
 const PASSWORD_CHANGE_PATH = "/admin/change-password";
 
@@ -1119,7 +1119,7 @@ const nextConfig: NextConfig = {
       "../../packages/db/node_modules/.prisma/**",
     ],
   },
-  transpilePackages: ["@crinity/ui", "@crinity/shared"],
+  transpilePackages: ["@suppo/ui", "@suppo/shared"],
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   experimental: {
@@ -1143,7 +1143,7 @@ export default nextConfig;
 
 ```typescript
 import type { Config } from "tailwindcss";
-import { uiTailwindConfig } from "@crinity/ui/tailwind.config.base";
+import { uiTailwindConfig } from "@suppo/ui/tailwind.config.base";
 
 const config: Config = {
   ...uiTailwindConfig,
@@ -1175,7 +1175,7 @@ DATABASE_URL=file:../../packages/db/dev.db
 AUTH_SECRET=local-dev-secret-32-chars-minimum
 TICKET_ACCESS_SECRET=local-dev-ticket-secret
 GIT_TOKEN_ENCRYPTION_KEY=local-dev-encryption-key-32bytexx
-INITIAL_ADMIN_EMAIL=admin@crinity.io
+INITIAL_ADMIN_EMAIL=admin@suppo.io
 INITIAL_ADMIN_PASSWORD=admin1234
 AUTH_URL=http://localhost:3001
 ```
@@ -1186,10 +1186,10 @@ AUTH_URL=http://localhost:3001
 
 ```bash
 # 처음이라면 마이그레이션 실행
-pnpm --filter=@crinity/db migrate:dev --name init
+pnpm --filter=@suppo/db migrate:dev --name init
 
 # admin 개발 서버 기동
-pnpm --filter=@crinity/admin dev
+pnpm --filter=@suppo/admin dev
 ```
 
 Expected: `http://localhost:3001/admin/login` 에서 로그인 페이지 표시, 로그인 후 대시보드 접근 성공.
@@ -1298,27 +1298,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ```bash
 find apps/public/src -name "*.ts" -o -name "*.tsx" | xargs sed -i '' \
-  -e 's|@/lib/db/client|@crinity/db|g' \
-  -e 's|@/lib/auth/|@crinity/shared/auth/|g' \
-  -e 's|@/lib/security/|@crinity/shared/security/|g' \
-  -e 's|@/lib/email/enqueue|@crinity/shared/email/enqueue|g' \
-  -e 's|@/lib/email/process-outbox|@crinity/shared/email/process-outbox|g' \
-  -e 's|@/lib/email/threading|@crinity/shared/email/threading|g' \
-  -e 's|@/lib/email/providers/|@crinity/shared/email/providers/|g' \
-  -e 's|@/lib/tickets/create-ticket|@crinity/shared/tickets/create-ticket|g' \
-  -e 's|@/lib/tickets/public-thread|@crinity/shared/tickets/public-thread|g' \
-  -e 's|@/lib/tickets/ticket-number|@crinity/shared/tickets/ticket-number|g' \
-  -e 's|@/lib/knowledge/|@crinity/shared/knowledge/|g' \
-  -e 's|@/lib/branding/|@crinity/shared/branding/|g' \
-  -e 's|@/lib/storage/|@crinity/shared/storage/|g' \
-  -e 's|from "@/lib/utils"|from "@crinity/shared/utils"|g' \
-  -e 's|from "@/lib/utils/|from "@crinity/shared/utils/|g' \
-  -e 's|@/lib/validation/|@crinity/shared/validation/|g' \
-  -e 's|@/lib/crypto/|@crinity/shared/crypto/|g' \
-  -e 's|@/lib/db/queries/tickets|@crinity/shared/db/queries/tickets|g' \
-  -e 's|@/lib/db/queries/categories|@crinity/shared/db/queries/categories|g' \
-  -e 's|@/lib/db/queries/branding|@crinity/shared/db/queries/branding|g' \
-  -e 's|@/components/ui/|@crinity/ui/components/ui/|g' \
+  -e 's|@/lib/db/client|@suppo/db|g' \
+  -e 's|@/lib/auth/|@suppo/shared/auth/|g' \
+  -e 's|@/lib/security/|@suppo/shared/security/|g' \
+  -e 's|@/lib/email/enqueue|@suppo/shared/email/enqueue|g' \
+  -e 's|@/lib/email/process-outbox|@suppo/shared/email/process-outbox|g' \
+  -e 's|@/lib/email/threading|@suppo/shared/email/threading|g' \
+  -e 's|@/lib/email/providers/|@suppo/shared/email/providers/|g' \
+  -e 's|@/lib/tickets/create-ticket|@suppo/shared/tickets/create-ticket|g' \
+  -e 's|@/lib/tickets/public-thread|@suppo/shared/tickets/public-thread|g' \
+  -e 's|@/lib/tickets/ticket-number|@suppo/shared/tickets/ticket-number|g' \
+  -e 's|@/lib/knowledge/|@suppo/shared/knowledge/|g' \
+  -e 's|@/lib/branding/|@suppo/shared/branding/|g' \
+  -e 's|@/lib/storage/|@suppo/shared/storage/|g' \
+  -e 's|from "@/lib/utils"|from "@suppo/shared/utils"|g' \
+  -e 's|from "@/lib/utils/|from "@suppo/shared/utils/|g' \
+  -e 's|@/lib/validation/|@suppo/shared/validation/|g' \
+  -e 's|@/lib/crypto/|@suppo/shared/crypto/|g' \
+  -e 's|@/lib/db/queries/tickets|@suppo/shared/db/queries/tickets|g' \
+  -e 's|@/lib/db/queries/categories|@suppo/shared/db/queries/categories|g' \
+  -e 's|@/lib/db/queries/branding|@suppo/shared/db/queries/branding|g' \
+  -e 's|@/components/ui/|@suppo/ui/components/ui/|g' \
   -e 's|@/components/app/public-shell|@/components/public-shell|g'
 ```
 
@@ -1339,7 +1339,7 @@ const nextConfig: NextConfig = {
       "../../packages/db/node_modules/.prisma/**",
     ],
   },
-  transpilePackages: ["@crinity/ui", "@crinity/shared"],
+  transpilePackages: ["@suppo/ui", "@suppo/shared"],
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   experimental: {
@@ -1369,7 +1369,7 @@ AUTH_URL=http://localhost:3000
 - [ ] **Step 6: public 개발 서버 테스트**
 
 ```bash
-pnpm --filter=@crinity/public dev
+pnpm --filter=@suppo/public dev
 ```
 
 Expected: `http://localhost:3000` 에서 공개 헬프데스크 메인 페이지 표시. `/knowledge`, `/tickets/new`, `/survey/*` 등 공개 경로 동작 확인.
@@ -1411,9 +1411,9 @@ export default defineConfig({
     alias: {
       // 대부분 unit test는 admin 전용 lib을 테스트하므로 @ → apps/admin/src
       "@": path.resolve(__dirname, "./apps/admin/src"),
-      "@crinity/db":     path.resolve(__dirname, "./packages/db/src/index.ts"),
-      "@crinity/ui":     path.resolve(__dirname, "./packages/ui/src"),
-      "@crinity/shared": path.resolve(__dirname, "./packages/shared/src"),
+      "@suppo/db":     path.resolve(__dirname, "./packages/db/src/index.ts"),
+      "@suppo/ui":     path.resolve(__dirname, "./packages/ui/src"),
+      "@suppo/shared": path.resolve(__dirname, "./packages/shared/src"),
     },
   },
   test: {
@@ -1439,8 +1439,8 @@ import { enqueueEmail } from "@/lib/email/enqueue";
 import { processOutbox } from "@/lib/email/process-outbox";
 
 // 변경 후
-import { enqueueEmail } from "@crinity/shared/email/enqueue";
-import { processOutbox } from "@crinity/shared/email/process-outbox";
+import { enqueueEmail } from "@suppo/shared/email/enqueue";
+import { processOutbox } from "@suppo/shared/email/process-outbox";
 ```
 
 - [ ] **Step 3: unit 테스트 실행 확인**
@@ -1481,12 +1481,12 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm --filter=@crinity/public dev --port 3000",
+      command: "pnpm --filter=@suppo/public dev --port 3000",
       url: "http://127.0.0.1:3000",
       reuseExistingServer: !process.env.CI,
     },
     {
-      command: "pnpm --filter=@crinity/admin dev --port 3001",
+      command: "pnpm --filter=@suppo/admin dev --port 3001",
       url: "http://127.0.0.1:3001",
       reuseExistingServer: !process.env.CI,
     },
@@ -1563,7 +1563,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY packages/db/package.json      ./packages/db/
 COPY packages/db/prisma            ./packages/db/prisma
 COPY package.json pnpm-workspace.yaml ./
-CMD ["pnpm", "--filter=@crinity/db", "migrate:deploy"]
+CMD ["pnpm", "--filter=@suppo/db", "migrate:deploy"]
 
 # ── 빌드
 FROM base AS builder
@@ -1579,8 +1579,8 @@ ENV AUTH_SECRET=$AUTH_SECRET \
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN pnpm --filter=@crinity/db generate
-RUN pnpm --filter=@crinity/${APP_NAME} build
+RUN pnpm --filter=@suppo/db generate
+RUN pnpm --filter=@suppo/${APP_NAME} build
 # 빌드 완료 후 민감 ENV 초기화
 ENV AUTH_SECRET="" DATABASE_URL="" TICKET_ACCESS_SECRET="" GIT_TOKEN_ENCRYPTION_KEY=""
 
@@ -1662,7 +1662,7 @@ services:
       target: runner
       args:
         APP_NAME: public
-    image: crinity-public:latest
+    image: suppo-public:latest
     restart: unless-stopped
     depends_on:
       migrate:
@@ -1687,7 +1687,7 @@ services:
       target: runner
       args:
         APP_NAME: admin
-    image: crinity-admin:latest
+    image: suppo-admin:latest
     restart: unless-stopped
     depends_on:
       migrate:
@@ -1744,7 +1744,7 @@ http {
 
     server {
         listen 80;
-        server_name helpdesk.crinity.io;
+        server_name helpdesk.suppo.io;
         # /admin 차단 블록 제거 — public 앱에 /admin 코드 없음
 
         location / {
@@ -1760,7 +1760,7 @@ http {
 
     server {
         listen 80;
-        server_name admin.crinity.io;
+        server_name admin.suppo.io;
 
         location = / {
             return 301 /admin/dashboard;
@@ -1783,10 +1783,10 @@ http {
 
 ```bash
 # admin 이미지 빌드
-docker build --target runner --build-arg APP_NAME=admin -t crinity-admin:latest .
+docker build --target runner --build-arg APP_NAME=admin -t suppo-admin:latest .
 
 # public 이미지 빌드
-docker build --target runner --build-arg APP_NAME=public -t crinity-public:latest .
+docker build --target runner --build-arg APP_NAME=public -t suppo-public:latest .
 ```
 
 Expected: 빌드 성공. 실패 시 Dockerfile COPY 경로 오류를 수정한다.
@@ -1798,7 +1798,7 @@ docker compose up --build -d
 docker compose logs -f
 ```
 
-Expected: `migrate` 서비스 완료, `admin` + `public` 서비스 기동. `helpdesk.crinity.io` 와 `admin.crinity.io` 접근 확인.
+Expected: `migrate` 서비스 완료, `admin` + `public` 서비스 기동. `helpdesk.suppo.io` 와 `admin.suppo.io` 접근 확인.
 
 - [ ] **Step 6: Commit**
 
@@ -1873,10 +1873,10 @@ pnpm build:admin
 pnpm build:public
 
 # DB
-pnpm --filter=@crinity/db generate      # Prisma 클라이언트 재생성
-pnpm --filter=@crinity/db migrate:dev --name <name>  # 마이그레이션 생성
-pnpm --filter=@crinity/db studio        # Prisma Studio
-pnpm --filter=@crinity/db seed          # 시드 데이터
+pnpm --filter=@suppo/db generate      # Prisma 클라이언트 재생성
+pnpm --filter=@suppo/db migrate:dev --name <name>  # 마이그레이션 생성
+pnpm --filter=@suppo/db studio        # Prisma Studio
+pnpm --filter=@suppo/db seed          # 시드 데이터
 
 # 테스트
 pnpm test        # Vitest unit tests (루트에서)
@@ -1884,9 +1884,9 @@ pnpm test:e2e    # Playwright E2E (admin + public 서버 자동 기동)
 
 # 최초 설정
 pnpm install
-pnpm --filter=@crinity/db generate
-pnpm --filter=@crinity/db migrate:dev --name init
-pnpm --filter=@crinity/db seed
+pnpm --filter=@suppo/db generate
+pnpm --filter=@suppo/db migrate:dev --name init
+pnpm --filter=@suppo/db seed
 \`\`\`
 ```
 
@@ -1903,8 +1903,8 @@ Expected: **결과 없음** (0줄). 이 검증이 통과해야 마이그레이�
 - [ ] **Step 6: 전체 빌드 검증**
 
 ```bash
-pnpm --filter=@crinity/admin build
-pnpm --filter=@crinity/public build
+pnpm --filter=@suppo/admin build
+pnpm --filter=@suppo/public build
 pnpm test
 ```
 
@@ -1925,11 +1925,11 @@ git commit -m "feat: complete monorepo restructure — remove src/, APP_TYPE eli
 
 2. **sed 명령어**: macOS에서는 `sed -i ''` (빈 문자열 필수), Linux에서는 `sed -i`. `&&`로 체이닝하면 한 번에 처리 가능.
 
-3. **Prisma generate 위치**: `packages/db/prisma/schema.prisma`에서 `output = "../node_modules/.prisma/client"` 설정 후 `pnpm --filter=@crinity/db generate` 실행. 생성 결과는 `packages/db/node_modules/.prisma/client/`.
+3. **Prisma generate 위치**: `packages/db/prisma/schema.prisma`에서 `output = "../node_modules/.prisma/client"` 설정 후 `pnpm --filter=@suppo/db generate` 실행. 생성 결과는 `packages/db/node_modules/.prisma/client/`.
 
 4. **standalone 출력 경로**: 모노레포에서 standalone은 `apps/{APP_NAME}/.next/standalone/apps/{APP_NAME}/server.js`에 생성된다. Docker runner에서 `CMD node apps/$APP_NAME/server.js` (shell form, ENV 확장).
 
-5. **transpilePackages**: `@crinity/ui`와 `@crinity/shared`는 사전 컴파일 없이 소스로 소비되므로 각 앱의 `next.config.ts`에 반드시 포함.
+5. **transpilePackages**: `@suppo/ui`와 `@suppo/shared`는 사전 컴파일 없이 소스로 소비되므로 각 앱의 `next.config.ts`에 반드시 포함.
 
 6. **공유 볼륨**: 두 앱이 파일 업로드를 공유하려면 `uploads` 볼륨을 `apps/admin/public/uploads`와 `apps/public/public/uploads` 양쪽에 마운트해야 한다. (docker-compose.yml Step 2 참조)
 

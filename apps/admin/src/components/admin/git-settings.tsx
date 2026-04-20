@@ -1,21 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { useRouter } from "next/navigation";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@crinity/ui/components/ui/dialog";
+} from "@suppo/ui/components/ui/dialog";
 import { toast } from "sonner";
 import { Github, Gitlab, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
 import { copyText } from "@/lib/i18n/admin-copy-utils";

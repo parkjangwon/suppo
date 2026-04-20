@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@crinity/db", () => ({ prisma: { lLMSettings: { upsert: vi.fn() } } }));
+vi.mock("@suppo/db", () => ({ prisma: { lLMSettings: { upsert: vi.fn() } } }));
 vi.mock("@/lib/llm/providers/gemini", () => ({ callGemini: vi.fn() }));
 vi.mock("@/lib/llm/providers/ollama", () => ({ callOllama: vi.fn() }));
 
 import { generateAuditAnomalyReport } from "@/lib/ai/audit-anomaly";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { callGemini } from "@/lib/llm/providers/gemini";
 
 const mockSettings = {

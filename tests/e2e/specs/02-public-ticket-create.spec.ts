@@ -30,7 +30,7 @@ test("고객이 티켓을 생성하고 티켓 번호를 받는다", async ({ pag
 
   await test.step("폼 입력", async () => {
     await page.getByLabel("이름").fill("테스트 고객");
-    await page.getByLabel("이메일").fill("e2e-test@crinity-test.io");
+    await page.getByLabel("이메일").fill("e2e-test@suppo-test.io");
     await page.getByLabel("제목").fill("[E2E] 테스트 티켓 제목");
     await page.getByLabel("내용").fill("E2E 자동화 테스트에서 생성된 티켓입니다. 자동으로 삭제됩니다.");
 
@@ -66,6 +66,6 @@ test("고객이 티켓을 생성하고 티켓 번호를 받는다", async ({ pag
       where: { ticketNumber: createdTicketNumber! },
     });
     expect(ticket).not.toBeNull();
-    expect(ticket!.customerEmail).toBe("e2e-test@crinity-test.io");
+    expect(ticket!.customerEmail).toBe("e2e-test@suppo-test.io");
   });
 });

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@crinity/shared/utils";
+import { cn } from "@suppo/shared/utils";
 
 export interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}

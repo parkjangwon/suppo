@@ -12,7 +12,7 @@ vi.mock("@/lib/public-api/auth", () => ({
   hasPublicApiScope: (apiKey: { scopes?: string[] }, scope: string) => apiKey.scopes?.includes(scope) ?? false,
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     ticket: {
       findMany: mockFindManyTickets,
@@ -20,11 +20,11 @@ vi.mock("@crinity/db", () => ({
   },
 }));
 
-vi.mock("@crinity/shared/tickets/create-ticket", () => ({
+vi.mock("@suppo/shared/tickets/create-ticket", () => ({
   createTicket: mockCreateTicket,
 }));
 
-vi.mock("@crinity/shared/integrations/outbound-webhooks", () => ({
+vi.mock("@suppo/shared/integrations/outbound-webhooks", () => ({
   dispatchWebhookEvent: vi.fn().mockResolvedValue({ sent: 0 }),
 }));
 

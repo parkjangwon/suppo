@@ -1,13 +1,13 @@
-import { prisma } from "@crinity/db";
-import { createLoggerProvider } from "@crinity/shared/email/providers/logger";
-import { createNodemailerProvider } from "@crinity/shared/email/providers/nodemailer";
-import { createResendProvider } from "@crinity/shared/email/providers/resend";
-import { createSesProvider } from "@crinity/shared/email/providers/ses";
-import type { EmailProvider } from "@crinity/shared/email/provider-types";
+import { prisma } from "@suppo/db";
+import { createLoggerProvider } from "@suppo/shared/email/providers/logger";
+import { createNodemailerProvider } from "@suppo/shared/email/providers/nodemailer";
+import { createResendProvider } from "@suppo/shared/email/providers/resend";
+import { createSesProvider } from "@suppo/shared/email/providers/ses";
+import type { EmailProvider } from "@suppo/shared/email/provider-types";
 import {
   formatEmailFrom,
   getDefaultEmailSettings,
-} from "@crinity/shared/email/settings";
+} from "@suppo/shared/email/settings";
 
 type EmailDeliveryStatus = "PENDING" | "SENT" | "FAILED";
 type EmailDeliveryCategory = "CUSTOMER" | "INTERNAL";

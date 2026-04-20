@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getBackofficeSession } from "@crinity/shared/auth/session";
-import { checkSLABreaches } from "@crinity/shared/sla/alerts";
+import { getBackofficeSession } from "@suppo/shared/auth/session";
+import { checkSLABreaches } from "@suppo/shared/sla/alerts";
 
 export async function GET() {
   const session = await getBackofficeSession();

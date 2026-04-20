@@ -1,5 +1,5 @@
 import { TicketPriority, TicketStatus } from "@prisma/client";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 interface BulkTicketUpdates {
   status?: TicketStatus;

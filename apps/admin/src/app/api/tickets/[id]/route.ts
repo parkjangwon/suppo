@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getAdminTicketDetail, updateTicketStatus, updateTicketPriority, assignTicket } from "@/lib/db/queries/admin-tickets";
-import { validateRequest, updateTicketSchema } from "@crinity/shared/security/input-validation";
-import { requireJson } from "@crinity/shared/security/content-type";
-import { checkRateLimit, createRateLimitHeaders } from "@crinity/shared/security/rate-limit";
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
-import { prisma } from "@crinity/db";
+import { validateRequest, updateTicketSchema } from "@suppo/shared/security/input-validation";
+import { requireJson } from "@suppo/shared/security/content-type";
+import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
+import { prisma } from "@suppo/db";
 
 export async function GET(
   request: NextRequest,

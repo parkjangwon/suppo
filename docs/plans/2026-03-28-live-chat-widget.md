@@ -30,7 +30,7 @@
 - Run: `pnpm vitest run tests/unit/chat/chat-model-contract.spec.ts`
 
 **Step 5: Migrate and generate**
-- Run: `DATABASE_URL='file:/.../packages/db/dev.db' pnpm --filter=@crinity/db exec prisma migrate dev --name add_live_chat`
+- Run: `DATABASE_URL='file:/.../packages/db/dev.db' pnpm --filter=@suppo/db exec prisma migrate dev --name add_live_chat`
 
 ### Task 2: Conversation Service
 

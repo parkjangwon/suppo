@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { prisma } from "@crinity/db";
-import { createTicket } from "@crinity/shared/tickets/create-ticket";
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
+import { prisma } from "@suppo/db";
+import { createTicket } from "@suppo/shared/tickets/create-ticket";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
 
 import {
   authenticatePublicApiKey,

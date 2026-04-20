@@ -4,9 +4,9 @@
 
 **Goal:** Wire all admin console UI components to use the existing `AdminCopy` i18n context so KO↔EN switching via the sidebar button actually changes all visible UI text.
 
-**Architecture:** `AdminCopy` (in `packages/shared/src/i18n/admin-copy.ts`) is already populated with KO/EN strings and provided via `AdminCopyProvider` in `apps/admin/src/app/(admin)/layout.tsx`. The cookie (`crinity-admin-locale`) is already read server-side. Components just need to call `useAdminCopy()` and replace hardcoded Korean strings with the copy object properties. Task 1 expands AdminCopy with all missing keys; Tasks 2–15 wire each component group.
+**Architecture:** `AdminCopy` (in `packages/shared/src/i18n/admin-copy.ts`) is already populated with KO/EN strings and provided via `AdminCopyProvider` in `apps/admin/src/app/(admin)/layout.tsx`. The cookie (`suppo-admin-locale`) is already read server-side. Components just need to call `useAdminCopy()` and replace hardcoded Korean strings with the copy object properties. Task 1 expands AdminCopy with all missing keys; Tasks 2–15 wire each component group.
 
-**Tech Stack:** Next.js 15 App Router, React 19, TypeScript, `packages/shared/src/i18n/admin-copy.ts`, `useAdminCopy()` hook from `@crinity/shared/i18n/admin-context`
+**Tech Stack:** Next.js 15 App Router, React 19, TypeScript, `packages/shared/src/i18n/admin-copy.ts`, `useAdminCopy()` hook from `@suppo/shared/i18n/admin-context`
 
 **Scope:** Admin app only (`apps/admin/src/`). Does NOT touch public portal, DB data, LLM prompts, or API body values.
 
@@ -1500,8 +1500,8 @@ In `ADMIN_COPY.en`, add after `daySaturday`:
 - [ ] **Step 4: Also remove `businessHoursDayLabels: string` from the interface** (it was listed but isn't needed — day labels come from `daySunday`...`daySaturday` array built at runtime). Verify TypeScript compiles:
 
 ```bash
-cd /Users/pjw/dev/project/crinity-helpdesk
-pnpm --filter=@crinity/shared build 2>&1 | tail -20
+cd /Users/pjw/dev/project/suppo-helpdesk
+pnpm --filter=@suppo/shared build 2>&1 | tail -20
 ```
 
 Expected: no type errors for `admin-copy.ts`.
@@ -1528,8 +1528,8 @@ The `getAdminNavSections` function currently has hardcoded Korean labels. Pass `
 Replace the full file content of `apps/admin/src/lib/navigation/admin-nav.ts`:
 
 ```typescript
-import type { BackofficeRole } from "@crinity/shared/auth/config";
-import type { AdminCopy } from "@crinity/shared/i18n/admin-copy";
+import type { BackofficeRole } from "@suppo/shared/auth/config";
+import type { AdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export type AdminNavItemKey =
   | "dashboard" | "analytics" | "knowledge" | "chats" | "chat-settings"
@@ -1673,8 +1673,8 @@ Find line `const navSections = getAdminNavSections(userRole);` and change to:
 - [ ] **Step 3: Verify TypeScript compiles**
 
 ```bash
-cd /Users/pjw/dev/project/crinity-helpdesk
-pnpm --filter=@crinity/admin build 2>&1 | tail -30
+cd /Users/pjw/dev/project/suppo-helpdesk
+pnpm --filter=@suppo/admin build 2>&1 | tail -30
 ```
 
 Expected: no errors in admin-nav.ts or admin-shell.tsx.
@@ -1698,7 +1698,7 @@ git commit -m "feat(i18n): wire navigation labels and section titles to AdminCop
 
 Add `useAdminCopy` import at the top of imports:
 ```typescript
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 ```
 
 At the top of the `TicketList` component function, add:
@@ -1742,7 +1742,7 @@ Replace UI strings:
 
 Add import:
 ```typescript
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { enUS, ko as koLocale } from "date-fns/locale";
 ```
 
@@ -1769,7 +1769,7 @@ Replace all hardcoded strings:
 - [ ] **Step 3: Verify build**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 ```
 
 - [ ] **Step 4: Commit**
@@ -1796,7 +1796,7 @@ For each of the two files, apply:
 - [ ] **Step 1: Add import + `const copy = useAdminCopy()`**
 
 ```typescript
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 // inside component:
 const copy = useAdminCopy();
 ```
@@ -1867,7 +1867,7 @@ Replace:
 - [ ] **Step 6: Build check**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 ```
 
 - [ ] **Step 7: Commit**
@@ -1956,7 +1956,7 @@ Replace other strings:
 - [ ] **Step 6: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/comment-section.tsx apps/admin/src/components/admin/comment-thread.tsx apps/admin/src/components/admin/internal-note-form.tsx apps/admin/src/components/admin/ticket-merge-dialog.tsx apps/admin/src/components/admin/transfer-dialog.tsx
 git commit -m "feat(i18n): wire ticket workspace comment/merge/transfer components"
 ```
@@ -2000,7 +2000,7 @@ UI strings:
 - [ ] **Step 3: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/agent-list.tsx
 git commit -m "feat(i18n): wire agent list to AdminCopy"
 ```
@@ -2067,7 +2067,7 @@ Remove `STATUS_LABELS` map. Replace:
 - [ ] **Step 6: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/team-list.tsx apps/admin/src/components/admin/customer-list.tsx apps/admin/src/components/admin/customer-snapshot-card.tsx apps/admin/src/components/admin/customer-insights-panel.tsx apps/admin/src/components/admin/audit-log-list.tsx
 git commit -m "feat(i18n): wire team, customer, audit log components"
 ```
@@ -2168,7 +2168,7 @@ Remove `LINK_SOURCE_LABELS` map if present. Replace:
 - [ ] **Step 7: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/knowledge-list.tsx apps/admin/src/components/admin/knowledge-form.tsx apps/admin/src/components/admin/template-form.tsx apps/admin/src/components/admin/template-list.tsx apps/admin/src/components/admin/category-manager.tsx apps/admin/src/components/admin/ticket-knowledge-links.tsx
 git commit -m "feat(i18n): wire knowledge, template, category components"
 ```
@@ -2280,7 +2280,7 @@ Replace strings:
 - [ ] **Step 6: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/business-hours-form.tsx apps/admin/src/components/admin/branding-form.tsx apps/admin/src/components/admin/email-settings-form.tsx apps/admin/src/components/admin/llm-settings-form.tsx apps/admin/src/components/admin/system-management.tsx
 git commit -m "feat(i18n): wire basic settings forms (business hours, branding, email, LLM, system)"
 ```
@@ -2396,7 +2396,7 @@ Replace toasts:
 - [ ] **Step 7: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/git-settings.tsx apps/admin/src/components/admin/api-key-manager.tsx apps/admin/src/components/admin/webhook-endpoint-manager.tsx apps/admin/src/components/admin/request-type-list.tsx apps/admin/src/components/admin/custom-field-dialog.tsx apps/admin/src/components/admin/custom-field-list.tsx
 git commit -m "feat(i18n): wire git, webhooks, API keys, request types, custom fields"
 ```
@@ -2456,7 +2456,7 @@ For other strings in SAML form (field labels, instructions, button text), read t
 - [ ] **Step 4: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/sla-policy-manager.tsx apps/admin/src/components/admin/automation-rule-manager.tsx apps/admin/src/components/admin/saml-provider-form.tsx
 git commit -m "feat(i18n): wire SLA, automation rules, SAML form"
 ```
@@ -2506,7 +2506,7 @@ Replace all 33 Korean strings using `copy.chatProfile*` keys.
 - [ ] **Step 4: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/chat-widget-settings-manager.tsx apps/admin/src/components/admin/chat-widget-profile-manager.tsx apps/admin/src/components/admin/chat-saved-views-bar.tsx
 git commit -m "feat(i18n): wire chat widget settings and profile manager"
 ```
@@ -2561,7 +2561,7 @@ For each: add `useAdminCopy` import + `const copy = useAdminCopy()`.
 - [ ] **Step 5: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/ticket/comment-list.tsx apps/admin/src/components/ticket/customer-reply-form.tsx apps/admin/src/components/ticket/git-integration-section.tsx apps/admin/src/components/ticket/ticket-form.tsx
 git commit -m "feat(i18n): wire admin ticket/* components"
 ```
@@ -2616,7 +2616,7 @@ Wire any Korean strings found using appropriate `copy.analytics*` keys.
 - [ ] **Step 5: Build check + Commit**
 
 ```bash
-pnpm --filter=@crinity/admin build 2>&1 | tail -20
+pnpm --filter=@suppo/admin build 2>&1 | tail -20
 git add apps/admin/src/components/admin/saved-filters.tsx apps/admin/src/components/admin/advanced-search.tsx apps/admin/src/components/admin/helpdesk-operations-center.tsx
 git commit -m "feat(i18n): wire saved filters, advanced search, operations center"
 ```
@@ -2656,7 +2656,7 @@ grep -n '"[가-힣]' apps/admin/src/components/admin/chat-queue.tsx
 - [ ] **Step 3: Final full build**
 
 ```bash
-cd /Users/pjw/dev/project/crinity-helpdesk
+cd /Users/pjw/dev/project/suppo-helpdesk
 pnpm build:admin 2>&1 | tail -40
 ```
 

@@ -12,7 +12,7 @@ test.beforeAll(async () => {
     data: {
       ticketNumber: `CRN-E2E-BULK-1-${Date.now()}`,
       customerName: "벌크 고객 1",
-      customerEmail: "bulk-1@crinity-test.io",
+      customerEmail: "bulk-1@suppo-test.io",
       subject: "[E2E] 벌크 작업 테스트 1",
       description: "벌크 작업 테스트용 티켓 1",
       priority: "MEDIUM",
@@ -25,7 +25,7 @@ test.beforeAll(async () => {
     data: {
       ticketNumber: `CRN-E2E-BULK-2-${Date.now()}`,
       customerName: "벌크 고객 2",
-      customerEmail: "bulk-2@crinity-test.io",
+      customerEmail: "bulk-2@suppo-test.io",
       subject: "[E2E] 벌크 작업 테스트 2",
       description: "벌크 작업 테스트용 티켓 2",
       priority: "MEDIUM",
@@ -50,7 +50,7 @@ test.afterAll(async () => {
 test("관리자가 티켓 목록에서 여러 티켓을 선택해 상태를 일괄 변경한다", async ({ page }, testInfo) => {
   await test.step("관리자 로그인", async () => {
     await page.goto("http://127.0.0.1:3001/admin/login");
-    await page.getByLabel("이메일").fill("admin@crinity.io");
+    await page.getByLabel("이메일").fill("admin@suppo.io");
     await page.getByLabel("비밀번호").fill("admin1234");
     await page.getByRole("button", { name: "로그인" }).click();
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });

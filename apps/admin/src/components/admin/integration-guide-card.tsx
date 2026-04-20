@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 
 const CREATE_TICKET_EXAMPLE = `curl -X POST https://YOUR_ADMIN_DOMAIN/api/public/tickets \\
   -H "Content-Type: application/json" \\
@@ -16,7 +16,7 @@ const CREATE_TICKET_EXAMPLE = `curl -X POST https://YOUR_ADMIN_DOMAIN/api/public
 
 const WEBHOOK_EXAMPLE = `POST /your/webhook-endpoint
 Content-Type: application/json
-x-crinity-signature: <sha256 hmac>
+x-suppo-signature: <sha256 hmac>
 
 {
   "event": "ticket.created",
@@ -54,7 +54,7 @@ export function IntegrationGuideCard() {
           <div className="font-medium">Webhook 사용 순서</div>
           <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
             <li>외부 수신 URL과 이벤트를 등록합니다.</li>
-            <li>필요하면 시크릿을 넣어 `x-crinity-signature` 서명을 검증합니다.</li>
+            <li>필요하면 시크릿을 넣어 `x-suppo-signature` 서명을 검증합니다.</li>
             <li>`테스트 발송`으로 연결을 먼저 확인한 뒤 운영 이벤트를 받습니다.</li>
           </ol>
           <pre className="overflow-x-auto rounded-lg border bg-muted/20 p-3 text-xs leading-5">

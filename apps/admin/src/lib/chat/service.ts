@@ -3,4 +3,4 @@ export {
   createChatConversation,
   getChatConversationForCustomer,
   postChatMessage,
-} from "@crinity/shared/chat/service";
+} from "@suppo/shared/chat/service";

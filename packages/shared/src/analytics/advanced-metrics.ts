@@ -1,5 +1,5 @@
 // Advanced Analytics v2 - First Response Time, Resolution Time, Backlog
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export interface AdvancedMetrics {
   period: string;

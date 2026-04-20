@@ -9,7 +9,7 @@ import {
   type SearchIssuesInput,
   resolveLimit,
   validateRepoFullName
-} from "@crinity/shared/git/provider";
+} from "@suppo/shared/git/provider";
 
 const GITLAB_API_BASE = process.env.GITLAB_API_BASE?.trim() || "https://gitlab.com/api/v4";
 

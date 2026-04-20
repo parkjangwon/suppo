@@ -2,19 +2,19 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { prisma } from "@suppo/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { DashboardAiSection } from "@/components/admin/dashboard-ai-section";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
-  title: "운영 대시보드 | Crinity",
+  title: "운영 대시보드 | Suppo",
 };
 
 export default async function DashboardPage() {
   const session = await auth();
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
 
   if (!session?.user) {
     redirect("/admin/login");

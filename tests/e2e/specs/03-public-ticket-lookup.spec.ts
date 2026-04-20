@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 import { prisma, seedAdmin, seedRequestType, cleanupTicket } from "../fixtures/db";
 import { captureStep } from "../fixtures/screenshot";
 
-const TEST_EMAIL = "e2e-lookup@crinity-test.io";
+const TEST_EMAIL = "e2e-lookup@suppo-test.io";
 let ticketNumber: string;
 
 test.beforeAll(async () => {

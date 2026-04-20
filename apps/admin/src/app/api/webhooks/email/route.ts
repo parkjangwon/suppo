@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
-import { enqueueInternalCommentNotifications } from "@crinity/shared/email/enqueue";
-import { processAttachments } from "@crinity/shared/storage/attachment-service";
+import { prisma } from "@suppo/db";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
+import { enqueueInternalCommentNotifications } from "@suppo/shared/email/enqueue";
+import { processAttachments } from "@suppo/shared/storage/attachment-service";
 import { z } from "zod";
 import { createHmac, timingSafeEqual } from "crypto";
 

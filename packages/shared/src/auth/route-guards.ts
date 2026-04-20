@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import type { BackofficeRole } from "@crinity/shared/auth/config";
-import { hasPermission, type Permission } from "@crinity/shared/auth/permissions";
+import type { BackofficeRole } from "@suppo/shared/auth/config";
+import { hasPermission, type Permission } from "@suppo/shared/auth/permissions";
 
 interface SessionUser {
   role?: string;

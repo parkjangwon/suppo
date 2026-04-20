@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@crinity/ui/components/ui/select";
-import { Switch } from "@crinity/ui/components/ui/switch";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@suppo/ui/components/ui/select";
+import { Switch } from "@suppo/ui/components/ui/switch";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import { Loader2, Clock, CalendarDays, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 

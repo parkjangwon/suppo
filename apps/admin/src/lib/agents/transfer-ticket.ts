@@ -1,7 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 
-import { prisma } from "@crinity/db";
-import { logActivity } from "@crinity/shared/tickets/activity";
+import { prisma } from "@suppo/db";
+import { logActivity } from "@suppo/shared/tickets/activity";
 
 interface TransferTicketInput {
   ticketId: string;

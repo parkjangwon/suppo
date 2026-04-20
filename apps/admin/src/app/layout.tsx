@@ -4,8 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth-provider";
 
 export const metadata: Metadata = {
-  title: "Crinity Helpdesk",
-  description: "Crinity helpdesk system"
+  title: "Suppo Helpdesk",
+  description: "Suppo helpdesk system"
 };
 
 export default function RootLayout({

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
-import { getPublicAppUrl } from "@crinity/shared/utils/app-urls";
+import { getPublicCopy } from "@suppo/shared/i18n/public-copy";
+import { getPublicAppUrl } from "@suppo/shared/utils/app-urls";
 
 import "./globals.css";
 
@@ -11,14 +11,14 @@ const baseUrl = getPublicAppUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Crinity Helpdesk - 고객 지원 센터",
-    template: "%s | Crinity Helpdesk"
+    default: "Suppo Helpdesk - 고객 지원 센터",
+    template: "%s | Suppo Helpdesk"
   },
   description: "고객 티켓 관리와 지식베이스를 한 곳에서. 5분 만에 설정하고 바로 시작하세요.",
   keywords: ["helpdesk", "customer support", "티켓 관리", "고객 지원", "지식베이스"],
-  authors: [{ name: "Crinity" }],
-  creator: "Crinity",
-  publisher: "Crinity",
+  authors: [{ name: "Suppo" }],
+  creator: "Suppo",
+  publisher: "Suppo",
   robots: {
     index: true,
     follow: true,
@@ -35,21 +35,21 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     alternateLocale: "en_US",
     url: baseUrl,
-    siteName: "Crinity Helpdesk",
-    title: "Crinity Helpdesk - 고객 지원 센터",
+    siteName: "Suppo Helpdesk",
+    title: "Suppo Helpdesk - 고객 지원 센터",
     description: "고객 티켓 관리와 지식베이스를 한 곳에서. 5분 만에 설정하고 바로 시작하세요.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Crinity Helpdesk"
+        alt: "Suppo Helpdesk"
       }
     ]
   },
   twitter: {
     card: "summary_large_image",
-    title: "Crinity Helpdesk - 고객 지원 센터",
+    title: "Suppo Helpdesk - 고객 지원 센터",
     description: "고객 티켓 관리와 지식베이스를 한 곳에서.",
     images: ["/og-image.png"]
   },
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const locale = (await cookies()).get("crinity-locale")?.value;
+  const locale = (await cookies()).get("suppo-locale")?.value;
   const copy = getPublicCopy(locale);
 
   return (

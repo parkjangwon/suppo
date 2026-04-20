@@ -16,7 +16,7 @@ describe("public locale route", () => {
     const response = await POST(request);
 
     expect(response.status).toBe(200);
-    expect(response.cookies.get("crinity-locale")?.value).toBe("en");
+    expect(response.cookies.get("suppo-locale")?.value).toBe("en");
   });
 
   it("rejects invalid locales", async () => {

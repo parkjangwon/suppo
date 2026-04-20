@@ -1,6 +1,6 @@
 import type { AgentRole, Prisma } from "@prisma/client";
 
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export async function listActiveAgents(role?: AgentRole) {
   return prisma.agent.findMany({

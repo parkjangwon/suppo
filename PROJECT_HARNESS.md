@@ -61,7 +61,7 @@ These fields must stay synchronized across `PROJECT_HARNESS.md` and `harness-con
   - dev: pnpm dev:all
   - typecheck: pnpm tsc --noEmit
 - project_constraints:
-  - Prisma 스키마 변경 뒤에는 `pnpm --filter=@crinity/db generate`와 적절한 마이그레이션 흐름을 반드시 반영한다.
+  - Prisma 스키마 변경 뒤에는 `pnpm --filter=@suppo/db generate`와 적절한 마이그레이션 흐름을 반드시 반영한다.
   - Edge 미들웨어와 Edge에서 호출될 수 있는 JWT callback 경로에는 Prisma 직접 조회를 추가하지 않는다.
   - 필수 시크릿(`AUTH_SECRET`, `TICKET_ACCESS_SECRET`, `GIT_TOKEN_ENCRYPTION_KEY`)은 기본값 없이 관리하고 길이 요건을 지킨다.
   - 운영 배포에서는 sqld 외부 노출 금지와 shared uploads 볼륨 규칙을 깨지 않는다.

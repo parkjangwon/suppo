@@ -1,8 +1,8 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { AdminCopyProvider } from "@crinity/shared/i18n/admin-context";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { AdminCopyProvider } from "@suppo/shared/i18n/admin-context";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 

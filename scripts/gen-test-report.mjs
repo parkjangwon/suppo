@@ -85,9 +85,9 @@ function addBorder(cell) {
   const meta = [
     ['테스트 일자', '2026-03-22'],
     ['환경', 'Docker 멀티컨테이너 (nginx + admin + public + sqld)'],
-    ['도메인', 'admin.crinity.io / helpdesk.crinity.io (로컬 /etc/hosts)'],
+    ['도메인', 'admin.suppo.io / helpdesk.suppo.io (로컬 /etc/hosts)'],
     ['DB', 'LibSQL (sqld HTTP:8889) via Prisma LibSQL Adapter'],
-    ['테스트 계정', 'admin@crinity.io / admin1234'],
+    ['테스트 계정', 'admin@suppo.io / admin1234'],
     ['AI 백엔드', 'Ollama (미설정) — 에러 처리 UI 검증'],
     ['빌드', 'Docker image 재빌드 후 docker compose up -d'],
     ['', ''],
@@ -98,8 +98,8 @@ function addBorder(cell) {
     ['FAIL', '1 → 수정 완료'],
     ['', ''],
     ['── 발견 및 수정된 버그 ──', ''],
-    ['BUG-01', 'Nginx server_name이 company.com으로 잘못 설정 (crinity.io로 수정)'],
-    ['BUG-02', '.env.production PUBLIC_URL/ADMIN_URL 도메인 오류 (crinity.io로 수정)'],
+    ['BUG-01', 'Nginx server_name이 company.com으로 잘못 설정 (suppo.io로 수정)'],
+    ['BUG-02', '.env.production PUBLIC_URL/ADMIN_URL 도메인 오류 (suppo.io로 수정)'],
     ['BUG-03', 'Dockerfile runner 스테이지에 .prisma 클라이언트 누락 — module not found'],
     ['BUG-04', 'PrismaLibSql 생성자에 Client 인스턴스 전달 → URL_INVALID 오류'],
     ['BUG-05', 'NextAuth UntrustedHost — nginx 리버스 프록시 환경에서 로그인 루프'],
@@ -145,8 +145,8 @@ function addBorder(cell) {
   setHeaderRow(sh, 1, ['ID', '영역', '증상', '근본 원인', '수정 내용', '상태']);
 
   const bugs = [
-    ['BUG-01', 'nginx.conf',         'admin.crinity.io 접속 불가',                      'server_name이 helpdesk/admin.company.com으로 잘못 설정',                    'nginx.conf server_name을 crinity.io로 수정', 'PASS'],
-    ['BUG-02', '.env.production',    'PUBLIC_URL / ADMIN_URL 도메인 오류',               '.env.production에 company.com URL이 잔류',                                  '.env.production URL을 crinity.io로 수정', 'PASS'],
+    ['BUG-01', 'nginx.conf',         'admin.suppo.io 접속 불가',                      'server_name이 helpdesk/admin.company.com으로 잘못 설정',                    'nginx.conf server_name을 suppo.io로 수정', 'PASS'],
+    ['BUG-02', '.env.production',    'PUBLIC_URL / ADMIN_URL 도메인 오류',               '.env.production에 company.com URL이 잔류',                                  '.env.production URL을 suppo.io로 수정', 'PASS'],
     ['BUG-03', 'Dockerfile',         "Cannot find module '.prisma/client/default'",       'prod-deps 스테이지는 --prod 플래그로 설치 → prisma CLI 없어 generate 미실행', 'runner 스테이지에 builder에서 .prisma 디렉터리 COPY 추가', 'PASS'],
     ['BUG-04', 'src/lib/db/client.ts', 'URL_INVALID: The URL undefined — 매 요청마다',  'PrismaLibSql 생성자에 createClient() 결과(Client 인스턴스) 전달; #url private',  'new PrismaLibSql({ url, authToken }) — 설정 객체 직접 전달', 'PASS'],
     ['BUG-05', 'src/auth.ts',        'UntrustedHost → /admin/login ↔ /admin/dashboard 리다이렉트 루프', 'NextAuth v5가 nginx 리버스 프록시 Host 헤더를 신뢰하지 않음', "NextAuth({ ..., trustHost: true }) 추가", 'PASS'],
@@ -213,7 +213,7 @@ function addBorder(cell) {
 
     // ── 인증 ──
     ['TC-05', '인증', '관리자 로그인',
-      '1. http://admin.crinity.io/admin/login 접속\n2. admin@crinity.io / admin1234 입력\n3. 로그인 버튼 클릭',
+      '1. http://admin.suppo.io/admin/login 접속\n2. admin@suppo.io / admin1234 입력\n3. 로그인 버튼 클릭',
       '/admin/dashboard 리다이렉트',
       'BUG-05, BUG-06 수정 후 정상 로그인 성공',
       'PASS', 'trustHost + ensureDefaultAdminSeed() 수정'],
@@ -322,10 +322,10 @@ function addBorder(cell) {
 
   const changes = [
     ['nginx.conf',
-     'server_name helpdesk.company.com → helpdesk.crinity.io\nserver_name admin.company.com → admin.crinity.io',
+     'server_name helpdesk.company.com → helpdesk.suppo.io\nserver_name admin.company.com → admin.suppo.io',
      'BUG-01', '✓'],
     ['.env.production',
-     'PUBLIC_URL=http://helpdesk.crinity.io\nADMIN_URL=http://admin.crinity.io',
+     'PUBLIC_URL=http://helpdesk.suppo.io\nADMIN_URL=http://admin.suppo.io',
      'BUG-02', '✓'],
     ['Dockerfile (runner 스테이지)',
      'COPY --from=builder .../node_modules/.prisma ./node_modules/.pnpm/.../node_modules/.prisma 추가',

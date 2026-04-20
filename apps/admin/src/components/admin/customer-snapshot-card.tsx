@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface CustomerSnapshotCardProps {
   customerId: string;

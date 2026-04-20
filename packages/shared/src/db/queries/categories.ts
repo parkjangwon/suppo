@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { getCache, setCache } from "../../cache/redis";
 
 const CATEGORIES_CACHE_KEY = "categories:all";

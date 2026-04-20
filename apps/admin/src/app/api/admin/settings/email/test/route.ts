@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { enqueueEmail } from "@crinity/shared/email/enqueue";
-import { processOutbox } from "@crinity/shared/email/process-outbox";
+import { prisma } from "@suppo/db";
+import { enqueueEmail } from "@suppo/shared/email/enqueue";
+import { processOutbox } from "@suppo/shared/email/process-outbox";
 import {
   formatEmailFrom,
   getDefaultEmailSettings,
   validateEmailSettings,
-} from "@crinity/shared/email/settings";
+} from "@suppo/shared/email/settings";
 
 export const runtime = "nodejs";
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const subject = "[Crinity] 이메일 연동 테스트 메일";
+  const subject = "[Suppo] 이메일 연동 테스트 메일";
   const htmlBody = `<!doctype html>
 <html lang="ko">
   <body style="font-family: Arial, sans-serif; padding: 24px;">

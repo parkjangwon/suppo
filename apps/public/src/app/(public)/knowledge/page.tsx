@@ -1,18 +1,18 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { prisma } from "@crinity/db";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { prisma } from "@suppo/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import { BookOpen, ChevronRight, X } from "lucide-react";
 import { KnowledgeSearchInput } from "@/components/knowledge/knowledge-search-input";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { getSystemBranding } from "@crinity/shared/db/queries/branding";
-import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { getSystemBranding } from "@suppo/shared/db/queries/branding";
+import { getPublicCopy } from "@suppo/shared/i18n/public-copy";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = (await cookies()).get("crinity-locale")?.value;
+  const locale = (await cookies()).get("suppo-locale")?.value;
   const copy = getPublicCopy(locale);
   return {
     title: copy.knowledgePageTitle,
@@ -28,7 +28,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
   const [{ category: categorySlug, q }, branding, locale] = await Promise.all([
     searchParams,
     getSystemBranding(),
-    cookies().then((c) => c.get("crinity-locale")?.value),
+    cookies().then((c) => c.get("suppo-locale")?.value),
   ]);
 
   if (!branding.knowledgeEnabled) {

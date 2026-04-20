@@ -4,14 +4,14 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { EmailSettingsForm } from "@/components/admin/email-settings-form";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {
-  title: "이메일 연동 | Crinity",
+  title: "이메일 연동 | Suppo",
 };
 
 export default async function EmailSettingsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {

@@ -1,12 +1,12 @@
-import { prisma } from "@crinity/db";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
+import { prisma } from "@suppo/db";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import { TicketStatus, TicketPriority, Prisma } from "@prisma/client";
 import {
   enqueueCSATSurveyEmail,
   enqueueInternalStatusNotifications,
   enqueueStatusChangedEmail,
   enqueueTicketAssignedEmail,
-} from "@crinity/shared/email/enqueue";
+} from "@suppo/shared/email/enqueue";
 
 export interface GetAdminTicketsParams {
   status?: TicketStatus;

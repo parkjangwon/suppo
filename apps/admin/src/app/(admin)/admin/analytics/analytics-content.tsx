@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@crinity/ui/components/ui/tabs";
+} from "@suppo/ui/components/ui/tabs";
 import { useSession } from "next-auth/react";
 import { DatePreset } from "@/lib/db/queries/admin-analytics/contracts";
 import { CategoryFrequencyChart } from "@/components/admin/analytics/charts/category-frequency-chart";

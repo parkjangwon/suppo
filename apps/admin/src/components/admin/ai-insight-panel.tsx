@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { MarkdownContent } from "@crinity/shared/components/markdown-content";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { MarkdownContent } from "@suppo/shared/components/markdown-content";
 import { Loader2, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
 
 interface AiInsightPanelProps {

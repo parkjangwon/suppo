@@ -13,7 +13,7 @@ vi.mock("@/auth", () => ({
 // prisma 모킹 — mockCredential을 모듈 수준 변수로 추출해 테스트 내에서 직접 재설정 가능하게 함
 const mockCredential = vi.hoisted(() => vi.fn().mockResolvedValue({ encryptedToken: "encrypted-token" }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     ticket: {
       findUnique: vi.fn().mockResolvedValue({ assigneeId: "agent-1" })
@@ -37,7 +37,7 @@ vi.mock("@crinity/db", () => ({
 }));
 
 // crypto 모킹
-vi.mock("@crinity/shared/crypto/encrypt", () => ({
+vi.mock("@suppo/shared/crypto/encrypt", () => ({
   decryptToken: vi.fn().mockReturnValue("plain-token")
 }));
 

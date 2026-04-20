@@ -1,4 +1,4 @@
-# Crinity Helpdesk 50-CYCLE MEGA COMPLETION 🚀🎉
+# Suppo Helpdesk 50-CYCLE MEGA COMPLETION 🚀🎉
 
 **총 사이클:** 50개  
 **상태:** ALL COMPLETE  

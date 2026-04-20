@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   }
 
   const response = NextResponse.json({ success: true });
-  response.cookies.set("crinity-admin-locale", locale, {
+  response.cookies.set("suppo-admin-locale", locale, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
-import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
+import { formatPhoneNumberInput } from "@suppo/shared/utils/phone-format";
 import { toast } from "sonner";
 
 interface SystemBranding {
@@ -33,17 +33,17 @@ interface SystemBranding {
 }
 
 const defaultFormData: SystemBranding = {
-  companyName: "Crinity",
+  companyName: "Suppo",
   logoUrl: "",
   faviconUrl: "",
   primaryColor: "#0f172a",
   secondaryColor: "#3b82f6",
-  homepageTitle: "Crinity Helpdesk",
+  homepageTitle: "Suppo Helpdesk",
   homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-  adminPanelTitle: "Crinity Admin",
+  adminPanelTitle: "Suppo Admin",
   appTitle: "고객 지원 센터",
   welcomeMessage: "무엇을 도와드릴까요?",
-  footerText: "© 2024 All rights reserved.",
+  footerText: "© 2026 parkjangwon. All rights reserved.",
   footerPhone: "",
   footerEmail: "",
   footerHomepage: "",
@@ -240,7 +240,7 @@ export function BrandingForm() {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, homepageTitle: e.target.value }))
               }
-              placeholder={copy.brandingHomepageTitlePlaceholder ?? "Crinity Helpdesk"}
+              placeholder={copy.brandingHomepageTitlePlaceholder ?? "Suppo Helpdesk"}
             />
           </div>
 
@@ -264,7 +264,7 @@ export function BrandingForm() {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, adminPanelTitle: e.target.value }))
               }
-              placeholder={copy.brandingAdminTitlePlaceholder ?? "Crinity Admin"}
+              placeholder={copy.brandingAdminTitlePlaceholder ?? "Suppo Admin"}
             />
           </div>
 
@@ -471,7 +471,7 @@ export function BrandingForm() {
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, footerText: e.target.value }))
               }
-              placeholder={copy.brandingFooterTextPlaceholder ?? "© 2024 All rights reserved."}
+              placeholder={copy.brandingFooterTextPlaceholder ?? "© 2026 parkjangwon. All rights reserved."}
             />
           </div>
 
@@ -570,7 +570,7 @@ export function BrandingForm() {
                 setFormData((prev) => ({ ...prev, showPoweredBy: checked }))
               }
             />
-            <Label htmlFor="showPoweredBy">{copy.brandingPoweredByLabel ?? "Powered by Crinity 표시"}</Label>
+            <Label htmlFor="showPoweredBy">{copy.brandingPoweredByLabel ?? "Powered by Suppo 표시"}</Label>
           </div>
 
           <div className="space-y-2">

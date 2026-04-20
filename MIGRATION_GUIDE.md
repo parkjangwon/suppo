@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides step-by-step instructions for migrating custom UI components to use shadcn/ui components consistently throughout the Crinity Helpdesk application.
+This guide provides step-by-step instructions for migrating custom UI components to use shadcn/ui components consistently throughout the Suppo Helpdesk application.
 
 ## Priority 1: Ticket Form Components
 

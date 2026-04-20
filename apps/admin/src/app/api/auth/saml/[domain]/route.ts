@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
-import { createSamlMetadataBaseUrl } from "@crinity/shared/utils/app-urls";
+import { prisma } from "@suppo/db";
+import { createSamlMetadataBaseUrl } from "@suppo/shared/utils/app-urls";
 
 interface RouteParams {
   params: Promise<{ domain: string }>;

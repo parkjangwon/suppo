@@ -2,26 +2,26 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
-import { Input } from "@crinity/ui/components/ui/input";
+import { Input } from "@suppo/ui/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
-import { Button } from "@crinity/ui/components/ui/button";
+} from "@suppo/ui/components/ui/select";
+import { Button } from "@suppo/ui/components/ui/button";
 import { Search, X, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Calendar as CalendarComponent } from "@crinity/ui/components/ui/calendar";
+import { Calendar as CalendarComponent } from "@suppo/ui/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@crinity/ui/components/ui/popover";
-import { cn } from "@crinity/shared/utils";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+} from "@suppo/ui/components/ui/popover";
+import { cn } from "@suppo/shared/utils";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface TicketFiltersProps {
   categories: { id: string; name: string }[];

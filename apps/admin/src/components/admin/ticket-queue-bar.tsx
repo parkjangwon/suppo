@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Button } from "@suppo/ui/components/ui/button";
 import { getTicketQueuePresets, type TicketQueueFilter } from "@/lib/tickets/ticket-queue-presets";
 
 interface TicketQueueBarProps {

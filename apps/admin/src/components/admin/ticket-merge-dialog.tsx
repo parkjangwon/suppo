@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -11,12 +11,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@crinity/ui/components/ui/dialog";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
+} from "@suppo/ui/components/ui/dialog";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
 import { toast } from "sonner";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 export interface Ticket {
   id: string;

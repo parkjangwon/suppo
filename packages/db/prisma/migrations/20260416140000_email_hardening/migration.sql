@@ -22,7 +22,7 @@ CREATE TABLE "new_EmailSettings" (
     "smtpUser" TEXT,
     "smtpPassword" TEXT,
     "fromEmail" TEXT NOT NULL DEFAULT 'no-reply@company.com',
-    "fromName" TEXT NOT NULL DEFAULT 'Crinity Helpdesk',
+    "fromName" TEXT NOT NULL DEFAULT 'Suppo Helpdesk',
     "sesAccessKey" TEXT,
     "sesSecretKey" TEXT,
     "sesRegion" TEXT NOT NULL DEFAULT 'ap-northeast-2',

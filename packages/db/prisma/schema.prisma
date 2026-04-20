@@ -593,7 +593,7 @@ model SystemBranding {
   id String @id @default("default") // 단일 레코드만 사용
 
   // Branding Settings
-  companyName String  @default("Crinity") // 회사명
+  companyName String  @default("Suppo") // 회사명
   logoUrl     String? // 로고 이미지 URL
   faviconUrl  String? // 파비콘 URL
 
@@ -602,12 +602,12 @@ model SystemBranding {
   secondaryColor String @default("#3b82f6") // 보조 색상
 
   // Text Customization
-  homepageTitle    String @default("Crinity Helpdesk") // 홈페이지 메인 제목
+  homepageTitle    String @default("Suppo Helpdesk") // 홈페이지 메인 제목
   homepageSubtitle String @default("민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.") // 홈페이지 부제목
-  adminPanelTitle  String @default("Crinity Admin") // 관리자 패널 제목
+  adminPanelTitle  String @default("Suppo Admin") // 관리자 패널 제목
   appTitle         String @default("고객 지원 센터") // 앱 제목
   welcomeMessage   String @default("무엇을 도와드릴까요?") // 환영 메시지
-  footerText       String @default("© 2024 All rights reserved.") // 푸터 텍스트
+  footerText       String @default("© 2026 parkjangwon. All rights reserved.") // 푸터 텍스트
 
   // Footer Contact Information
   footerPhone    String? // 푸터 전화번호
@@ -616,7 +616,7 @@ model SystemBranding {
   footerAddress  String? // 푸터 주소
 
   // Feature Flags
-  showPoweredBy     Boolean @default(true) // "Powered by Crinity" 표시 여부
+  showPoweredBy     Boolean @default(true) // "Powered by Suppo" 표시 여부
   knowledgeEnabled  Boolean @default(true) // 지식 찾기 공개 포털 노출 여부
   customCss     String? // 커스텀 CSS
 
@@ -640,7 +640,7 @@ model EmailSettings {
 
   // Sender Settings
   fromEmail String @default("no-reply@company.com")
-  fromName  String @default("Crinity Helpdesk")
+  fromName  String @default("Suppo Helpdesk")
 
   // AWS SES Settings
   sesAccessKey String?

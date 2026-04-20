@@ -1,21 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { Plus, Edit2, Trash2, Power, PowerOff, Copy, ExternalLink, Download } from "lucide-react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@crinity/ui/components/ui/dialog";
+} from "@suppo/ui/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +25,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@crinity/ui/components/ui/alert-dialog";
-import { Badge } from "@crinity/ui/components/ui/badge";
+} from "@suppo/ui/components/ui/alert-dialog";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import { toast } from "sonner";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
@@ -187,7 +187,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `crinity-sp-metadata-${provider.domain}.xml`;
+    a.download = `suppo-sp-metadata-${provider.domain}.xml`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

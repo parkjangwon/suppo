@@ -24,17 +24,17 @@ export interface SystemBranding {
 }
 
 const defaultBranding: SystemBranding = {
-  companyName: "Crinity",
+  companyName: "Suppo",
   logoUrl: undefined,
   faviconUrl: undefined,
   primaryColor: "#0f172a",
   secondaryColor: "#3b82f6",
-  homepageTitle: "Crinity Helpdesk",
+  homepageTitle: "Suppo Helpdesk",
   homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-  adminPanelTitle: "Crinity Admin",
+  adminPanelTitle: "Suppo Admin",
   appTitle: "고객 지원 센터",
   welcomeMessage: "무엇을 도와드릴까요?",
-  footerText: "© 2026 Crinity. All rights reserved.",
+  footerText: "© 2026 parkjangwon. All rights reserved.",
   showPoweredBy: true,
   knowledgeEnabled: true,
   customCss: undefined,

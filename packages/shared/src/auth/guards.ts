@@ -1,4 +1,4 @@
-import { BACKOFFICE_LOGIN_PATH, type BackofficeSession } from "@crinity/shared/auth/config";
+import { BACKOFFICE_LOGIN_PATH, type BackofficeSession } from "@suppo/shared/auth/config";
 
 export interface GuardResult {
   allowed: boolean;
@@ -49,4 +49,4 @@ export function requireAdmin(session: BackofficeSession): GuardResult {
   };
 }
 
-export type { BackofficeSession } from "@crinity/shared/auth/config";
+export type { BackofficeSession } from "@suppo/shared/auth/config";

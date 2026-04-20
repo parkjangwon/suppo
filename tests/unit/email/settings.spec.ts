@@ -5,7 +5,7 @@ import {
   shouldSendCustomerEmail,
   shouldSendInternalEmail,
   validateEmailSettings,
-} from "@crinity/shared/email/settings";
+} from "@suppo/shared/email/settings";
 
 describe("email settings helpers", () => {
   it("defaults both master toggles to false", () => {

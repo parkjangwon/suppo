@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { ReportType, ReportFormat, ReportRunStatus, ReportTriggerSource } from "@prisma/client";
 import { DateRange, GeneratedReportResult } from "./contracts";
 import { getOperationalReportData } from "./operational/query";

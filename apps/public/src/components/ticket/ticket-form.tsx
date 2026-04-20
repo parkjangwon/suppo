@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { ticketFormSchema, type TicketFormValues } from "@crinity/shared/validation/ticket";
+import { ticketFormSchema, type TicketFormValues } from "@suppo/shared/validation/ticket";
 import { AttachmentUpload } from "./attachment-upload";
 import { KnowledgeSuggestions } from "./knowledge-suggestions";
-import { useBranding } from "@crinity/shared/branding/context";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
-import { Label } from "@crinity/ui/components/ui/label";
+import { useBranding } from "@suppo/shared/branding/context";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
+import { Label } from "@suppo/ui/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
+import { formatPhoneNumberInput } from "@suppo/shared/utils/phone-format";
 import { CaptchaWidget } from "@/components/security/captcha-widget";
 
 interface TicketFormProps {

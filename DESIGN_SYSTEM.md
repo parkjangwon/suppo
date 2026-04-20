@@ -1,8 +1,8 @@
-# Crinity Helpdesk Design System
+# Suppo Helpdesk Design System
 
 ## Overview
 
-This document outlines the design system for Crinity Helpdesk, a customer support ticketing system built with Next.js 15, React 19, TypeScript, Tailwind CSS, and shadcn/ui. The design system ensures consistency, accessibility, and maintainability across the application.
+This document outlines the design system for Suppo Helpdesk, a customer support ticketing system built with Next.js 15, React 19, TypeScript, Tailwind CSS, and shadcn/ui. The design system ensures consistency, accessibility, and maintainability across the application.
 
 ## Design Tokens
 

@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { hash } from "bcryptjs";
 
-import { getBackofficeSession } from "@crinity/shared/auth/session";
-import { prisma } from "@crinity/db";
-import { formatPhoneNumberInput } from "@crinity/shared/utils/phone-format";
+import { getBackofficeSession } from "@suppo/shared/auth/session";
+import { prisma } from "@suppo/db";
+import { formatPhoneNumberInput } from "@suppo/shared/utils/phone-format";
 import { createAuditLog } from "@/lib/audit/logger";
 
 function generateTempPassword(): string {

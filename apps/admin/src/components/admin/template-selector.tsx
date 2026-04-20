@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Button } from "@suppo/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@crinity/ui/components/ui/dialog";
+} from "@suppo/ui/components/ui/dialog";
 
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@crinity/ui/components/ui/tabs";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@suppo/ui/components/ui/tabs";
 import { FileText, Sparkles, History, Star, Loader2 } from "lucide-react";
 import { renderTemplate, TemplateContext } from "@/lib/templates/renderer";
 

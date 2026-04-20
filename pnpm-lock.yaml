@@ -58,13 +58,13 @@ importers:
       '@aws-sdk/client-sesv2':
         specifier: ^3.1030.0
         version: 3.1030.0
-      '@crinity/db':
+      '@suppo/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@crinity/shared':
+      '@suppo/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@crinity/ui':
+      '@suppo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@hookform/resolvers':
@@ -173,13 +173,13 @@ importers:
       '@aws-sdk/client-sesv2':
         specifier: ^3.1030.0
         version: 3.1030.0
-      '@crinity/db':
+      '@suppo/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@crinity/shared':
+      '@suppo/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@crinity/ui':
+      '@suppo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@hookform/resolvers':
@@ -274,7 +274,7 @@ importers:
       '@aws-sdk/client-sesv2':
         specifier: ^3.1030.0
         version: 3.1030.0
-      '@crinity/db':
+      '@suppo/db':
         specifier: workspace:*
         version: link:../db
       bcryptjs:
@@ -335,7 +335,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@crinity/shared':
+      '@suppo/shared':
         specifier: workspace:*
         version: link:../shared
       '@radix-ui/react-checkbox':

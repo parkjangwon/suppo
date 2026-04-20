@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { FileText, Image as ImageIcon, Download, User, Headphones } from "lucide-react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface Comment {
   id: string;

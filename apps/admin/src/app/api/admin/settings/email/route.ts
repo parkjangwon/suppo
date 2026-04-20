@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { createAuditLog } from "@/lib/audit/logger";
 import {
   getDefaultEmailSettings,
   validateEmailSettings,
-} from "@crinity/shared/email/settings";
+} from "@suppo/shared/email/settings";
 
 const DEFAULT_SETTINGS_ID = "default";
 

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useBranding } from "@crinity/shared/branding/context";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
+import { useBranding } from "@suppo/shared/branding/context";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
 import { ArrowRight, FileText, Search, BookOpen } from "lucide-react";
 
 export default function PublicHomePage() {

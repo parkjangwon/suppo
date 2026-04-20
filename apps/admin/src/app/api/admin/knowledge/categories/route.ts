@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { knowledgeCategorySchema } from "@crinity/shared/validation/knowledge";
+import { prisma } from "@suppo/db";
+import { knowledgeCategorySchema } from "@suppo/shared/validation/knowledge";
 import { createAuditLog } from "@/lib/audit/logger";
 
 export async function GET() {

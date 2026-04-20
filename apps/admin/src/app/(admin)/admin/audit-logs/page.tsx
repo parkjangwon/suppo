@@ -4,17 +4,17 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { AuditLogList } from "@/components/admin/audit-log-list";
-import { prisma } from "@crinity/db";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { prisma } from "@suppo/db";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "감사 로그 | Crinity",
+  title: "감사 로그 | Suppo",
 };
 
 export default async function AdminAuditLogsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
   if (!session?.user) {

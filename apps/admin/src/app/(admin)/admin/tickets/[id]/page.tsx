@@ -2,16 +2,16 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { TicketDetailExtended as TicketDetail } from "@/components/admin/ticket-detail-extended";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { Button } from "@suppo/ui/components/ui/button";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export const metadata: Metadata = {
-  title: "티켓 상세 | Crinity Helpdesk",
+  title: "티켓 상세 | Suppo Helpdesk",
   description: "티켓 상세 정보 및 관리",
 };
 
@@ -22,7 +22,7 @@ interface TicketDetailPageProps {
 }
 
 export default async function TicketDetailPage({ params }: TicketDetailPageProps) {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value);
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
   if (!session?.user) {
     redirect("/admin/login");

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useBranding } from "@crinity/shared/branding/context";
-import { usePublicCopy } from "@crinity/shared/i18n/public-context";
-import { Label } from "@crinity/ui/components/ui/label";
+import { useBranding } from "@suppo/shared/branding/context";
+import { usePublicCopy } from "@suppo/shared/i18n/public-context";
+import { Label } from "@suppo/ui/components/ui/label";
 import { Loader2 } from "lucide-react";
 
 export function TicketLookupForm() {

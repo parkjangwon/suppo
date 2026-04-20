@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { deactivateAgent } from "@/lib/agents/deactivate-agent";
-import { getBackofficeSession } from "@crinity/shared/auth/session";
+import { getBackofficeSession } from "@suppo/shared/auth/session";
 
 const deactivateSchema = z.object({
   reason: z.string().trim().max(500).optional()

@@ -1,8 +1,8 @@
 import { createHmac } from "node:crypto";
 
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@crinity/db";
-import { validateWebhookTargetUrl } from "@crinity/shared/security/webhook-url";
+import { prisma } from "@suppo/db";
+import { validateWebhookTargetUrl } from "@suppo/shared/security/webhook-url";
 
 export type HelpdeskWebhookEvent =
   | "ticket.created"
@@ -96,7 +96,7 @@ export async function dispatchWebhookEvent(
           "content-type": "application/json",
           ...(endpoint.secret
             ? {
-                "x-crinity-signature": signPayload(endpoint.secret, payload),
+                "x-suppo-signature": signPayload(endpoint.secret, payload),
               }
             : {}),
         },

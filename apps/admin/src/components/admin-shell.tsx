@@ -4,15 +4,15 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Button } from "@suppo/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@crinity/ui/components/ui/dialog";
-import { cn } from "@crinity/shared/utils";
-import { getBackofficeRoleLabel, type BackofficeRole } from "@crinity/shared/auth/config";
+} from "@suppo/ui/components/ui/dialog";
+import { cn } from "@suppo/shared/utils";
+import { getBackofficeRoleLabel, type BackofficeRole } from "@suppo/shared/auth/config";
 import {
   BarChart3,
   BookOpen,
@@ -40,8 +40,8 @@ import {
   Workflow,
   X,
 } from "lucide-react";
-import { useBranding } from "@crinity/shared/branding/context";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useBranding } from "@suppo/shared/branding/context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { type AdminNavItemKey, getAdminNavSections } from "@/lib/navigation/admin-nav";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
@@ -219,7 +219,7 @@ function SidebarNavigation({
   onNavigate?: () => void;
   className?: string;
 }) {
-  const storageKey = "crinity-admin-nav-collapsed";
+  const storageKey = "suppo-admin-nav-collapsed";
   const [collapsedSections, setCollapsedSections] = React.useState<Record<string, boolean>>({});
 
   React.useEffect(() => {

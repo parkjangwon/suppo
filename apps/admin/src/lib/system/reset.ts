@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import {
   seedInitialAdmin,
   seedDefaultCategories,

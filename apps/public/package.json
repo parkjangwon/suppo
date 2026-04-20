@@ -1,5 +1,5 @@
 {
-  "name": "@crinity/public",
+  "name": "@suppo/public",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,9 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@crinity/db": "workspace:*",
-    "@crinity/shared": "workspace:*",
-    "@crinity/ui": "workspace:*",
+    "@suppo/db": "workspace:*",
+    "@suppo/shared": "workspace:*",
+    "@suppo/ui": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.577.0",

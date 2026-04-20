@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { DateRange, CustomerReportData, CustomerSummary, TicketSummary } from "../contracts";
 
 export async function getCustomerReportData(

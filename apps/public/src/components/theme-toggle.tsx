@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Button } from "@suppo/ui/components/ui/button";
 import { Sun, Moon } from "lucide-react";
 import { useEffect, useState } from "react";
 

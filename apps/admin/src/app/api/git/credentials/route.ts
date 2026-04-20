@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
-import { encryptToken } from "@crinity/shared/crypto/encrypt";
-import { parseProvider } from "@crinity/shared/git/provider";
-import { validateRequest, gitCredentialsSchema } from "@crinity/shared/security/input-validation";
-import { requireJson } from "@crinity/shared/security/content-type";
-import { checkRateLimit, createRateLimitHeaders } from "@crinity/shared/security/rate-limit";
+import { prisma } from "@suppo/db";
+import { encryptToken } from "@suppo/shared/crypto/encrypt";
+import { parseProvider } from "@suppo/shared/git/provider";
+import { validateRequest, gitCredentialsSchema } from "@suppo/shared/security/input-validation";
+import { requireJson } from "@suppo/shared/security/content-type";
+import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
 
 export async function GET() {
   const session = await auth();

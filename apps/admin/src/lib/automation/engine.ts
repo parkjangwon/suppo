@@ -1,5 +1,5 @@
-import { prisma } from "@crinity/db";
-import { createPublicTicketUrl } from "@crinity/shared/utils/app-urls";
+import { prisma } from "@suppo/db";
+import { createPublicTicketUrl } from "@suppo/shared/utils/app-urls";
 import { TicketStatus, TicketPriority, Prisma } from "@prisma/client";
 
 export interface AutomationCondition {

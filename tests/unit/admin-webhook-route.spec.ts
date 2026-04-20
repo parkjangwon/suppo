@@ -11,7 +11,7 @@ vi.mock("@/auth", () => ({
   auth: mockAuth,
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     webhookEndpoint: {
       findMany: mockFindManyWebhooks,

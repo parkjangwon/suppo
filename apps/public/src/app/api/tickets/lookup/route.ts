@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
-import { issueTicketAccessCookie } from "@crinity/shared/security/ticket-access";
-import { checkRateLimit, createRateLimitHeaders } from "@crinity/shared/security/rate-limit";
-import { validateRequest, lookupTicketSchema } from "@crinity/shared/security/input-validation";
+import { prisma } from "@suppo/db";
+import { issueTicketAccessCookie } from "@suppo/shared/security/ticket-access";
+import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
+import { validateRequest, lookupTicketSchema } from "@suppo/shared/security/input-validation";
 
 export async function POST(request: NextRequest) {
   try {

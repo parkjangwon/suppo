@@ -5,23 +5,23 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { formatPhoneNumber } from "@crinity/shared/utils/phone-format";
+import { formatPhoneNumber } from "@suppo/shared/utils/phone-format";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@crinity/ui/components/ui/tabs";
+} from "@suppo/ui/components/ui/select";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@suppo/ui/components/ui/tabs";
 import { CommentSection } from "./comment-section";
 import { TemplateContext } from "@/lib/templates/renderer";
 import { GitIntegrationSection } from "@/components/ticket/git-integration-section";
 import { LinkedIssuesReadonly } from "@/components/ticket/linked-issues-readonly";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface TicketDetailProps {
   ticket: any;

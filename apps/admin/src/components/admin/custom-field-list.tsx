@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -11,17 +11,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@crinity/ui/components/ui/table";
+} from "@suppo/ui/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@crinity/ui/components/ui/dropdown-menu";
+} from "@suppo/ui/components/ui/dropdown-menu";
 import { MoreVertical, Plus, Pencil, Trash2 } from "lucide-react";
 import { CustomFieldDialog } from "./custom-field-dialog";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CustomField {

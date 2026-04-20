@@ -1,4 +1,4 @@
-# Crinity Helpdesk 고도화 전략 보고서
+# Suppo Helpdesk 고도화 전략 보고서
 ## Zendesk / Freshdesk / Jira Service Management 오마주 로드맵
 
 ---

@@ -3,24 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@crinity/ui/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { MarkdownContent } from "@crinity/shared/components/markdown-content";
+} from "@suppo/ui/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { MarkdownContent } from "@suppo/shared/components/markdown-content";
 import { X, Plus, Eye, Save, Send } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface KnowledgeFormProps {
   article?: any;

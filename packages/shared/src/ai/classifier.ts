@@ -1,5 +1,5 @@
 import type { Category, LLMSettings, Team, TicketPriority } from "@prisma/client";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { callGemini, callOllama } from "./llm-providers";
 
 const DEFAULT_SETTINGS_ID = "default";

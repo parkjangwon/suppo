@@ -9,7 +9,7 @@ import {
   type SearchIssuesInput,
   resolveLimit,
   validateRepoFullName
-} from "@crinity/shared/git/provider";
+} from "@suppo/shared/git/provider";
 
 function computeReviewDecision(
   reviews: Array<{ user: { login: string }; state: string }>,

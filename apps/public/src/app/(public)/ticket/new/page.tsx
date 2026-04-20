@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { TicketForm } from "@/components/ticket/ticket-form";
-import { prisma } from "@crinity/db";
-import { getSystemBranding } from "@crinity/shared/db/queries/branding";
-import { getPublicCopy } from "@crinity/shared/i18n/public-copy";
+import { prisma } from "@suppo/db";
+import { getSystemBranding } from "@suppo/shared/db/queries/branding";
+import { getPublicCopy } from "@suppo/shared/i18n/public-copy";
 
 export async function generateMetadata() {
   const branding = await getSystemBranding();
@@ -21,7 +21,7 @@ async function listActiveRequestTypes() {
 
 export default async function NewTicketPage() {
   const branding = await getSystemBranding();
-  const locale = (await cookies()).get("crinity-locale")?.value;
+  const locale = (await cookies()).get("suppo-locale")?.value;
   const copy = getPublicCopy(locale);
   const captchaSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 

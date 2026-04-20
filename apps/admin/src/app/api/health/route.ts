@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
-import { isRedisAvailable } from "@crinity/shared/cache/redis";
+import { prisma } from "@suppo/db";
+import { isRedisAvailable } from "@suppo/shared/cache/redis";
 
 export async function GET() {
   const checks: Record<string, "healthy" | "unhealthy" | "unknown"> = {

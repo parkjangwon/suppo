@@ -1,5 +1,5 @@
 import type { LLMSettings, TicketPriority, TicketStatus } from "@prisma/client";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { callGemini } from "@/lib/llm/providers/gemini";
 import { callOllama } from "@/lib/llm/providers/ollama";
 

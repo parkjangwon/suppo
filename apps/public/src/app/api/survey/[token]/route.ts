@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 type RouteContext = {
   params: Promise<{ token: string }>;

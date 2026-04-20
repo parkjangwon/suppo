@@ -11,7 +11,7 @@ vi.mock("@/auth", () => ({
   auth: mockAuth,
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     webhookEndpoint: {
       findUnique: mockFindUniqueWebhook,
@@ -19,7 +19,7 @@ vi.mock("@crinity/db", () => ({
   },
 }));
 
-vi.mock("@crinity/shared/integrations/outbound-webhooks", () => ({
+vi.mock("@suppo/shared/integrations/outbound-webhooks", () => ({
   dispatchWebhookEvent: mockDispatchWebhookEvent,
 }));
 
@@ -49,7 +49,7 @@ describe("POST /api/admin/integrations/webhooks/[id]/test", () => {
         role: "ADMIN",
         agentId: "agent-1",
         name: "관리자",
-        email: "admin@crinity.io",
+        email: "admin@suppo.io",
       },
     });
     mockFindUniqueWebhook.mockResolvedValue({

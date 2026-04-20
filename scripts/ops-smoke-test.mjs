@@ -120,11 +120,11 @@ results.push(
     }
 
     const cookie = response.headers.get("set-cookie") || "";
-    if (!cookie.includes("crinity-locale=en")) {
-      throw new Error("crinity-locale cookie not set");
+    if (!cookie.includes("suppo-locale=en")) {
+      throw new Error("suppo-locale cookie not set");
     }
 
-    return "crinity-locale=en";
+    return "suppo-locale=en";
   })
 );
 

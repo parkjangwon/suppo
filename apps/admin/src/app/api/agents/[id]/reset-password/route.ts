@@ -2,8 +2,8 @@ import { randomBytes } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 
-import { getBackofficeSession } from "@crinity/shared/auth/session";
-import { prisma } from "@crinity/db";
+import { getBackofficeSession } from "@suppo/shared/auth/session";
+import { prisma } from "@suppo/db";
 import { createAuditLog } from "@/lib/audit/logger";
 
 function generateTempPassword(): string {

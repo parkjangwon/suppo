@@ -322,10 +322,10 @@ CMD ["node", "server.js"]
 **이미지 빌드 명령:**
 ```bash
 # 앱 이미지
-docker build --target runner -t crinity-helpdesk:latest .
+docker build --target runner -t suppo-helpdesk:latest .
 
 # 마이그레이션 이미지 (별도 빌드)
-docker build --target migrator -t crinity-migrate:latest .
+docker build --target migrator -t suppo-migrate:latest .
 ```
 
 ---
@@ -351,7 +351,7 @@ services:
       retries: 5
 
   public:
-    image: crinity-helpdesk:latest
+    image: suppo-helpdesk:latest
     restart: unless-stopped
     depends_on:
       sqld:
@@ -372,7 +372,7 @@ services:
     # 수평 확장: docker-compose up --scale public=3
 
   admin:
-    image: crinity-helpdesk:latest
+    image: suppo-helpdesk:latest
     restart: unless-stopped
     depends_on:
       sqld:
@@ -501,8 +501,8 @@ DATABASE_AUTH_TOKEN=
 
 ```bash
 # 1. 이미지 빌드
-docker build --target runner  -t crinity-helpdesk:latest .
-docker build --target migrator -t crinity-migrate:latest .
+docker build --target runner  -t suppo-helpdesk:latest .
+docker build --target migrator -t suppo-migrate:latest .
 
 # 2. sqld 먼저 기동
 docker compose up -d sqld
@@ -511,7 +511,7 @@ docker compose up -d sqld
 docker run --rm \
   --network <project>_default \
   -e DATABASE_URL=http://sqld:8889 \
-  crinity-migrate:latest
+  suppo-migrate:latest
 
 # 4. DB 초기 데이터 시드 (관리자 계정 생성)
 docker compose run --rm admin \
@@ -524,12 +524,12 @@ docker compose up -d
 ### 업데이트 배포
 
 ```bash
-docker build --target runner  -t crinity-helpdesk:latest .
-docker build --target migrator -t crinity-migrate:latest .
+docker build --target runner  -t suppo-helpdesk:latest .
+docker build --target migrator -t suppo-migrate:latest .
 
 # 마이그레이션 (스키마 변경이 없으면 생략 가능)
 docker run --rm --network <project>_default \
-  -e DATABASE_URL=http://sqld:8889 crinity-migrate:latest
+  -e DATABASE_URL=http://sqld:8889 suppo-migrate:latest
 
 # sqld는 재시작하지 않음 (데이터 보존)
 docker compose up -d --no-deps public admin nginx

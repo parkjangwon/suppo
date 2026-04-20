@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 const DEFAULT_BRANDING_ID = "default";
 
@@ -19,17 +19,17 @@ export async function GET(request: NextRequest) {
     if (!branding) {
       return NextResponse.json({
         id: DEFAULT_BRANDING_ID,
-        companyName: "Crinity",
+        companyName: "Suppo",
         logoUrl: null,
         faviconUrl: null,
         primaryColor: "#0f172a",
         secondaryColor: "#3b82f6",
-        homepageTitle: "Crinity Helpdesk",
+        homepageTitle: "Suppo Helpdesk",
         homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-        adminPanelTitle: "Crinity Admin",
+        adminPanelTitle: "Suppo Admin",
         appTitle: "고객 지원 센터",
         welcomeMessage: "무엇을 도와드릴까요?",
-        footerText: "© 2024 All rights reserved.",
+        footerText: "© 2026 parkjangwon. All rights reserved.",
         footerPhone: null,
         footerEmail: null,
         footerHomepage: null,
@@ -65,17 +65,17 @@ export async function PUT(request: NextRequest) {
     const branding = await prisma.systemBranding.upsert({
       where: { id: DEFAULT_BRANDING_ID },
       update: {
-        companyName: body.companyName || "Crinity",
+        companyName: body.companyName || "Suppo",
         logoUrl: body.logoUrl || null,
         faviconUrl: body.faviconUrl || null,
         primaryColor: body.primaryColor || "#0f172a",
         secondaryColor: body.secondaryColor || "#3b82f6",
-        homepageTitle: body.homepageTitle || "Crinity Helpdesk",
+        homepageTitle: body.homepageTitle || "Suppo Helpdesk",
         homepageSubtitle: body.homepageSubtitle || "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-        adminPanelTitle: body.adminPanelTitle || "Crinity Admin",
+        adminPanelTitle: body.adminPanelTitle || "Suppo Admin",
         appTitle: body.appTitle || "고객 지원 센터",
         welcomeMessage: body.welcomeMessage || "무엇을 도와드릴까요?",
-        footerText: body.footerText || "© 2024 All rights reserved.",
+        footerText: body.footerText || "© 2026 parkjangwon. All rights reserved.",
         footerPhone: body.footerPhone || null,
         footerEmail: body.footerEmail || null,
         footerHomepage: body.footerHomepage || null,
@@ -86,17 +86,17 @@ export async function PUT(request: NextRequest) {
       },
       create: {
         id: DEFAULT_BRANDING_ID,
-        companyName: body.companyName || "Crinity",
+        companyName: body.companyName || "Suppo",
         logoUrl: body.logoUrl || null,
         faviconUrl: body.faviconUrl || null,
         primaryColor: body.primaryColor || "#0f172a",
         secondaryColor: body.secondaryColor || "#3b82f6",
-        homepageTitle: body.homepageTitle || "Crinity Helpdesk",
+        homepageTitle: body.homepageTitle || "Suppo Helpdesk",
         homepageSubtitle: body.homepageSubtitle || "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-        adminPanelTitle: body.adminPanelTitle || "Crinity Admin",
+        adminPanelTitle: body.adminPanelTitle || "Suppo Admin",
         appTitle: body.appTitle || "고객 지원 센터",
         welcomeMessage: body.welcomeMessage || "무엇을 도와드릴까요?",
-        footerText: body.footerText || "© 2024 All rights reserved.",
+        footerText: body.footerText || "© 2026 parkjangwon. All rights reserved.",
         footerPhone: body.footerPhone || null,
         footerEmail: body.footerEmail || null,
         footerHomepage: body.footerHomepage || null,

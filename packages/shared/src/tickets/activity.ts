@@ -1,6 +1,6 @@
 import type { AuthorType, ActivityAction, PrismaClient, TicketActivity } from "@prisma/client";
 
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export type LoggedActivity = TicketActivity;
 

@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@crinity/db": ["../db/src/index.ts"]
+      "@suppo/db": ["../db/src/index.ts"]
     }
   },
   "include": ["src", "tailwind.config.base.ts"]

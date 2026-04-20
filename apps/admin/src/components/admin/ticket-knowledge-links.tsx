@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Badge } from "@crinity/ui/components/ui/badge";
-import { Input } from "@crinity/ui/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Badge } from "@suppo/ui/components/ui/badge";
+import { Input } from "@suppo/ui/components/ui/input";
 import { BookOpen, X, Plus, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface ArticleLink {
   id: string;

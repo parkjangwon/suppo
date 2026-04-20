@@ -1,14 +1,14 @@
 "use client";
 
 import { Moon, Sun, Monitor } from "lucide-react";
-import { useTheme } from "@crinity/shared/ui/theme-provider";
-import { Button } from "@crinity/ui/components/ui/button";
+import { useTheme } from "@suppo/shared/ui/theme-provider";
+import { Button } from "@suppo/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@crinity/ui/components/ui/dropdown-menu";
+} from "@suppo/ui/components/ui/dropdown-menu";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();

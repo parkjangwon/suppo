@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Checkbox } from "@crinity/ui/components/ui/checkbox";
-import { Label } from "@crinity/ui/components/ui/label";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Checkbox } from "@suppo/ui/components/ui/checkbox";
+import { Label } from "@suppo/ui/components/ui/label";
 import { toast } from "sonner";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface InternalNoteFormProps {
   ticketId: string;

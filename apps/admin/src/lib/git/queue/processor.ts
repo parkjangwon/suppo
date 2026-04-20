@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { GitProvider } from "@prisma/client";
 
 type GitOperation = 'CREATE_ISSUE' | 'LINK_ISSUE' | 'UPDATE_ISSUE';

@@ -1,8 +1,8 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AdminCopyProvider } from "@crinity/shared/i18n/admin-context";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { AdminCopyProvider } from "@suppo/shared/i18n/admin-context";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({

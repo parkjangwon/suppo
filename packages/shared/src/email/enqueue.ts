@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 import {
   renderNewCommentEmail,
@@ -9,13 +9,13 @@ import {
   renderCSATSurveyEmail,
   renderSLAWarningEmail,
   renderSLABreachEmail,
-} from "@crinity/shared/email/renderers";
+} from "@suppo/shared/email/renderers";
 import {
   getDefaultEmailSettings,
   shouldSendCustomerEmail,
   shouldSendInternalEmail,
-} from "@crinity/shared/email/settings";
-import { createThreadHeaders } from "@crinity/shared/email/threading";
+} from "@suppo/shared/email/settings";
+import { createThreadHeaders } from "@suppo/shared/email/threading";
 
 type EmailDeliveryStatus = "PENDING" | "SENT" | "FAILED";
 type EmailDeliveryCategory = "CUSTOMER" | "INTERNAL";

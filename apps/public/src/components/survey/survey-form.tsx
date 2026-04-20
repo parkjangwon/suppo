@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Textarea } from "@crinity/ui/components/ui/textarea";
-import { Label } from "@crinity/ui/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Textarea } from "@suppo/ui/components/ui/textarea";
+import { Label } from "@suppo/ui/components/ui/label";
 import { toast } from "sonner";
 
 interface Ticket {

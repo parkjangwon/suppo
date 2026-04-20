@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@crinity/ui/components/ui/tabs";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@suppo/ui/components/ui/tabs";
 import { ArrowRight } from "lucide-react";
 import { getTicketQueuePresets } from "@/lib/tickets/ticket-queue-presets";
 import type { TicketQueueFilter } from "@/lib/tickets/ticket-queue-presets";
 import { SLAPolicyManager } from "@/components/admin/sla-policy-manager";
 import { AutomationRuleManager } from "@/components/admin/automation-rule-manager";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface HelpdeskOperationsCenterProps {

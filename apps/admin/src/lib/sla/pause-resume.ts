@@ -1,7 +1,7 @@
-import { prisma } from "@crinity/db";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
+import { prisma } from "@suppo/db";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
-import { enqueueSLABreachEmail } from "@crinity/shared/email/enqueue";
+import { enqueueSLABreachEmail } from "@suppo/shared/email/enqueue";
 
 /**
  * 티켓 상태 변경 시 SLA 시계 제어

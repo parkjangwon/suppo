@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getBackofficeSession } from "@crinity/shared/auth/session";
+import { getBackofficeSession } from "@suppo/shared/auth/session";
 import {
   listMacros,
   createMacro,
-} from "@crinity/shared/macro/service";
+} from "@suppo/shared/macro/service";
 
 export async function GET() {
   const session = await getBackofficeSession();

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@crinity/db";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
-import { enqueueInternalCommentNotifications } from "@crinity/shared/email/enqueue";
-import { verifyTicketAccessToken } from "@crinity/shared/security/ticket-access";
+import { prisma } from "@suppo/db";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
+import { enqueueInternalCommentNotifications } from "@suppo/shared/email/enqueue";
+import { verifyTicketAccessToken } from "@suppo/shared/security/ticket-access";
 import { cookies } from "next/headers";
-import { processAttachments, AttachmentError } from "@crinity/shared/storage/attachment-service";
+import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
 
 export async function POST(request: Request) {
   try {

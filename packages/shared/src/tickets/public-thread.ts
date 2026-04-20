@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 
 export async function getPublicTicketThread(ticketNumber: string, email: string) {
   const ticket = await prisma.ticket.findUnique({

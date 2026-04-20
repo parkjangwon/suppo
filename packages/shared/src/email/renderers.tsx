@@ -5,7 +5,7 @@ import {
   createAdminTicketSearchUrl,
   createPublicSurveyUrl,
   createPublicTicketUrl,
-} from "@crinity/shared/utils/app-urls";
+} from "@suppo/shared/utils/app-urls";
 
 export interface RenderedEmail {
   subject: string;

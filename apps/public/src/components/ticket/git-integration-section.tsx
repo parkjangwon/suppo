@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "@crinity/ui/components/ui/button";
+import { Button } from "@suppo/ui/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import { toast } from "sonner";
-import type { IssueDetail, IssueFullDetail, GitProvider } from "@crinity/shared/git/provider";
+import type { IssueDetail, IssueFullDetail, GitProvider } from "@suppo/shared/git/provider";
 import {
   getStateBadgeClass,
   getLabelTextColor,

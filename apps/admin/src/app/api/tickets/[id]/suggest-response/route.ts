@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { generateResponseSuggestion } from "@/lib/ai/suggestion-engine";
 
 export async function POST(

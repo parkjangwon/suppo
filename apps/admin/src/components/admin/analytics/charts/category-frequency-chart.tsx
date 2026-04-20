@@ -1,7 +1,7 @@
 "use client";
 
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { CategoryFrequency } from "@/lib/db/queries/admin-analytics/contracts";
 import { copyText } from "@/lib/i18n/admin-copy-utils";

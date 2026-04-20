@@ -1,5 +1,5 @@
-import { prisma } from "@crinity/db";
-import { db } from "@crinity/db/raw";
+import { prisma } from "@suppo/db";
+import { db } from "@suppo/db/raw";
 import { DateRange, RepeatInquiry, RepeatPatternType, RepeatInquiryResponse } from "./contracts";
 
 interface RawRepeatInquiry {

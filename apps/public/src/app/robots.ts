@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getPublicAppUrl } from "@crinity/shared/utils/app-urls";
+import { getPublicAppUrl } from "@suppo/shared/utils/app-urls";
 
 const baseUrl = getPublicAppUrl();
 

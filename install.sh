@@ -156,7 +156,7 @@ write_app_env_files() {
   upsert_env_value apps/admin/.env.local AUTH_SECRET "${AUTH_SECRET}"
   upsert_env_value apps/admin/.env.local TICKET_ACCESS_SECRET "${TICKET_ACCESS_SECRET}"
   upsert_env_value apps/admin/.env.local GIT_TOKEN_ENCRYPTION_KEY "${GIT_TOKEN_ENCRYPTION_KEY}"
-  upsert_env_value apps/admin/.env.local INITIAL_ADMIN_EMAIL "${INITIAL_ADMIN_EMAIL:-admin@crinity.io}"
+  upsert_env_value apps/admin/.env.local INITIAL_ADMIN_EMAIL "${INITIAL_ADMIN_EMAIL:-admin@suppo.io}"
   upsert_env_value apps/admin/.env.local INITIAL_ADMIN_PASSWORD "${INITIAL_ADMIN_PASSWORD:-admin1234}"
   upsert_env_value apps/admin/.env.local AUTH_URL "http://localhost:3001"
 }
@@ -192,11 +192,11 @@ sync_local_database() {
   set +a
 
   log INFO "Prisma Client를 생성합니다."
-  pnpm --filter=@crinity/db generate
+  pnpm --filter=@suppo/db generate
 
   if [[ "${DATABASE_URL}" == http://* ]] || [[ "${DATABASE_URL}" == https://* ]]; then
     log INFO "LibSQL/원격 DB 환경으로 판단되어 migrate:deploy를 실행합니다."
-    pnpm --filter=@crinity/db migrate:deploy
+    pnpm --filter=@suppo/db migrate:deploy
   else
     local db_path existing_table_count
     db_path="${DATABASE_URL#file:}"
@@ -207,14 +207,14 @@ sync_local_database() {
       apply_sqlite_migrations "$db_path"
     else
       log INFO "기존 로컬 SQLite DB를 감지했습니다. Prisma 스키마 동기화를 시도합니다."
-      if ! pnpm --filter=@crinity/db exec prisma db push --schema=./prisma/schema.prisma --skip-generate; then
+      if ! pnpm --filter=@suppo/db exec prisma db push --schema=./prisma/schema.prisma --skip-generate; then
         warn "Prisma db push가 실패해 기존 dev.db를 그대로 유지합니다. 스키마를 완전히 다시 만들려면 packages/db/dev.db를 삭제한 뒤 install.sh를 다시 실행하세요."
       fi
     fi
   fi
 
   log INFO "시드 데이터를 적용합니다."
-  pnpm --filter=@crinity/db seed
+  pnpm --filter=@suppo/db seed
 }
 
 print_success() {
@@ -223,7 +223,7 @@ print_success() {
 [DONE] 설치 완료
 - Public: http://localhost:3000
 - Admin:  http://localhost:3001/admin/login
-- 기본 관리자 계정: ${INITIAL_ADMIN_EMAIL:-admin@crinity.io}
+- 기본 관리자 계정: ${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
 - 기본 관리자 비밀번호: ${INITIAL_ADMIN_PASSWORD:-admin1234}
 
 시작 명령:

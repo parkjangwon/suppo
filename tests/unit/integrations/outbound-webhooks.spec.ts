@@ -7,7 +7,7 @@ const { mockFindManyWebhookEndpoints, mockUpdateWebhookEndpoint, mockCreateWebho
   mockFetch: vi.fn(),
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     webhookEndpoint: {
       findMany: mockFindManyWebhookEndpoints,
@@ -21,7 +21,7 @@ vi.mock("@crinity/db", () => ({
 
 global.fetch = mockFetch;
 
-import { dispatchWebhookEvent } from "@crinity/shared/integrations/outbound-webhooks";
+import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
 
 describe("dispatchWebhookEvent", () => {
   beforeEach(() => {

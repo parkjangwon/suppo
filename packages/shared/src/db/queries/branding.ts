@@ -1,5 +1,5 @@
-import { prisma } from "@crinity/db";
-import { SystemBranding } from "@crinity/shared/branding/context";
+import { prisma } from "@suppo/db";
+import { SystemBranding } from "@suppo/shared/branding/context";
 import { getCache, setCache } from "../../cache/redis";
 
 const DEFAULT_BRANDING_ID = "default";
@@ -7,17 +7,17 @@ const BRANDING_CACHE_KEY = "branding:system";
 const BRANDING_CACHE_TTL = 1800;
 
 const defaultBranding: SystemBranding = {
-  companyName: "Crinity",
+  companyName: "Suppo",
   logoUrl: undefined,
   faviconUrl: undefined,
   primaryColor: "#0f172a",
   secondaryColor: "#3b82f6",
-  homepageTitle: "Crinity Helpdesk",
+  homepageTitle: "Suppo Helpdesk",
   homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-  adminPanelTitle: "Crinity Admin",
+  adminPanelTitle: "Suppo Admin",
   appTitle: "고객 지원 센터",
   welcomeMessage: "무엇을 도와드릴까요?",
-  footerText: "© 2026 Crinity. All rights reserved.",
+  footerText: "© 2026 parkjangwon. All rights reserved.",
   footerPhone: undefined,
   footerEmail: undefined,
   footerHomepage: undefined,

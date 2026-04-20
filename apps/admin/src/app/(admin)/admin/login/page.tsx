@@ -4,11 +4,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-import { Button } from "@crinity/ui/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Input } from "@crinity/ui/components/ui/input";
-import { BACKOFFICE_DASHBOARD_PATH } from "@crinity/shared/auth/config";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Input } from "@suppo/ui/components/ui/input";
+import { BACKOFFICE_DASHBOARD_PATH } from "@suppo/shared/auth/config";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export default function AdminLoginPage() {
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder={copyText(copy, "loginEmailPlaceholder", "admin@crinity.com")}
+                placeholder={copyText(copy, "loginEmailPlaceholder", "admin@suppo.io")}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"

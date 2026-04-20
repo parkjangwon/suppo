@@ -1,13 +1,13 @@
 import { randomBytes } from "node:crypto";
 
-import { prisma } from "@crinity/db";
-import { pickAssignee, type CandidateAgent } from "@crinity/shared/assignment/pick-assignee";
-import { buildChatCustomerTokenHash } from "@crinity/shared/chat/token";
-import { dispatchEmailOutboxSoon } from "@crinity/shared/email/dispatch-trigger";
-import { enqueueTicketCreatedEmails } from "@crinity/shared/email/enqueue";
-import { generateTicketNumber } from "@crinity/shared/tickets/ticket-number";
+import { prisma } from "@suppo/db";
+import { pickAssignee, type CandidateAgent } from "@suppo/shared/assignment/pick-assignee";
+import { buildChatCustomerTokenHash } from "@suppo/shared/chat/token";
+import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
+import { enqueueTicketCreatedEmails } from "@suppo/shared/email/enqueue";
+import { generateTicketNumber } from "@suppo/shared/tickets/ticket-number";
 
-export { buildChatCustomerTokenHash } from "@crinity/shared/chat/token";
+export { buildChatCustomerTokenHash } from "@suppo/shared/chat/token";
 
 type TicketPriority = "URGENT" | "HIGH" | "MEDIUM" | "LOW";
 type CommentAuthorType = "CUSTOMER" | "AGENT";
@@ -215,7 +215,7 @@ export async function createChatConversation(input: StartChatConversationInput, 
     const conversation = await tx.chatConversation.create({
       data: {
         ticketId: ticket.id,
-        widgetKey: input.widgetKey ?? widgetSettings?.widgetKey ?? "crinity-chat-widget",
+        widgetKey: input.widgetKey ?? widgetSettings?.widgetKey ?? "suppo-chat-widget",
         customerTokenHash,
         status: "WAITING_AGENT",
         lastMessageAt: new Date(),

@@ -1,4 +1,4 @@
-# Crinity Helpdesk 개선 로드맵 2026
+# Suppo Helpdesk 개선 로드맵 2026
 
 **작성일**: 2026-03-29  
 **대상 버전**: 50-Cycle Complete  

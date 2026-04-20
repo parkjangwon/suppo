@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAdminCopy } from "@crinity/shared/i18n/admin-context";
-import { getDefaultEmailSettings } from "@crinity/shared/email/settings";
-import { Button } from "@crinity/ui/components/ui/button";
-import { Input } from "@crinity/ui/components/ui/input";
-import { Label } from "@crinity/ui/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@crinity/ui/components/ui/card";
-import { Switch } from "@crinity/ui/components/ui/switch";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { getDefaultEmailSettings } from "@suppo/shared/email/settings";
+import { Button } from "@suppo/ui/components/ui/button";
+import { Input } from "@suppo/ui/components/ui/input";
+import { Label } from "@suppo/ui/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
+import { Switch } from "@suppo/ui/components/ui/switch";
 import { Loader2, Mail, Bell, Server } from "lucide-react";
 import { toast } from "sonner";
 

@@ -6,11 +6,11 @@ import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { ApiKeyManager } from "@/components/admin/api-key-manager";
 import { IntegrationGuideCard } from "@/components/admin/integration-guide-card";
 import { WebhookEndpointManager } from "@/components/admin/webhook-endpoint-manager";
-import { getAdminCopy } from "@crinity/shared/i18n/admin-copy";
+import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 export default async function IntegrationSettingsPage() {
-  const copy = getAdminCopy((await cookies()).get("crinity-admin-locale")?.value) as unknown as Record<string, string>;
+  const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value) as unknown as Record<string, string>;
   const locale = copy.locale === "en" ? "en" : "ko";
   const t = (key: string, ko: string, en?: string) =>
     copyText(copy as never, key, locale === "en" ? (en ?? ko) : ko);

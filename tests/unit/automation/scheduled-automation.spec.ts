@@ -20,7 +20,7 @@ const {
   mockEmailDeliveryCreate: vi.fn(),
 }));
 
-vi.mock("@crinity/db", () => ({
+vi.mock("@suppo/db", () => ({
   prisma: {
     automationRule: {
       findMany: mockFindManyRules,

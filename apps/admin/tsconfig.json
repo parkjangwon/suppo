@@ -6,11 +6,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@crinity/db": ["../../packages/db/src/index.ts"],
-      "@crinity/ui": ["../../packages/ui/src"],
-      "@crinity/ui/*": ["../../packages/ui/src/*", "../../packages/ui/*"],
-      "@crinity/shared": ["../../packages/shared/src"],
-      "@crinity/shared/*": ["../../packages/shared/src/*"]
+      "@suppo/db": ["../../packages/db/src/index.ts"],
+      "@suppo/ui": ["../../packages/ui/src"],
+      "@suppo/ui/*": ["../../packages/ui/src/*", "../../packages/ui/*"],
+      "@suppo/shared": ["../../packages/shared/src"],
+      "@suppo/shared/*": ["../../packages/shared/src/*"]
     },
     "types": ["vitest/globals"]
   },

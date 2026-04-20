@@ -3,9 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@crinity/db": ["../db/src/index.ts"],
-      "@crinity/shared": ["./src"],
-      "@crinity/shared/*": ["./src/*"],
+      "@suppo/db": ["../db/src/index.ts"],
+      "@suppo/shared": ["./src"],
+      "@suppo/shared/*": ["./src/*"],
       "@/auth": ["../../apps/admin/src/auth.ts"]
     }
   },

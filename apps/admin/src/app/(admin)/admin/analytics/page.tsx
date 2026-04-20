@@ -1,4 +1,4 @@
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { AnalyticsContent } from "./analytics-content";
 
 export default async function AnalyticsPage() {

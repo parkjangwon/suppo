@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
-import { prisma } from "@crinity/db";
+import { prisma } from "@suppo/db";
 import { ReportType, ReportFormat, ReportTriggerSource } from "@prisma/client";
 import { processReport, createPendingReport } from "@/lib/reports/process-runs";
 import { getPeriodFromPreset, generatePeriodKey } from "@/lib/reports/date-range";
