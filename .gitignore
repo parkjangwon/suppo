@@ -11,6 +11,7 @@ coverage/
 test-results/
 playwright-report/
 test-report/
+e2e-test-results/
 .playwright-mcp/
 
 # Next.js 

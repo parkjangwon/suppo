@@ -10,18 +10,11 @@ docker/
 ├── apache-vhosts.conf.example
 ├── docker-compose.backend.yml
 ├── docker-compose.yml
+├── install.sh
 ├── nginx.entrypoint.sh
-├── certs/
-│   ├── admin.crt
-│   ├── admin.key
-│   ├── public.crt
-│   └── public.key
 └── env/
-    ├── .env.backend
     ├── .env.backend.example
-    ├── .env.production
-    ├── .env.production.example
-    └── .env.production.local
+    └── .env.production.example
 ```
 
 ## 파일 설명
@@ -30,13 +23,12 @@ docker/
 - `docker-compose.yml`: 올인원 배포용. `sqld`, `migrate`, `bootstrap`, `public`, `admin`, `nginx` 구성
 - `docker-compose.backend.yml`: 백엔드 전용 배포용. `nginx` 없이 `public/admin`을 `3000/3001`로 직접 리슨
 - `apache-vhosts.conf.example`: 외부 Apache reverse proxy 예시
+- `install.sh`: 환경 파일 생성/보정과 배포 준비 스크립트
 - `nginx.entrypoint.sh`: 환경변수 기반 Nginx 설정 생성 스크립트
-- `env/.env.production`: 운영 배포용 환경 변수
 - `env/.env.production.example`: 운영 환경 변수 템플릿
-- `env/.env.backend`: 백엔드 전용 환경 변수
 - `env/.env.backend.example`: 백엔드 전용 환경 변수 템플릿
-- `env/.env.production.local`: 로컬 프로덕션 테스트용 오버라이드
-- `certs/`: 인증서 파일 보관 위치
+- `env/.env.production`, `env/.env.backend`: 설치 스크립트나 수동 복사로 생성하는 실제 배포용 환경 파일
+- `certs/`: 필요 시 운영자가 마운트하거나 생성하는 인증서 파일 보관 위치
 
 ## 기본 사용법
 

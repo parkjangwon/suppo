@@ -167,9 +167,11 @@ suppo/
 ├── tests/
 ├── docker/
 │   ├── Dockerfile
+│   ├── README.md
+│   ├── apache-vhosts.conf.example
+│   ├── docker-compose.backend.yml
 │   ├── docker-compose.yml
-│   ├── nginx.conf.template
-│   ├── certs/
+│   ├── nginx.entrypoint.sh
 │   └── env/
 ├── pnpm-workspace.yaml
 └── tsconfig.base.json
@@ -533,16 +535,12 @@ docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t 
 
 ## 참고 문서
 
-- [AGENTS.md](/Users/pjw/dev/project/crinity-helpdesk/AGENTS.md)
-- [CLAUDE.md](/Users/pjw/dev/project/crinity-helpdesk/CLAUDE.md)
-- `docs/superpowers/plans/2026-03-22-monorepo-restructure.md`
-
-## Paperclip E2E verification
-
-- 2026-03-31: Paperclip wake 이벤트로 README 반영, commit, push까지 완료.
+- [AGENTS.md](./AGENTS.md)
+- [CLAUDE.md](./CLAUDE.md)
+- [PROJECT_HARNESS.md](./PROJECT_HARNESS.md)
+- [docker/README.md](./docker/README.md)
+- [docs/superpowers/plans/2026-03-22-monorepo-restructure.md](./docs/superpowers/plans/2026-03-22-monorepo-restructure.md)
 
 ## 라이선스
 
 MIT
-
-Paperclip E2E code-path verified.
