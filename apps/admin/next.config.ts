@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/**": [
       "../../node_modules/@libsql/**",
+      "../../node_modules/@prisma/adapter-libsql/**",
+      "../../node_modules/@prisma/driver-adapter-utils/**",
       "../../node_modules/.pnpm/@libsql*/**",
+      "../../node_modules/.pnpm/@prisma+adapter-libsql@*/**",
+      "../../node_modules/.pnpm/@prisma+driver-adapter-utils@*/**",
       "../../node_modules/.pnpm/libsql*/**",
       "../../packages/db/node_modules/.prisma/**"
     ]

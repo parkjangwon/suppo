@@ -34,16 +34,24 @@ ENV AUTH_SECRET=$AUTH_SECRET \
     GIT_TOKEN_ENCRYPTION_KEY=$GIT_TOKEN_ENCRYPTION_KEY
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/admin/node_modules ./apps/admin/node_modules
+COPY --from=deps /app/apps/public/node_modules ./apps/public/node_modules
+COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY --from=deps /app/packages/ui/node_modules ./packages/ui/node_modules
 COPY . .
 RUN mkdir -p /app/apps/${APP_NAME}/public
 RUN pnpm --filter=@suppo/db generate
 RUN pnpm --filter=@suppo/${APP_NAME} build
+# Copy packages/db native deps into standalone (pnpm symlinks; BusyBox cp lacks -L)
+RUN node docker/copy-standalone-deps.mjs "$APP_NAME"
 ENV AUTH_SECRET="" DATABASE_URL="" TICKET_ACCESS_SECRET="" GIT_TOKEN_ENCRYPTION_KEY=""
 
 FROM base AS runner
 ARG APP_NAME
 ENV APP_NAME=$APP_NAME \
-    NODE_ENV=production
+    NODE_ENV=production \
+    HOSTNAME=0.0.0.0
 
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 WORKDIR /app
@@ -52,7 +60,21 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/standalone
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/static ./apps/${APP_NAME}/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/public ./apps/${APP_NAME}/public
 
+# Entrypoint: load auto-generated secrets from secrets-init service if env vars are empty
+RUN { \
+      echo '#!/bin/sh'; \
+      echo 'if [ -f /run/config/secrets.env ]; then'; \
+      echo '  while IFS="=" read -r _k _v; do'; \
+      echo '    [ -z "$_k" ] && continue'; \
+      echo '    eval "_old=\${${_k}:-}"'; \
+      echo '    [ -z "$_old" ] && eval "export ${_k}=${_v}"'; \
+      echo '  done < /run/config/secrets.env'; \
+      echo 'fi'; \
+      echo 'exec "$@"'; \
+    } > /entrypoint.sh && chmod +x /entrypoint.sh
+
 USER nextjs
 EXPOSE 3000
 ENV PORT=3000
-CMD node apps/$APP_NAME/server.js
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["sh", "-c", "node apps/$APP_NAME/server.js"]

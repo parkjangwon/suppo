@@ -1,4 +1,51 @@
 services:
+  secrets-init:
+    image: node:22-alpine
+    restart: "no"
+    environment:
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+    command:
+      - sh
+      - -c
+      - |
+        if [ -f /config/secrets.env ] && awk -F= '
+          BEGIN {
+            desiredAdminPassword = "admin1234"
+            if (ENVIRON["INITIAL_ADMIN_PASSWORD"] != "") {
+              desiredAdminPassword = ENVIRON["INITIAL_ADMIN_PASSWORD"]
+            }
+            required["AUTH_SECRET"] = 0
+            required["TICKET_ACCESS_SECRET"] = 0
+            required["GIT_TOKEN_ENCRYPTION_KEY"] = 0
+            required["INITIAL_ADMIN_PASSWORD"] = 0
+          }
+          $$1 in required { required[$$1] = length($$2) > 0 }
+          $$1 == "INITIAL_ADMIN_PASSWORD" && $$2 != desiredAdminPassword { required[$$1] = 0 }
+          END {
+            for (key in required) {
+              if (!required[key]) {
+                exit 1
+              }
+            }
+          }
+        ' /config/secrets.env; then
+          exit 0
+        fi
+        rand_secret() { node -e 'process.stdout.write(require("crypto").randomBytes(32).toString("base64url"))'; }
+        printf 'AUTH_SECRET=%s\n' "$$(rand_secret)" > /config/secrets.env
+        printf 'TICKET_ACCESS_SECRET=%s\n' "$$(rand_secret)" >> /config/secrets.env
+        printf 'GIT_TOKEN_ENCRYPTION_KEY=%s\n' "$$(rand_secret)" >> /config/secrets.env
+        if [ -n "$$INITIAL_ADMIN_PASSWORD" ]; then
+          ADMIN_PW="$$INITIAL_ADMIN_PASSWORD"
+        else
+          ADMIN_PW="admin1234"
+          printf '\n=== 초기 관리자 비밀번호: %s ===\n' "$$ADMIN_PW"
+          printf '(재확인: docker compose logs secrets-init)\n\n'
+        fi
+        printf 'INITIAL_ADMIN_PASSWORD=%s\n' "$$ADMIN_PW" >> /config/secrets.env
+    volumes:
+      - config_data:/config
+
   sqld:
     image: ghcr.io/tursodatabase/libsql-server:latest
     restart: unless-stopped
@@ -31,14 +78,25 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
-    command: ["sh", "-lc", "cd /app/packages/db && ./node_modules/.bin/prisma generate --schema=./prisma/schema.prisma && ./node_modules/.bin/tsx prisma/bootstrap.ts"]
+      secrets-init:
+        condition: service_completed_successfully
+    command:
+      - sh
+      - -lc
+      - |
+        [ -f /run/config/secrets.env ] && . /run/config/secrets.env
+        cd /app/packages/db && \
+        ./node_modules/.bin/prisma generate --schema=./prisma/schema.prisma && \
+        ./node_modules/.bin/tsx prisma/bootstrap.ts
+    volumes:
+      - config_data:/run/config
     environment:
       DATABASE_URL: http://sqld:8889
       DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
-      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
-      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       AUTO_BOOTSTRAP: ${AUTO_BOOTSTRAP:-if-empty}
-      SEED_PROFILE: ${SEED_PROFILE:-none}
+      SEED_PROFILE: ${SEED_PROFILE:-demo}
 
   public:
     build:
@@ -55,16 +113,17 @@ services:
     environment:
       DATABASE_URL: http://sqld:8889
       DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
-      PUBLIC_URL: ${PUBLIC_URL}
-      ADMIN_URL: ${ADMIN_URL}
-      AUTH_URL: ${PUBLIC_URL}
-      AUTH_SECRET: ${AUTH_SECRET}
-      TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET}
-      GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
+      ADMIN_URL: ${ADMIN_URL:-http://localhost:3001}
+      AUTH_URL: ${PUBLIC_URL:-http://localhost:3000}
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET:-}
+      GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY:-}
     volumes:
       - uploads:/app/apps/public/public/uploads
-    expose:
-      - "3000"
+      - config_data:/run/config
+    ports:
+      - "${BIND_IP:-127.0.0.1}:${PUBLIC_PORT:-3000}:3000"
 
   admin:
     build:
@@ -81,49 +140,22 @@ services:
     environment:
       DATABASE_URL: http://sqld:8889
       DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
-      PUBLIC_URL: ${PUBLIC_URL}
-      ADMIN_URL: ${ADMIN_URL}
-      AUTH_URL: ${ADMIN_URL}
-      AUTH_SECRET: ${AUTH_SECRET}
-      TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET}
-      GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY}
-      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
-      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
+      ADMIN_URL: ${ADMIN_URL:-http://localhost:3001}
+      AUTH_URL: ${ADMIN_URL:-http://localhost:3001}
+      AUTH_TRUST_HOST: "1"
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET:-}
+      GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY:-}
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
     volumes:
       - uploads:/app/apps/admin/public/uploads
-    expose:
-      - "3000"
-
-  nginx:
-    image: nginx:alpine
-    restart: unless-stopped
+      - config_data:/run/config
     ports:
-      - "${NGINX_HTTP_PORT:-80}:${NGINX_HTTP_PORT:-80}"
-      - "${NGINX_HTTPS_PORT:-443}:${NGINX_HTTPS_PORT:-443}"
-    environment:
-      PUBLIC_URL: ${PUBLIC_URL}
-      ADMIN_URL: ${ADMIN_URL}
-      PUBLIC_SERVER_NAME: ${PUBLIC_SERVER_NAME:-}
-      ADMIN_SERVER_NAME: ${ADMIN_SERVER_NAME:-}
-      PUBLIC_CLIENT_MAX_BODY_SIZE: ${PUBLIC_CLIENT_MAX_BODY_SIZE:-600M}
-      ADMIN_CLIENT_MAX_BODY_SIZE: ${ADMIN_CLIENT_MAX_BODY_SIZE:-100M}
-      ENABLE_TLS: ${ENABLE_TLS:-0}
-      NGINX_HTTP_PORT: ${NGINX_HTTP_PORT:-80}
-      NGINX_HTTPS_PORT: ${NGINX_HTTPS_PORT:-443}
-      PUBLIC_TLS_CERT: ${PUBLIC_TLS_CERT:-/etc/nginx/certs/public.crt}
-      PUBLIC_TLS_KEY: ${PUBLIC_TLS_KEY:-/etc/nginx/certs/public.key}
-      ADMIN_TLS_CERT: ${ADMIN_TLS_CERT:-/etc/nginx/certs/admin.crt}
-      ADMIN_TLS_KEY: ${ADMIN_TLS_KEY:-/etc/nginx/certs/admin.key}
-    volumes:
-      - ./nginx.entrypoint.sh:/docker-entrypoint.d/99-render-nginx.sh:ro
-      - ./certs:/etc/nginx/certs:ro
-    depends_on:
-      - public
-      - admin
-    command:
-      - /bin/sh
-      - /docker-entrypoint.d/99-render-nginx.sh
+      - "${BIND_IP:-127.0.0.1}:${ADMIN_PORT:-3001}:3000"
 
 volumes:
   db_data:
   uploads:
+  config_data:
