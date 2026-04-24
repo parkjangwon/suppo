@@ -126,7 +126,7 @@ payload 예시:
 - Frontend: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, shadcn/ui
 - Backend: Next.js Route Handlers, NextAuth.js v5, Prisma ORM
 - Database: SQLite (로컬), LibSQL/sqld (운영)
-- Infra: pnpm workspaces, Docker, Docker Compose, Nginx
+- Infra: pnpm workspaces, Docker, Docker Compose
 - Integrations: Ollama, Gemini, SMTP/SES/Resend, S3, GitHub/GitLab, BoxyHQ SAML
 
 ## 모노레포 구조
@@ -167,12 +167,9 @@ suppo/
 ├── tests/
 ├── docker/
 │   ├── Dockerfile
-│   ├── README.md
-│   ├── apache-vhosts.conf.example
-│   ├── docker-compose.backend.yml
-│   ├── docker-compose.yml
-│   ├── nginx.entrypoint.sh
-│   └── env/
+│   ├── .env.example
+│   ├── copy-standalone-deps.mjs
+│   └── docker-compose.yml
 ├── pnpm-workspace.yaml
 └── tsconfig.base.json
 ```
@@ -185,19 +182,14 @@ suppo/
 - pnpm 10 이상
 - macOS/Linux
 
-### 로컬 설치
+### 로컬 실행
+
+로컬 개발 환경은 SQLite 파일 DB를 사용합니다. 아래 명령은 의존성 설치, `.env`/`.env.local` 생성, Prisma Client 생성, SQLite 마이그레이션, demo seed 적용까지 한 번에 처리합니다.
 
 ```bash
-pnpm install
 ./install.sh
 pnpm dev:all
 ```
-
-로컬 설치 흐름은 아래와 같습니다.
-
-1. `pnpm install`
-2. `./install.sh`
-3. `pnpm dev:all`
 
 `./install.sh`가 담당하는 작업:
 
@@ -205,7 +197,19 @@ pnpm dev:all
 - `apps/public/.env.local`, `apps/admin/.env.local` 생성
 - 로컬 SQLite 초기화
 - Prisma Client 생성
-- 기본 시드 적용
+- demo seed 적용
+
+접속 주소:
+
+- Public: `http://localhost:3000`
+- Admin: `http://localhost:3001/admin/login`
+
+기본 관리자 계정:
+
+```text
+email: admin@suppo.io
+password: admin1234
+```
 
 ### 개발 서버
 
@@ -231,122 +235,103 @@ pnpm build:all
 pnpm start:all
 ```
 
-### Docker 설치
+## Docker Compose 배포
 
-Docker 배포는 두 가지 모드를 지원합니다.
+Docker 배포는 `docker/docker-compose.yml` 하나로 실행합니다. Compose는 `sqld`, `migrate`, `secrets-init`, `bootstrap`, `public`, `admin`을 순서대로 기동합니다.
 
-- `all-in-one`: compose 안에 `nginx`까지 포함하는 단일 스택
-- `backend`: 리버스 프록시 없이 `public/admin/sqld`만 올리는 스택
-
-가장 빠른 방법은 아래 스크립트를 사용하는 것입니다.
+### 빠른 시작
 
 ```bash
-./docker/install.sh
+docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-백엔드 모드:
+기본 접속 주소:
+
+- Public: `http://localhost:3000`
+- Admin: `http://localhost:3001/admin/login`
+
+기본 관리자 계정:
+
+```text
+email: admin@suppo.io
+password: admin1234
+```
+
+기본값으로 `SEED_PROFILE=demo`가 적용되어 첫 기동 시 데모 고객, 상담원, 티켓, 지식베이스, 템플릿, 감사 로그, CSAT 데이터가 함께 생성됩니다.
+
+### 환경 파일 사용
+
+필요하면 예시 파일을 복사해 포트, 바인딩 주소, 외부 URL, 초기 계정, seed 정책을 조정합니다.
 
 ```bash
-./docker/install.sh --mode backend
+cp docker/.env.example docker/.env
+docker compose -f docker/docker-compose.yml --env-file docker/.env up --build -d
 ```
 
-환경 파일만 준비하고 실제 `docker compose up`은 나중에 하고 싶다면:
+자주 바꾸는 값:
 
 ```bash
-./docker/install.sh --prepare-only
+PUBLIC_URL=http://localhost:3000
+ADMIN_URL=http://localhost:3001
+BIND_IP=127.0.0.1
+PUBLIC_PORT=3000
+ADMIN_PORT=3001
+INITIAL_ADMIN_EMAIL=admin@suppo.io
+INITIAL_ADMIN_PASSWORD=admin1234
+AUTO_BOOTSTRAP=if-empty
+SEED_PROFILE=demo
 ```
 
-백엔드 모드에서 환경 파일만 먼저 준비하려면:
+`AUTH_SECRET`, `TICKET_ACCESS_SECRET`, `GIT_TOKEN_ENCRYPTION_KEY`는 비워두면 `secrets-init` 서비스가 `config_data` 볼륨의 `/config/secrets.env`에 자동 생성합니다. 컨테이너의 entrypoint는 `/run/config/secrets.env`를 읽어 빈 환경 변수만 채웁니다.
+
+### 로그와 상태 확인
 
 ```bash
-./docker/install.sh --mode backend --prepare-only
+docker compose -f docker/docker-compose.yml ps
+docker compose -f docker/docker-compose.yml logs -f secrets-init migrate bootstrap public admin
 ```
 
-수동 설치 흐름은 다음과 같습니다.
+`migrate`는 Docker에서 `prisma migrate deploy` 대신 [packages/db/prisma/migrate.ts](packages/db/prisma/migrate.ts)를 사용해 `migration.sql` 파일들을 LibSQL에 순서대로 적용합니다.
 
-1. 환경 변수 파일 준비
+`bootstrap`은 시작 시 `prisma generate`를 먼저 수행합니다. 빈 DB에서는 `SEED_PROFILE=demo`이면 demo seed를 넣고, `SEED_PROFILE=none`이면 최소 운영 기본 데이터만 넣습니다. DB가 이미 비어 있지 않으면 자동 bootstrap은 건너뜁니다.
 
-올인원:
+### 시드 데이터 초기화
+
+현재 Docker DB에 demo seed를 다시 적용하려면:
 
 ```bash
-cp docker/env/.env.production.example docker/env/.env.production
+docker compose -f docker/docker-compose.yml run --rm bootstrap sh -lc '
+  [ -f /run/config/secrets.env ] && . /run/config/secrets.env
+  export INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
+  export INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD:-admin1234}
+  cd /app/packages/db
+  ./node_modules/.bin/prisma generate --schema=./prisma/schema.prisma
+  ./node_modules/.bin/tsx prisma/seed.ts
+'
 ```
 
-백엔드:
+DB와 자동 생성 시크릿까지 완전히 새로 만들려면 볼륨을 삭제합니다. 이 명령은 기존 티켓과 업로드 데이터도 삭제합니다.
 
 ```bash
-cp docker/env/.env.backend.example docker/env/.env.backend
+docker compose -f docker/docker-compose.yml down -v
+docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-2. env 파일에서 최소 항목 수정
-
-올인원은 `docker/env/.env.production`:
-
-- `PUBLIC_URL`
-- `ADMIN_URL`
-- `AUTH_SECRET`
-- `TICKET_ACCESS_SECRET`
-- `GIT_TOKEN_ENCRYPTION_KEY`
-- `INITIAL_ADMIN_EMAIL`
-- `INITIAL_ADMIN_PASSWORD`
-- 필요 시 `AUTO_BOOTSTRAP`, `SEED_PROFILE`
-
-백엔드는 `docker/env/.env.backend`:
-
-- `PUBLIC_URL`
-- `ADMIN_URL`
-- `BACKEND_BIND_IP`
-- `PUBLIC_APP_PORT`
-- `ADMIN_APP_PORT`
-- `AUTH_SECRET`
-- `TICKET_ACCESS_SECRET`
-- `GIT_TOKEN_ENCRYPTION_KEY`
-- `INITIAL_ADMIN_EMAIL`
-- `INITIAL_ADMIN_PASSWORD`
-- 필요 시 `AUTO_BOOTSTRAP`, `SEED_PROFILE`
-
-3. 컨테이너 기동
-
-올인원:
+로컬 SQLite seed를 다시 만들려면:
 
 ```bash
-docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
+rm -f packages/db/dev.db
+./install.sh
 ```
 
-백엔드:
+기존 로컬 DB를 유지한 채 demo seed만 다시 적용하려면:
 
 ```bash
-docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up --build -d
+set -a
+source .env
+set +a
+pnpm --filter=@suppo/db seed
 ```
-
-4. 로그 확인
-
-```bash
-docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production logs -f
-```
-
-백엔드 모드는 아래처럼 확인합니다.
-
-```bash
-docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend logs -f
-```
-
-올인원 첫 기동 시 내부 순서는 다음과 같습니다.
-
-- `sqld`
-- `migrate`
-- `bootstrap`
-- `public`
-- `admin`
-- `nginx`
-
-백엔드 모드는 `sqld -> migrate -> bootstrap -> public -> admin` 순서로 동작합니다.
-
-`migrate`는 Docker에서 `prisma migrate deploy`를 직접 호출하지 않고, [packages/db/prisma/migrate.ts](/Users/pjw/dev/project/suppo/packages/db/prisma/migrate.ts:1) 가 `migration.sql` 파일들을 LibSQL에 순서대로 적용합니다.
-
-`bootstrap`은 시작 시 `prisma generate`를 먼저 수행한 뒤, 빈 DB일 때만 최소 운영 기본 데이터를 넣고 `SEED_PROFILE=demo`일 때만 데모 데이터를 자동 주입합니다.
-
-백엔드 모드에서는 `nginx`가 빠지고, `public/admin`이 `BACKEND_BIND_IP`와 `PUBLIC_APP_PORT`/`ADMIN_APP_PORT`로 바인딩됩니다. 외부 Apache나 다른 프록시 서버는 그 주소로 직접 reverse proxy 하면 됩니다.
 
 ## 운영 점검
 
@@ -356,16 +341,16 @@ docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.b
 - 운영 ENV 검증:
 
 ```bash
-pnpm ops:validate-env -- --env-file docker/env/.env.production
+pnpm ops:validate-env -- --env-file docker/.env
 ```
 
 - 배포 직후 smoke test:
 
 ```bash
-pnpm ops:smoke -- --env-file docker/env/.env.production
+pnpm ops:smoke -- --env-file docker/.env
 ```
 
-`docker/env/.env.production`이 로컬/스테이징용 HTTP URL이면 `--allow-http`를 함께 사용합니다.
+`docker/.env`가 로컬/스테이징용 HTTP URL이면 `--allow-http`를 함께 사용합니다.
 
 ## 환경 변수
 
@@ -466,30 +451,7 @@ Playwright는 public/admin 서버를 자동으로 띄우고 다음 핵심 흐름
 
 결과 체크리스트는 `test-report/` 아래 `.xlsx`로 저장됩니다.
 
-## 배포
-
-운영 배포는 Docker 멀티 스테이지 빌드와 Docker Compose 기준입니다.
-
-```bash
-docker compose -f docker/docker-compose.yml --env-file docker/env/.env.production up --build -d
-```
-
-구성:
-
-- `sqld`: LibSQL 서버
-- `migrate`: `migration.sql` 파일을 LibSQL에 순서대로 적용
-- `bootstrap`: `prisma generate` 후 빈 DB일 때 최소 운영 기본 데이터 생성, 필요 시 데모 데이터 주입
-- `public`: 공개 앱 컨테이너
-- `admin`: 관리자 앱 컨테이너
-- `nginx`: 도메인별 리버스 프록시
-
-백엔드 전용 배포는 아래 파일을 사용합니다.
-
-```bash
-docker compose -f docker/docker-compose.backend.yml --env-file docker/env/.env.backend up --build -d
-```
-
-### 이미지 빌드 예시
+## 이미지 빌드 예시
 
 ```bash
 docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=public -t suppo-public:latest .
@@ -538,7 +500,6 @@ docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t 
 - [AGENTS.md](./AGENTS.md)
 - [CLAUDE.md](./CLAUDE.md)
 - [PROJECT_HARNESS.md](./PROJECT_HARNESS.md)
-- [docker/README.md](./docker/README.md)
 - [docs/superpowers/plans/2026-03-22-monorepo-restructure.md](./docs/superpowers/plans/2026-03-22-monorepo-restructure.md)
 
 ## 라이선스
