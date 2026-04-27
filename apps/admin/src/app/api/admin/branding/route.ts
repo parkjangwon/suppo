@@ -53,14 +53,11 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await auth();
     
-    console.log("Branding PUT - Full session:", JSON.stringify(session, null, 2));
-    
     if (!session?.user || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    console.log("Branding PUT - Body:", body);
 
     const branding = await prisma.systemBranding.upsert({
       where: { id: DEFAULT_BRANDING_ID },

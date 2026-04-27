@@ -308,7 +308,6 @@ async function applyAutomationRuleToTicket(
       data: updates,
     });
 
-    console.log(`[Automation] Rule "${rule.name}" executed:`, logs.join(", "));
 
     if (actions.sendNotification) {
       await tx.emailDelivery.create({

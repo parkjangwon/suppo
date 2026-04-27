@@ -32,7 +32,6 @@ export async function syncTicketStatusFromGitEvent(
   const newStatus = mapGitStateToTicketStatus(gitState);
   
   if (!newStatus) {
-    console.log(`Unknown git state: ${gitState}, skipping sync`);
     return;
   }
 
@@ -46,7 +45,6 @@ export async function syncTicketStatusFromGitEvent(
   });
 
   if (!ticket) {
-    console.log(`Ticket ${ticketId} not found, skipping sync`);
     return;
   }
 
@@ -80,7 +78,6 @@ export async function syncTicketStatusFromGitEvent(
     }
   });
 
-  console.log(`Synced ticket ${ticket.ticketNumber} status from ${ticket.status} to ${newStatus}`);
 }
 
 export async function handleGitEventWithSync(

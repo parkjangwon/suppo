@@ -79,8 +79,6 @@ export class AutomationLogger {
   
   log(entry: ExecutionLog): void {
     this.logs.push(entry);
-    // In production, this would write to database
-    console.log(`[Automation] ${entry.ruleName} executed on ${entry.ticketNumber}: ${entry.success ? "success" : "failed"}`);
   }
   
   getLogs(ruleId?: string, limit: number = 100): ExecutionLog[] {

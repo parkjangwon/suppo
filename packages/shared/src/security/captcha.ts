@@ -4,7 +4,6 @@ export async function verifyCaptcha(token: string): Promise<boolean> {
   }
 
   if (process.env.NODE_ENV === "development" && token === "dev-token-bypass") {
-    console.log("Development mode: Bypassing CAPTCHA with dev token");
     return true;
   }
 

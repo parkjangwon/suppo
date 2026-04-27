@@ -31,7 +31,6 @@ async function ensureDefaultAdminSeed() {
   const adminPassword = process.env.INITIAL_ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
-    console.log("[Auth] INITIAL_ADMIN_EMAIL or INITIAL_ADMIN_PASSWORD not set, skipping default admin seed");
     return;
   }
 
@@ -52,7 +51,6 @@ async function ensureDefaultAdminSeed() {
         passwordHash
       }
     });
-    console.log("[Auth] Default admin created:", adminEmail);
     return;
   }
 

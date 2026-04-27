@@ -116,13 +116,10 @@ export async function processGitQueue(batchSize = 10): Promise<{
 async function executeGitOperation(item: QueueItem): Promise<void> {
   switch (item.operation) {
     case 'CREATE_ISSUE':
-      console.log(`Executing CREATE_ISSUE for ${item.provider}`);
       break;
     case 'LINK_ISSUE':
-      console.log(`Executing LINK_ISSUE for ${item.provider}`);
       break;
     case 'UPDATE_ISSUE':
-      console.log(`Executing UPDATE_ISSUE for ${item.provider}`);
       break;
     default:
       throw new Error(`Unknown operation: ${item.operation}`);

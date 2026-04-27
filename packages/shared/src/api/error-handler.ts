@@ -216,9 +216,6 @@ export async function withErrorHandler<T>(
 ): Promise<NextResponse<ApiResponse<T>>> {
   const requestId = generateRequestId();
   
-  if (request) {
-    console.log(`[API ${requestId}] ${request.method} ${request.url}`);
-  }
 
   try {
     const response = await handler();
