@@ -167,6 +167,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "이미 사용 중인 이메일입니다" }, { status: 409 });
     }
 
-    throw error;
+    console.error("Failed to create agent:", error);
+    return NextResponse.json({ error: "상담원 생성에 실패했습니다" }, { status: 500 });
   }
 }

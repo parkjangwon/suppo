@@ -15,20 +15,25 @@ export async function GET(_request: Request, { params }: RouteParams) {
   }
 
   const { id } = await params;
-  const deliveries = await prisma.webhookDeliveryLog.findMany({
-    where: { endpointId: id },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-    select: {
-      id: true,
-      event: true,
-      isTest: true,
-      responseStatusCode: true,
-      responseBody: true,
-      errorMessage: true,
-      createdAt: true,
-    },
-  });
 
-  return NextResponse.json(deliveries);
+  try {
+    const deliveries = await prisma.webhookDeliveryLog.findMany({
+      where: { endpointId: id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        event: true,
+        isTest: true,
+        responseStatusCode: true,
+        responseBody: true,
+        errorMessage: true,
+        createdAt: true,
+      },
+    });
+
+    return NextResponse.json(deliveries);
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch delivery logs" }, { status: 500 });
+  }
 }

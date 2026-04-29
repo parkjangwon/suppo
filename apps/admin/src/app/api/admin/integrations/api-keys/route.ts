@@ -24,6 +24,7 @@ export async function GET() {
 
   const apiKeys = await prisma.publicApiKey.findMany({
     orderBy: { createdAt: "desc" },
+    take: 100,
     select: {
       id: true,
       name: true,

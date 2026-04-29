@@ -29,20 +29,24 @@ export async function POST(_request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: "Not Found" }, { status: 404 });
   }
 
-  const result = await dispatchWebhookEvent(
-    "webhook.test",
-    {
-      source: "admin-test",
-      webhookId: webhook.id,
-      webhookName: webhook.name,
-      webhookUrl: webhook.url,
-      testedBy: session.user.email ?? session.user.name ?? "admin",
-    },
-    {
-      endpointId: webhook.id,
-      isTest: true,
-    },
-  );
+  try {
+    const result = await dispatchWebhookEvent(
+      "webhook.test",
+      {
+        source: "admin-test",
+        webhookId: webhook.id,
+        webhookName: webhook.name,
+        webhookUrl: webhook.url,
+        testedBy: session.user.email ?? session.user.name ?? "admin",
+      },
+      {
+        endpointId: webhook.id,
+        isTest: true,
+      },
+    );
 
-  return NextResponse.json({ success: true, sent: result.sent });
+    return NextResponse.json({ success: true, sent: result.sent });
+  } catch {
+    return NextResponse.json({ error: "Failed to dispatch webhook" }, { status: 500 });
+  }
 }
