@@ -143,6 +143,8 @@ docker compose -f docker/docker-compose.yml logs -f public admin
 docker compose -f docker/docker-compose.yml logs -f migrate bootstrap
 ```
 
+외부 모니터링은 관리자 앱의 `/api/health`를 확인하면 됩니다. 응답에는 DB, 업로드 볼륨 쓰기 가능 여부, Redis, 내부 dispatch 토큰 설정 상태가 포함됩니다. 상태가 `unhealthy`이면 HTTP 503을 반환합니다.
+
 ---
 
 ## 업데이트 방법
@@ -186,6 +188,14 @@ docker run --rm \
   alpine tar czf /backup/uploads-$(date +%Y%m%d).tar.gz /data
 ```
 
+관리자 화면의 `Admin → 설정 → 시스템`에서 ZIP 백업을 내려받은 뒤, 복구 전에 구조 검증을 실행할 수 있습니다.
+
+```bash
+pnpm ops:backup-drill -- --file ./backup/backup-YYYY-MM-DD.zip
+```
+
+이 검증은 ZIP 구조, 주요 테이블 JSON, 첨부파일 DB 레코드와 ZIP 내부 파일의 대응을 확인합니다. 운영 DB를 수정하지 않는 dry-run 검증입니다.
+
 ---
 
 ## 데이터 초기화
@@ -201,10 +211,22 @@ docker compose -f docker/docker-compose.yml up --build -d
 
 ## 배포 전 환경 검증
 
-운영 환경에서 필수 변수가 올바르게 설정됐는지 확인합니다.
+운영 환경에서 필수 변수, URL, 시크릿 길이/중복, 업로드 경로, 초기 관리자 비밀번호가 올바른지 확인합니다.
 
 ```bash
-pnpm ops:validate-env -- --env-file docker/.env
+pnpm ops:validate-env -- --env-file docker/.env --allow-generated-secrets
+```
+
+API 라우트의 권한 보호 방식도 배포 전에 감사합니다.
+
+```bash
+pnpm ops:auth-audit
+```
+
+서비스를 올린 뒤에는 기본 헬스/접속 흐름을 확인합니다.
+
+```bash
+pnpm ops:smoke -- --env-file docker/.env
 ```
 
 ---

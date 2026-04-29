@@ -101,6 +101,12 @@ results.push(
     if (!["healthy", "degraded"].includes(body.status)) {
       throw new Error(`unexpected health status: ${body.status}`);
     }
+    if (body.checks?.database !== "healthy") {
+      throw new Error(`database check is ${body.checks?.database ?? "missing"}`);
+    }
+    if (body.checks?.uploads !== "healthy") {
+      throw new Error(`uploads check is ${body.checks?.uploads ?? "missing"}`);
+    }
     return body.status;
   })
 );

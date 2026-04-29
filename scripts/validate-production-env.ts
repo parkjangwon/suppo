@@ -2,10 +2,11 @@
 
 import { config } from "dotenv";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 type ValidationLevel = "error" | "warning";
 
-interface Finding {
+export interface Finding {
   level: ValidationLevel;
   message: string;
 }
@@ -13,11 +14,13 @@ interface Finding {
 interface Args {
   envFile?: string;
   allowHttp: boolean;
+  allowGeneratedSecrets: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
   const args: Args = {
     allowHttp: false,
+    allowGeneratedSecrets: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -31,13 +34,17 @@ function parseArgs(argv: string[]): Args {
     if (arg === "--allow-http") {
       args.allowHttp = true;
     }
+
+    if (arg === "--allow-generated-secrets") {
+      args.allowGeneratedSecrets = true;
+    }
   }
 
   return args;
 }
 
 function loadEnvironment(envFile?: string) {
-  const defaultFiles = [".env", ".env.local", "docker/env/.env.production"];
+  const defaultFiles = [".env", ".env.local", "docker/.env", "docker/env/.env.production"];
   const files = envFile ? [envFile] : defaultFiles;
 
   for (const file of files) {
@@ -45,8 +52,15 @@ function loadEnvironment(envFile?: string) {
   }
 }
 
-function requireValue(name: string, findings: Finding[]) {
-  const value = process.env[name];
+type Environment = NodeJS.ProcessEnv;
+
+function readEnv(env: Environment, name: string) {
+  const value = env[name]?.trim();
+  return value || undefined;
+}
+
+function requireValue(env: Environment, name: string, findings: Finding[]) {
+  const value = readEnv(env, name);
   if (!value) {
     findings.push({ level: "error", message: `${name} is required` });
     return "";
@@ -55,8 +69,8 @@ function requireValue(name: string, findings: Finding[]) {
   return value;
 }
 
-function requireMinLength(name: string, minLength: number, findings: Finding[]) {
-  const value = requireValue(name, findings);
+function requireMinLength(env: Environment, name: string, minLength: number, findings: Finding[]) {
+  const value = requireValue(env, name, findings);
   if (value && value.length < minLength) {
     findings.push({
       level: "error",
@@ -65,8 +79,27 @@ function requireMinLength(name: string, minLength: number, findings: Finding[]) 
   }
 }
 
-function validateUrl(name: string, allowHttp: boolean, findings: Finding[]) {
-  const value = requireValue(name, findings);
+function requireSecretMinLength(
+  env: Environment,
+  name: string,
+  minLength: number,
+  findings: Finding[],
+  allowGeneratedSecrets: boolean,
+) {
+  const value = readEnv(env, name);
+  if (!value && allowGeneratedSecrets) {
+    findings.push({
+      level: "warning",
+      message: `${name} is missing; relying on Docker secrets-init to generate it before runtime`,
+    });
+    return;
+  }
+
+  requireMinLength(env, name, minLength, findings);
+}
+
+function validateUrl(env: Environment, name: string, allowHttp: boolean, findings: Finding[]) {
+  const value = requireValue(env, name, findings);
   if (!value) {
     return;
   }
@@ -86,71 +119,158 @@ function validateUrl(name: string, allowHttp: boolean, findings: Finding[]) {
   if (allowHttp && !["http:", "https:"].includes(parsed.protocol)) {
     findings.push({ level: "error", message: `${name} must use http or https` });
   }
+  return parsed;
 }
 
-function validateEnvironment(allowHttp: boolean) {
+function validateUploadDir(env: Environment, findings: Finding[]) {
+  const uploadDir = readEnv(env, "UPLOAD_DIR") ?? "uploads";
+  const normalized = uploadDir.replace(/\\/g, "/");
+
+  if (normalized.includes("..")) {
+    findings.push({
+      level: "error",
+      message: "UPLOAD_DIR must not contain path traversal segments",
+    });
+  }
+
+  if (/apps\/(admin|public)\/public(\/|$)/.test(normalized) || /(^|\/)public\/uploads(\/|$)/.test(normalized)) {
+    findings.push({
+      level: "error",
+      message: "UPLOAD_DIR must point to a shared private directory, not an app public directory",
+    });
+  }
+}
+
+function validateDistinctSecrets(env: Environment, names: string[], findings: Finding[]) {
+  for (let left = 0; left < names.length; left += 1) {
+    for (let right = left + 1; right < names.length; right += 1) {
+      const leftValue = readEnv(env, names[left]);
+      const rightValue = readEnv(env, names[right]);
+      if (leftValue && rightValue && leftValue === rightValue) {
+        findings.push({
+          level: "error",
+          message: `${names[left]} and ${names[right]} must use different secret values`,
+        });
+      }
+    }
+  }
+}
+
+function validateWeakValues(env: Environment, findings: Finding[]) {
+  const weakAdminPasswords = new Set(["admin", "admin123", "admin1234", "password", "password1234"]);
+  const initialPassword = readEnv(env, "INITIAL_ADMIN_PASSWORD");
+  if (initialPassword && weakAdminPasswords.has(initialPassword.toLowerCase())) {
+    findings.push({
+      level: "warning",
+      message: "INITIAL_ADMIN_PASSWORD uses a weak default-like value; change it before production",
+    });
+  }
+
+  for (const name of ["AUTH_SECRET", "TICKET_ACCESS_SECRET", "GIT_TOKEN_ENCRYPTION_KEY"]) {
+    const value = readEnv(env, name);
+    if (value && /(test|placeholder|changeme|secret-min-32|local-dev)/i.test(value)) {
+      findings.push({
+        level: "warning",
+        message: `${name} looks like a placeholder or test value; replace before production deployment`,
+      });
+    }
+  }
+}
+
+export function validateEnvironment(
+  env: Environment,
+  allowHttp: boolean,
+  options: { allowGeneratedSecrets?: boolean } = {},
+) {
   const findings: Finding[] = [];
 
-  requireValue("DATABASE_URL", findings);
-  validateUrl("PUBLIC_URL", allowHttp, findings);
-  validateUrl("ADMIN_BASE_URL", allowHttp, findings);
-  requireMinLength("AUTH_SECRET", 32, findings);
-  requireMinLength("TICKET_ACCESS_SECRET", 32, findings);
-  requireMinLength("GIT_TOKEN_ENCRYPTION_KEY", 32, findings);
+  requireValue(env, "DATABASE_URL", findings);
+  const publicUrl = validateUrl(env, "PUBLIC_URL", allowHttp, findings);
+  const adminBaseUrl = readEnv(env, "ADMIN_BASE_URL") ? validateUrl(env, "ADMIN_BASE_URL", allowHttp, findings) : undefined;
+  const adminUrl = readEnv(env, "ADMIN_URL") ? validateUrl(env, "ADMIN_URL", allowHttp, findings) : undefined;
 
-  if (!process.env.TURNSTILE_SECRET_KEY) {
+  if (!adminBaseUrl && !adminUrl) {
+    findings.push({ level: "error", message: "ADMIN_BASE_URL or ADMIN_URL is required" });
+  }
+
+  const allowGeneratedSecrets = options.allowGeneratedSecrets ?? false;
+  requireSecretMinLength(env, "AUTH_SECRET", 32, findings, allowGeneratedSecrets);
+  requireSecretMinLength(env, "TICKET_ACCESS_SECRET", 32, findings, allowGeneratedSecrets);
+  requireSecretMinLength(env, "GIT_TOKEN_ENCRYPTION_KEY", 32, findings, allowGeneratedSecrets);
+  validateDistinctSecrets(env, ["AUTH_SECRET", "TICKET_ACCESS_SECRET", "GIT_TOKEN_ENCRYPTION_KEY"], findings);
+  validateUploadDir(env, findings);
+  validateWeakValues(env, findings);
+
+  if (!readEnv(env, "TURNSTILE_SECRET_KEY")) {
     findings.push({
       level: "warning",
       message: "TURNSTILE_SECRET_KEY is missing; public ticket/chat CAPTCHA will fail in production",
     });
   }
 
-  if (!process.env.INTERNAL_EMAIL_DISPATCH_TOKEN) {
+  if (!readEnv(env, "INTERNAL_EMAIL_DISPATCH_TOKEN")) {
     findings.push({
       level: "warning",
       message: "INTERNAL_EMAIL_DISPATCH_TOKEN is missing; email dispatch endpoint cannot be triggered securely",
     });
   }
 
-  if (!process.env.INTERNAL_AUTOMATION_DISPATCH_TOKEN) {
+  if (!readEnv(env, "INTERNAL_AUTOMATION_DISPATCH_TOKEN")) {
     findings.push({
       level: "warning",
       message: "INTERNAL_AUTOMATION_DISPATCH_TOKEN is missing; automation dispatch endpoint cannot be triggered securely",
     });
   }
 
-  if (process.env.INITIAL_ADMIN_EMAIL && !process.env.INITIAL_ADMIN_PASSWORD) {
+  if (readEnv(env, "INITIAL_ADMIN_EMAIL") && !readEnv(env, "INITIAL_ADMIN_PASSWORD")) {
     findings.push({
       level: "error",
       message: "INITIAL_ADMIN_PASSWORD must be set when INITIAL_ADMIN_EMAIL is provided",
     });
   }
 
-  if (process.env.INITIAL_ADMIN_PASSWORD && !process.env.INITIAL_ADMIN_EMAIL) {
+  if (readEnv(env, "INITIAL_ADMIN_PASSWORD") && !readEnv(env, "INITIAL_ADMIN_EMAIL")) {
     findings.push({
       level: "error",
       message: "INITIAL_ADMIN_EMAIL must be set when INITIAL_ADMIN_PASSWORD is provided",
     });
   }
 
-  if (process.env.PUBLIC_URL && process.env.ADMIN_BASE_URL && process.env.PUBLIC_URL === process.env.ADMIN_BASE_URL) {
+  const effectiveAdminUrl = adminBaseUrl ?? adminUrl;
+  if (publicUrl && effectiveAdminUrl && publicUrl.href === effectiveAdminUrl.href) {
     findings.push({
       level: "warning",
-      message: "PUBLIC_URL and ADMIN_BASE_URL are identical; confirm public/admin domain split is intentional",
+      message: "PUBLIC_URL and admin URL are identical; confirm public/admin domain split is intentional",
     });
   }
 
-  if (process.env.AUTH_SECRET?.includes("test-secret") || process.env.TICKET_ACCESS_SECRET?.includes("test")) {
+  const appBaseUrl = readEnv(env, "APP_BASE_URL");
+  if (appBaseUrl && publicUrl) {
+    try {
+      const parsedAppBaseUrl = new URL(appBaseUrl);
+      if (parsedAppBaseUrl.href !== publicUrl.href) {
+        findings.push({
+          level: "warning",
+          message: "APP_BASE_URL differs from PUBLIC_URL; customer-facing email links may point to the wrong host",
+        });
+      }
+    } catch {
+      findings.push({ level: "error", message: "APP_BASE_URL must be a valid URL when set" });
+    }
+  }
+
+  const bindIp = readEnv(env, "BIND_IP");
+  if (bindIp === "0.0.0.0" || bindIp === "::") {
     findings.push({
       level: "warning",
-      message: "Detected test-like secret values; replace before production deployment",
+      message: "BIND_IP exposes app ports on all interfaces; use 127.0.0.1 behind a reverse proxy when possible",
     });
   }
 
   return findings;
 }
 
-function printFindings(findings: Finding[]) {
+export function printFindings(findings: Finding[]) {
   const errors = findings.filter((finding) => finding.level === "error");
   const warnings = findings.filter((finding) => finding.level === "warning");
 
@@ -178,12 +298,20 @@ function printFindings(findings: Finding[]) {
   }
 }
 
-const args = parseArgs(process.argv.slice(2));
-loadEnvironment(args.envFile);
+function main() {
+  const args = parseArgs(process.argv.slice(2));
+  loadEnvironment(args.envFile);
 
-const findings = validateEnvironment(args.allowHttp);
-printFindings(findings);
+  const findings = validateEnvironment(process.env, args.allowHttp, {
+    allowGeneratedSecrets: args.allowGeneratedSecrets,
+  });
+  printFindings(findings);
 
-if (findings.some((finding) => finding.level === "error")) {
-  process.exit(1);
+  if (findings.some((finding) => finding.level === "error")) {
+    process.exit(1);
+  }
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  main();
 }

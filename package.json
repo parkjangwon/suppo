@@ -14,6 +14,8 @@
     "lint": "pnpm -r lint",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "ops:auth-audit": "node scripts/audit-api-auth.mjs",
+    "ops:backup-drill": "node scripts/ops-backup-restore-drill.mjs",
     "ops:validate-env": "tsx scripts/validate-production-env.ts",
     "ops:smoke": "node scripts/ops-smoke-test.mjs"
   },
@@ -24,10 +26,12 @@
     "@vitejs/plugin-react": "^5.2.0",
     "dotenv": "^17.3.1",
     "jsdom": "^25.0.1",
+    "jszip": "^3.10.1",
     "next": "^15.5.15",
     "playwright": "^1.53.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "vitest": "^4.1.5"
   },
