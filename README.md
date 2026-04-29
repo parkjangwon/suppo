@@ -1,506 +1,278 @@
-# Suppo
+# Suppo — 사내 헬프데스크
 
 <p align="center">
-  <strong>pnpm workspace 기반 Public/Admin 분리형 헬프데스크 시스템</strong>
+  <strong>고객 포털과 관리자 대시보드가 분리된 셀프호스팅 헬프데스크 시스템</strong>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js" alt="Next.js 15">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19">
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma" alt="Prisma">
-  <img src="https://img.shields.io/badge/SQLite-3-003B57?style=flat-square&logo=sqlite" alt="SQLite">
-  <img src="https://img.shields.io/badge/LibSQL-blue?style=flat-square" alt="LibSQL">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT">
 </p>
 
 ---
 
-## 개요
+## 이 시스템이 제공하는 것
 
-Suppo은 고객용 공개 채널과 관리자용 백오피스를 분리한 헬프데스크 애플리케이션입니다.
+| 사용자 | 무엇을 하나 |
+|--------|------------|
+| **고객** | 티켓 제출 → 진행 상황 확인 → 댓글로 추가 문의 |
+| **상담원** | 티켓 접수 · 처리 · 댓글 작성 · 내부 메모 · 파일 첨부 |
+| **관리자** | 상담원 관리 · 통계 확인 · 이메일/브랜딩/연동 설정 |
 
-- `apps/public`: 고객 티켓 생성, 조회, 지식베이스, 설문
-- `apps/admin`: 상담원/관리자 대시보드, 티켓 처리, 분석, 설정
-- `packages/db`: Prisma + LibSQL/SQLite 클라이언트 및 마이그레이션
-- `packages/shared`: 인증, 보안, 이메일, 티켓, 지식베이스, i18n(다국어) 등 공용 비즈니스 로직
-- `packages/ui`: 공용 shadcn/ui 컴포넌트
+**포함된 기능:**
+- 고객 포털 (티켓 제출, 상태 조회, 지식베이스, CSAT 설문)
+- 관리자 패널 (티켓 목록/상세, 담당자 배정, 일괄 처리, 검색/필터)
+- 이메일 알림 (티켓 접수, 댓글, 내부 알림)
+- 실시간 알림 (관리자 패널 내 SSE 푸시)
+- 지식베이스 관리 (초안/게시/비공개)
+- 팀 · 영업시간 · 업무 규칙 설정
+- GitHub/GitLab 이슈 연동
+- 공개 API + Outbound Webhook
+- 다국어 지원 (한국어/영어)
+- SAML SSO (BoxyHQ)
 
-로컬 개발은 SQLite 파일 DB를 사용하고, 운영은 LibSQL/sqld 멀티 컨테이너 구성을 기준으로 합니다.
+---
 
-## 핵심 기능
+## 빠른 시작 (Docker Compose)
 
-- 고객용 티켓 생성, 티켓 조회, 공개 댓글, 지식베이스, CSAT 설문
-- 관리자용 대시보드, 티켓 목록/상세, 댓글/내부 메모, 담당자 변경, 검색/필터
-- 상담원 자동 할당, presence 표시, comment lock
-- 이메일 Outbox 패턴, GitHub/GitLab 이슈 연동, SAML SSO, 감사 로그
-- AI 설정/인사이트/자동 분류, 파일 업로드, 브랜딩, 문의 유형/템플릿 관리
-- 팀·큐 관리, 업무 규칙, 영업시간 설정, 사용자 정의 필드
-- 다국어 지원 (한국어/영어, cookie 기반 locale 전환)
-- 지식 문서의 public 링크는 `게시됨 + 공개` 상태에서만 admin 목록에 노출
-- 공개 API 키와 outbound webhook 기반 외부 시스템 연동
-
-## 관리자 메뉴 구조
-
-설정 메뉴는 아래처럼 역할별로 분리되어 있습니다.
-
-- `업무 규칙`: 응답 목표, 자동 처리, 작업 바로가기
-- `연동 설정`: 공개 API 키, outbound webhook
-- `브랜딩`, `이메일 연동`, `Git 연동`, `SAML SSO`, `시스템` 등은 각각 독립 메뉴
-
-즉, 운영자 입장에서:
-
-- 티켓 처리 기준을 바꾸고 싶으면 `업무 규칙`
-- 외부 시스템과 연결하고 싶으면 `연동 설정`
-
-으로 이해하면 됩니다.
-
-## 연동 가이드
-
-### 공개 API
-
-연동 설정의 `공개 API 키`는 외부 시스템이 우리 헬프데스크 티켓 API를 호출할 때 씁니다.
-
-- 관리자 경로: `/admin/settings/integrations`
-- 인증 헤더: `x-api-key: <발급된 키>` 또는 `Authorization: Bearer <발급된 키>`
-- 현재 지원 엔드포인트
-  - `GET /api/public/tickets`
-  - `POST /api/public/tickets`
-  - `GET /api/public/tickets/:id`
-  - `PATCH /api/public/tickets/:id`
-
-티켓 생성 예시:
+서버 1대와 Docker가 있으면 충분합니다.
 
 ```bash
-curl -X POST https://YOUR_ADMIN_DOMAIN/api/public/tickets \
-  -H "Content-Type: application/json" \
-  -H "x-api-key: crn_live_xxxxxxxxxxxxxxxxx" \
-  -d '{
-    "customerName": "홍길동",
-    "customerEmail": "hong@example.com",
-    "requestTypeId": "REQUEST_TYPE_ID",
-    "priority": "MEDIUM",
-    "subject": "외부 시스템에서 생성한 문의",
-    "description": "주문 시스템 장애 접수"
-  }'
-```
+# 1. 저장소 클론
+git clone https://github.com/parkjangwon/suppo.git
+cd suppo
 
-활용 예시:
+# 2. 환경 파일 준비 (선택 — 기본값으로도 바로 실행 가능)
+cp docker/.env.example docker/.env
 
-- 쇼핑몰/ERP에서 장애 접수 시 헬프데스크 티켓 자동 생성
-- 사내 운영툴에서 티켓 상태를 `IN_PROGRESS`, `RESOLVED`로 동기화
-- Zapier/Make에서 고객 이벤트를 티켓으로 변환
-
-### Outbound Webhook
-
-`Outbound Webhook`은 우리 시스템에서 발생한 이벤트를 외부 URL로 POST 전송합니다.
-
-- 현재 이벤트
-  - `ticket.created`
-  - `ticket.updated`
-  - `ticket.commented`
-- 선택 사항
-  - `서명 시크릿`: 설정하면 `x-suppo-signature` 헤더로 `sha256 HMAC` 서명이 붙습니다.
-
-payload 예시:
-
-```json
-{
-  "event": "ticket.created",
-  "occurredAt": "2026-03-29T10:00:00.000Z",
-  "data": {
-    "source": "public-form",
-    "ticketId": "ticket_123",
-    "ticketNumber": "CRN-2026-000123"
-  }
-}
-```
-
-운영 팁:
-
-- webhook 등록 후 `테스트 발송`으로 먼저 연결 확인
-- 각 endpoint 카드에서 최근 호출 이력, 응답 코드, 에러를 바로 확인 가능
-- 공개 API와 webhook을 같이 쓰면 “외부가 티켓 생성”하고 “우리 쪽 상태 변경을 다시 외부가 수신”하는 양방향 흐름을 만들 수 있음
-
-## 기술 스택
-
-- Frontend: Next.js 15 App Router, React 19, TypeScript, Tailwind CSS, shadcn/ui
-- Backend: Next.js Route Handlers, NextAuth.js v5, Prisma ORM
-- Database: SQLite (로컬), LibSQL/sqld (운영)
-- Infra: pnpm workspaces, Docker, Docker Compose
-- Integrations: Ollama, Gemini, SMTP/SES/Resend, S3, GitHub/GitLab, BoxyHQ SAML
-
-## 모노레포 구조
-
-```text
-suppo/
-├── apps/
-│   ├── admin/
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   ├── components/
-│   │   │   ├── hooks/
-│   │   │   ├── lib/
-│   │   │   ├── auth.ts
-│   │   │   ├── auth-edge.ts
-│   │   │   └── middleware.ts
-│   │   ├── next.config.ts
-│   │   ├── package.json
-│   │   └── tsconfig.json
-│   └── public/
-│       ├── src/
-│       │   ├── app/
-│       │   ├── components/
-│       │   └── middleware.ts
-│       ├── next.config.ts
-│       ├── package.json
-│       └── tsconfig.json
-├── packages/
-│   ├── db/
-│   │   ├── prisma/
-│   │   ├── src/client.ts
-│   │   ├── src/raw.ts
-│   │   └── src/index.ts
-│   ├── shared/
-│   │   └── src/
-│   └── ui/
-│       └── src/components/ui/
-├── tests/
-├── docker/
-│   ├── Dockerfile
-│   ├── .env.example
-│   ├── copy-standalone-deps.mjs
-│   └── docker-compose.yml
-├── pnpm-workspace.yaml
-└── tsconfig.base.json
-```
-
-## 시작하기
-
-### 요구사항
-
-- Node.js 22 이상 권장
-- pnpm 10 이상
-- macOS/Linux
-
-### 로컬 실행
-
-로컬 개발 환경은 SQLite 파일 DB를 사용합니다. 아래 명령은 의존성 설치, `.env`/`.env.local` 생성, Prisma Client 생성, SQLite 마이그레이션, demo seed 적용까지 한 번에 처리합니다.
-
-```bash
-./install.sh
-pnpm dev:all
-```
-
-`./install.sh`가 담당하는 작업:
-
-- 루트 `.env` 생성/보정
-- `apps/public/.env.local`, `apps/admin/.env.local` 생성
-- 로컬 SQLite 초기화
-- Prisma Client 생성
-- demo seed 적용
-
-접속 주소:
-
-- Public: `http://localhost:3000`
-- Admin: `http://localhost:3001/admin/login`
-
-기본 관리자 계정:
-
-```text
-email: admin@suppo.io
-password: admin1234
-```
-
-### 개발 서버
-
-공개 앱과 관리자 앱을 각각 실행합니다.
-
-```bash
-pnpm dev:public
-pnpm dev:admin
-pnpm dev:all
-```
-
-- Public: `http://localhost:3000`
-- Admin: `http://localhost:3001`
-
-`pnpm dev:all`은 앱만 실행합니다. 로컬 `.env.local` 생성, SQLite 초기화, 기본 시드 적용은 먼저 `./install.sh`가 담당합니다.
-
-### 빌드
-
-```bash
-pnpm build:public
-pnpm build:admin
-pnpm build:all
-pnpm start:all
-```
-
-## Docker Compose 배포
-
-Docker 배포는 `docker/docker-compose.yml` 하나로 실행합니다. Compose는 `sqld`, `migrate`, `secrets-init`, `bootstrap`, `public`, `admin`을 순서대로 기동합니다.
-
-### 빠른 시작
-
-```bash
+# 3. 실행
 docker compose -f docker/docker-compose.yml up --build -d
 ```
 
 기본 접속 주소:
 
-- Public: `http://localhost:3000`
-- Admin: `http://localhost:3001/admin/login`
+| 역할 | URL |
+|------|-----|
+| 고객 포털 | http://localhost:3000 |
+| 관리자 패널 | http://localhost:3001/admin/login |
 
 기본 관리자 계정:
 
-```text
-email: admin@suppo.io
-password: admin1234
+```
+이메일: admin@suppo.io
+비밀번호: admin1234
 ```
 
-기본값으로 `SEED_PROFILE=demo`가 적용되어 첫 기동 시 데모 고객, 상담원, 티켓, 지식베이스, 템플릿, 감사 로그, CSAT 데이터가 함께 생성됩니다.
+> **첫 로그인 후 반드시 비밀번호를 변경하세요.**
 
-### 환경 파일 사용
+---
 
-필요하면 예시 파일을 복사해 포트, 바인딩 주소, 외부 URL, 초기 계정, seed 정책을 조정합니다.
+## 배포 후 필수 설정 (이것만 하면 됩니다)
+
+### 1단계. 비밀번호 변경
+
+Admin 패널 우측 상단 프로필 → 비밀번호 변경
+
+### 2단계. 이메일 설정
+
+`Admin → 설정 → 이메일 연동`에서 발송 방식을 선택합니다.
+
+| 방식 | 설정 항목 |
+|------|----------|
+| SMTP | 호스트, 포트, 계정, 비밀번호 |
+| Resend | API Key |
+
+설정 후 **고객 이메일 알림 활성화** 토글을 켜야 실제 발송됩니다.  
+설정 전까지는 이메일이 발송되지 않습니다 (오류 없이 조용히 스킵됨).
+
+### 3단계. 문의 유형 등록
+
+`Admin → 설정 → 문의 유형`에서 최소 1개를 등록해야 고객이 티켓을 제출할 수 있습니다.
+
+예시:
+- 기술 지원
+- 구매/결제 문의
+- 기타
+
+### 4단계. 상담원 계정 추가
+
+`Admin → 상담원 관리 → 상담원 추가`
+
+필요에 따라 팀(`Admin → 팀 관리`)도 구성합니다.
+
+### 5단계. 브랜딩 설정 (선택)
+
+`Admin → 설정 → 브랜딩`에서 회사명, 로고, 색상을 변경합니다.  
+고객 포털과 이메일에 반영됩니다.
+
+---
+
+## 운영 환경 구성 (도메인 분리)
+
+리버스 프록시(nginx, Caddy 등) 뒤에 배포하는 경우 `docker/.env`에서 외부 URL을 설정합니다.
 
 ```bash
-cp docker/.env.example docker/.env
-docker compose -f docker/docker-compose.yml --env-file docker/.env up --build -d
+# docker/.env
+PUBLIC_URL=https://help.example.com       # 고객이 접속하는 주소
+ADMIN_URL=https://admin.example.com       # 관리자가 접속하는 주소
+APP_BASE_URL=https://help.example.com     # 이메일 링크에 사용되는 기본 URL
+BIND_IP=127.0.0.1                         # 리버스 프록시 뒤라면 127.0.0.1
+EMAIL_DOMAIN=example.com                  # 발신 이메일 도메인
+INITIAL_ADMIN_EMAIL=admin@example.com
+INITIAL_ADMIN_PASSWORD=강력한_비밀번호
+SEED_PROFILE=none                         # 운영 환경에서는 demo 데이터 제외
 ```
 
-자주 바꾸는 값:
+시크릿 키(`AUTH_SECRET`, `TICKET_ACCESS_SECRET`, `GIT_TOKEN_ENCRYPTION_KEY`)는 비워 두면 첫 실행 시 자동 생성됩니다.  
+**한 번 생성된 시크릿은 절대 변경하지 마세요.** 변경하면 모든 세션과 암호화 토큰이 무효화됩니다.
+
+---
+
+## 상태 확인 및 로그
 
 ```bash
-PUBLIC_URL=http://localhost:3000
-ADMIN_URL=http://localhost:3001
-BIND_IP=127.0.0.1
-PUBLIC_PORT=3000
-ADMIN_PORT=3001
-INITIAL_ADMIN_EMAIL=admin@suppo.io
-INITIAL_ADMIN_PASSWORD=admin1234
-AUTO_BOOTSTRAP=if-empty
-SEED_PROFILE=demo
-```
-
-`AUTH_SECRET`, `TICKET_ACCESS_SECRET`, `GIT_TOKEN_ENCRYPTION_KEY`는 비워두면 `secrets-init` 서비스가 `config_data` 볼륨의 `/config/secrets.env`에 자동 생성합니다. 컨테이너의 entrypoint는 `/run/config/secrets.env`를 읽어 빈 환경 변수만 채웁니다.
-
-### 로그와 상태 확인
-
-```bash
+# 전체 서비스 상태
 docker compose -f docker/docker-compose.yml ps
-docker compose -f docker/docker-compose.yml logs -f secrets-init migrate bootstrap public admin
+
+# 실시간 로그 (Ctrl+C로 종료)
+docker compose -f docker/docker-compose.yml logs -f public admin
+
+# 특정 서비스 로그
+docker compose -f docker/docker-compose.yml logs -f migrate bootstrap
 ```
 
-`migrate`는 Docker에서 `prisma migrate deploy` 대신 [packages/db/prisma/migrate.ts](packages/db/prisma/migrate.ts)를 사용해 `migration.sql` 파일들을 LibSQL에 순서대로 적용합니다.
+---
 
-`bootstrap`은 시작 시 `prisma generate`를 먼저 수행합니다. 빈 DB에서는 `SEED_PROFILE=demo`이면 demo seed를 넣고, `SEED_PROFILE=none`이면 최소 운영 기본 데이터만 넣습니다. DB가 이미 비어 있지 않으면 자동 bootstrap은 건너뜁니다.
-
-### 시드 데이터 초기화
-
-현재 Docker DB에 demo seed를 다시 적용하려면:
+## 업데이트 방법
 
 ```bash
-docker compose -f docker/docker-compose.yml run --rm bootstrap sh -lc '
-  [ -f /run/config/secrets.env ] && . /run/config/secrets.env
-  export INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
-  export INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD:-admin1234}
-  cd /app/packages/db
-  ./node_modules/.bin/prisma generate --schema=./prisma/schema.prisma
-  ./node_modules/.bin/tsx prisma/seed.ts
-'
+# 최신 코드 받기
+git pull
+
+# 이미지 재빌드 및 재시작 (데이터 유지)
+docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-DB와 자동 생성 시크릿까지 완전히 새로 만들려면 볼륨을 삭제합니다. 이 명령은 기존 티켓과 업로드 데이터도 삭제합니다.
+마이그레이션은 `migrate` 서비스가 재시작 시 자동으로 적용합니다.
+
+---
+
+## 백업
+
+Docker 볼륨 2개가 데이터를 보관합니다:
+
+| 볼륨 | 내용 |
+|------|------|
+| `suppo_sqld_data` | 티켓, 설정, 전체 DB |
+| `suppo_uploads` | 첨부 파일 |
+
+볼륨 백업 예시:
+
+```bash
+# DB 백업
+docker run --rm \
+  -v suppo_sqld_data:/data \
+  -v $(pwd)/backup:/backup \
+  alpine tar czf /backup/sqld-$(date +%Y%m%d).tar.gz /data
+
+# 업로드 파일 백업
+docker run --rm \
+  -v suppo_uploads:/data \
+  -v $(pwd)/backup:/backup \
+  alpine tar czf /backup/uploads-$(date +%Y%m%d).tar.gz /data
+```
+
+---
+
+## 데이터 초기화
+
+> **주의: 아래 명령은 모든 티켓과 첨부 파일을 삭제합니다.**
 
 ```bash
 docker compose -f docker/docker-compose.yml down -v
 docker compose -f docker/docker-compose.yml up --build -d
 ```
 
-로컬 SQLite seed를 다시 만들려면:
+---
 
-```bash
-rm -f packages/db/dev.db
-./install.sh
-```
+## 배포 전 환경 검증
 
-기존 로컬 DB를 유지한 채 demo seed만 다시 적용하려면:
-
-```bash
-set -a
-source .env
-set +a
-pnpm --filter=@suppo/db seed
-```
-
-## 운영 점검
-
-운영 배포 전에는 아래 문서와 스크립트를 기준으로 점검합니다.
-
-- 운영 점검 문서: `docs/plans/2026-04-11-operational-readiness-and-test-plan.md`
-- 운영 ENV 검증:
+운영 환경에서 필수 변수가 올바르게 설정됐는지 확인합니다.
 
 ```bash
 pnpm ops:validate-env -- --env-file docker/.env
 ```
 
-- 배포 직후 smoke test:
+---
+
+## 시스템 요구사항
+
+| 항목 | 최소 사양 |
+|------|----------|
+| OS | Linux (Ubuntu 22.04 이상 권장) |
+| CPU | 1 vCPU |
+| 메모리 | 1 GB RAM |
+| 디스크 | 10 GB (첨부 파일 용량에 따라 추가) |
+| Docker | 24 이상 |
+| Docker Compose | v2 이상 |
+
+소규모 팀(상담원 10명 이하, 월 티켓 수천 건 이하) 기준입니다.
+
+---
+
+## 자주 묻는 질문
+
+**Q. 이메일을 설정했는데 발송이 안 됩니다.**  
+Admin → 설정 → 이메일 연동에서 **"고객 이메일 알림 활성화"** 토글이 켜져 있는지 확인하세요.
+
+**Q. 고객이 티켓 제출 시 문의 유형 목록이 비어 있습니다.**  
+Admin → 설정 → 문의 유형에서 최소 1개를 등록해야 합니다.
+
+**Q. 관리자 비밀번호를 잊었습니다.**  
+DB에 직접 접근해 비밀번호 해시를 초기화하거나, 볼륨을 삭제 후 재시작해 초기 계정으로 복구합니다.
+
+**Q. 여러 대의 서버로 확장할 수 있나요?**  
+현재 실시간 알림(SSE)과 요청 제한이 단일 서버 인메모리 방식입니다. 수평 확장 시 알림이 누락될 수 있으며, 소규모 팀에서는 서버 1대로 충분합니다.
+
+**Q. SSL/HTTPS는 어떻게 설정하나요?**  
+nginx, Caddy 같은 리버스 프록시에서 SSL을 처리하고 Suppo는 HTTP로 내부 통신하도록 구성을 권장합니다. `BIND_IP=127.0.0.1`으로 설정하면 외부 직접 노출을 막을 수 있습니다.
+
+---
+
+## 웹 콘솔 설정 메뉴 안내
+
+환경 변수가 아닌 Admin 패널에서 관리되는 설정 목록입니다.
+
+| 메뉴 | 경로 | 설명 |
+|------|------|------|
+| 이메일 연동 | `/admin/settings/email` | SMTP/Resend 설정, 알림 활성화 |
+| 브랜딩 | `/admin/settings/branding` | 회사명, 로고, 주색상 |
+| 문의 유형 | `/admin/settings/request-types` | 고객 폼의 카테고리 |
+| 템플릿 | `/admin/templates` | 댓글 빠른 답변 템플릿 |
+| 영업시간 | `/admin/settings/business-hours` | SLA 산정 기준 시간 |
+| 업무 규칙 | `/admin/settings/operations` | 자동 배정, 응답 목표 |
+| Git 연동 | `/admin/settings/git` | GitHub/GitLab 이슈 연결 |
+| SAML SSO | `/admin/settings/saml` | 기업 SSO (BoxyHQ) |
+| AI/LLM | `/admin/settings/llm` | 자동 분류, 인사이트 |
+| 연동 설정 | `/admin/settings/integrations` | 공개 API 키, Webhook |
+| 시스템 | `/admin/settings/system` | 백업/복원, 감사 로그 |
+
+---
+
+## 로컬 개발 환경 (기여자용)
 
 ```bash
-pnpm ops:smoke -- --env-file docker/.env
+# 요구사항: Node.js 22+, pnpm 10+
+./install.sh     # 의존성 설치, DB 초기화, demo 시드 적용
+pnpm dev:all     # 개발 서버 실행 (Public :3000, Admin :3001)
+pnpm test        # 단위 테스트
+pnpm test:e2e    # E2E 테스트
+pnpm build:all   # 프로덕션 빌드
 ```
 
-`docker/.env`가 로컬/스테이징용 HTTP URL이면 `--allow-http`를 함께 사용합니다.
-
-## 환경 변수
-
-### 루트 `.env`
-
-Playwright나 일부 공통 도구에서 사용합니다.
-
-```bash
-DATABASE_URL="file:./packages/db/dev.db"
-AUTH_SECRET="your-auth-secret"
-AUTH_URL="http://localhost:3000"
-TICKET_ACCESS_SECRET="your-ticket-access-secret"
-GIT_TOKEN_ENCRYPTION_KEY="your-32-byte-key"
-INITIAL_ADMIN_EMAIL="admin@suppo.io"
-INITIAL_ADMIN_PASSWORD="admin1234"
-```
-
-### 앱별 `.env.local`
-
-각 앱은 자체 `.env.local`을 사용합니다.
-
-`apps/public/.env.local`
-
-```bash
-DATABASE_URL=file:/absolute/path/to/packages/db/dev.db
-TICKET_ACCESS_SECRET=local-dev-ticket-secret
-AUTH_URL=http://localhost:3000
-```
-
-`apps/admin/.env.local`
-
-```bash
-DATABASE_URL=file:/absolute/path/to/packages/db/dev.db
-AUTH_SECRET=local-dev-secret-32-chars-minimum
-TICKET_ACCESS_SECRET=local-dev-ticket-secret
-GIT_TOKEN_ENCRYPTION_KEY=local-dev-encryption-key-32bytexx
-INITIAL_ADMIN_EMAIL=admin@suppo.io
-INITIAL_ADMIN_PASSWORD=admin1234
-AUTH_URL=http://localhost:3001
-```
-
-### 웹 콘솔에서 관리되는 설정
-
-- 이메일 설정: `/admin/settings/email`
-- AI/LLM 설정: `/admin/settings/llm`
-- 브랜딩: `/admin/settings/branding`
-- SAML SSO: `/admin/settings/saml`
-- 문의 유형: `/admin/settings/request-types`
-- Git 연동: `/admin/settings/git`
-- 업무 규칙: `/admin/settings/operations`
-- 연동 설정: `/admin/settings/integrations`
-- 영업시간: `/admin/settings/business-hours`
-- 사용자 정의 필드: `/admin/settings/custom-fields`
-- 시스템 설정: `/admin/settings/system`
-
-## 데이터베이스
-
-Prisma 스키마와 마이그레이션은 `packages/db/prisma/`에 있습니다.
-
-주요 명령어:
-
-```bash
-pnpm --filter=@suppo/db generate
-pnpm --filter=@suppo/db migrate:dev --name <name>
-pnpm --filter=@suppo/db migrate:deploy
-pnpm --filter=@suppo/db seed
-pnpm --filter=@suppo/db studio
-```
-
-로컬 SQLite 개발에서는 위 Prisma 명령을 그대로 사용합니다. Docker + LibSQL(sqld) 경로에서는 `migrate` 서비스가 [packages/db/prisma/migrate.ts](/Users/pjw/dev/project/suppo/packages/db/prisma/migrate.ts:1) 를 통해 SQL 마이그레이션을 적용합니다.
-
-## 테스트
-
-### Unit Test
-
-```bash
-pnpm test
-```
-
-Vitest는 admin 앱 alias를 기준으로 동작하고, 공용 패키지 경로는 workspace alias로 해석합니다.
-
-### E2E Test
-
-```bash
-pnpm test:e2e
-```
-
-Playwright는 public/admin 서버를 자동으로 띄우고 다음 핵심 흐름을 검증합니다.
-
-- public 홈 렌더링
-- public 티켓 생성
-- public 티켓 조회
-- admin 로그인
-- admin 티켓 목록/상세
-- ticket presence
-- comment lock
-- 고급 검색 필터
-
-결과 체크리스트는 `test-report/` 아래 `.xlsx`로 저장됩니다.
-
-## 이미지 빌드 예시
-
-```bash
-docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=public -t suppo-public:latest .
-docker build -f docker/Dockerfile --target runner --build-arg APP_NAME=admin -t suppo-admin:latest .
-```
-
-## 라우팅 원칙
-
-### Public 앱
-
-- `/`
-- `/ticket/new`
-- `/ticket/submitted`
-- `/ticket/lookup`
-- `/ticket/[number]`
-- `/knowledge`
-- `/knowledge/[slug]`
-- `/survey/[token]`
-- `/api/tickets`
-- `/api/tickets/lookup`
-- `/api/comments/public`
-
-### Admin 앱
-
-- `/` → `/admin/dashboard` 리다이렉트
-- `/admin/login`
-- `/admin/dashboard`
-- `/admin/tickets`
-- `/admin/tickets/[id]`
-- `/admin/analytics`
-- `/admin/agents`
-- `/admin/teams`
-- `/admin/customers`
-- `/admin/knowledge`
-- `/admin/templates`
-- `/admin/calendar`
-- `/admin/audit-logs`
-- `/admin/settings/*`
-- `/api/admin/*`
-- `/api/agents/*`
-- `/api/comments`
-- `/api/tickets/[id]/*`
-
-## 참고 문서
-
-- [AGENTS.md](./AGENTS.md)
-- [CLAUDE.md](./CLAUDE.md)
-- [PROJECT_HARNESS.md](./PROJECT_HARNESS.md)
-- [docs/superpowers/plans/2026-03-22-monorepo-restructure.md](./docs/superpowers/plans/2026-03-22-monorepo-restructure.md)
+---
 
 ## 라이선스
 
