@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { hash, compare } from "bcryptjs";
 import { prisma } from "@suppo/db";
 import { z } from "zod";
+import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "현재 비밀번호를 입력해주세요."),
@@ -11,8 +12,17 @@ const changePasswordSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for") ?? "127.0.0.1";
+    const rateLimit = checkRateLimit(ip, 5, 60 * 1000); // 5 attempts per minute
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요." },
+        { status: 429, headers: createRateLimitHeaders(rateLimit) }
+      );
+    }
+
     const session = await auth();
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "인증되지 않은 요청입니다." },

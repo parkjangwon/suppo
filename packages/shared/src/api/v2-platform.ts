@@ -103,7 +103,7 @@ export class RateLimiter {
 export function createAPIv2Middleware(oauth: OAuth2Server, rateLimiter: RateLimiter) {
   return async function apiMiddleware(request: NextRequest): Promise<NextResponse | null> {
     // Rate limiting
-    const clientIp = request.ip || "unknown";
+    const clientIp = request.headers.get("x-forwarded-for") ?? "unknown";
     const rateLimit = rateLimiter.checkLimit(clientIp);
     
     if (!rateLimit.allowed) {

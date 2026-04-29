@@ -9,5 +9,5 @@
       "@/auth": ["../../apps/admin/src/auth.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../../apps/admin/src/types/next-auth.d.ts"]
 }

@@ -6,7 +6,7 @@ import { bulkUpdateTickets } from "@/lib/tickets/bulk-update";
 
 const bulkUpdateSchema = z
   .object({
-    ticketIds: z.array(z.string().min(1)).min(1),
+    ticketIds: z.array(z.string().min(1)).min(1).max(200),
     status: z.enum(["OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CLOSED"]).optional(),
     priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).optional(),
     assigneeId: z.string().nullable().optional(),

@@ -89,7 +89,7 @@ export async function getPortalTicketDetail(
         comments: {
           where: { isInternal: false },
           orderBy: { createdAt: "asc" },
-          include: { agent: true }
+          include: { author: true }
         },
         attachments: true
       }
@@ -116,8 +116,8 @@ export async function getPortalTicketDetail(
       content: c.content,
       isInternal: c.isInternal,
       createdAt: c.createdAt,
-      authorName: c.agentId ? publicAgentDisplayName : ticket.customerName,
-      authorType: c.agentId ? "AGENT" : "CUSTOMER"
+      authorName: c.authorId ? publicAgentDisplayName : ticket.customerName,
+      authorType: c.authorId ? "AGENT" : "CUSTOMER"
     })),
     attachments: ticket.attachments.map(a => ({
       id: a.id,
@@ -140,7 +140,9 @@ export async function addPortalComment(
         ticketId,
         content,
         isInternal: false,
-        source: "PORTAL"
+        authorType: "CUSTOMER",
+        authorName: customerEmail,
+        authorEmail: customerEmail,
       }
     });
     return true;

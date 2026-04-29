@@ -17,11 +17,11 @@ export async function calculateFirstResponseTime(
   const tickets = await prisma.ticket.findMany({
     where: {
       createdAt: { gte: startDate, lte: endDate },
-      comments: { some: { agentId: { not: null } } }
+      comments: { some: { authorId: { not: null } } }
     },
     include: {
       comments: {
-        where: { agentId: { not: null } },
+        where: { authorId: { not: null } },
         orderBy: { createdAt: "asc" },
         take: 1
       }

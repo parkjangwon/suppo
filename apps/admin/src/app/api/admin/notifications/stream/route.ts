@@ -11,26 +11,22 @@ export async function GET() {
 
   const agentId = session.user.agentId;
 
+  let heartbeat: ReturnType<typeof setInterval>;
+
   const stream = new ReadableStream({
     start(controller) {
       notificationService.subscribe(agentId, controller);
 
-      // heartbeat every 25s to keep connection alive
-      const heartbeat = setInterval(() => {
+      heartbeat = setInterval(() => {
         try {
           controller.enqueue(new TextEncoder().encode(": heartbeat\n\n"));
         } catch {
           clearInterval(heartbeat);
         }
       }, 25_000);
-
-      // store cleanup fn on the controller for cancel
-      (controller as unknown as { _cleanup: () => void })._cleanup = () => {
-        clearInterval(heartbeat);
-        notificationService.unsubscribe(agentId);
-      };
     },
     cancel() {
+      clearInterval(heartbeat);
       notificationService.unsubscribe(agentId);
     },
   });

@@ -43,8 +43,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique filename
-    const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+    // Generate unique filename — derive extension from validated MIME type, not user filename
+    const MIME_TO_EXT: Record<string, string> = {
+      "image/png": "png",
+      "image/jpeg": "jpg",
+      "image/jpg": "jpg",
+      "image/gif": "gif",
+      "image/webp": "webp",
+    };
+    const ext = MIME_TO_EXT[file.type] ?? "bin";
     const safeType = (type || "image").replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 32) || "image";
     const filename = `${safeType}-${crypto.randomUUID()}.${ext}`;
     

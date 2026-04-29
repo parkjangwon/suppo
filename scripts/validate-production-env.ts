@@ -93,7 +93,7 @@ function validateEnvironment(allowHttp: boolean) {
 
   requireValue("DATABASE_URL", findings);
   validateUrl("PUBLIC_URL", allowHttp, findings);
-  validateUrl("ADMIN_URL", allowHttp, findings);
+  validateUrl("ADMIN_BASE_URL", allowHttp, findings);
   requireMinLength("AUTH_SECRET", 32, findings);
   requireMinLength("TICKET_ACCESS_SECRET", 32, findings);
   requireMinLength("GIT_TOKEN_ENCRYPTION_KEY", 32, findings);
@@ -133,10 +133,10 @@ function validateEnvironment(allowHttp: boolean) {
     });
   }
 
-  if (process.env.PUBLIC_URL && process.env.ADMIN_URL && process.env.PUBLIC_URL === process.env.ADMIN_URL) {
+  if (process.env.PUBLIC_URL && process.env.ADMIN_BASE_URL && process.env.PUBLIC_URL === process.env.ADMIN_BASE_URL) {
     findings.push({
       level: "warning",
-      message: "PUBLIC_URL and ADMIN_URL are identical; confirm public/admin domain split is intentional",
+      message: "PUBLIC_URL and ADMIN_BASE_URL are identical; confirm public/admin domain split is intentional",
     });
   }
 
