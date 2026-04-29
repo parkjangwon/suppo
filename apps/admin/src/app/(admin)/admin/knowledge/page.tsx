@@ -6,7 +6,7 @@ import { prisma } from "@suppo/db";
 import { Prisma } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { KnowledgeList } from "@/components/admin/knowledge-list";
-import { getPublicAppUrl } from "@suppo/shared/utils/public-app-url";
+import { getPublicAppUrl } from "@suppo/shared/utils/app-urls";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const metadata: Metadata = {

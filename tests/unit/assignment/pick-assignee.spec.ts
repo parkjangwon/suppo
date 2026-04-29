@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pickAssignee, type CandidateAgent } from "@/lib/assignment/pick-assignee";
+import { pickAssignee, type CandidateAgent } from "@suppo/shared/assignment/pick-assignee";
 
 describe("pickAssignee", () => {
   it("prefers the least-loaded specialist", () => {

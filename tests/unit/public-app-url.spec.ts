@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   createPublicKnowledgeUrl,
   getPublicAppUrl,
-} from "@suppo/shared/utils/public-app-url";
+} from "@suppo/shared/utils/app-urls";
 
 describe("public app url helpers", () => {
   it("uses the configured public url and trims the trailing slash", () => {

@@ -46,6 +46,10 @@ export function createPublicSurveyUrl(ticketId: string, configuredUrl?: string):
   return `${getPublicAppUrl(configuredUrl)}/survey/${ticketId}`;
 }
 
+export function createPublicKnowledgeUrl(slug: string, configuredUrl?: string): string {
+  return `${getPublicAppUrl(configuredUrl)}/knowledge/${slug}`;
+}
+
 export function createSamlMetadataBaseUrl(configuredUrl?: string): string {
   return getPublicAppUrl(configuredUrl);
 }
