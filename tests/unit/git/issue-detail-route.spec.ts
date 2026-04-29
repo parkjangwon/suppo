@@ -34,17 +34,15 @@ vi.mock("@suppo/shared/crypto/encrypt", () => ({
 }));
 
 vi.mock("@/lib/git/providers/github", () => ({
-  GitHubProvider: vi.fn().mockImplementation(() => ({
-    provider: "GITHUB",
-    getIssueFullDetail: mockGetIssueFullDetail
-  }))
+  GitHubProvider: vi.fn().mockImplementation(function() {
+    return { provider: "GITHUB", getIssueFullDetail: mockGetIssueFullDetail };
+  })
 }));
 
 vi.mock("@/lib/git/providers/gitlab", () => ({
-  GitLabProvider: vi.fn().mockImplementation(() => ({
-    provider: "GITLAB"
-    // getIssueFullDetail 미구현
-  }))
+  GitLabProvider: vi.fn().mockImplementation(function() {
+    return { provider: "GITLAB" };
+  })
 }));
 
 const sampleFullDetail = {

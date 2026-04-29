@@ -44,16 +44,15 @@ vi.mock("@suppo/shared/crypto/encrypt", () => ({
 // GitHub provider 모킹
 const mockGetIssue = vi.fn();
 vi.mock("@/lib/git/providers/github", () => ({
-  GitHubProvider: vi.fn().mockImplementation(() => ({
-    provider: "GITHUB",
-    getIssue: mockGetIssue
-  }))
+  GitHubProvider: vi.fn().mockImplementation(function() {
+    return { provider: "GITHUB", getIssue: mockGetIssue };
+  })
 }));
 
 vi.mock("@/lib/git/providers/gitlab", () => ({
-  GitLabProvider: vi.fn().mockImplementation(() => ({
-    provider: "GITLAB"
-  }))
+  GitLabProvider: vi.fn().mockImplementation(function() {
+    return { provider: "GITLAB" };
+  })
 }));
 
 
