@@ -246,7 +246,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                       <ul className="space-y-1">
                         {ticket.attachments.map((file: any) => (
                           <li key={file.id}>
-                            <a href={file.fileUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
+                            <a href={`/api/attachments/${file.id}`} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
                               {file.fileName}
                             </a>
                           </li>

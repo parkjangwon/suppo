@@ -76,7 +76,7 @@ export function PublicTicketDetail({
               {ticket.attachments.map((attachment) => (
                 <a
                   key={attachment.id}
-                  href={attachment.url}
+                  href={`/api/attachments/${attachment.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-blue-600 hover:underline"

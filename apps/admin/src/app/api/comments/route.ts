@@ -6,7 +6,11 @@ import {
   enqueueInternalCommentNotifications,
   enqueueNewCommentEmail,
 } from "@suppo/shared/email/enqueue";
-import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
+import {
+  cleanupProcessedAttachments,
+  processAttachments,
+  AttachmentError,
+} from "@suppo/shared/storage/attachment-service";
 import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
 import { notificationService } from "@suppo/shared/notifications/sse-service";
 import { prisma } from "@suppo/db";
@@ -20,10 +24,11 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const ticketId = formData.get("ticketId") as string;
-    const content = formData.get("content") as string;
+    const content = (formData.get("content") as string | null) ?? "";
     const isInternal = formData.get("isInternal") === "true";
+    const files = formData.getAll("attachments") as File[];
 
-    if (!ticketId || !content) {
+    if (!ticketId || (!content.trim() && files.length === 0)) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -36,7 +41,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
     }
 
-    const files = formData.getAll("attachments") as File[];
     let processedAttachments: Awaited<ReturnType<typeof processAttachments>> = [];
     const authorName = session.user.name ?? session.user.email ?? "Unknown Agent";
     const authorEmail = session.user.email ?? "";
@@ -52,15 +56,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const comment = await addComment({
-      ticketId,
-      content,
-      isInternal: isInternal || false,
-      authorId: session.user.agentId,
-      authorName,
-      authorEmail,
-      attachments: processedAttachments,
-    });
+    let comment: Awaited<ReturnType<typeof addComment>>;
+    try {
+      comment = await addComment({
+        ticketId,
+        content,
+        isInternal: isInternal || false,
+        authorId: session.user.agentId,
+        authorName,
+        authorEmail,
+        attachments: processedAttachments,
+      });
+    } catch (error) {
+      await cleanupProcessedAttachments(processedAttachments);
+      throw error;
+    }
 
     const emailSettings = await prisma.emailSettings.findUnique({
       where: { id: "default" },
@@ -107,7 +117,11 @@ export async function POST(request: NextRequest) {
         id: `comment-${comment.id}`,
         type: "ticket.commented",
         title: isInternal ? "내부 메모가 추가되었습니다" : "새 댓글이 달렸습니다",
-        message: `[${ticket.ticketNumber}] ${authorName}: ${content.slice(0, 60)}${content.length > 60 ? "…" : ""}`,
+        message: `[${ticket.ticketNumber}] ${authorName}: ${
+          content.trim()
+            ? `${content.slice(0, 60)}${content.length > 60 ? "…" : ""}`
+            : "첨부파일이 추가되었습니다"
+        }`,
         data: { ticketId, ticketNumber: ticket.ticketNumber, commentId: comment.id },
         timestamp: new Date(),
         read: false,

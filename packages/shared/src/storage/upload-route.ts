@@ -55,3 +55,43 @@ export async function serveUploadedFile(segments: string[] | undefined): Promise
     throw error;
   }
 }
+
+function contentDispositionFilename(filename: string): string {
+  return filename.replace(/[\\"]/g, "_");
+}
+
+export async function serveAttachmentFile(fileUrl: string, fileName: string): Promise<Response> {
+  if (!fileUrl.startsWith("/uploads/")) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  const uploadDir = getUploadDir();
+  const relativePath = fileUrl.replace(/^\/uploads\//, "");
+  const filePath = path.resolve(uploadDir, relativePath);
+
+  if (!isPathInside(filePath, uploadDir)) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  const response = await serveUploadedFile(relativePath.split("/"));
+  if (!response.ok) {
+    return response;
+  }
+
+  const headers = new Headers(response.headers);
+  headers.set("Content-Disposition", `inline; filename="${contentDispositionFilename(fileName)}"`);
+
+  return new Response(response.body, {
+    status: response.status,
+    headers,
+  });
+}
+
+export async function serveBrandingAsset(filename: string): Promise<Response> {
+  const safeFilename = path.basename(filename);
+  if (!safeFilename || safeFilename !== filename) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  return serveUploadedFile(["branding", safeFilename]);
+}

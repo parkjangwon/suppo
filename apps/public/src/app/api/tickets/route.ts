@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
 import { verifyCaptcha } from "@suppo/shared/security/captcha";
 import { ticketFormSchema } from "@suppo/shared/validation/ticket";
-import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
+import {
+  cleanupProcessedAttachments,
+  processAttachments,
+  AttachmentError,
+} from "@suppo/shared/storage/attachment-service";
 import { createTicket } from "@suppo/shared/tickets/create-ticket";
 import { classifyTicket } from "@suppo/shared/ai/classifier";
 import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
@@ -111,20 +115,26 @@ export async function POST(request: NextRequest) {
     }
 
     if (files.length > 0) {
+      let processedAttachments: Awaited<ReturnType<typeof processAttachments>> = [];
       try {
-        const processedAttachments = await processAttachments(files, result.ticket.id);
+        processedAttachments = await processAttachments(files, result.ticket.id);
 
         if (processedAttachments.length > 0) {
-          await prisma.attachment.createMany({
-            data: processedAttachments.map(a => ({
-              ticketId: result.ticket.id,
-              fileName: a.fileName,
-              fileSize: a.fileSize,
-              mimeType: a.mimeType,
-              fileUrl: a.fileUrl,
-              uploadedBy: validationResult.data.customerName,
-            })),
-          });
+          try {
+            await prisma.attachment.createMany({
+              data: processedAttachments.map(a => ({
+                ticketId: result.ticket.id,
+                fileName: a.fileName,
+                fileSize: a.fileSize,
+                mimeType: a.mimeType,
+                fileUrl: a.fileUrl,
+                uploadedBy: validationResult.data.customerName,
+              })),
+            });
+          } catch (error) {
+            await cleanupProcessedAttachments(processedAttachments);
+            throw error;
+          }
         }
       } catch (error) {
         if (error instanceof AttachmentError) {
