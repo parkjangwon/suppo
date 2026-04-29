@@ -59,6 +59,7 @@ WORKDIR /app
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/.next/static ./apps/${APP_NAME}/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/${APP_NAME}/public ./apps/${APP_NAME}/public
+RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
 # Entrypoint: load auto-generated secrets from secrets-init service if env vars are empty
 RUN { \

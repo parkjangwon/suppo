@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
+import { getUploadDir, isPathInside } from "./upload-config";
 
 function sanitizeFilename(filename: string): string {
   const ext = path.extname(filename).toLowerCase();
@@ -15,12 +14,13 @@ function sanitizeFilename(filename: string): string {
 }
 
 export async function saveToLocal(file: File, ticketId: string, uniqueName: string): Promise<string> {
+  const uploadDir = getUploadDir();
   const sanitizedTicketId = path.basename(ticketId);
-  const ticketDir = path.join(UPLOAD_DIR, sanitizedTicketId);
+  const ticketDir = path.join(uploadDir, sanitizedTicketId);
   const resolvedTicketDir = path.resolve(ticketDir);
-  const resolvedUploadDir = path.resolve(UPLOAD_DIR);
+  const resolvedUploadDir = path.resolve(uploadDir);
   
-  if (!resolvedTicketDir.startsWith(resolvedUploadDir)) {
+  if (!isPathInside(resolvedTicketDir, resolvedUploadDir)) {
     throw new Error("Invalid ticket ID: path traversal detected");
   }
   

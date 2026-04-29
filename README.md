@@ -168,6 +168,8 @@ Docker 볼륨 2개가 데이터를 보관합니다:
 | `suppo_sqld_data` | 티켓, 설정, 전체 DB |
 | `suppo_uploads` | 첨부 파일 |
 
+첨부파일은 `UPLOAD_DIR` 경로에 저장됩니다. 기본값은 `uploads`이며, 상대 경로는 로컬에서는 프로젝트 루트 기준, Docker에서는 컨테이너 앱 루트(`/app`) 기준으로 해석됩니다. public/admin 앱이 같은 경로를 읽으므로 한쪽에서 업로드한 파일을 다른 쪽에서도 `/uploads/...` URL로 조회할 수 있습니다.
+
 볼륨 백업 예시:
 
 ```bash

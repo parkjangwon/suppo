@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@suppo/db";
+import { getUploadDir } from "@suppo/shared/storage/upload-config";
 
 /**
  * 현재 스키마 버전을 파일시스템에서 직접 읽어옴.
@@ -21,9 +22,6 @@ async function getLatestMigration(): Promise<string> {
     return "unknown";
   }
 }
-
-const UPLOAD_DIR =
-  process.env.UPLOAD_DIR ?? path.join(process.cwd(), "public", "uploads");
 
 /** BigInt를 문자열로 직렬화 (SQLite에서 BigInt 필드가 있을 경우 대비) */
 function bigIntReplacer(_key: string, value: unknown): unknown {
@@ -208,7 +206,7 @@ export async function createBackupZip(): Promise<Buffer> {
   }
 
   const attachmentsFolder = zip.folder("attachments")!;
-  await addDirToZip(attachmentsFolder, UPLOAD_DIR);
+  await addDirToZip(attachmentsFolder, getUploadDir());
 
   return zip.generateAsync({
     type: "nodebuffer",

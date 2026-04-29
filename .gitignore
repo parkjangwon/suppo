@@ -72,6 +72,8 @@ Thumbs.db
 
 # Uploads
 uploads/
+!apps/*/src/app/uploads/
+!apps/*/src/app/uploads/**
 
 # Claude
 .claude/

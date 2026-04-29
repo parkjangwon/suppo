@@ -119,8 +119,9 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-}
       TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET:-}
       GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY:-}
+      UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
     volumes:
-      - uploads:/app/apps/public/public/uploads
+      - uploads:/app/uploads
       - config_data:/run/config
     ports:
       - "${BIND_IP:-127.0.0.1}:${PUBLIC_PORT:-3000}:3000"
@@ -149,8 +150,9 @@ services:
       GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY:-}
       INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+      UPLOAD_DIR: ${UPLOAD_DIR:-uploads}
     volumes:
-      - uploads:/app/apps/admin/public/uploads
+      - uploads:/app/uploads
       - config_data:/run/config
     ports:
       - "${BIND_IP:-127.0.0.1}:${ADMIN_PORT:-3001}:3000"

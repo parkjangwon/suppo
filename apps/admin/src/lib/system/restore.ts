@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import fs from "fs/promises";
 import path from "path";
 import { prisma } from "@suppo/db";
+import { getUploadDir, isPathInside } from "@suppo/shared/storage/upload-config";
 
 export class RestoreValidationError extends Error {
   constructor(message: string) {
@@ -9,9 +10,6 @@ export class RestoreValidationError extends Error {
     this.name = "RestoreValidationError";
   }
 }
-
-const UPLOAD_DIR =
-  process.env.UPLOAD_DIR ?? path.join(process.cwd(), "public", "uploads");
 
 /**
  * 현재 스키마 버전을 파일시스템에서 직접 읽어옴.
@@ -162,6 +160,7 @@ export const RESTORE_INSERT_ORDER = [
 
 /** ZIP 버퍼로부터 DB + 첨부파일 전체 복구 */
 export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> {
+  const uploadDir = getUploadDir();
   const zip = await JSZip.loadAsync(zipBuffer);
 
   // manifest 검증
@@ -322,8 +321,8 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
   );
 
   // 첨부파일 원자적 교체
-  const tmpDir = `${UPLOAD_DIR}_restore_tmp`;
-  const backupDir = `${UPLOAD_DIR}_backup_tmp`;
+  const tmpDir = `${uploadDir}_restore_tmp`;
+  const backupDir = `${uploadDir}_backup_tmp`;
 
   // 기존 temp 디렉토리 정리
   await fs.rm(tmpDir, { recursive: true, force: true });
@@ -334,8 +333,8 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
   for (const [relativePath, file] of Object.entries(zip.files)) {
     if (relativePath.startsWith("attachments/") && !file.dir) {
       const relPath = relativePath.replace(/^attachments\//, "");
-      const destPath = path.join(tmpDir, relPath);
-      if (!destPath.startsWith(path.resolve(tmpDir))) continue;
+      const destPath = path.resolve(tmpDir, relPath);
+      if (!isPathInside(destPath, tmpDir)) continue;
       await fs.mkdir(path.dirname(destPath), { recursive: true });
       const content = await file.async("nodebuffer");
       await fs.writeFile(destPath, content);
@@ -344,12 +343,12 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
 
   // 원자적 교체: current → backup → tmp → current
   try {
-    await fs.rename(UPLOAD_DIR, backupDir).catch(() => {});
-    await fs.rename(tmpDir, UPLOAD_DIR);
+    await fs.rename(uploadDir, backupDir).catch(() => {});
+    await fs.rename(tmpDir, uploadDir);
     await fs.rm(backupDir, { recursive: true, force: true });
   } catch (err) {
     // 롤백 시도
-    await fs.rename(backupDir, UPLOAD_DIR).catch(() => {});
+    await fs.rename(backupDir, uploadDir).catch(() => {});
     await fs.rm(tmpDir, { recursive: true, force: true });
     throw err;
   }
