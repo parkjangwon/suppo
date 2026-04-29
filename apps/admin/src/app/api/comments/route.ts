@@ -8,6 +8,7 @@ import {
 } from "@suppo/shared/email/enqueue";
 import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
 import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
+import { notificationService } from "@suppo/shared/notifications/sse-service";
 import { prisma } from "@suppo/db";
 
 export async function POST(request: NextRequest) {
@@ -100,6 +101,18 @@ export async function POST(request: NextRequest) {
       isInternal: comment.isInternal,
       authorId: session.user.agentId,
     });
+
+    if (ticket.assigneeId && ticket.assigneeId !== session.user.agentId) {
+      notificationService.notify(ticket.assigneeId, {
+        id: `comment-${comment.id}`,
+        type: "ticket.commented",
+        title: isInternal ? "내부 메모가 추가되었습니다" : "새 댓글이 달렸습니다",
+        message: `[${ticket.ticketNumber}] ${authorName}: ${content.slice(0, 60)}${content.length > 60 ? "…" : ""}`,
+        data: { ticketId, ticketNumber: ticket.ticketNumber, commentId: comment.id },
+        timestamp: new Date(),
+        read: false,
+      });
+    }
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {

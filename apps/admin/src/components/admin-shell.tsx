@@ -44,6 +44,7 @@ import { useBranding } from "@suppo/shared/branding/context";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { type AdminNavItemKey, getAdminNavSections } from "@/lib/navigation/admin-nav";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
+import { NotificationBell } from "@/components/admin/notification-bell";
 
 const NAV_ICONS: Record<AdminNavItemKey, React.ComponentType<{ className?: string }>> = {
   dashboard: LayoutDashboard,
@@ -111,6 +112,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <SidebarBrand adminPanelTitle={branding.adminPanelTitle} />
         <SidebarNavigation sections={navSections} pathname={pathname} className="flex-1 overflow-y-auto px-3 py-4" />
         <div className="border-t border-border/70 bg-background/70 px-3 py-3 backdrop-blur">
+          <div className="mb-2 flex justify-end">
+            <NotificationBell />
+          </div>
           <SidebarLocaleSwitch
             currentLocale={currentLocale}
             onToggle={() => handleLocaleChange(currentLocale === "ko" ? "en" : "ko")}
@@ -127,14 +131,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 md:hidden">
           <span className="font-bold text-lg tracking-tight">{branding.adminPanelTitle}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsMobileNavOpen(true)}
-            aria-label={copyText(copy, "commonOpenMenu", "메뉴 열기")}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileNavOpen(true)}
+              aria-label={copyText(copy, "commonOpenMenu", "메뉴 열기")}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
         </header>
         <main className="flex-1 p-6 overflow-auto bg-background">
           {children}

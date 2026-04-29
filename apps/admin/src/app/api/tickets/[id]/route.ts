@@ -5,6 +5,7 @@ import { validateRequest, updateTicketSchema } from "@suppo/shared/security/inpu
 import { requireJson } from "@suppo/shared/security/content-type";
 import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
 import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
+import { notificationService } from "@suppo/shared/notifications/sse-service";
 import { prisma } from "@suppo/db";
 
 export async function GET(
@@ -106,6 +107,30 @@ export async function PATCH(
           ...(validated.assigneeId !== undefined ? { assigneeId: validated.assigneeId } : {}),
         },
       });
+
+      if (validated.assigneeId && validated.assigneeId !== ticket.assigneeId) {
+        notificationService.notify(validated.assigneeId, {
+          id: `assign-${id}-${Date.now()}`,
+          type: "ticket.assigned",
+          title: "티켓이 배정되었습니다",
+          message: `[${ticket.ticketNumber}] ${ticket.subject}`,
+          data: { ticketId: id, ticketNumber: ticket.ticketNumber },
+          timestamp: new Date(),
+          read: false,
+        });
+      }
+
+      if (validated.status && ticket.assigneeId) {
+        notificationService.notify(ticket.assigneeId, {
+          id: `status-${id}-${Date.now()}`,
+          type: "ticket.status_changed",
+          title: "티켓 상태가 변경되었습니다",
+          message: `[${ticket.ticketNumber}] ${ticket.subject} → ${validated.status}`,
+          data: { ticketId: id, ticketNumber: ticket.ticketNumber, status: validated.status },
+          timestamp: new Date(),
+          read: false,
+        });
+      }
     }
 
     return NextResponse.json(updatedTicket, { headers: createRateLimitHeaders(rateLimitResult) });
