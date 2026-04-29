@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@suppo/db";
 import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import { enqueueInternalCommentNotifications } from "@suppo/shared/email/enqueue";
 import { verifyTicketAccessToken } from "@suppo/shared/security/ticket-access";
+import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
 import { cookies } from "next/headers";
 import {
   cleanupProcessedAttachments,
@@ -10,8 +11,17 @@ import {
   AttachmentError,
 } from "@suppo/shared/storage/attachment-service";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    const rateLimitResult = checkRateLimit(`comment:${ip}`, 10, 60 * 1000);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: "너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요." },
+        { status: 429, headers: createRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("ticket_access")?.value;
 

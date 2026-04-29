@@ -40,6 +40,11 @@ vi.mock("@suppo/shared/email/enqueue", () => ({
   enqueueInternalCommentNotifications: vi.fn(),
 }));
 
+vi.mock("@suppo/shared/security/rate-limit", () => ({
+  checkRateLimit: vi.fn(() => ({ allowed: true, remaining: 9, reset: Date.now() + 60000 })),
+  createRateLimitHeaders: vi.fn(() => ({})),
+}));
+
 vi.mock("@suppo/db", () => ({
   prisma: {
     ticket: {
@@ -59,7 +64,8 @@ import { POST } from "../../apps/public/src/app/api/comments/public/route";
 function buildRequest(formData: FormData) {
   return {
     formData: async () => formData,
-  } as Request;
+    headers: { get: () => null },
+  } as unknown as Request;
 }
 
 describe("public comment attachments route", () => {
