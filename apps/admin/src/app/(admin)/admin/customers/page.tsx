@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { AdminOnlyPageState } from "@/components/admin/admin-only-page-state";
 import { CustomerList } from "@/components/admin/customer-list";
 import { prisma } from "@suppo/db";
+import { Prisma } from "@prisma/client";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,11 @@ export const metadata: Metadata = {
   title: "고객 관리 | Suppo",
 };
 
-export default async function AdminCustomersPage() {
+export default async function AdminCustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
@@ -46,8 +51,29 @@ export default async function AdminCustomersPage() {
     );
   }
 
+  const PAGE_SIZE = 50;
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
+  const search = typeof params.search === "string" ? params.search.trim() : undefined;
+
+  const where: Prisma.CustomerWhereInput | undefined = search
+    ? {
+        OR: [
+          { name: { contains: search } },
+          { email: { contains: search } },
+        ],
+      }
+    : undefined;
+
+  const totalCount = await prisma.customer.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+
   const customers = await prisma.customer.findMany({
+    where,
     orderBy: { lastTicketAt: "desc" },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   const serializedCustomers = customers.map(customer => ({
@@ -68,7 +94,14 @@ export default async function AdminCustomersPage() {
         </div>
       </div>
 
-      <CustomerList initialCustomers={serializedCustomers} />
+      <CustomerList
+        initialCustomers={serializedCustomers}
+        page={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+        search={search}
+      />
     </div>
   );
 }

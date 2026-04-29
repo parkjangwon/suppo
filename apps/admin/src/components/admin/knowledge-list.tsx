@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -36,6 +36,7 @@ import { Plus, Search, Pencil, Trash2, ExternalLink, BarChart3 } from "lucide-re
 import { toast } from "sonner";
 import { CategoryManager } from "./category-manager";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { PaginationNav } from "@/components/ui/pagination-nav";
 
 interface KnowledgeListProps {
   articles: any[];
@@ -43,6 +44,13 @@ interface KnowledgeListProps {
   currentUserId: string;
   isAdmin: boolean;
   publicBaseUrl: string;
+  page: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+  search?: string;
+  categoryId?: string;
+  status?: string;
 }
 
 export function KnowledgeList({
@@ -51,31 +59,38 @@ export function KnowledgeList({
   currentUserId,
   isAdmin,
   publicBaseUrl,
+  page,
+  totalPages,
+  totalCount,
+  pageSize,
+  search,
+  categoryId,
+  status,
 }: KnowledgeListProps) {
   const copy = useAdminCopy() as unknown as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const searchParams = useSearchParams();
+  const [searchInput, setSearchInput] = useState(search ?? "");
+  const selectedCategory = categoryId ?? "all";
+  const selectedStatus = status ?? "all";
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const filteredArticles = articles.filter((article) => {
-    const matchesSearch =
-      searchQuery === "" ||
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt?.toLowerCase().includes(searchQuery.toLowerCase());
+  const updateParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value && value !== "all") {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    params.delete("page");
+    router.push(`?${params.toString()}`);
+  };
 
-    const matchesCategory =
-      selectedCategory === "all" || article.categoryId === selectedCategory;
-
-    const matchesStatus =
-      selectedStatus === "all" ||
-      (selectedStatus === "published" && article.isPublished) ||
-      (selectedStatus === "draft" && !article.isPublished);
-
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    updateParam("search", searchInput.trim());
+  };
 
   const handleDelete = async (id: string) => {
     setIsDeleting(id);
@@ -112,17 +127,20 @@ export function KnowledgeList({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="flex gap-2 flex-1">
+        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
               placeholder={t("knowledgeSearchPlaceholder", "문서 검색...")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="pl-10"
             />
           </div>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <Button type="submit" variant="outline" size="sm">
+            {t("commonSearch", "검색")}
+          </Button>
+          <Select value={selectedCategory} onValueChange={(value) => updateParam("categoryId", value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={t("knowledgeCategoryPlaceholder", "카테고리")} />
             </SelectTrigger>
@@ -135,7 +153,7 @@ export function KnowledgeList({
               ))}
             </SelectContent>
           </Select>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <Select value={selectedStatus} onValueChange={(value) => updateParam("status", value)}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder={t("knowledgeStatus", "상태")} />
             </SelectTrigger>
@@ -145,7 +163,7 @@ export function KnowledgeList({
               <SelectItem value="draft">{t("knowledgeStatusDraft", "초안")}</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </form>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>
             <Link href="/admin/knowledge/contributors">
@@ -177,14 +195,14 @@ export function KnowledgeList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredArticles.length === 0 ? (
+            {articles.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   문서가 없습니다
                 </TableCell>
               </TableRow>
             ) : (
-              filteredArticles.map((article) => (
+              articles.map((article) => (
                 <TableRow key={article.id}>
                   <TableCell className="font-medium">
                     <div className="max-w-xs truncate" title={article.title}>
@@ -295,9 +313,12 @@ export function KnowledgeList({
         </Table>
       </div>
 
-      <div className="text-sm text-gray-500">
-        총 {filteredArticles.length}개 문서
-      </div>
+      <PaginationNav
+        page={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={pageSize}
+      />
     </div>
   );
 }

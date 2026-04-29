@@ -26,6 +26,9 @@ export default async function TicketsPage({
 
   const params = await searchParams;
 
+  const PAGE_SIZE = 30;
+  const page = Math.max(1, parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
+
   const status = typeof params.status === "string" ? params.status : undefined;
   const priority = typeof params.priority === "string" ? params.priority : undefined;
   const categoryId = typeof params.categoryId === "string" ? params.categoryId : undefined;
@@ -187,18 +190,20 @@ export default async function TicketsPage({
     ...(andFilters.length > 0 ? { AND: andFilters } : {}),
   };
 
+  const totalCount = await prisma.ticket.count({ where });
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+
   const tickets = await prisma.ticket.findMany({
     where,
     include: {
       category: true,
-      requestType: {
-        select: { id: true, name: true },
-      },
-      assignee: {
-        select: { id: true, name: true },
-      },
+      requestType: { select: { id: true, name: true } },
+      assignee: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: "desc" },
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
   });
 
   const categories = await prisma.category.findMany({
@@ -221,6 +226,10 @@ export default async function TicketsPage({
         categories={categories}
         agents={agents}
         currentAgentId={session.user.agentId ?? undefined}
+        page={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
         currentFilter={{
           queue,
           status,

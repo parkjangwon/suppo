@@ -51,7 +51,7 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
       } else {
         params.delete(name);
       }
-      params.delete("cursor");
+      params.delete("page");
       return params.toString();
     },
     [searchParams]

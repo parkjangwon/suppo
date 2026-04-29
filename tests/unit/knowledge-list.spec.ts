@@ -6,8 +6,10 @@ import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
+    push: vi.fn(),
     refresh: vi.fn(),
   }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("next/link", () => ({
@@ -53,6 +55,10 @@ describe("KnowledgeList public link visibility", () => {
           currentUserId: "author-1",
           isAdmin: true,
           publicBaseUrl: "https://helpdesk.example.com",
+          page: 1,
+          totalPages: 1,
+          totalCount: 1,
+          pageSize: 30,
         })
       )
     );
@@ -75,6 +81,10 @@ describe("KnowledgeList public link visibility", () => {
           currentUserId: "author-1",
           isAdmin: true,
           publicBaseUrl: "https://helpdesk.example.com",
+          page: 1,
+          totalPages: 1,
+          totalCount: 2,
+          pageSize: 30,
         })
       )
     );

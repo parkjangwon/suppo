@@ -16,6 +16,7 @@ import { TicketFilters } from "./ticket-filters";
 import { AdvancedSearch } from "./advanced-search";
 import { SavedFilters } from "./saved-filters";
 import { TicketQueueBar } from "./ticket-queue-bar";
+import { PaginationNav } from "@/components/ui/pagination-nav";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
@@ -54,12 +55,20 @@ export function TicketList({
   categories,
   agents,
   currentAgentId,
+  page,
+  totalPages,
+  totalCount,
+  pageSize,
   currentFilter,
 }: {
   tickets: Ticket[];
   categories: { id: string; name: string }[];
   agents: { id: string; name: string }[];
   currentAgentId?: string;
+  page: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
   currentFilter: {
     queue?: string;
     status?: string;
@@ -76,21 +85,16 @@ export function TicketList({
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const [isAdvancedSearch, setIsAdvancedSearch] = useState(false);
   const [selectedTicketIds, setSelectedTicketIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState("");
   const [bulkPriority, setBulkPriority] = useState("");
   const [bulkAssigneeId, setBulkAssigneeId] = useState("");
   const [isApplyingBulk, setIsApplyingBulk] = useState(false);
-  const itemsPerPage = 10;
 
-  const totalPages = Math.ceil(tickets.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedTickets = tickets.slice(startIndex, startIndex + itemsPerPage);
   const allVisibleSelected =
-    paginatedTickets.length > 0 &&
-    paginatedTickets.every((ticket) => selectedTicketIds.includes(ticket.id));
+    tickets.length > 0 &&
+    tickets.every((ticket) => selectedTicketIds.includes(ticket.id));
   const statusLabels: Record<string, string> = {
     OPEN: t("ticketStatusOpen", "접수"),
     IN_PROGRESS: t("ticketStatusInProgress", "처리중"),
@@ -106,7 +110,7 @@ export function TicketList({
   };
 
   const handleAdvancedSearch = (params: URLSearchParams) => {
-    params.delete("cursor");
+    params.delete("page");
     router.push(`/admin/tickets?${params.toString()}`);
   };
 
@@ -117,7 +121,7 @@ export function TicketList({
   };
 
   const toggleVisibleTickets = (checked: boolean) => {
-    const visibleIds = paginatedTickets.map((ticket) => ticket.id);
+    const visibleIds = tickets.map((ticket) => ticket.id);
 
     setSelectedTicketIds((prev) => {
       if (checked) {
@@ -332,7 +336,7 @@ export function TicketList({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {paginatedTickets.map((ticket) => (
+            {tickets.map((ticket) => (
               <tr
                 key={ticket.id}
                 className="cursor-pointer hover:bg-gray-50"
@@ -381,50 +385,18 @@ export function TicketList({
         </table>
       </div>
 
-      {tickets.length === 0 && (
+      {totalCount === 0 && (
         <div className="text-center py-8 text-gray-500">
           {t("commonNotFound", "티켓이 없습니다")}
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            총 {tickets.length}개 중 {startIndex + 1}-{Math.min(startIndex + itemsPerPage, tickets.length)}개 표시
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-            >
-              {t("commonCancel", "이전")}
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  className="w-8 h-8 p-0"
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </Button>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-            >
-              {t("commonCreate", "다음")}
-            </Button>
-          </div>
-        </div>
-      )}
+      <PaginationNav
+        page={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={pageSize}
+      />
     </div>
   );
 }
