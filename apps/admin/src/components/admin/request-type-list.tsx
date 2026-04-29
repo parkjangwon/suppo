@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Edit2, Power, PowerOff, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDebouncedSearchParam } from "@/hooks/use-debounced-search-param";
+import { Plus, Edit2, Power, PowerOff, Trash2, Search } from "lucide-react";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Input } from "@suppo/ui/components/ui/input";
@@ -33,6 +34,7 @@ import {
 import { Badge } from "@suppo/ui/components/ui/badge";
 import { toast } from "sonner";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
+import { PaginationNav } from "@/components/ui/pagination-nav";
 
 type RequestType = {
   id: string;
@@ -56,27 +58,28 @@ type Team = {
 interface RequestTypeListProps {
   requestTypes: RequestType[];
   teams: Team[];
+  page: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+  search?: string;
 }
 
-const priorityLabels: Record<string, string> = {
-  URGENT: "긴급",
-  HIGH: "높음",
-  MEDIUM: "보통",
-  LOW: "낮음",
-};
-
-const channelLabels: Record<string, string> = {
-  WEB: "웹",
-  EMAIL: "이메일",
-  API: "API",
-  IN_APP: "앱 내",
-};
-
-export function RequestTypeList({ requestTypes, teams }: RequestTypeListProps) {
+export function RequestTypeList({
+  requestTypes,
+  teams,
+  page,
+  totalPages,
+  totalCount,
+  pageSize,
+  search,
+}: RequestTypeListProps) {
   const copy = useAdminCopy();
   const t = (key: string, ko: string, en?: string) =>
     copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const [types, setTypes] = useState(requestTypes);
+  const [searchInput, setSearchInput] = useState(search ?? "");
+  useDebouncedSearchParam(searchInput);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingType, setEditingType] = useState<RequestType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,6 +107,10 @@ export function RequestTypeList({ requestTypes, teams }: RequestTypeListProps) {
     API: "API",
     IN_APP: t("requestTypeChannelInApp", "앱 내", "In-app"),
   };
+
+  useEffect(() => {
+    setTypes(requestTypes);
+  }, [requestTypes]);
 
   const resetForm = () => {
     setFormData({
@@ -221,7 +228,18 @@ export function RequestTypeList({ requestTypes, teams }: RequestTypeListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex w-full gap-2 sm:max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="문의 유형 검색"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => { resetForm(); setIsCreateOpen(true); }}>
@@ -325,6 +343,7 @@ export function RequestTypeList({ requestTypes, teams }: RequestTypeListProps) {
           ))}
         </TableBody>
       </Table>
+      <PaginationNav page={page} totalPages={totalPages} totalCount={totalCount} pageSize={pageSize} />
     </div>
   );
 }

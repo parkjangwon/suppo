@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedSearchParam } from "@/hooks/use-debounced-search-param";
 import { Input } from "@suppo/ui/components/ui/input";
 import { Button } from "@suppo/ui/components/ui/button";
 import {
@@ -52,21 +52,8 @@ export function CustomerList({
 }: CustomerListProps) {
   const copy = useAdminCopy() as unknown as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(search ?? "");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (searchInput.trim()) {
-      params.set("search", searchInput.trim());
-    } else {
-      params.delete("search");
-    }
-    params.delete("page");
-    router.push(`?${params.toString()}`);
-  };
+  useDebouncedSearchParam(searchInput);
 
   return (
     <div className="space-y-6">
@@ -95,7 +82,7 @@ export function CustomerList({
         </Card>
       </div>
 
-      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -105,10 +92,7 @@ export function CustomerList({
             className="pl-10"
           />
         </div>
-        <Button type="submit" variant="outline" size="sm">
-          {t("commonSearch", "검색")}
-        </Button>
-      </form>
+      </div>
 
       <Card>
         <div className="hidden md:block">

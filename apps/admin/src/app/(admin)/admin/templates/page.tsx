@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@suppo/db";
+import { Prisma } from "@prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { TemplateList } from "@/components/admin/template-list";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
@@ -11,7 +12,11 @@ export const metadata: Metadata = {
   title: "응답 템플릿 관리 | Suppo",
 };
 
-export default async function TemplatesPage() {
+export default async function TemplatesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const copy = getAdminCopy((await cookies()).get("suppo-admin-locale")?.value);
   const session = await auth();
 
@@ -21,26 +26,34 @@ export default async function TemplatesPage() {
 
   const isAdmin = session.user.role === "ADMIN";
 
-  const [templates, categories, requestTypes] = await Promise.all([
-    prisma.responseTemplate.findMany({
-      where: isAdmin
-        ? {}
-        : {
+  const params = await searchParams;
+  const PAGE_SIZE = 30;
+  const page = Math.max(1, parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
+  const search = typeof params.search === "string" ? params.search.trim() : undefined;
+  const visibilityWhere: Prisma.ResponseTemplateWhereInput = isAdmin
+    ? {}
+    : {
+        OR: [
+          { createdById: session.user.id },
+          { isShared: true },
+        ],
+      };
+  const where: Prisma.ResponseTemplateWhereInput = search
+    ? {
+        AND: [
+          visibilityWhere,
+          {
             OR: [
-              { createdById: session.user.id },
-              { isShared: true },
+              { title: { contains: search } },
+              { content: { contains: search } },
             ],
           },
-      include: {
-        category: {
-          select: { id: true, name: true },
-        },
-        createdBy: {
-          select: { id: true, name: true },
-        },
-      },
-      orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
-    }),
+        ],
+      }
+    : visibilityWhere;
+
+  const [totalCount, categories, requestTypes] = await Promise.all([
+    prisma.responseTemplate.count({ where }),
     prisma.category.findMany({
       select: { id: true, name: true },
       orderBy: { sortOrder: "asc" },
@@ -51,6 +64,23 @@ export default async function TemplatesPage() {
       orderBy: { sortOrder: "asc" },
     }),
   ]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+
+  const templates = await prisma.responseTemplate.findMany({
+    where,
+    include: {
+      category: {
+        select: { id: true, name: true },
+      },
+      createdBy: {
+        select: { id: true, name: true },
+      },
+    },
+    orderBy: [{ sortOrder: "asc" }, { title: "asc" }],
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
+  });
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -70,6 +100,11 @@ export default async function TemplatesPage() {
             requestTypes={requestTypes}
             currentUserId={session.user.id}
             isAdmin={isAdmin}
+            page={currentPage}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+            search={search}
           />
         </CardContent>
       </Card>

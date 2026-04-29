@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Input } from "@suppo/ui/components/ui/input";
 import { Button } from "@suppo/ui/components/ui/button";
 import {
@@ -103,7 +103,7 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
       if (!response.ok) throw new Error("Failed to fetch logs");
 
       const data = await response.json();
-      setLogs(data.logs);
+      setLogs(data.logs ?? data.auditLogs ?? []);
       setPagination(data.pagination);
     } catch (error) {
       console.error("Error fetching audit logs:", error);
@@ -130,10 +130,20 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    fetchLogs(1);
-  };
+  const hasMounted = useRef(false);
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      fetchLogs(1);
+    }, 300);
+
+    return () => window.clearTimeout(timeout);
+  }, [fetchLogs]);
 
   return (
     <div className="space-y-6">
@@ -142,11 +152,11 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
           <CardTitle className="text-lg font-medium">{t("auditLogsFilter", "필터")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder={t("auditLogsActorPlaceholder", "작업자 이름/이메일 검색")}
+                placeholder={t("auditLogsActorPlaceholder", "작업자/설명 검색")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10"
@@ -184,18 +194,13 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
               placeholder={t("auditLogsDateFromPlaceholder", "시작일")}
             />
             
-            <div className="flex gap-2">
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                placeholder={t("auditLogsDateToPlaceholder", "종료일")}
-              />
-              <Button type="submit" variant="secondary">
-                {t("commonSearch", "검색")}
-              </Button>
-            </div>
-          </form>
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              placeholder={t("auditLogsDateToPlaceholder", "종료일")}
+            />
+          </div>
         </CardContent>
       </Card>
 

@@ -22,6 +22,7 @@ const auditActions = [
 ] as const;
 
 const exportQuerySchema = z.object({
+  search: z.string().trim().min(1).optional(),
   actorId: z.string().trim().min(1).optional(),
   action: z.enum(auditActions).optional(),
   resourceType: z.string().trim().min(1).optional(),
@@ -31,6 +32,12 @@ const exportQuerySchema = z.object({
 
 type AuditAction = (typeof auditActions)[number];
 type AuditLogWhereInput = {
+  OR?: Array<{
+    actorName?: { contains: string };
+    actorEmail?: { contains: string };
+    description?: { contains: string };
+    resourceId?: { contains: string };
+  }>;
   actorId?: string;
   action?: AuditAction;
   resourceType?: string;
@@ -69,6 +76,7 @@ type AuditLogDelegate = {
 const auditLogDelegate = (prisma as unknown as { auditLog: AuditLogDelegate }).auditLog;
 
 function buildAuditLogWhere(params: {
+  search?: string;
   actorId?: string;
   action?: AuditAction;
   resourceType?: string;
@@ -86,6 +94,16 @@ function buildAuditLogWhere(params: {
   }
 
   return {
+    ...(params.search
+      ? {
+          OR: [
+            { actorName: { contains: params.search } },
+            { actorEmail: { contains: params.search } },
+            { description: { contains: params.search } },
+            { resourceId: { contains: params.search } },
+          ],
+        }
+      : {}),
     ...(params.actorId ? { actorId: params.actorId } : {}),
     ...(params.action ? { action: params.action } : {}),
     ...(params.resourceType ? { resourceType: params.resourceType } : {}),
@@ -102,6 +120,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const params = exportQuerySchema.parse({
+      search: request.nextUrl.searchParams.get("search") ?? undefined,
       actorId: request.nextUrl.searchParams.get("actorId") ?? undefined,
       action: request.nextUrl.searchParams.get("action") ?? undefined,
       resourceType: request.nextUrl.searchParams.get("resourceType") ?? undefined,

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedSearchParam } from "@/hooks/use-debounced-search-param";
 import {
   Table,
   TableBody,
@@ -72,6 +73,7 @@ export function KnowledgeList({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(search ?? "");
+  useDebouncedSearchParam(searchInput);
   const selectedCategory = categoryId ?? "all";
   const selectedStatus = status ?? "all";
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -85,11 +87,6 @@ export function KnowledgeList({
     }
     params.delete("page");
     router.push(`?${params.toString()}`);
-  };
-
-  const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault();
-    updateParam("search", searchInput.trim());
   };
 
   const handleDelete = async (id: string) => {
@@ -127,7 +124,7 @@ export function KnowledgeList({
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <form onSubmit={handleSearch} className="flex gap-2 flex-1">
+        <div className="flex gap-2 flex-1">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input
@@ -137,9 +134,6 @@ export function KnowledgeList({
               className="pl-10"
             />
           </div>
-          <Button type="submit" variant="outline" size="sm">
-            {t("commonSearch", "검색")}
-          </Button>
           <Select value={selectedCategory} onValueChange={(value) => updateParam("categoryId", value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={t("knowledgeCategoryPlaceholder", "카테고리")} />
@@ -163,7 +157,7 @@ export function KnowledgeList({
               <SelectItem value="draft">{t("knowledgeStatusDraft", "초안")}</SelectItem>
             </SelectContent>
           </Select>
-        </form>
+        </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" asChild>
             <Link href="/admin/knowledge/contributors">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDebouncedSearchParam } from "@/hooks/use-debounced-search-param";
 import {
   Table,
   TableBody,
@@ -12,6 +13,7 @@ import {
 } from "@suppo/ui/components/ui/table";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Badge } from "@suppo/ui/components/ui/badge";
+import { Input } from "@suppo/ui/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -32,8 +34,9 @@ import {
 } from "@suppo/ui/components/ui/alert-dialog";
 import { TemplateForm } from "./template-form";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, FileText, Sparkles, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, Sparkles, Users, Search } from "lucide-react";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { PaginationNav } from "@/components/ui/pagination-nav";
 
 interface Template {
   id: string;
@@ -68,6 +71,11 @@ interface TemplateListProps {
   requestTypes: RequestType[];
   currentUserId: string;
   isAdmin: boolean;
+  page: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+  search?: string;
 }
 
 export function TemplateList({
@@ -76,10 +84,17 @@ export function TemplateList({
   requestTypes,
   currentUserId,
   isAdmin,
+  page,
+  totalPages,
+  totalCount,
+  pageSize,
+  search,
 }: TemplateListProps) {
   const copy = useAdminCopy() as unknown as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const router = useRouter();
+  const [searchInput, setSearchInput] = useState(search ?? "");
+  useDebouncedSearchParam(searchInput);
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -109,9 +124,17 @@ export function TemplateList({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-600">
-          총 {templates.length}개의 템플릿
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex w-full gap-2 sm:max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="템플릿 검색"
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
+              className="pl-10"
+            />
+          </div>
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
@@ -266,6 +289,7 @@ export function TemplateList({
           </TableBody>
         </Table>
       </div>
+      <PaginationNav page={page} totalPages={totalPages} totalCount={totalCount} pageSize={pageSize} />
 
       <AlertDialog
         open={!!deletingTemplate}

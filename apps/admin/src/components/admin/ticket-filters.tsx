@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
+import { useDebouncedSearchParam } from "@/hooks/use-debounced-search-param";
 import { Input } from "@suppo/ui/components/ui/input";
 import {
   Select,
@@ -36,6 +37,7 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
   const searchParams = useSearchParams();
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  useDebouncedSearchParam(search);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(
     searchParams.get("dateFrom") ? new Date(searchParams.get("dateFrom")!) : undefined
   );
@@ -69,11 +71,6 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleFilterChange("search", search);
-  };
-
   const clearFilters = () => {
     setSearch("");
     setDateFrom(undefined);
@@ -87,7 +84,7 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
     <div className="space-y-4 mb-6">
       {showBasicSearch && (
         <div className="flex flex-col sm:flex-row gap-4">
-          <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+          <div className="flex-1 flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -97,8 +94,7 @@ export function TicketFilters({ categories, agents, showBasicSearch = true }: Ti
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <Button type="submit" variant="secondary">{t("commonSearch", "검색")}</Button>
-          </form>
+          </div>
 
           {hasFilters && (
             <Button variant="ghost" onClick={clearFilters} className="shrink-0">

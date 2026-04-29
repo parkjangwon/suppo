@@ -6,6 +6,7 @@ import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
+    replace: vi.fn(),
     push: vi.fn(),
     refresh: vi.fn(),
   }),
