@@ -1,4 +1,4 @@
-# Suppo — 사내 헬프데스크
+# Suppo — 헬프데스크
 
 <p align="center">
   <strong>고객 포털과 관리자 대시보드가 분리된 셀프호스팅 헬프데스크 시스템</strong>
