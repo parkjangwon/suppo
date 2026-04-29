@@ -135,10 +135,11 @@ async function getOverviewKPI(dateRange: { from: Date; to: Date }) {
     }),
   ]);
 
-  const responseTimeRows = await (avgResponseAgg as any).rows;
-  const resolutionTimeRows = await (avgResolutionAgg as any).rows;
-  const repeatRows = await (repeatCustomers as any).rows;
-  const vipRows = await (vipCustomers as any).rows;
+  type RawResultSet = { rows: Record<string, unknown>[] };
+  const responseTimeRows = (avgResponseAgg as RawResultSet).rows;
+  const resolutionTimeRows = (avgResolutionAgg as RawResultSet).rows;
+  const repeatRows = (repeatCustomers as RawResultSet).rows;
+  const vipRows = (vipCustomers as RawResultSet).rows;
 
   return {
     totalTickets,

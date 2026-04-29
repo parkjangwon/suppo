@@ -53,7 +53,7 @@ export function SLAPolicyManager() {
 
   useEffect(() => {
     void fetchPolicies();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function fetchPolicies() {
     setIsLoading(true);
@@ -64,7 +64,7 @@ export function SLAPolicyManager() {
       }
       const data = await response.json();
       setPolicies(data);
-    } catch (error) {
+    } catch {
       toast.error(t("slaPolicyLoadFailed", "SLA 정책을 불러오지 못했습니다."));
     } finally {
       setIsLoading(false);
@@ -114,7 +114,7 @@ export function SLAPolicyManager() {
       toast.success(editingId ? t("slaPolicySaveSuccess", "SLA 정책이 수정되었습니다.") : t("slaPolicyCreateSuccess", "SLA 정책이 생성되었습니다."));
       setIsDialogOpen(false);
       await fetchPolicies();
-    } catch (error) {
+    } catch {
       toast.error(t("slaPolicySaveError", "SLA 정책 저장에 실패했습니다."));
     } finally {
       setIsSaving(false);
@@ -135,7 +135,7 @@ export function SLAPolicyManager() {
 
       toast.success(policy.isActive ? t("slaPolicyDeactivateSuccess", "정책이 비활성화되었습니다.") : t("slaPolicyActivateSuccess", "정책이 활성화되었습니다."));
       await fetchPolicies();
-    } catch (error) {
+    } catch {
       toast.error(t("slaPolicyStatusError", "SLA 정책 상태 변경에 실패했습니다."));
     }
   }
@@ -155,7 +155,7 @@ export function SLAPolicyManager() {
 
       toast.success(t("slaPolicyDeleteSuccess", "SLA 정책이 삭제되었습니다."));
       await fetchPolicies();
-    } catch (error) {
+    } catch {
       toast.error(t("slaPolicyDeleteError", "SLA 정책 삭제에 실패했습니다."));
     }
   }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@suppo/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -51,7 +50,6 @@ interface SavedFiltersProps {
 export function SavedFilters({ currentFilter, currentSort, onApplyFilter }: SavedFiltersProps) {
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
-  const router = useRouter();
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -101,23 +99,6 @@ export function SavedFilters({ currentFilter, currentSort, onApplyFilter }: Save
       toast.error(t("savedFilterSaveError", "저장 중 오류가 발생했습니다."));
     } finally {
       setIsLoading(false);
-    }
-  }
-
-  async function handleDeleteFilter(id: string) {
-    if (!confirm(t("savedFilterDeleteSuccess", "이 필터를 삭제하시겠습니까?"))) return;
-
-    try {
-      const response = await fetch(`/api/admin/saved-filters/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) throw new Error();
-
-      toast.success(t("savedFilterDeleteSuccess", "필터가 삭제되었습니다."));
-      fetchSavedFilters();
-    } catch {
-      toast.error(t("savedFilterDeleteError", "삭제 중 오류가 발생했습니다."));
     }
   }
 

@@ -39,11 +39,11 @@ export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
       try {
         const response = await fetch(`/api/admin/tickets/merge?ticketId=${ticketId}`);
         if (!response.ok) {
-          throw new Error(t("ticketMergeFailed", "Failed to load relations"));
+          throw new Error("Failed to load relations");
         }
         const data = await response.json();
         setRelations(data);
-      } catch (error) {
+      } catch {
         setRelations([]);
       } finally {
         setIsLoading(false);

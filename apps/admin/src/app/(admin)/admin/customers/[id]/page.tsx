@@ -71,15 +71,15 @@ export default function CustomerDetailPage() {
         const data = await res.json();
         setCustomer(data);
         setMemo(data.memo || "");
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchCustomer();
-  }, [id]);
+  }, [id, copy]);
 
   const handleSaveMemo = async () => {
     setIsSavingMemo(true);
@@ -94,7 +94,7 @@ export default function CustomerDetailPage() {
       
       toast.success(copyText(copy, "customerMemoSaveSuccess", "메모가 저장되었습니다."));
       setCustomer(prev => prev ? { ...prev, memo } : null);
-    } catch (err) {
+    } catch {
       toast.error(copyText(copy, "customerMemoSaveError", "메모 저장 중 오류가 발생했습니다."));
     } finally {
       setIsSavingMemo(false);
@@ -113,7 +113,7 @@ export default function CustomerDetailPage() {
       const data = await res.json();
       toast.success(copyText(copy, "customerAnalysisSuccess", "AI 분석이 완료되었습니다."));
       setCustomer(prev => prev ? { ...prev, analysis: data.analysis } : null);
-    } catch (err) {
+    } catch {
       toast.error(copyText(copy, "customerAnalysisError", "AI 분석 중 오류가 발생했습니다."));
     } finally {
       setIsAnalyzing(false);

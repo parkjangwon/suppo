@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@suppo/db";
 import { CustomFieldType } from "@prisma/client";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     if (!session?.user) {

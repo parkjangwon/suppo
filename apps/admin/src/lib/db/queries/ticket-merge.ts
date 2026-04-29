@@ -1,4 +1,5 @@
 import { prisma } from "@suppo/db";
+import { ActivityAction } from "@prisma/client";
 import { createAdminTicketDetailUrl } from "@suppo/shared/utils/app-urls";
 
 export interface MergeTicketsParams {
@@ -10,8 +11,8 @@ export interface MergeTicketsParams {
 
 export interface MergeConflict {
   field: string;
-  sourceValue: any;
-  targetValue: any;
+  sourceValue: unknown;
+  targetValue: unknown;
 }
 
 /**
@@ -296,7 +297,7 @@ export async function unmergeTickets(mergeIds: string[], actorId: string) {
           ticketId: merge.sourceTicketId,
           actorType: "AGENT",
           actorId,
-          action: "UNMERGED" as any,
+          action: ActivityAction.UNMERGED,
           oldValue: merge.targetTicketId,
           newValue: null,
         },

@@ -1,4 +1,3 @@
-import { prisma } from "@suppo/db";
 import { db } from "@suppo/db/raw";
 import { DateRange, VIPCustomer, VIPReason, VIPCustomerResponse } from "./contracts";
 
@@ -17,7 +16,6 @@ export async function getVIPCustomers(
   minLifetimeTickets = 10,
   minHighPriorityTickets = 3
 ): Promise<VIPCustomerResponse> {
-  const fromISO = dateRange.from.toISOString();
   const toISO = dateRange.to.toISOString();
   const ninetyDaysAgo = new Date(dateRange.to);
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);

@@ -171,7 +171,7 @@ export function TicketList({
       setBulkPriority("");
       setBulkAssigneeId("");
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error(t("ticketsBulkFailed", "일괄 변경에 실패했습니다."));
     } finally {
       setIsApplyingBulk(false);

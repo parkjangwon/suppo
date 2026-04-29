@@ -32,6 +32,7 @@ interface Template {
   id: string;
   title: string;
   content: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variables: any;
   isShared: boolean;
   isRecommended: boolean;
@@ -76,7 +77,7 @@ export function TemplateForm({
   const [isRecommended, setIsRecommended] = useState(template?.isRecommended ?? false);
   const [sortOrder, setSortOrder] = useState(template?.sortOrder?.toString() || "0");
   const [variables, setVariables] = useState<string[]>(
-    template?.variables?.map((v: any) => v.name) || []
+    template?.variables?.map((v: { name: string }) => v.name) || []
   );
 
   async function handleSubmit(e: React.FormEvent) {
@@ -124,7 +125,7 @@ export function TemplateForm({
         const data = await res.json();
         toast.error(data.error || t("templatesSaveError", "저장 중 오류가 발생했습니다."));
       }
-    } catch (error) {
+    } catch {
       toast.error(t("templatesSaveError", "저장 중 오류가 발생했습니다."));
     } finally {
       setLoading(false);

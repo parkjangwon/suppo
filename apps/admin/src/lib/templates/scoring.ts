@@ -1,5 +1,5 @@
 import { prisma } from "@suppo/db";
-import { ResponseTemplate, Ticket, TicketStatus, TicketPriority, AuditAction } from "@prisma/client";
+import { ResponseTemplate, Ticket, TicketPriority, AuditAction } from "@prisma/client";
 
 interface TemplateScore {
   template: ResponseTemplate;
@@ -30,19 +30,17 @@ async function scoreTemplate(
   let score = 0;
   const reasons: string[] = [];
 
-  const t = template as any;
-
-  if (t.requestTypeId && t.requestTypeId === ticket.requestTypeId) {
+  if (template.requestTypeId && template.requestTypeId === ticket.requestTypeId) {
     score += 30;
     reasons.push("문의 유형 일치");
   }
 
-  if (t.isRecommended) {
+  if (template.isRecommended) {
     score += 20;
     reasons.push("추천 템플릿");
   }
 
-  if (t.categoryId && t.categoryId === ticket.categoryId) {
+  if (template.categoryId && template.categoryId === ticket.categoryId) {
     score += 15;
     reasons.push("카테고리 일치");
   }

@@ -49,7 +49,7 @@ export function InternalNoteForm({ ticketId }: InternalNoteFormProps) {
       setContent("");
       setIsInternal(false);
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error(t("internalNoteError", "응답 등록 중 오류가 발생했습니다."));
     } finally {
       setIsSubmitting(false);

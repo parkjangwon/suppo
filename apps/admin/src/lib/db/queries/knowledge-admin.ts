@@ -53,7 +53,7 @@ export async function getAllKnowledgeCategories(): Promise<KnowledgeCategory[]> 
 export async function getKnowledgeArticles(
   filters: KnowledgeFilters = {}
 ): Promise<KnowledgeArticleListItem[]> {
-  const where: any = {};
+  const where: Record<string, unknown> = {};
 
   if (filters.categoryId) {
     where.categoryId = filters.categoryId;
@@ -291,7 +291,7 @@ export async function getKnowledgeContributors(): Promise<KnowledgeContributor[]
 }
 
 export async function checkSlugExists(slug: string, excludeId?: string): Promise<boolean> {
-  const where: any = { slug };
+  const where: Record<string, unknown> = { slug };
   if (excludeId) {
     where.id = { not: excludeId };
   }
@@ -304,7 +304,7 @@ export async function checkCategorySlugExists(
   slug: string,
   excludeId?: string
 ): Promise<boolean> {
-  const where: any = { slug };
+  const where: Record<string, unknown> = { slug };
   if (excludeId) {
     where.id = { not: excludeId };
   }

@@ -49,6 +49,7 @@ export function TicketMergeDialog({
   const [isMerging, setIsMerging] = useState(false);
   const [validationResult, setValidationResult] = useState<{
     valid: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     conflicts?: Array<{ field: string; sourceValue: any; targetValue: any }>;
   } | null>(null);
   const [isValidating, setIsValidating] = useState(false);

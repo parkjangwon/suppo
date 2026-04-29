@@ -1,4 +1,3 @@
-import { prisma } from "@suppo/db";
 import { db } from "@suppo/db/raw";
 import { DateRange, RepeatInquiry, RepeatPatternType, RepeatInquiryResponse } from "./contracts";
 

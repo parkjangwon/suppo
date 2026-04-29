@@ -1,5 +1,8 @@
 import { prisma } from "@suppo/db";
+import { Prisma } from "@prisma/client";
 import { DateRange, OperationalReportData, AgentActivitySummary, DailyStat } from "../contracts";
+
+type AuditLogRow = Prisma.AuditLogGetPayload<Record<string, never>>;
 
 export async function getOperationalReportData(
   period: DateRange
@@ -26,7 +29,7 @@ export async function getOperationalReportData(
   };
 }
 
-function calculateSummary(auditLogs: any[]) {
+function calculateSummary(auditLogs: AuditLogRow[]) {
   const totalActions = auditLogs.length;
   const uniqueActors = new Set(auditLogs.map((log) => log.actorId)).size;
 
@@ -46,8 +49,8 @@ function calculateSummary(auditLogs: any[]) {
   };
 }
 
-function calculateAgentActivities(auditLogs: any[]): AgentActivitySummary[] {
-  const agentMap = new Map<string, any>();
+function calculateAgentActivities(auditLogs: AuditLogRow[]): AgentActivitySummary[] {
+  const agentMap = new Map<string, AgentActivitySummary>();
 
   for (const log of auditLogs) {
     if (!agentMap.has(log.actorId)) {
@@ -61,7 +64,7 @@ function calculateAgentActivities(auditLogs: any[]): AgentActivitySummary[] {
       });
     }
 
-    const agent = agentMap.get(log.actorId);
+    const agent = agentMap.get(log.actorId)!;
     agent.totalActions++;
     agent.actionsByType[log.action] = (agent.actionsByType[log.action] || 0) + 1;
 
@@ -73,7 +76,7 @@ function calculateAgentActivities(auditLogs: any[]): AgentActivitySummary[] {
   return Array.from(agentMap.values()).sort((a, b) => b.totalActions - a.totalActions);
 }
 
-function calculateDailyStats(auditLogs: any[], period: DateRange): DailyStat[] {
+function calculateDailyStats(auditLogs: AuditLogRow[], period: DateRange): DailyStat[] {
   const dailyMap = new Map<string, { totalActions: number; uniqueActors: Set<string> }>();
 
   const current = new Date(period.from);

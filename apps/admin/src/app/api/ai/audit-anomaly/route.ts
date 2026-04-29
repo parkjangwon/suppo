@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@suppo/db";
+import { AuditAction } from "@prisma/client";
 import { generateAuditAnomalyReport } from "@/lib/ai/audit-anomaly";
 
 export async function POST(request: NextRequest) {
@@ -16,7 +17,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { search, action, resourceType, startDate, endDate } = body;
 
-    const where: any = {};
+    const where: {
+      OR?: { actorName?: { contains: string }; actorEmail?: { contains: string }; description?: { contains: string } }[];
+      action?: AuditAction;
+      resourceType?: string;
+      createdAt?: { gte?: Date; lte?: Date };
+    } = {};
     if (search) {
       where.OR = [
         { actorName: { contains: search } },
@@ -24,7 +30,7 @@ export async function POST(request: NextRequest) {
         { description: { contains: search } },
       ];
     }
-    if (action && action !== "ALL") where.action = action;
+    if (action && action !== "ALL") where.action = action as AuditAction;
     if (resourceType && resourceType !== "ALL") where.resourceType = resourceType;
 
     if (startDate || endDate) {

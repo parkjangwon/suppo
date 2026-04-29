@@ -121,7 +121,7 @@ export async function updateTicketStatus(
   const oldTicket = await prisma.ticket.findUnique({ where: { id } });
   if (!oldTicket) throw new Error("Ticket not found");
 
-  const updateData: any = { status };
+  const updateData: { status: typeof status; resolvedAt?: Date } = { status };
 
   // RESOLVED일 경우 해결일 설정
   if (status === "RESOLVED" && !oldTicket.resolvedAt) {

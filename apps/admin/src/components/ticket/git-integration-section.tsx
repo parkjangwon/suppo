@@ -64,7 +64,7 @@ export function GitIntegrationSection({
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState("");
   const [issueDetails, setIssueDetails] = useState<Record<string, IssueDetail | null | undefined>>({});
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [, setIsLoadingDetails] = useState(false);
   const [detailFetchTrigger, setDetailFetchTrigger] = useState(0);
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
   const [fullDetails, setFullDetails] = useState<Record<string, IssueFullDetail | null | undefined>>({});

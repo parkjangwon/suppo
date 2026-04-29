@@ -21,7 +21,7 @@ interface SuggestedArticle {
 
 export function KnowledgeSuggestions({ subject, description }: KnowledgeSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<SuggestedArticle[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
   const searchKnowledge = useCallback(async (query: string) => {

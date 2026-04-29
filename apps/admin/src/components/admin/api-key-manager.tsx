@@ -51,7 +51,7 @@ export function ApiKeyManager() {
     void fetchApiKeys().catch(() => {
       toast.error(copy.apiKeyLoadFailed ?? "API 키를 불러오지 못했습니다.");
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function markCopied(value: string) {
     setCopiedValue(value);
@@ -89,7 +89,7 @@ export function ApiKeyManager() {
       setNewKeyName("");
       setSelectedScopes(["tickets:read", "tickets:create"]);
       await fetchApiKeys();
-    } catch (error) {
+    } catch {
       toast.error(copy.apiKeyCreateFailed ?? "API 키 생성에 실패했습니다.");
     }
   }
@@ -109,7 +109,7 @@ export function ApiKeyManager() {
       }
 
       await fetchApiKeys();
-    } catch (error) {
+    } catch {
       toast.error(copy.apiKeyToggleFailed ?? "API 키 상태 변경에 실패했습니다.");
     }
   }
@@ -144,7 +144,7 @@ export function ApiKeyManager() {
         return next;
       });
       await fetchApiKeys();
-    } catch (error) {
+    } catch {
       toast.error(copy.apiKeyDeleteFailed ?? "API 키 삭제에 실패했습니다.");
     }
   }

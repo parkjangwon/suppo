@@ -24,7 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@suppo/ui/components/ui/alert-dialog";
-import { FolderTree, Plus, Pencil, Trash2, GripVertical } from "lucide-react";
+import { FolderTree, Pencil, Trash2, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 

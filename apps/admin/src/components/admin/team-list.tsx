@@ -17,7 +17,7 @@ import {
 import { Label } from "@suppo/ui/components/ui/label";
 import { Textarea } from "@suppo/ui/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Edit2, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface Team {
@@ -90,7 +90,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
 
       toast.success(isActive ? "활성화되었습니다" : "비활성화되었습니다");
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error("상태 변경에 실패했습니다");
     }
   };

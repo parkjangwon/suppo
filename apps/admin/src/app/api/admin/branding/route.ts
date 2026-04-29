@@ -4,7 +4,7 @@ import { prisma } from "@suppo/db";
 
 const DEFAULT_BRANDING_ID = "default";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
     

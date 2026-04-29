@@ -57,15 +57,14 @@ function normalizeAutomationRule(
   };
 }
 
-interface TicketWithAutomationContext
-  extends Prisma.TicketGetPayload<{
-    include: {
-      assignee: true;
-      team: true;
-      category: true;
-      slaClocks: true;
-    };
-  }> {}
+type TicketWithAutomationContext = Prisma.TicketGetPayload<{
+  include: {
+    assignee: true;
+    team: true;
+    category: true;
+    slaClocks: true;
+  };
+}>;
 
 interface AutomationRunResult {
   processedRules: number;
@@ -514,7 +513,7 @@ export async function autoAssignByTeam(ticketId: string, requestTypeId: string) 
     await tx.ticketActivity.create({
       data: {
         ticketId,
-        actorType: "SYSTEM" as any,
+        actorType: "SYSTEM" as "AGENT",
         action: "ASSIGNED",
         oldValue: "unassigned",
         newValue: selectedAgent.id,
@@ -567,7 +566,7 @@ export async function autoAssignByCategory(ticketId: string, categoryId: string)
     await tx.ticketActivity.create({
       data: {
         ticketId,
-        actorType: "SYSTEM" as any,
+        actorType: "SYSTEM" as "AGENT",
         action: "ASSIGNED",
         oldValue: "unassigned",
         newValue: selectedAgent.id,

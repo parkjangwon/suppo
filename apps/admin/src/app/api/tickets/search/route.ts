@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@suppo/db";
-import { Prisma } from "@prisma/client";
+import { Prisma, TicketStatus, TicketPriority } from "@prisma/client";
 import { z } from "zod";
 
 const searchSchema = z.object({
@@ -94,12 +94,12 @@ export async function GET(request: NextRequest) {
 
     // Status filter
     if (params.status && params.status.length > 0) {
-      where.status = { in: params.status as any };
+      where.status = { in: params.status as TicketStatus[] };
     }
 
     // Priority filter
     if (params.priority && params.priority.length > 0) {
-      where.priority = { in: params.priority as any };
+      where.priority = { in: params.priority as TicketPriority[] };
     }
 
     // Assignee filter

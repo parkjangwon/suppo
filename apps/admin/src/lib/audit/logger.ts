@@ -10,9 +10,9 @@ export interface CreateAuditLogParams {
   resourceType: string;
   resourceId?: string;
   description: string;
-  oldValue?: any;
-  newValue?: any;
-  metadata?: any;
+  oldValue?: unknown;
+  newValue?: unknown;
+  metadata?: unknown;
   ipAddress?: string;
   userAgent?: string;
 }

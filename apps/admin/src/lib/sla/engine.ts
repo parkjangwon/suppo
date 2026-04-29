@@ -1,7 +1,7 @@
 // SLA 계산 엔진
 // 비즈니스 시간 기준으로 SLA 시간을 계산하고 관리합니다
 
-import { SLAClockStatus, SLATarget, TicketStatus } from "@prisma/client";
+import { SLAClockStatus, SLATarget, TicketStatus, TicketPriority } from "@prisma/client";
 import { prisma } from "@suppo/db";
 import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import { enqueueSLAWarningEmail, enqueueSLABreachEmail } from "@suppo/shared/email/enqueue";
@@ -14,12 +14,6 @@ interface BusinessHours {
   holidays: Date[];
 }
 
-interface SLAResult {
-  deadlineAt: Date;
-  remainingMinutes: number;
-  isBreached: boolean;
-  isWarning: boolean; // 80% 이상 사용
-}
 
 /**
  * SLA 정책에 따라 티켓의 SLA 클락을 초기화합니다
@@ -32,7 +26,7 @@ export async function initializeSLAClocks(
   // 해당 우선순위의 SLA 정책 조회
   const policy = await prisma.sLAPolicy.findFirst({
     where: {
-      priority: priority as any,
+      priority: priority as TicketPriority,
       isActive: true,
     },
   });
@@ -167,7 +161,7 @@ function getNextBusinessTime(date: Date, businessHours: BusinessHours): Date {
  * 다음 근무일을 찾습니다
  */
 function getNextBusinessDay(date: Date, businessHours: BusinessHours): Date {
-  let next = new Date(date);
+  const next = new Date(date);
   next.setDate(next.getDate() + 1);
   next.setHours(businessHours.workStartHour, 0, 0, 0);
 

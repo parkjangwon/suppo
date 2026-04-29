@@ -42,6 +42,7 @@ interface Template {
   id: string;
   title: string;
   content: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variables: any;
   isShared: boolean;
   isRecommended: boolean;
@@ -112,7 +113,7 @@ export function TemplateList({
         const data = await res.json();
         toast.error(data.error || t("templatesDeleteError", "삭제 중 오류가 발생했습니다."));
       }
-    } catch (error) {
+    } catch {
       toast.error(t("templatesDeleteError", "삭제 중 오류가 발생했습니다."));
     }
     setDeletingTemplate(null);

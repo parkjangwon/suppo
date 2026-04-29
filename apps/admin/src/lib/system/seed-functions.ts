@@ -6,7 +6,6 @@ import {
   AuthProvider,
   Prisma,
   PrismaClient,
-  ActivityAction,
 } from "@prisma/client";
 import { hash } from "bcryptjs";
 

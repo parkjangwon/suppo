@@ -23,7 +23,9 @@ import { toast } from "sonner";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface KnowledgeFormProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   article?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   categories: any[];
 }
 

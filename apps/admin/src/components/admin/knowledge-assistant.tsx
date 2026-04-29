@@ -32,7 +32,6 @@ interface Article {
 export function KnowledgeAssistant({
   onInsertContent,
   ticketSubject,
-  ticketDescription,
   ticketId,
 }: KnowledgeAssistantProps) {
   const [isOpen, setIsOpen] = useState(false);

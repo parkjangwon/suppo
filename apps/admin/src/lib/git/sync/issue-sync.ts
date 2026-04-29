@@ -1,5 +1,5 @@
 import { prisma } from "@suppo/db";
-import { TicketStatus, GitProvider, GitEventType, AuditAction, AuthorType } from "@prisma/client";
+import { TicketStatus, GitProvider, GitEventType, AuditAction, AuthorType, Prisma } from "@prisma/client";
 
 interface GitIssuePayload {
   state: string;
@@ -126,9 +126,9 @@ async function createAuditLog(params: {
   resourceType: string;
   resourceId: string;
   description: string;
-  oldValue?: any;
-  newValue?: any;
-  metadata?: any;
+  oldValue?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue;
+  newValue?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue;
+  metadata?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue;
 }) {
   try {
     await prisma.auditLog.create({

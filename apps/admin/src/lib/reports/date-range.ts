@@ -74,7 +74,6 @@ export function getNextRunDate(
   dayOfMonth: number | null,
   hour: number,
   minute: number,
-  timezone: string = "Asia/Seoul"
 ): Date {
   const now = new Date();
   const next = new Date(now);

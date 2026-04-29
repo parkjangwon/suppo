@@ -6,7 +6,6 @@ import { requireJson } from "@suppo/shared/security/content-type";
 import { checkRateLimit, createRateLimitHeaders } from "@suppo/shared/security/rate-limit";
 import { dispatchWebhookEvent } from "@suppo/shared/integrations/outbound-webhooks";
 import { notificationService } from "@suppo/shared/notifications/sse-service";
-import { prisma } from "@suppo/db";
 
 export async function GET(
   request: NextRequest,
@@ -83,7 +82,7 @@ export async function PATCH(
     const body = await request.json();
     const validated = validateRequest(updateTicketSchema, body);
 
-    let updatedTicket: any = ticket;
+    let updatedTicket = ticket as typeof ticket | Awaited<ReturnType<typeof updateTicketStatus>>;
 
     if (validated.status) {
       updatedTicket = await updateTicketStatus(id, validated.status, session.user.agentId);

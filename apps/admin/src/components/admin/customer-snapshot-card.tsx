@@ -40,7 +40,7 @@ export function CustomerSnapshotCard({ customerId }: CustomerSnapshotCardProps) 
         if (isMounted) {
           setData(payload);
         }
-      } catch (error) {
+      } catch {
         if (isMounted) {
           setData(null);
         }

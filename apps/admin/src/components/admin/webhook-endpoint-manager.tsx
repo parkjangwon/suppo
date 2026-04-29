@@ -85,7 +85,7 @@ export function WebhookEndpointManager() {
     void fetchWebhooks().catch(() => {
       toast.error(copy.webhookLoadFailed ?? "Webhook 목록을 불러오지 못했습니다.");
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function createWebhook() {
     try {
@@ -112,7 +112,7 @@ export function WebhookEndpointManager() {
       setSecret("");
       setSelectedEvents(["ticket.created"]);
       await fetchWebhooks();
-    } catch (error) {
+    } catch {
       toast.error(copy.webhookCreateFailed ?? "Webhook 생성에 실패했습니다.");
     }
   }
@@ -132,7 +132,7 @@ export function WebhookEndpointManager() {
       }
 
       await fetchWebhooks();
-    } catch (error) {
+    } catch {
       toast.error(copy.webhookToggleFailed ?? "Webhook 상태 변경에 실패했습니다.");
     }
   }
@@ -148,7 +148,7 @@ export function WebhookEndpointManager() {
       }
 
       await fetchWebhooks();
-    } catch (error) {
+    } catch {
       toast.error(copy.webhookDeleteFailed ?? "Webhook 삭제에 실패했습니다.");
     }
   }

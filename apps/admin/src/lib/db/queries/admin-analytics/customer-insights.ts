@@ -85,8 +85,8 @@ export async function getCustomerInsights(customerId: string): Promise<CustomerI
     }),
   ]);
 
-  const responseTimeRows = (responseTimeStats as any).rows;
-  const resolutionTimeRows = (resolutionTimeStats as any).rows;
+  const responseTimeRows = (responseTimeStats as { rows: Array<{ avgMinutes: number | null }> }).rows;
+  const resolutionTimeRows = (resolutionTimeStats as { rows: Array<{ avgHours: number | null }> }).rows;
 
   const categoryMap = new Map(
     categoryBreakdown.map((c) => [c.categoryId, c._count.id])

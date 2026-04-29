@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { compare, hash, hashSync } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import NextAuth from "next-auth";
 import type { Adapter } from "next-auth/adapters";
 import type { Provider } from "next-auth/providers";

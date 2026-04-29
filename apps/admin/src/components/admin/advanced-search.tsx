@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@suppo/ui/components/ui/input";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Checkbox } from "@suppo/ui/components/ui/checkbox";
@@ -9,7 +8,6 @@ import { Label } from "@suppo/ui/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@suppo/ui/components/ui/select";
 import { Badge } from "@suppo/ui/components/ui/badge";
 import { Search, X, Folder, Filter } from "lucide-react";
-import { cn } from "@suppo/shared/utils";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface AdvancedSearchProps {
@@ -20,12 +18,10 @@ interface AdvancedSearchProps {
 
 type SearchMode = "all" | "any" | "exact";
 
-export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchProps) {
+export function AdvancedSearch(props: AdvancedSearchProps) {
+  const { onSearch } = props;
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   const [searchTerm, setSearchTerm] = useState("");
   const [searchFields, setSearchFields] = useState<string[]>(["subject", "description", "comments"]);
   const [searchMode, setSearchMode] = useState<SearchMode>("all");
@@ -57,31 +53,6 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
 
     params.delete("cursor");
     onSearch(params);
-  };
-
-  const handleSaveSearch = () => {
-    const currentFilters: Record<string, string> = {};
-    const currentSearchParams = Array.from(searchParams.entries());
-
-    // 필터 수집
-    currentSearchParams.forEach(([key, value]) => {
-      if (key !== "cursor" && value && value !== "all") {
-        currentFilters[key] = value;
-      }
-    });
-
-    const newSaved: SavedSearch = {
-      id: Date.now().toString(),
-      name: `검색 ${savedSearches.length + 1}`,
-      term: searchTerm,
-      fields: searchFields,
-      mode: searchMode,
-      filters: currentFilters,
-    };
-
-    const updated = [...savedSearches, newSaved].slice(0, 10);
-    setSavedSearches(updated);
-    localStorage.setItem("admin-saved-searches", JSON.stringify(updated));
   };
 
   const handleLoadSaved = (saved: SavedSearch) => {
@@ -228,7 +199,7 @@ export function AdvancedSearch({ categories, agents, onSearch }: AdvancedSearchP
                     <span className="text-sm font-medium">{saved.name}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    "{saved.term}" ({saved.fields.join(", ")})
+                    &quot;{saved.term}&quot; ({saved.fields.join(", ")})
                   </div>
                 </div>
                 <div className="flex items-center gap-1">

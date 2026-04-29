@@ -39,8 +39,23 @@ import { CategoryManager } from "./category-manager";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { PaginationNav } from "@/components/ui/pagination-nav";
 
+interface KnowledgeArticleItem {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  isPublished: boolean;
+  isPublic: boolean;
+  authorId: string;
+  viewCount: number;
+  updatedAt: string | Date;
+  category?: { name: string } | null;
+  author?: { name: string } | null;
+}
+
 interface KnowledgeListProps {
-  articles: any[];
+  articles: KnowledgeArticleItem[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   categories: any[];
   currentUserId: string;
   isAdmin: boolean;
@@ -102,22 +117,22 @@ export function KnowledgeList({
 
       toast.success("문서가 삭제되었습니다");
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error("삭제 중 오류가 발생했습니다");
     } finally {
       setIsDeleting(null);
     }
   };
 
-  const canEdit = (article: any) => {
+  const canEdit = (article: KnowledgeArticleItem) => {
     return isAdmin || article.authorId === currentUserId;
   };
 
-  const canDelete = (article: any) => {
+  const canDelete = (article: KnowledgeArticleItem) => {
     return isAdmin || article.authorId === currentUserId;
   };
 
-  const canOpenPublicLink = (article: any) => {
+  const canOpenPublicLink = (article: KnowledgeArticleItem) => {
     return article.isPublished && article.isPublic;
   };
 

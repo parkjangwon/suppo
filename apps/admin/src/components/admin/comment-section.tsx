@@ -104,7 +104,7 @@ export function CommentSection({
         setReply((prev) => prev + (prev ? "\n\n" : "") + suggestion);
         toast.success(t("commentAiSuggest", "AI 답변 제안이 입력되었습니다."));
       }
-    } catch (error) {
+    } catch {
       toast.error(t("commentAiSuggestLoading", "AI 답변 생성 중 오류가 발생했습니다."));
     }
   }

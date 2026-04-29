@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface TicketDetailProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ticket: any;
   agents: { id: string; name: string }[];
   currentAgentId: string;
@@ -75,6 +76,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
 
     setIsUpdating(true);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body: Record<string, any> = {};
       body[field] = value;
 
@@ -90,7 +92,7 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
 
       toast.success(t("ticketDetailUpdateSuccess", "업데이트 되었습니다."));
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error(t("ticketDetailUpdateFailed", "업데이트 중 오류가 발생했습니다."));
     } finally {
       setIsUpdating(false);
@@ -190,7 +192,8 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
                     <div className="mt-4 pt-4 border-t">
                       <h4 className="text-sm font-medium mb-2">{t("commonView", "첨부파일")}</h4>
                       <ul className="space-y-1">
-                        {ticket.attachments.map((file: any) => (
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        {(ticket.attachments as Array<any>).map((file) => (
                           <li key={file.id}>
                             <a href={`/api/attachments/${file.id}`} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">
                               {file.fileName}
@@ -219,7 +222,8 @@ export function TicketDetail({ ticket, agents, currentAgentId, isAdmin }: Ticket
               <Card>
                 <CardContent className="pt-6">
                   <div className="space-y-4">
-                    {ticket.activities?.map((activity: any) => (
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {(ticket.activities as Array<any> | undefined)?.map((activity) => (
                       <div key={activity.id} className="flex gap-4 text-sm">
                         <div className="text-muted-foreground whitespace-nowrap">
                           {format(new Date(activity.createdAt), "MM.dd HH:mm")}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import {
   format,
@@ -96,15 +96,7 @@ export default function CalendarPage() {
 
   const isAdmin = session?.user?.role === "ADMIN";
 
-  useEffect(() => {
-    if (!session) return;
-    fetchAbsences();
-    if (isAdmin) {
-      fetchAgents();
-    }
-  }, [currentDate, isAdmin, session]);
-
-  const fetchAbsences = async () => {
+  const fetchAbsences = useCallback(async () => {
     try {
       const start = format(startOfMonth(currentDate), "yyyy-MM-dd");
       const end = format(endOfMonth(currentDate), "yyyy-MM-dd");
@@ -112,23 +104,31 @@ export default function CalendarPage() {
       if (!res.ok) throw new Error("Failed to fetch absences");
       const data = await res.json();
       setAbsences(data);
-    } catch (error) {
+    } catch {
       toast.error(copyText(copy, "calendarLoadFailed", "일정을 불러오는 중 오류가 발생했습니다."));
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentDate, copy]);
 
-  const fetchAgents = async () => {
+  const fetchAgents = useCallback(async () => {
     try {
       const res = await fetch("/api/agents");
       if (!res.ok) throw new Error("Failed to fetch agents");
       const data = await res.json();
       setAgents(data.agents || []);
-    } catch (error) {
+    } catch {
       toast.error(copyText(copy, "calendarAgentsLoadFailed", "상담원 목록을 불러오는 중 오류가 발생했습니다."));
     }
-  };
+  }, [copy]);
+
+  useEffect(() => {
+    if (!session) return;
+    fetchAbsences();
+    if (isAdmin) {
+      fetchAgents();
+    }
+  }, [currentDate, isAdmin, session, fetchAbsences, fetchAgents]);
 
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
@@ -195,7 +195,7 @@ export default function CalendarPage() {
       if (!res.ok) throw new Error("Failed to delete");
       toast.success(copyText(copy, "calendarDeleteSuccess", "일정이 삭제되었습니다."));
       fetchAbsences();
-    } catch (error) {
+    } catch {
       toast.error(copyText(copy, "calendarDeleteFailed", "일정 삭제 중 오류가 발생했습니다."));
     }
   };

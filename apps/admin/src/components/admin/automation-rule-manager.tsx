@@ -70,7 +70,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
 
   useEffect(() => {
     void fetchRules();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function fetchRules() {
     setIsLoading(true);
@@ -81,7 +81,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
       }
       const data = await response.json();
       setRules(data);
-    } catch (error) {
+    } catch {
       toast.error(t("automationLoadFailed", "자동화 규칙을 불러오지 못했습니다."));
     } finally {
       setIsLoading(false);
@@ -188,7 +188,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
       toast.success(editingId ? t("automationUpdateSuccess", "자동화 규칙이 수정되었습니다.") : t("automationCreateSuccess", "자동화 규칙이 생성되었습니다."));
       setIsDialogOpen(false);
       await fetchRules();
-    } catch (error) {
+    } catch {
       toast.error(t("automationSaveFailed", "자동화 규칙 저장에 실패했습니다."));
     } finally {
       setIsSaving(false);
@@ -209,7 +209,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
 
       toast.success(rule.isActive ? t("automationDeactivateSuccess", "규칙이 비활성화되었습니다.") : t("automationActivateSuccess", "규칙이 활성화되었습니다."));
       await fetchRules();
-    } catch (error) {
+    } catch {
       toast.error(t("automationStatusFailed", "자동화 규칙 상태 변경에 실패했습니다."));
     }
   }
@@ -229,7 +229,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
 
       toast.success(t("automationDeleteSuccess", "자동화 규칙이 삭제되었습니다."));
       await fetchRules();
-    } catch (error) {
+    } catch {
       toast.error(t("automationDeleteFailed", "자동화 규칙 삭제에 실패했습니다."));
     }
   }

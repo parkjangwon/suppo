@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@suppo/db";
-import {
-  createKnowledgeArticleSchema,
-  updateKnowledgeArticleSchema,
-} from "@suppo/shared/validation/knowledge";
+import { createKnowledgeArticleSchema } from "@suppo/shared/validation/knowledge";
 import { generateSlug } from "@suppo/shared/knowledge/slug";
 import { createAuditLog } from "@/lib/audit/logger";
 
@@ -20,7 +17,11 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const search = searchParams.get("search");
 
-    const where: any = {};
+    const where: {
+      categoryId?: string;
+      isPublished?: boolean;
+      OR?: { title?: { contains: string }; excerpt?: { contains: string } }[];
+    } = {};
 
     if (categoryId) {
       where.categoryId = categoryId;

@@ -8,13 +8,11 @@ import { Input } from "@suppo/ui/components/ui/input";
 import { Label } from "@suppo/ui/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@suppo/ui/components/ui/card";
 import { Badge } from "@suppo/ui/components/ui/badge";
-import { Switch } from "@suppo/ui/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@suppo/ui/components/ui/dialog";
 import { toast } from "sonner";
 import { Github, Gitlab, Plus, Trash2, CheckCircle2, AlertCircle } from "lucide-react";
@@ -116,7 +114,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
       setCredentials((prev) => prev.filter((c) => c.provider !== provider));
       toast.success(t("gitDeleteSuccess", "자격증명이 삭제되었습니다", "Credentials deleted."));
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error(t("gitDeleteError", "삭제에 실패했습니다", "Failed to delete."));
     }
   };

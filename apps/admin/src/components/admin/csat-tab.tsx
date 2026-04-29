@@ -20,22 +20,21 @@ export function CSATTab({ ticketId }: CSATTabProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchCSAT();
-  }, [ticketId]);
-
-  async function fetchCSAT() {
-    try {
-      const response = await fetch(`/api/tickets/${ticketId}/csat`);
-      if (response.ok) {
-        const data = await response.json();
-        setCsat(data);
+    async function fetchCSAT() {
+      try {
+        const response = await fetch(`/api/tickets/${ticketId}/csat`);
+        if (response.ok) {
+          const data = await response.json();
+          setCsat(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch CSAT:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch CSAT:", error);
-    } finally {
-      setIsLoading(false);
     }
-  }
+    void fetchCSAT();
+  }, [ticketId]);
 
   if (isLoading) {
     return (

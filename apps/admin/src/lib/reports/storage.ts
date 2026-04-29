@@ -17,8 +17,7 @@ export async function initializeStorage(): Promise<void> {
 // 파일 저장
 export async function saveReportFile(
   storageKey: string,
-  buffer: Buffer,
-  mimeType: string
+  buffer: Buffer
 ): Promise<{ sizeBytes: number }> {
   await initializeStorage();
   

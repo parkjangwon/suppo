@@ -29,7 +29,6 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     formState: { errors },
   } = useForm<TicketFormValues>({

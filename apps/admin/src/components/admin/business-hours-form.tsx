@@ -64,7 +64,7 @@ export function BusinessHoursForm() {
       .then((d) => setData(d))
       .catch(() => toast.error(copy.businessHoursLoadFailed ?? "설정을 불러오지 못했습니다."))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggleWorkDay = (day: number) => {
     setData((prev) => ({

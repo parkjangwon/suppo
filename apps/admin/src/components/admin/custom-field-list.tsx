@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@suppo/ui/components/ui/dropdown-menu";
-import { MoreVertical, Plus, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { CustomFieldDialog } from "./custom-field-dialog";
 import { toast } from "sonner";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
@@ -30,6 +30,7 @@ interface CustomField {
   name: string;
   description: string | null;
   fieldType: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTI_SELECT";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options: any;
   isRequired: boolean;
   isActive: boolean;
@@ -195,7 +196,7 @@ export function CustomFieldList({ fields }: CustomFieldListProps) {
     </div>
   );
 
-  async function handleSave(field: any) {
+  async function handleSave(field: Record<string, unknown>) {
     try {
       const response = await fetch("/api/admin/custom-fields" + (editingField ? `/${editingField.id}` : ""), {
         method: editingField ? "PATCH" : "POST",

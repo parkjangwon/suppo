@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Input } from "@suppo/ui/components/ui/input";
 import { Label } from "@suppo/ui/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Switch } from "@suppo/ui/components/ui/switch";
-import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 import { formatPhoneNumberInput } from "@suppo/shared/utils/phone-format";
 import { toast } from "sonner";
 
@@ -308,9 +309,11 @@ export function BrandingForm() {
               <div className="space-y-2">
                 {formData.logoUrl ? (
                   <div className="relative inline-block">
-                    <img
+                    <Image
                       src={formData.logoUrl}
                       alt="Logo preview"
+                      width={160}
+                      height={80}
                       className="h-20 w-auto object-contain border rounded p-2"
                     />
                     <button
@@ -352,9 +355,11 @@ export function BrandingForm() {
               <div className="space-y-2">
                 {formData.faviconUrl ? (
                   <div className="relative inline-block">
-                    <img
+                    <Image
                       src={formData.faviconUrl}
                       alt="Favicon preview"
+                      width={48}
+                      height={48}
                       className="h-12 w-12 object-contain border rounded p-1"
                     />
                     <button

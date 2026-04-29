@@ -235,7 +235,7 @@ export class GitHubProvider implements GitIssueProvider {
     ];
 
     // Round 2: PR 상세 병렬 fetch
-    let linkedPRs: LinkedPR[] = [];
+    const linkedPRs: LinkedPR[] = [];
     if (prNumbers.length > 0) {
       const prResults = await Promise.allSettled(
         prNumbers.map(prNumber =>

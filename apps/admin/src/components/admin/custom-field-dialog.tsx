@@ -23,6 +23,7 @@ interface CustomField {
   name: string;
   description: string | null;
   fieldType: "TEXT" | "NUMBER" | "DATE" | "BOOLEAN" | "SELECT" | "MULTI_SELECT";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options: any;
   isRequired: boolean;
   isActive: boolean;
@@ -33,7 +34,7 @@ interface CustomFieldDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   field?: CustomField | null;
-  onSave: (field: any) => void;
+  onSave: (field: Record<string, unknown>) => void;
 }
 
 export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomFieldDialogProps) {
@@ -99,7 +100,7 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
   function handleSubmit() {
     if (!validate()) return;
 
-    const fieldData: any = {
+    const fieldData: Record<string, unknown> = {
       key,
       name,
       description: description || null,
@@ -164,7 +165,7 @@ export function CustomFieldDialog({ open, onOpenChange, field, onSave }: CustomF
 
           <div className="space-y-2">
             <Label htmlFor="fieldType">{copyText(copy, "commonType", "필드 타입")}</Label>
-            <Select value={fieldType} onValueChange={(value: any) => setFieldType(value)}>
+            <Select value={fieldType} onValueChange={(value) => setFieldType(value as typeof fieldType)}>
               <SelectTrigger id="fieldType">
                 <SelectValue />
               </SelectTrigger>

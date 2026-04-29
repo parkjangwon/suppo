@@ -91,7 +91,13 @@ export async function getCustomerReportData(
   };
 }
 
-function calculateResponseTime(ticket: any): number | null {
+type TicketWithComments = {
+  createdAt: Date;
+  resolvedAt: Date | null;
+  comments: { createdAt: Date }[];
+};
+
+function calculateResponseTime(ticket: TicketWithComments): number | null {
   const firstComment = ticket.comments?.[0];
   if (!firstComment) return null;
 
@@ -100,7 +106,7 @@ function calculateResponseTime(ticket: any): number | null {
   return Math.round((responded - created) / (1000 * 60));
 }
 
-function calculateResolutionTime(ticket: any): number | null {
+function calculateResolutionTime(ticket: TicketWithComments): number | null {
   if (!ticket.resolvedAt) return null;
 
   const created = new Date(ticket.createdAt).getTime();

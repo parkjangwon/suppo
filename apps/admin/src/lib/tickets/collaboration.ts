@@ -2,7 +2,7 @@ import { prisma } from "@suppo/db";
 
 const PRESENCE_STALE_MS = 35_000; // 35초 후 stale로 간주
 const LOCK_DURATION_MS = 60_000; // 60초 락 유효기간
-const LOCK_RENEWAL_MS = 30_000; // 30초마다 갱신
+// const LOCK_RENEWAL_MS = 30_000; // 30초마다 갱신 (현재 미사용 — 자동 갱신 미구현)
 
 export interface PresenceInfo {
   agentId: string;
@@ -177,7 +177,7 @@ export async function acquireCommentLock(
       acquiredAt: lock.acquiredAt,
       expiresAt: lock.expiresAt,
     };
-  } catch (error) {
+  } catch {
     // 중복 생성 시도 (race condition)
     return null;
   }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
-import { Plus, Edit2, Trash2, Power, PowerOff, Copy, ExternalLink, Download } from "lucide-react";
+import { Plus, Edit2, Trash2, Power, PowerOff, Copy, Download } from "lucide-react";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Input } from "@suppo/ui/components/ui/input";

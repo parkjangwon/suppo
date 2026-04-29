@@ -1,5 +1,5 @@
 import { prisma } from "@suppo/db";
-import { GitProvider } from "@prisma/client";
+import { GitProvider, Prisma } from "@prisma/client";
 
 type GitOperation = 'CREATE_ISSUE' | 'LINK_ISSUE' | 'UPDATE_ISSUE';
 
@@ -7,27 +7,28 @@ interface QueueItem {
   id: string;
   operation: GitOperation;
   provider: GitProvider;
-  payload: any;
+  payload: Prisma.JsonValue;
   retryCount: number;
   maxRetries: number;
 }
 
-function classifyError(error: any): { code: string; shouldRetry: boolean } {
-  if (error.status === 401) return { code: 'AUTH_FAILED', shouldRetry: false };
-  if (error.status === 403) return { code: 'PERMISSION_DENIED', shouldRetry: false };
-  if (error.status === 404) return { code: 'RESOURCE_NOT_FOUND', shouldRetry: false };
-  if (error.status === 422) return { code: 'VALIDATION_FAILED', shouldRetry: false };
-  if (error.status === 429) return { code: 'RATE_LIMIT', shouldRetry: true };
-  if (error.code === 'ETIMEDOUT') return { code: 'TIMEOUT', shouldRetry: true };
-  if (error.code === 'ECONNREFUSED') return { code: 'CONNECTION_FAILED', shouldRetry: true };
-  if (error.code === 'ENOTFOUND') return { code: 'DNS_ERROR', shouldRetry: true };
+function classifyError(error: unknown): { code: string; shouldRetry: boolean } {
+  const e = error as { status?: number; code?: string };
+  if (e.status === 401) return { code: 'AUTH_FAILED', shouldRetry: false };
+  if (e.status === 403) return { code: 'PERMISSION_DENIED', shouldRetry: false };
+  if (e.status === 404) return { code: 'RESOURCE_NOT_FOUND', shouldRetry: false };
+  if (e.status === 422) return { code: 'VALIDATION_FAILED', shouldRetry: false };
+  if (e.status === 429) return { code: 'RATE_LIMIT', shouldRetry: true };
+  if (e.code === 'ETIMEDOUT') return { code: 'TIMEOUT', shouldRetry: true };
+  if (e.code === 'ECONNREFUSED') return { code: 'CONNECTION_FAILED', shouldRetry: true };
+  if (e.code === 'ENOTFOUND') return { code: 'DNS_ERROR', shouldRetry: true };
   return { code: 'UNKNOWN', shouldRetry: true };
 }
 
 export async function enqueueGitOperation(
   operation: GitOperation,
   provider: GitProvider,
-  payload: any,
+  payload: Prisma.InputJsonValue,
   maxRetries = 3
 ): Promise<string> {
   const item = await prisma.gitOperationQueue.create({
@@ -79,7 +80,7 @@ export async function processGitQueue(batchSize = 10): Promise<{
       
       succeeded++;
     } catch (error) {
-      const { code, shouldRetry } = classifyError(error);
+      const { code } = classifyError(error);
       const newRetryCount = item.retryCount + 1;
       
       await prisma.gitOperationQueue.update({
@@ -126,7 +127,7 @@ async function executeGitOperation(item: QueueItem): Promise<void> {
   }
 }
 
-async function notifyAdmin(subject: string, details: any): Promise<void> {
+async function notifyAdmin(subject: string, details: Prisma.JsonValue): Promise<void> {
   console.error(`[Git Queue Alert] ${subject}`, details);
 }
 

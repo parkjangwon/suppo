@@ -52,44 +52,42 @@ export function TemplateSelector({
   });
 
   useEffect(() => {
-    if (open) {
-      fetchTemplates();
-    }
-  }, [open, requestTypeId]);
-
-  async function fetchTemplates() {
-    setLoading(true);
-    try {
-      let url = "/api/templates/recommended";
-      if (requestTypeId) {
-        url += `?requestTypeId=${requestTypeId}`;
-      }
-
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        setTemplates({
-          recommended: data.recommended || [],
-          general: data.general || [],
-          recent: data.recent || [],
-        });
-      } else {
-        const fallbackRes = await fetch("/api/templates");
-        if (fallbackRes.ok) {
-          const data = await fallbackRes.json();
-          setTemplates({
-            recommended: [],
-            general: data.templates || [],
-            recent: [],
-          });
+    if (!open) return;
+    async function fetchTemplates() {
+      setLoading(true);
+      try {
+        let url = "/api/templates/recommended";
+        if (requestTypeId) {
+          url += `?requestTypeId=${requestTypeId}`;
         }
+
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          setTemplates({
+            recommended: data.recommended || [],
+            general: data.general || [],
+            recent: data.recent || [],
+          });
+        } else {
+          const fallbackRes = await fetch("/api/templates");
+          if (fallbackRes.ok) {
+            const data = await fallbackRes.json();
+            setTemplates({
+              recommended: [],
+              general: data.templates || [],
+              recent: [],
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch templates:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch templates:", error);
-    } finally {
-      setLoading(false);
     }
-  }
+    void fetchTemplates();
+  }, [open, requestTypeId]);
 
   function handleSelect(template: Template) {
     const content = templateContext

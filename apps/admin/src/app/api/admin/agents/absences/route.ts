@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@suppo/db";
 import { z } from "zod";
-import { startOfDay, endOfDay, isBefore, isAfter } from "date-fns";
+import { isBefore } from "date-fns";
 
 const absenceSchema = z.object({
   agentId: z.string().min(1, "상담원을 선택해주세요"),

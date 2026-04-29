@@ -1,3 +1,4 @@
+import NextImage from "next/image";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { FileText, Image as ImageIcon, Download, User, Headphones } from "lucide-react";
@@ -111,9 +112,11 @@ export function CommentList({ comments }: CommentListProps) {
                             rel="noopener noreferrer"
                             className="block relative"
                           >
-                            <img
+                            <NextImage
                               src={`/api/attachments/${attachment.id}`}
                               alt={attachment.filename}
+                              width={96}
+                              height={96}
                               className="h-24 w-24 object-cover rounded-lg border border-slate-200 group-hover:border-blue-400 transition-all group-hover:shadow-md"
                             />
                             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">

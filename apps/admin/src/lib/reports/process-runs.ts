@@ -34,7 +34,7 @@ export async function processReport(options: ProcessReportOptions): Promise<Gene
     }
 
     const storageKey = generateStorageKey(reportId, format);
-    const { sizeBytes } = await saveReportFile(storageKey, buffer, format);
+    const { sizeBytes } = await saveReportFile(storageKey, buffer);
 
     const fileName = generateFileName(reportType, period, format);
     const mimeType = getMimeType(format);
