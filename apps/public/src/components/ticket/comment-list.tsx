@@ -107,13 +107,13 @@ export function CommentList({
                       <div key={attachment.id} className="group">
                         {isImageFile(attachment.mimeType) || attachment.filename.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                           <a
-                            href={attachment.url}
+                            href={`/api/attachments/${attachment.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block relative"
                           >
                             <img
-                              src={attachment.url}
+                              src={`/api/attachments/${attachment.id}`}
                               alt={attachment.filename}
                               className="h-24 w-24 object-cover rounded-lg border border-slate-200 group-hover:border-blue-400 transition-all group-hover:shadow-md"
                             />
@@ -123,7 +123,7 @@ export function CommentList({
                           </a>
                         ) : (
                           <a
-                            href={attachment.url}
+                            href={`/api/attachments/${attachment.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm text-slate-700 hover:border-blue-400 hover:text-blue-600 hover:shadow-sm transition-all"

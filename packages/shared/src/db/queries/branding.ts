@@ -27,6 +27,19 @@ const defaultBranding: SystemBranding = {
   customCss: undefined,
 };
 
+function normalizeBrandingAssetUrl(url: string | null | undefined): string | undefined {
+  if (!url) {
+    return undefined;
+  }
+
+  const legacyPrefix = "/uploads/branding/";
+  if (url.startsWith(legacyPrefix)) {
+    return `/api/branding-assets/${encodeURIComponent(url.slice(legacyPrefix.length))}`;
+  }
+
+  return url;
+}
+
 export async function getSystemBranding(): Promise<SystemBranding> {
   const cached = await getCache<SystemBranding>(BRANDING_CACHE_KEY);
   if (cached) return cached;
@@ -49,8 +62,8 @@ export async function getSystemBranding(): Promise<SystemBranding> {
 
   const result = branding ? {
     companyName: branding.companyName,
-    logoUrl: branding.logoUrl || undefined,
-    faviconUrl: branding.faviconUrl || undefined,
+    logoUrl: normalizeBrandingAssetUrl(branding.logoUrl),
+    faviconUrl: normalizeBrandingAssetUrl(branding.faviconUrl),
     primaryColor: branding.primaryColor,
     secondaryColor: branding.secondaryColor,
     homepageTitle: branding.homepageTitle,

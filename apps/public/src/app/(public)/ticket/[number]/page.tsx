@@ -43,7 +43,7 @@ export default async function TicketPage({ params }: TicketPageProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     attachments: ticket.attachments.map((a: any) => ({
       id: a.id,
-      url: a.fileUrl,
+      url: `/api/attachments/${a.id}`,
       filename: a.fileName
     })),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +56,7 @@ export default async function TicketPage({ params }: TicketPageProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       attachments: c.attachments.map((a: any) => ({
         id: a.id,
-        url: a.fileUrl,
+        url: `/api/attachments/${a.id}`,
         filename: a.fileName,
         mimeType: a.mimeType
       }))

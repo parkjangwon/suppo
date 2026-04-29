@@ -4,7 +4,11 @@ import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import { enqueueInternalCommentNotifications } from "@suppo/shared/email/enqueue";
 import { verifyTicketAccessToken } from "@suppo/shared/security/ticket-access";
 import { cookies } from "next/headers";
-import { processAttachments, AttachmentError } from "@suppo/shared/storage/attachment-service";
+import {
+  cleanupProcessedAttachments,
+  processAttachments,
+  AttachmentError,
+} from "@suppo/shared/storage/attachment-service";
 
 export async function POST(request: Request) {
   try {
@@ -22,9 +26,10 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const ticketId = formData.get("ticketId") as string;
-    const content = formData.get("content") as string;
+    const content = (formData.get("content") as string | null) ?? "";
+    const files = formData.getAll("attachments") as File[];
 
-    if (!ticketId || !content) {
+    if (!ticketId || (!content.trim() && files.length === 0)) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -37,7 +42,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const files = formData.getAll("attachments") as File[];
     let processedAttachments: Awaited<ReturnType<typeof processAttachments>> = [];
 
     if (files.length > 0) {
@@ -51,31 +55,37 @@ export async function POST(request: Request) {
       }
     }
 
-    const comment = await prisma.comment.create({
-      data: {
-        content,
-        ticketId,
-        isInternal: false,
-        authorType: "CUSTOMER",
-        authorName: ticket.customerName,
-        authorEmail: ticket.customerEmail,
-        attachments: processedAttachments.length > 0
-          ? {
-              create: processedAttachments.map(att => ({
-                ticketId,
-                fileName: att.fileName,
-                fileSize: att.fileSize,
-                mimeType: att.mimeType,
-                fileUrl: att.fileUrl,
-                uploadedBy: ticket.customerName,
-              })),
-            }
-          : undefined,
-      },
-      include: {
-        attachments: true,
-      },
-    });
+    let comment: Awaited<ReturnType<typeof prisma.comment.create>>;
+    try {
+      comment = await prisma.comment.create({
+        data: {
+          content,
+          ticketId,
+          isInternal: false,
+          authorType: "CUSTOMER",
+          authorName: ticket.customerName,
+          authorEmail: ticket.customerEmail,
+          attachments: processedAttachments.length > 0
+            ? {
+                create: processedAttachments.map(att => ({
+                  ticketId,
+                  fileName: att.fileName,
+                  fileSize: att.fileSize,
+                  mimeType: att.mimeType,
+                  fileUrl: att.fileUrl,
+                  uploadedBy: ticket.customerName,
+                })),
+              }
+            : undefined,
+        },
+        include: {
+          attachments: true,
+        },
+      });
+    } catch (error) {
+      await cleanupProcessedAttachments(processedAttachments);
+      throw error;
+    }
 
     const assignee = await prisma.ticket.findUnique({
       where: { id: ticketId },

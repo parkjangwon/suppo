@@ -37,3 +37,33 @@ export async function saveToLocal(file: File, ticketId: string, uniqueName: stri
   
   return `/uploads/${sanitizedTicketId}/${safeFilename}`;
 }
+
+export async function deleteLocalFileUrl(fileUrl: string): Promise<boolean> {
+  if (!fileUrl.startsWith("/uploads/")) {
+    return false;
+  }
+
+  const uploadDir = getUploadDir();
+  const relativePath = fileUrl.replace(/^\/uploads\//, "");
+  const filePath = path.resolve(uploadDir, relativePath);
+
+  if (!isPathInside(filePath, uploadDir)) {
+    return false;
+  }
+
+  try {
+    const stat = await fs.stat(filePath);
+    if (!stat.isFile()) {
+      return false;
+    }
+
+    await fs.rm(filePath, { force: true });
+    return true;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT" || code === "ENOTDIR") {
+      return false;
+    }
+    throw error;
+  }
+}

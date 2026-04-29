@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@suppo/db";
 import { dispatchEmailOutboxSoon } from "@suppo/shared/email/dispatch-trigger";
 import { enqueueInternalCommentNotifications } from "@suppo/shared/email/enqueue";
-import { processAttachments } from "@suppo/shared/storage/attachment-service";
+import {
+  cleanupProcessedAttachments,
+  processAttachments,
+} from "@suppo/shared/storage/attachment-service";
 import { z } from "zod";
 import { createHmac, timingSafeEqual } from "crypto";
 
@@ -253,28 +256,34 @@ async function addCommentToExistingTicket(
   const cleanContent = cleanEmailContent(email.text || email.html || "");
 
   // 댓글 생성
-  const comment = await prisma.comment.create({
-    data: {
-      ticketId: ticket.id,
-      authorType: "CUSTOMER",
-      authorName: email.fromName || email.from.split("@")[0],
-      authorEmail: email.from,
-      content: cleanContent,
-      isInternal: false,
-      attachments: processed.length > 0
-        ? {
-            create: processed.map((attachment) => ({
-              ticketId: ticket.id,
-              fileName: attachment.fileName,
-              fileSize: attachment.fileSize,
-              mimeType: attachment.mimeType,
-              fileUrl: attachment.fileUrl,
-              uploadedBy: email.fromName || email.from,
-            })),
-          }
-        : undefined,
-    },
-  });
+  let comment: Awaited<ReturnType<typeof prisma.comment.create>>;
+  try {
+    comment = await prisma.comment.create({
+      data: {
+        ticketId: ticket.id,
+        authorType: "CUSTOMER",
+        authorName: email.fromName || email.from.split("@")[0],
+        authorEmail: email.from,
+        content: cleanContent,
+        isInternal: false,
+        attachments: processed.length > 0
+          ? {
+              create: processed.map((attachment) => ({
+                ticketId: ticket.id,
+                fileName: attachment.fileName,
+                fileSize: attachment.fileSize,
+                mimeType: attachment.mimeType,
+                fileUrl: attachment.fileUrl,
+                uploadedBy: email.fromName || email.from,
+              })),
+            }
+          : undefined,
+      },
+    });
+  } catch (error) {
+    await cleanupProcessedAttachments(processed);
+    throw error;
+  }
 
   // 이메일 스레드 매핑 저장
   await prisma.emailThreadMapping.create({
@@ -383,16 +392,21 @@ async function createTicketFromEmail(
   );
 
   if (processed.length > 0) {
-    await prisma.attachment.createMany({
-      data: processed.map((attachment) => ({
-        ticketId: ticket.id,
-        fileName: attachment.fileName,
-        fileSize: attachment.fileSize,
-        mimeType: attachment.mimeType,
-        fileUrl: attachment.fileUrl,
-        uploadedBy: email.fromName || email.from,
-      })),
-    });
+    try {
+      await prisma.attachment.createMany({
+        data: processed.map((attachment) => ({
+          ticketId: ticket.id,
+          fileName: attachment.fileName,
+          fileSize: attachment.fileSize,
+          mimeType: attachment.mimeType,
+          fileUrl: attachment.fileUrl,
+          uploadedBy: email.fromName || email.from,
+        })),
+      });
+    } catch (error) {
+      await cleanupProcessedAttachments(processed);
+      throw error;
+    }
   }
 
   // 이메일 스레드 매핑 저장

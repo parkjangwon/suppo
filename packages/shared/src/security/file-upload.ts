@@ -15,19 +15,13 @@ const ALLOWED_EXTENSIONS = new Set([
   ".zip",
 ]);
 
-// MIME 타입별 매직 넘버 (파일 헤더 시그니처)
-const FILE_SIGNATURES: Record<string, Uint8Array> = {
-  "image/png": new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
-  "image/jpeg": new Uint8Array([0xff, 0xd8, 0xff]),
-  "image/gif": new Uint8Array([0x47, 0x49, 0x46]),
-  "image/webp": new Uint8Array([0x52, 0x49, 0x46, 0x46]), // RIFF...
-  "application/pdf": new Uint8Array([0x25, 0x50, 0x44, 0x46]), // %PDF
-  "application/zip": new Uint8Array([0x50, 0x4b, 0x03, 0x04]), // PK...
-  "application/msword": new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]), // OLE2
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": new Uint8Array([0x50, 0x4b, 0x03, 0x04]), // ZIP-based
-  "application/vnd.ms-excel": new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]), // OLE2
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": new Uint8Array([0x50, 0x4b, 0x03, 0x04]), // ZIP-based
-};
+const OLE2_SIGNATURE = new Uint8Array([0xd0, 0xcf, 0x11, 0xe0]);
+const PDF_SIGNATURE = new Uint8Array([0x25, 0x50, 0x44, 0x46]);
+const ZIP_SIGNATURES = [
+  new Uint8Array([0x50, 0x4b, 0x03, 0x04]),
+  new Uint8Array([0x50, 0x4b, 0x05, 0x06]),
+  new Uint8Array([0x50, 0x4b, 0x07, 0x08]),
+];
 
 // 위험한 파일 이름 패턴
 const DANGEROUS_FILENAME_PATTERNS = [
@@ -47,6 +41,37 @@ const MALICIOUS_CONTENT_PATTERNS = [
   /<%\s*/i,
   /<\!/i,
 ];
+
+async function readFileHeader(file: File, length: number): Promise<Uint8Array> {
+  const blob = typeof file.slice === "function" ? file.slice(0, length) : file;
+
+  if (typeof blob.arrayBuffer === "function") {
+    return new Uint8Array(await blob.arrayBuffer());
+  }
+
+  if (typeof file.arrayBuffer === "function") {
+    return new Uint8Array(await file.arrayBuffer()).slice(0, length);
+  }
+
+  if (typeof FileReader !== "undefined") {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        if (reader.result instanceof ArrayBuffer) {
+          resolve(new Uint8Array(reader.result));
+          return;
+        }
+
+        reject(new Error("Unable to read file header"));
+      };
+      reader.onerror = () => reject(reader.error ?? new Error("Unable to read file header"));
+      reader.readAsArrayBuffer(blob);
+    });
+  }
+
+  throw new Error("Unable to read file header");
+}
 
 /**
  * 파일 확장자 검증
@@ -85,25 +110,65 @@ export function validateFileName(fileName: string): { valid: boolean; error?: st
  */
 export async function verifyFileSignature(file: File, expectedMimeType: string): Promise<boolean> {
   try {
-    // 이미지 및 PDF는 항상 검증
-    const alwaysVerify = ["image/", "application/pdf"].some(type => expectedMimeType.startsWith(type));
-    if (!alwaysVerify) {
-      return true; // 다른 파일 형식은 확장자로만 검증
+    if (expectedMimeType === "text/plain" || expectedMimeType === "text/csv") {
+      return true;
     }
 
-    const signature = FILE_SIGNATURES[expectedMimeType];
-    if (!signature) {
-      return true; // 알려진 시그니처가 없으면 통과
-    }
+    const bytes = await readFileHeader(file, 12);
 
-    const buffer = await file.slice(0, signature.length).arrayBuffer();
-    const fileHeader = new Uint8Array(buffer);
-
-    // 매직 넘버 비교
-    for (let i = 0; i < signature.length; i++) {
-      if (fileHeader[i] !== signature[i]) {
+    const startsWith = (signature: Uint8Array) => {
+      if (bytes.length < signature.length) {
         return false;
       }
+
+      for (let index = 0; index < signature.length; index += 1) {
+        if (bytes[index] !== signature[index]) {
+          return false;
+        }
+      }
+
+      return true;
+    };
+
+    if (expectedMimeType === "image/png") {
+      return startsWith(new Uint8Array([0x89, 0x50, 0x4e, 0x47]));
+    }
+
+    if (expectedMimeType === "image/jpeg") {
+      return startsWith(new Uint8Array([0xff, 0xd8, 0xff]));
+    }
+
+    if (expectedMimeType === "image/gif") {
+      return startsWith(new Uint8Array([0x47, 0x49, 0x46]));
+    }
+
+    if (expectedMimeType === "image/webp") {
+      return (
+        startsWith(new Uint8Array([0x52, 0x49, 0x46, 0x46])) &&
+        bytes[8] === 0x57 &&
+        bytes[9] === 0x45 &&
+        bytes[10] === 0x42 &&
+        bytes[11] === 0x50
+      );
+    }
+
+    if (expectedMimeType === "application/pdf") {
+      return startsWith(PDF_SIGNATURE);
+    }
+
+    if (
+      expectedMimeType === "application/zip" ||
+      expectedMimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+      expectedMimeType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    ) {
+      return ZIP_SIGNATURES.some(startsWith);
+    }
+
+    if (
+      expectedMimeType === "application/msword" ||
+      expectedMimeType === "application/vnd.ms-excel"
+    ) {
+      return startsWith(OLE2_SIGNATURE);
     }
 
     return true;

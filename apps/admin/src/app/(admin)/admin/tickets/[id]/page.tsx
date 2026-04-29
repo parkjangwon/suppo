@@ -45,10 +45,13 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
           comments: {
             include: {
               attachments: {
-                select: { id: true, fileName: true, fileUrl: true },
+                select: { id: true, fileName: true, fileUrl: true, mimeType: true },
               },
             },
             orderBy: { createdAt: "asc" },
+          },
+          attachments: {
+            select: { id: true, fileName: true, fileUrl: true, mimeType: true },
           },
           activities: {
             include: {

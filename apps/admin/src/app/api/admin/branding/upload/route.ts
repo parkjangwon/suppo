@@ -3,15 +3,9 @@ import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { isAllowedImageUploadMimeType } from "@suppo/shared/security/image-upload";
+import { getUploadDir } from "@suppo/shared/storage/upload-config";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-function getUploadDirs() {
-  const currentAppUploadDir = join(process.cwd(), "public", "uploads", "branding");
-  const publicAppUploadDir = join(process.cwd(), "..", "public", "public", "uploads", "branding");
-
-  return Array.from(new Set([currentAppUploadDir, publicAppUploadDir]));
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,18 +49,14 @@ export async function POST(request: NextRequest) {
     const safeType = (type || "image").replace(/[^a-zA-Z0-9-_]/g, "").slice(0, 32) || "image";
     const filename = `${safeType}-${crypto.randomUUID()}.${ext}`;
     
-    // Save to public/uploads/branding directory
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    for (const uploadDir of getUploadDirs()) {
-      await mkdir(uploadDir, { recursive: true });
-      const filePath = join(uploadDir, filename);
-      await writeFile(filePath, buffer);
-    }
+    const uploadDir = join(getUploadDir(), "branding");
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(join(uploadDir, filename), buffer);
 
-    // Return the public URL
-    const url = `/uploads/branding/${filename}`;
+    const url = `/api/branding-assets/${filename}`;
 
     return NextResponse.json({ url, filename });
   } catch (error) {

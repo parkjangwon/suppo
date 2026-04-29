@@ -8,6 +8,9 @@ const {
   mockClassifyTicket,
   mockFindManyCategories,
   mockFindManyTeams,
+  mockProcessAttachments,
+  mockCleanupProcessedAttachments,
+  mockAttachmentCreateMany,
 } = vi.hoisted(() => ({
   mockCheckRateLimit: vi.fn(),
   mockVerifyCaptcha: vi.fn(),
@@ -15,6 +18,9 @@ const {
   mockClassifyTicket: vi.fn(),
   mockFindManyCategories: vi.fn(),
   mockFindManyTeams: vi.fn(),
+  mockProcessAttachments: vi.fn(),
+  mockCleanupProcessedAttachments: vi.fn(),
+  mockAttachmentCreateMany: vi.fn(),
 }));
 
 vi.mock("@suppo/shared/security/rate-limit", () => ({
@@ -36,7 +42,8 @@ vi.mock("@suppo/shared/ai/classifier", () => ({
 
 vi.mock("@suppo/shared/storage/attachment-service", () => ({
   AttachmentError: class AttachmentError extends Error {},
-  processAttachments: vi.fn(),
+  cleanupProcessedAttachments: mockCleanupProcessedAttachments,
+  processAttachments: mockProcessAttachments,
 }));
 
 vi.mock("@suppo/shared/integrations/outbound-webhooks", () => ({
@@ -55,7 +62,7 @@ vi.mock("@suppo/db", () => ({
       update: vi.fn(),
     },
     attachment: {
-      createMany: vi.fn(),
+      createMany: mockAttachmentCreateMany,
     },
   },
 }));
@@ -79,6 +86,9 @@ describe("public ticket create route", () => {
     mockClassifyTicket.mockReset();
     mockFindManyCategories.mockReset();
     mockFindManyTeams.mockReset();
+    mockProcessAttachments.mockReset();
+    mockCleanupProcessedAttachments.mockReset();
+    mockAttachmentCreateMany.mockReset();
 
     mockCheckRateLimit.mockReturnValue({
       allowed: true,
@@ -89,6 +99,7 @@ describe("public ticket create route", () => {
     mockClassifyTicket.mockResolvedValue(null);
     mockFindManyCategories.mockResolvedValue([]);
     mockFindManyTeams.mockResolvedValue([]);
+    mockAttachmentCreateMany.mockResolvedValue({ count: 0 });
   });
 
   it("returns 429 when the rate limit blocks the request", async () => {
@@ -158,5 +169,43 @@ describe("public ticket create route", () => {
     expect(response.status).toBe(201);
     expect(mockVerifyCaptcha).toHaveBeenCalledWith("dev-token-bypass");
     expect(data.ticketNumber).toBe("CRN-2026-0001");
+  });
+
+  it("cleans up uploaded files when attachment DB insert fails", async () => {
+    const processed = [
+      {
+        fileName: "debug.txt",
+        fileSize: 9,
+        mimeType: "text/plain",
+        fileUrl: "/uploads/ticket-1/debug.txt",
+      },
+    ];
+    mockCreateTicket.mockResolvedValue({
+      ticket: {
+        id: "ticket-1",
+        ticketNumber: "CRN-2026-0001",
+        subject: "충분히 긴 제목입니다",
+        priority: "MEDIUM",
+        status: "OPEN",
+        customerEmail: "user@example.com",
+      },
+    });
+    mockProcessAttachments.mockResolvedValue(processed);
+    mockAttachmentCreateMany.mockRejectedValue(new Error("db failed"));
+
+    const formData = new FormData();
+    formData.append("customerName", "테스트 고객");
+    formData.append("customerEmail", "user@example.com");
+    formData.append("requestTypeId", "request-type-1");
+    formData.append("priority", "MEDIUM");
+    formData.append("subject", "충분히 긴 제목입니다");
+    formData.append("description", "충분히 긴 설명입니다. 최소 길이를 넘깁니다.");
+    formData.append("captchaToken", "dev-token-bypass");
+    formData.append("attachments", new File(["debug"], "debug.txt", { type: "text/plain" }));
+
+    const response = await POST(buildRequest(formData));
+
+    expect(response.status).toBe(500);
+    expect(mockCleanupProcessedAttachments).toHaveBeenCalledWith(processed);
   });
 });

@@ -47,4 +47,32 @@ describe("getSystemBranding", () => {
     expect(branding.knowledgeEnabled).toBe(true);
     expect(mockSetCache).toHaveBeenCalled();
   });
+
+  it("normalizes legacy branding upload URLs to the public branding asset API", async () => {
+    mockFindUnique.mockResolvedValue({
+      companyName: "Suppo",
+      logoUrl: "/uploads/branding/logo file.png",
+      faviconUrl: "/uploads/branding/favicon.ico",
+      primaryColor: "#0f172a",
+      secondaryColor: "#3b82f6",
+      homepageTitle: "Suppo",
+      homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
+      adminPanelTitle: "Suppo Admin",
+      appTitle: "고객 지원 센터",
+      welcomeMessage: "무엇을 도와드릴까요?",
+      footerText: "© 2026 parkjangwon. All rights reserved.",
+      footerPhone: null,
+      footerEmail: null,
+      footerHomepage: null,
+      footerAddress: null,
+      showPoweredBy: true,
+      knowledgeEnabled: true,
+      customCss: null,
+    });
+
+    const branding = await getSystemBranding();
+
+    expect(branding.logoUrl).toBe("/api/branding-assets/logo%20file.png");
+    expect(branding.faviconUrl).toBe("/api/branding-assets/favicon.ico");
+  });
 });

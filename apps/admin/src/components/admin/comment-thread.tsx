@@ -274,7 +274,7 @@ export function CommentThread({
                         {comment.attachments.map((file) => (
                           <li key={file.id}>
                             <a
-                              href={file.fileUrl}
+                              href={`/api/attachments/${file.id}`}
                               target="_blank"
                               rel="noreferrer"
                               className="text-xs text-blue-600 hover:underline"
