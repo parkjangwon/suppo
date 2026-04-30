@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
             priority: classification.priority,
             teamId: classification.teamId ?? undefined,
             categoryId: classification.categoryId ?? undefined,
-            tags: JSON.stringify(tags),
+            tags: tags,
           },
         });
       }

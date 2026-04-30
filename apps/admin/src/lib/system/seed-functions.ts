@@ -240,7 +240,7 @@ export async function seedBusinessCalendar(prisma: PrismaClient): Promise<void> 
       timezone: "Asia/Seoul",
       workStartHour: 9,
       workEndHour: 18,
-      workDays: "[1,2,3,4,5]",
+      workDays: [1, 2, 3, 4, 5],
     },
   });
 
@@ -781,7 +781,7 @@ export async function seedTickets(
         requestTypeId: requestTypeId ?? null,
         teamId: teamId ?? null,
         source: t.source ?? "WEB",
-        tags: JSON.stringify(t.tags ?? []),
+        tags: t.tags ?? [],
         createdAt: d(t.createdAtOffset, 9),
         firstResponseAt: t.firstResponseOffset != null ? d(t.firstResponseOffset, 10) : null,
         resolvedAt: t.resolvedAtOffset != null ? d(t.resolvedAtOffset, 15) : null,

@@ -35,7 +35,7 @@ type CustomerAnalysisTicket = {
   serviceModule: string | null;
   reopenedCount: number;
   summary: string | null;
-  tags: string | null;
+  tags: string[] | null;
   createdAt: Date;
   firstResponseAt: Date | null;
   resolvedAt: Date | null;
@@ -86,21 +86,11 @@ function truncateText(value: string | null | undefined, maxLength: number): stri
   return `${value.slice(0, maxLength)}...`;
 }
 
-function formatTags(tags: string | null): string {
-  if (!tags) {
+function formatTags(tags: string[] | null): string {
+  if (!tags || tags.length === 0) {
     return "없음";
   }
-
-  try {
-    const parsed = JSON.parse(tags) as unknown;
-    if (Array.isArray(parsed) && parsed.every((tag) => typeof tag === "string")) {
-      return parsed.length > 0 ? parsed.join(", ") : "없음";
-    }
-  } catch {
-    // Ignore malformed legacy data and fall back to raw value.
-  }
-
-  return tags;
+  return tags.join(", ");
 }
 
 function summarizeTicketStats(tickets: CustomerAnalysisTicket[]): string {
