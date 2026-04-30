@@ -46,16 +46,22 @@ services:
     volumes:
       - config_data:/config
 
-  sqld:
-    image: ghcr.io/tursodatabase/libsql-server:latest
+  postgres:
+    image: postgres:17-alpine
     restart: unless-stopped
-    volumes:
-      - db_data:/var/lib/sqld
     environment:
-      SQLD_NODE: primary
-      SQLD_HTTP_LISTEN_ADDR: "0.0.0.0:8889"
+      POSTGRES_DB: suppo
+      POSTGRES_USER: suppo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
     expose:
-      - "8889"
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U suppo -d suppo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   migrate:
     build:
@@ -64,10 +70,10 @@ services:
       target: migrator
     restart: "no"
     depends_on:
-      - sqld
+      postgres:
+        condition: service_healthy
     environment:
-      DATABASE_URL: http://sqld:8889
-      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+      DATABASE_URL: postgresql://suppo:${POSTGRES_PASSWORD}@postgres:5432/suppo
 
   bootstrap:
     build:
@@ -91,8 +97,7 @@ services:
     volumes:
       - config_data:/run/config
     environment:
-      DATABASE_URL: http://sqld:8889
-      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+      DATABASE_URL: postgresql://suppo:${POSTGRES_PASSWORD}@postgres:5432/suppo
       INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       AUTO_BOOTSTRAP: ${AUTO_BOOTSTRAP:-if-empty}
@@ -111,8 +116,7 @@ services:
       bootstrap:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: http://sqld:8889
-      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+      DATABASE_URL: postgresql://suppo:${POSTGRES_PASSWORD}@postgres:5432/suppo
       PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
       ADMIN_URL: ${ADMIN_URL:-http://localhost:3001}
       AUTH_URL: ${PUBLIC_URL:-http://localhost:3000}
@@ -139,8 +143,7 @@ services:
       bootstrap:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: http://sqld:8889
-      DATABASE_AUTH_TOKEN: ${DATABASE_AUTH_TOKEN:-}
+      DATABASE_URL: postgresql://suppo:${POSTGRES_PASSWORD}@postgres:5432/suppo
       PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3000}
       ADMIN_URL: ${ADMIN_URL:-http://localhost:3001}
       AUTH_URL: ${ADMIN_URL:-http://localhost:3001}
