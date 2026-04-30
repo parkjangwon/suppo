@@ -19,33 +19,33 @@ export async function getCSATTrend(
   let bucketExpression: string;
   switch (granularity) {
     case "week":
-      bucketExpression = `strftime('%Y-W%W', "submittedAt")`;
+      bucketExpression = `TO_CHAR("submittedAt", 'IYYY-"W"IW')`;
       break;
     case "month":
-      bucketExpression = `strftime('%Y-%m', "submittedAt")`;
+      bucketExpression = `TO_CHAR("submittedAt", 'YYYY-MM')`;
       break;
     case "day":
     default:
-      bucketExpression = `strftime('%Y-%m-%d', "submittedAt")`;
+      bucketExpression = `TO_CHAR("submittedAt", 'YYYY-MM-DD')`;
       break;
   }
 
-  const buckets = await db.execute({
+  const buckets = await db.execute<RawCSATBucket>({
     sql: `
       SELECT
         ${bucketExpression} as bucket,
-        AVG(rating) as avgRating,
-        COUNT(*) as responseCount,
-        SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) as positiveCount
-      FROM CustomerSatisfaction
-      WHERE submittedAt >= ?
-        AND submittedAt <= ?
+        AVG(rating) as "avgRating",
+        COUNT(*) as "responseCount",
+        SUM(CASE WHEN rating >= 4 THEN 1 ELSE 0 END) as "positiveCount"
+      FROM "CustomerSatisfaction"
+      WHERE "submittedAt" >= $1::timestamptz
+        AND "submittedAt" <= $2::timestamptz
       GROUP BY ${bucketExpression}
       ORDER BY ${bucketExpression} ASC
     `,
     args: [fromISO, toISO],
   });
-  const typedBuckets: RawCSATBucket[] = buckets.rows as RawCSATBucket[];
+  const typedBuckets: RawCSATBucket[] = buckets.rows;
 
   const trend: CSATBucket[] = typedBuckets.map((b) => ({
     bucket: b.bucket,

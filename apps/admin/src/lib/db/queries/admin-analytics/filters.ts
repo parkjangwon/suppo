@@ -38,7 +38,7 @@ export function getDateRangeFromPreset(preset: DatePreset, customRange?: { from:
   return { from, to };
 }
 
-export function formatDateForSQLite(date: Date): string {
+export function formatDateForSQL(date: Date): string {
   return date.toISOString();
 }
 

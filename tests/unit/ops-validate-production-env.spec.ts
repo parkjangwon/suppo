@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { validateEnvironment } from "../../scripts/validate-production-env";
 
 const baseEnv = {
-  DATABASE_URL: "file:./packages/db/dev.db",
+  DATABASE_URL: "postgresql://suppo:strong-password@postgres:5432/suppo",
   PUBLIC_URL: "https://help.example.com",
   ADMIN_BASE_URL: "https://admin.example.com",
   APP_BASE_URL: "https://help.example.com",
@@ -30,6 +30,13 @@ describe("validateProductionEnvironment", () => {
       ...baseEnv,
       UPLOAD_DIR: "apps/public/public/uploads",
     })).toContain("UPLOAD_DIR must point to a shared private directory, not an app public directory");
+  });
+
+  it("rejects non-PostgreSQL database URLs", () => {
+    expect(messages({
+      ...baseEnv,
+      DATABASE_URL: "file:./packages/db/dev.db",
+    })).toContain("DATABASE_URL must use postgresql:// or postgres:// for production");
   });
 
   it("rejects reused secret values", () => {

@@ -20,12 +20,12 @@ COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
 COPY packages/db/prisma ./packages/db/prisma
 COPY packages/db/src ./packages/db/src
 COPY package.json pnpm-workspace.yaml ./
-CMD ["sh", "-lc", "cd /app/packages/db && ./node_modules/.bin/tsx prisma/migrate.ts"]
+CMD ["sh", "-lc", "cd /app/packages/db && ./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma"]
 
 FROM base AS builder
 ARG APP_NAME
 ARG AUTH_SECRET="build-time-placeholder"
-ARG DATABASE_URL="file:./packages/db/dev.db"
+ARG DATABASE_URL="postgresql://localhost:5432/suppo"
 ARG TICKET_ACCESS_SECRET="build-time-placeholder"
 ARG GIT_TOKEN_ENCRYPTION_KEY="build-time-placeholder-32byte-xx"
 ENV AUTH_SECRET=$AUTH_SECRET \
@@ -43,7 +43,7 @@ COPY . .
 RUN mkdir -p /app/apps/${APP_NAME}/public
 RUN pnpm --filter=@suppo/db generate
 RUN pnpm --filter=@suppo/${APP_NAME} build
-# Copy packages/db native deps into standalone (pnpm symlinks; BusyBox cp lacks -L)
+# Copy packages/db Prisma deps into standalone (pnpm symlinks; BusyBox cp lacks -L)
 RUN node docker/copy-standalone-deps.mjs "$APP_NAME"
 ENV AUTH_SECRET="" DATABASE_URL="" TICKET_ACCESS_SECRET="" GIT_TOKEN_ENCRYPTION_KEY=""
 

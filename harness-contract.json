@@ -54,16 +54,16 @@
     "Next.js 15 App Router",
     "React 19",
     "TypeScript 5",
-    "Prisma 6 with @prisma/adapter-libsql",
-    "SQLite for local development",
-    "LibSQL/sqld for production",
+    "Prisma 6 with PostgreSQL",
+    "PostgreSQL for local development",
+    "PostgreSQL for production",
     "Vitest for unit tests",
     "Playwright for E2E tests",
     "Docker Compose and Nginx for deployment"
   ],
   "environment": {
-    "development": "Local development uses pnpm workspace commands with SQLite and dual Next.js apps.",
-    "runtime": "Node.js 22 Alpine container runtime for admin/public apps and migrator jobs.",
+    "development": "Local development uses pnpm workspace commands with PostgreSQL and dual Next.js apps.",
+    "runtime": "Node.js 22 Alpine container runtime for admin/public apps, migrator jobs, and PostgreSQL.",
     "primary_os": "macOS for local development; Linux containers for deployment."
   },
   "change_history": [
@@ -108,6 +108,12 @@
       "change": "Confirmed a more detailed and explanatory collaboration tone.",
       "target": "harness-contract.json",
       "reason": "Repository owner prefers detailed guidance over terse responses."
+    },
+    {
+      "date": "2026-04-30",
+      "change": "Updated durable stack defaults after SQLite/libSQL to PostgreSQL migration.",
+      "target": "PROJECT_HARNESS.md, harness-contract.json",
+      "reason": "Repository database stack now uses PostgreSQL for development and production."
     }
   ],
   "notes": [

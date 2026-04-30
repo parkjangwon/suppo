@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
 
     // Tags filter
     if (params.tags && params.tags.length > 0) {
-      andClauses.push(...params.tags.map((tag) => ({ tags: { contains: tag } })));
+      andClauses.push(...params.tags.map((tag) => ({ tags: { has: tag } })));
     }
 
     // Date range filter

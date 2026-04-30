@@ -77,15 +77,15 @@ These fields must stay synchronized across `PROJECT_HARNESS.md` and `harness-con
   - Next.js 15 App Router
   - React 19
   - TypeScript 5
-  - Prisma 6 with @prisma/adapter-libsql
-  - SQLite for local development
-  - LibSQL/sqld for production
+  - Prisma 6 with PostgreSQL
+  - PostgreSQL for local development
+  - PostgreSQL for production
   - Vitest for unit tests
   - Playwright for E2E tests
   - Docker Compose and Nginx for deployment
 - environment:
-  - development: Local development uses pnpm workspace commands with SQLite and dual Next.js apps.
-  - runtime: Node.js 22 Alpine container runtime for admin/public apps and migrator jobs.
+  - development: Local development uses pnpm workspace commands with PostgreSQL and dual Next.js apps.
+  - runtime: Node.js 22 Alpine container runtime for admin/public apps, migrator jobs, and PostgreSQL.
   - primary_os: macOS for local development; Linux containers for deployment.
 
 ## 런타임 상태 필드
@@ -209,3 +209,4 @@ Repair durable contract first, then volatile runtime state, then projections.
 | 2026-04-20 | Confirmed approval policy for risky changes only. | harness-contract.json | Safe small changes may proceed directly, but risky changes require explicit confirmation. |
 | 2026-04-20 | Captured repository constraints and inferred stack/environment defaults from strong repo signals. | harness-contract.json | Existing README, Docker assets, and package manifests provide stable canonical project context. |
 | 2026-04-20 | Confirmed a more detailed and explanatory collaboration tone. | harness-contract.json | Repository owner prefers detailed guidance over terse responses. |
+| 2026-04-30 | Updated durable stack defaults after SQLite/libSQL to PostgreSQL migration. | PROJECT_HARNESS.md, harness-contract.json | Repository database stack now uses PostgreSQL for development and production. |

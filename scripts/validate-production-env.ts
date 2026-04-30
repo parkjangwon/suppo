@@ -69,6 +69,28 @@ function requireValue(env: Environment, name: string, findings: Finding[]) {
   return value;
 }
 
+function validatePostgresDatabaseUrl(env: Environment, findings: Finding[]) {
+  const value = requireValue(env, "DATABASE_URL", findings);
+  if (!value) {
+    return;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    findings.push({ level: "error", message: "DATABASE_URL must be a valid URL" });
+    return;
+  }
+
+  if (parsed.protocol !== "postgresql:" && parsed.protocol !== "postgres:") {
+    findings.push({
+      level: "error",
+      message: "DATABASE_URL must use postgresql:// or postgres:// for production",
+    });
+  }
+}
+
 function requireMinLength(env: Environment, name: string, minLength: number, findings: Finding[]) {
   const value = requireValue(env, name, findings);
   if (value && value.length < minLength) {
@@ -184,7 +206,7 @@ export function validateEnvironment(
 ) {
   const findings: Finding[] = [];
 
-  requireValue(env, "DATABASE_URL", findings);
+  validatePostgresDatabaseUrl(env, findings);
   const publicUrl = validateUrl(env, "PUBLIC_URL", allowHttp, findings);
   const adminBaseUrl = readEnv(env, "ADMIN_BASE_URL") ? validateUrl(env, "ADMIN_BASE_URL", allowHttp, findings) : undefined;
   const adminUrl = readEnv(env, "ADMIN_URL") ? validateUrl(env, "ADMIN_URL", allowHttp, findings) : undefined;

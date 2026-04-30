@@ -50,15 +50,17 @@ export async function GET() {
     status = "unhealthy";
   }
 
-  try {
-    const redisAvailable = await isRedisAvailable();
-    checks.redis = redisAvailable ? "healthy" : "unknown";
-    if (!redisAvailable) {
+  if (process.env.REDIS_URL) {
+    try {
+      const redisAvailable = await isRedisAvailable();
+      checks.redis = redisAvailable ? "healthy" : "unknown";
+      if (!redisAvailable) {
+        status = status === "unhealthy" ? "unhealthy" : "degraded";
+      }
+    } catch {
+      checks.redis = "unknown";
       status = status === "unhealthy" ? "unhealthy" : "degraded";
     }
-  } catch {
-    checks.redis = "unknown";
-    status = status === "unhealthy" ? "unhealthy" : "degraded";
   }
 
   if (checks.emailDispatchToken === "unknown" || checks.automationDispatchToken === "unknown") {

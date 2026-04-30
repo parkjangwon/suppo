@@ -3,9 +3,12 @@
   "private": true,
   "scripts": {
     "postinstall": "pnpm --filter=@suppo/db generate",
+    "prepare:local": "node scripts/ensure-local-env.mjs",
+    "prebuild:all": "node scripts/ensure-local-env.mjs --install-if-missing",
     "dev": "pnpm dev:all",
     "dev:admin": "pnpm --filter=@suppo/admin dev",
     "dev:public": "pnpm --filter=@suppo/public dev",
+    "predev:all": "./install.sh --skip-install",
     "dev:all": "pnpm -r --parallel --filter=@suppo/public --filter=@suppo/admin dev",
     "build:admin": "pnpm --filter=@suppo/admin build",
     "build:public": "pnpm --filter=@suppo/public build",

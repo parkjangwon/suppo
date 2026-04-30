@@ -78,16 +78,16 @@ async function getTopCustomers(dateRange: { from: Date; to: Date }, limit: numbe
   const customers = await db.execute({
     sql: `
       SELECT
-        customerId,
-        customerName,
-        customerEmail,
-        COUNT(*) as ticketCount
-      FROM Ticket
-      WHERE createdAt >= ?
-        AND createdAt <= ?
-      GROUP BY customerId, customerName, customerEmail
+        "customerId",
+        "customerName",
+        "customerEmail",
+        COUNT(*) as "ticketCount"
+      FROM "Ticket"
+      WHERE "createdAt" >= $1::timestamptz
+        AND "createdAt" <= $2::timestamptz
+      GROUP BY "customerId", "customerName", "customerEmail"
       ORDER BY COUNT(*) DESC
-      LIMIT ?
+      LIMIT $3
     `,
     args: [dateRange.from.toISOString(), dateRange.to.toISOString(), limit],
   });

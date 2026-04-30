@@ -33,7 +33,7 @@ export async function GET() {
     timezone: calendar.timezone,
     workStartHour: calendar.workStartHour,
     workEndHour: calendar.workEndHour,
-    workDays: JSON.parse(calendar.workDays ?? "[1,2,3,4,5]") as number[],
+    workDays: (calendar.workDays ?? [1, 2, 3, 4, 5]) as number[],
     holidays: calendar.holidays.map((h) => ({
       id: h.id,
       name: h.name,
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       timezone: timezone || "Asia/Seoul",
       workStartHour,
       workEndHour,
-      workDays: JSON.stringify(workDays ?? [1, 2, 3, 4, 5]),
+      workDays: workDays ?? [1, 2, 3, 4, 5],
       isActive: true,
     },
     create: {
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       timezone: timezone || "Asia/Seoul",
       workStartHour,
       workEndHour,
-      workDays: JSON.stringify(workDays ?? [1, 2, 3, 4, 5]),
+      workDays: workDays ?? [1, 2, 3, 4, 5],
       isActive: true,
     },
   });

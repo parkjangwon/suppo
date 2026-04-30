@@ -9,7 +9,7 @@ if (!appName) {
 
 const standaloneNodeModules = `/app/apps/${appName}/.next/standalone/node_modules`;
 const dbNodeModules = "/app/packages/db/node_modules";
-const packages = ["@prisma/adapter-libsql", "@libsql/client", "libsql"];
+const packages = ["@prisma/client"];
 const copiedRealpaths = new Set();
 
 function copyPackageFromRealpath(packageName, packageRealpath) {

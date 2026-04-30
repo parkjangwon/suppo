@@ -7,8 +7,8 @@ interface RawRepeatInquiry {
   customerName: string;
   ticketCount: bigint;
   distinctCategories: bigint;
-  firstTicketAt: string;
-  lastTicketAt: string;
+  firstTicketAt: Date;
+  lastTicketAt: Date;
 }
 
 export async function getRepeatInquiries(
@@ -18,26 +18,26 @@ export async function getRepeatInquiries(
   const fromISO = dateRange.from.toISOString();
   const toISO = dateRange.to.toISOString();
 
-  const rawData = await db.execute({
+  const rawData = await db.execute<RawRepeatInquiry>({
     sql: `
       SELECT
-        t.customerId,
-        t.customerEmail,
-        t.customerName,
-        COUNT(*) as ticketCount,
-        COUNT(DISTINCT t.categoryId) as distinctCategories,
-        MIN(t.createdAt) as firstTicketAt,
-        MAX(t.createdAt) as lastTicketAt
-      FROM Ticket t
-      WHERE t.createdAt >= ?
-        AND t.createdAt <= ?
-      GROUP BY t.customerId, t.customerEmail, t.customerName
-      HAVING COUNT(*) >= ?
+        t."customerId",
+        t."customerEmail",
+        t."customerName",
+        COUNT(*) as "ticketCount",
+        COUNT(DISTINCT t."categoryId") as "distinctCategories",
+        MIN(t."createdAt") as "firstTicketAt",
+        MAX(t."createdAt") as "lastTicketAt"
+      FROM "Ticket" t
+      WHERE t."createdAt" >= $1::timestamptz
+        AND t."createdAt" <= $2::timestamptz
+      GROUP BY t."customerId", t."customerEmail", t."customerName"
+      HAVING COUNT(*) >= $3
       ORDER BY COUNT(*) DESC
     `,
     args: [fromISO, toISO, minTickets],
   });
-  const typedRawData: RawRepeatInquiry[] = rawData.rows as RawRepeatInquiry[];
+  const typedRawData: RawRepeatInquiry[] = rawData.rows;
 
   const customers: RepeatInquiry[] = typedRawData.map((row) => {
     const distinctCategoriesNum = Number(row.distinctCategories);
@@ -56,8 +56,8 @@ export async function getRepeatInquiries(
       customerEmail: row.customerEmail,
       ticketCount: Number(row.ticketCount),
       distinctCategories: Number(row.distinctCategories),
-      firstTicketAt: new Date(row.firstTicketAt),
-      lastTicketAt: new Date(row.lastTicketAt),
+      firstTicketAt: row.firstTicketAt,
+      lastTicketAt: row.lastTicketAt,
       patternType,
     };
   });

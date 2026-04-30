@@ -79,21 +79,21 @@ async function getOverviewKPI(dateRange: { from: Date; to: Date }) {
     }),
     db.execute({
       sql: `
-        SELECT AVG((julianday(firstResponseAt) - julianday(createdAt)) * 1440) as avgMinutes
-        FROM Ticket
-        WHERE firstResponseAt IS NOT NULL
-          AND createdAt >= ?
-          AND createdAt <= ?
+        SELECT AVG(EXTRACT(EPOCH FROM ("firstResponseAt" - "createdAt")) / 60) as "avgMinutes"
+        FROM "Ticket"
+        WHERE "firstResponseAt" IS NOT NULL
+          AND "createdAt" >= $1::timestamptz
+          AND "createdAt" <= $2::timestamptz
       `,
       args: [dateRange.from.toISOString(), dateRange.to.toISOString()],
     }),
     db.execute({
       sql: `
-        SELECT AVG((julianday(COALESCE(resolvedAt, closedAt)) - julianday(createdAt)) * 24) as avgHours
-        FROM Ticket
-        WHERE (resolvedAt IS NOT NULL OR closedAt IS NOT NULL)
-          AND createdAt >= ?
-          AND createdAt <= ?
+        SELECT AVG(EXTRACT(EPOCH FROM (COALESCE("resolvedAt", "closedAt") - "createdAt")) / 3600) as "avgHours"
+        FROM "Ticket"
+        WHERE ("resolvedAt" IS NOT NULL OR "closedAt" IS NOT NULL)
+          AND "createdAt" >= $1::timestamptz
+          AND "createdAt" <= $2::timestamptz
       `,
       args: [dateRange.from.toISOString(), dateRange.to.toISOString()],
     }),
@@ -110,12 +110,15 @@ async function getOverviewKPI(dateRange: { from: Date; to: Date }) {
     }),
     db.execute({
       sql: `
-        SELECT COUNT(DISTINCT customerEmail) as count
-        FROM Ticket
-        WHERE createdAt >= ?
-          AND createdAt <= ?
-        GROUP BY customerEmail
-        HAVING COUNT(*) >= 2
+        SELECT COUNT(*) as count
+        FROM (
+          SELECT "customerEmail"
+          FROM "Ticket"
+          WHERE "createdAt" >= $1::timestamptz
+            AND "createdAt" <= $2::timestamptz
+          GROUP BY "customerEmail"
+          HAVING COUNT(*) >= 2
+        )
       `,
       args: [dateRange.from.toISOString(), dateRange.to.toISOString()],
     }),
@@ -123,12 +126,12 @@ async function getOverviewKPI(dateRange: { from: Date; to: Date }) {
       sql: `
         SELECT COUNT(*) as count
         FROM (
-          SELECT customerEmail
-          FROM Ticket
-          WHERE createdAt <= ?
-          GROUP BY customerEmail
+          SELECT "customerEmail"
+          FROM "Ticket"
+          WHERE "createdAt" <= $1::timestamptz
+          GROUP BY "customerEmail"
           HAVING COUNT(*) >= 10
-             OR SUM(CASE WHEN createdAt >= ? THEN 1 ELSE 0 END) >= 5
+             OR SUM(CASE WHEN "createdAt" >= $2::timestamptz THEN 1 ELSE 0 END) >= 5
         )
       `,
       args: [dateRange.to.toISOString(), new Date(dateRange.to.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()],

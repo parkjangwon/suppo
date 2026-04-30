@@ -5,21 +5,17 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client.ts",
-    "./raw": "./src/raw.ts",
-    "./resolve-database-url": "./src/resolve-database-url.ts"
+    "./raw": "./src/raw.ts"
   },
   "scripts": {
     "generate": "prisma generate --schema=./prisma/schema.prisma",
-    "bootstrap": "tsx prisma/bootstrap.ts",
-    "migrate:dev": "prisma migrate dev --schema=./prisma/schema.prisma",
-    "migrate:deploy": "prisma migrate deploy --schema=./prisma/schema.prisma",
-    "migrate:libsql": "tsx prisma/migrate.ts",
-    "seed": "tsx prisma/seed.ts",
-    "studio": "prisma studio --schema=./prisma/schema.prisma"
+    "bootstrap": "set -a && . ../../.env && set +a && tsx prisma/bootstrap.ts",
+    "migrate:dev": "set -a && . ../../.env && set +a && prisma migrate dev --schema=./prisma/schema.prisma",
+    "migrate:deploy": "set -a && . ../../.env && set +a && prisma migrate deploy --schema=./prisma/schema.prisma",
+    "seed": "set -a && . ../../.env && set +a && tsx prisma/seed.ts",
+    "studio": "set -a && . ../../.env && set +a && prisma studio --schema=./prisma/schema.prisma"
   },
   "dependencies": {
-    "@libsql/client": "^0.17.2",
-    "@prisma/adapter-libsql": "^6.19.3",
     "@prisma/client": "^6.19.3"
   },
   "devDependencies": {

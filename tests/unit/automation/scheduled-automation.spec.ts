@@ -101,7 +101,7 @@ describe("executeScheduledAutomationRules", () => {
         assigneeId: "agent-1",
         teamId: null,
         categoryId: null,
-        tags: "[]",
+        tags: [],
         updatedBy: null,
         assignee: { id: "agent-1", name: "담당 상담원" },
         team: null,
@@ -129,7 +129,7 @@ describe("executeScheduledAutomationRules", () => {
       assigneeId: "agent-1",
       teamId: null,
       categoryId: null,
-      tags: "[]",
+      tags: [],
       updatedBy: null,
       assignee: { id: "agent-1", name: "담당 상담원" },
       team: null,
@@ -146,7 +146,7 @@ describe("executeScheduledAutomationRules", () => {
       data: {
         priority: "URGENT",
         assigneeId: "team-lead-1",
-        tags: JSON.stringify(["sla:breached", "escalated:auto"]),
+        tags: ["sla:breached", "escalated:auto"],
         updatedBy: "admin-1",
       },
     });
@@ -194,7 +194,7 @@ describe("executeScheduledAutomationRules", () => {
         assigneeId: null,
         teamId: null,
         categoryId: null,
-        tags: JSON.stringify(["existing"]),
+        tags: ["existing"],
         updatedAt: new Date("2026-03-27T08:00:00.000Z"),
         updatedBy: null,
         assignee: null,
@@ -215,7 +215,7 @@ describe("executeScheduledAutomationRules", () => {
       assigneeId: null,
       teamId: null,
       categoryId: null,
-      tags: JSON.stringify(["existing"]),
+      tags: ["existing"],
       updatedAt: new Date("2026-03-27T08:00:00.000Z"),
       updatedBy: null,
       assignee: null,
@@ -231,7 +231,7 @@ describe("executeScheduledAutomationRules", () => {
     expect(mockTicketUpdate).toHaveBeenCalledWith({
       where: { id: "ticket-2" },
       data: {
-        tags: JSON.stringify(["existing", "follow-up:due"]),
+        tags: ["existing", "follow-up:due"],
         updatedBy: "admin-1",
       },
     });

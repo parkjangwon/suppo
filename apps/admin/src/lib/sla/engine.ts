@@ -407,7 +407,7 @@ export async function getBusinessHours(): Promise<BusinessHours> {
     timezone: calendar.timezone,
     workStartHour: calendar.workStartHour,
     workEndHour: calendar.workEndHour,
-    workDays: JSON.parse(calendar.workDays ?? "[1,2,3,4,5]") as number[],
+    workDays: (calendar.workDays ?? [1, 2, 3, 4, 5]) as number[],
     holidays: calendar.holidays.map((h) => h.date),
   };
 }

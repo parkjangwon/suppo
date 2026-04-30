@@ -65,28 +65,28 @@ export async function getCustomerInsights(customerId: string): Promise<CustomerI
         id: true,
       },
     }),
-    db.execute({
+    db.execute<{ avgMinutes: number | null }>({
       sql: `
-        SELECT AVG((julianday(firstResponseAt) - julianday(createdAt)) * 1440) as avgMinutes
-        FROM Ticket
-        WHERE customerId = ?
-          AND firstResponseAt IS NOT NULL
+        SELECT AVG(EXTRACT(EPOCH FROM ("firstResponseAt" - "createdAt")) / 60) as "avgMinutes"
+        FROM "Ticket"
+        WHERE "customerId" = $1
+          AND "firstResponseAt" IS NOT NULL
       `,
       args: [customerId],
     }),
-    db.execute({
+    db.execute<{ avgHours: number | null }>({
       sql: `
-        SELECT AVG((julianday(COALESCE(resolvedAt, closedAt)) - julianday(createdAt)) * 24) as avgHours
-        FROM Ticket
-        WHERE customerId = ?
-          AND (resolvedAt IS NOT NULL OR closedAt IS NOT NULL)
+        SELECT AVG(EXTRACT(EPOCH FROM (COALESCE("resolvedAt", "closedAt") - "createdAt")) / 3600) as "avgHours"
+        FROM "Ticket"
+        WHERE "customerId" = $1
+          AND ("resolvedAt" IS NOT NULL OR "closedAt" IS NOT NULL)
       `,
       args: [customerId],
     }),
   ]);
 
-  const responseTimeRows = (responseTimeStats as { rows: Array<{ avgMinutes: number | null }> }).rows;
-  const resolutionTimeRows = (resolutionTimeStats as { rows: Array<{ avgHours: number | null }> }).rows;
+  const responseTimeRows = responseTimeStats.rows;
+  const resolutionTimeRows = resolutionTimeStats.rows;
 
   const categoryMap = new Map(
     categoryBreakdown.map((c) => [c.categoryId, c._count.id])
