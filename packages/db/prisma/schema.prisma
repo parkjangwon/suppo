@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -161,7 +161,7 @@ model Ticket {
   resolvedAt           DateTime?
   closedAt             DateTime?
   reopenedCount        Int                @default(0)
-  tags                 String?            @default("[]")
+  tags                 String[]           @default([])
   searchVector         String?
   summary              String?
   summaryUpdatedAt     DateTime?
@@ -838,7 +838,7 @@ model BusinessCalendar {
   timezone      String   @default("Asia/Seoul")
   workStartHour Int      @default(9) // 24시간 형식
   workEndHour   Int      @default(18)
-  workDays      String?  @default("[1,2,3,4,5]") // 0=일, 1=월, ..., 6=토
+  workDays      Int[]    @default([1,2,3,4,5]) // 0=일, 1=월, ..., 6=토
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
