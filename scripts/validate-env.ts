@@ -25,7 +25,8 @@ const requiredEnvVars: EnvVar[] = [
   {
     name: "DATABASE_URL",
     required: true,
-    description: "Database connection URL (SQLite file path or LibSQL URL)",
+    pattern: /^postgres(ql)?:\/\/.+/,
+    description: "PostgreSQL connection URL",
   },
   {
     name: "AUTH_SECRET",

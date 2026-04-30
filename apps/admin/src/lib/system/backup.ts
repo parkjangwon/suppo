@@ -23,7 +23,7 @@ async function getLatestMigration(): Promise<string> {
   }
 }
 
-/** BigInt를 문자열로 직렬화 (SQLite에서 BigInt 필드가 있을 경우 대비) */
+/** BigInt를 문자열로 직렬화 (PostgreSQL 집계 결과 대비) */
 function bigIntReplacer(_key: string, value: unknown): unknown {
   if (typeof value === "bigint") return value.toString();
   return value;

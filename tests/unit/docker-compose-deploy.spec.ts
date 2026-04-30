@@ -17,6 +17,10 @@ describe("Docker Compose one-click deployment", () => {
     expect(compose).toContain("image: node:22-alpine");
     expect(compose).toContain("randomBytes(32).toString(\"base64url\")");
     expect(compose).toContain("required[$$1] = length($$2) > 0");
+    expect(compose).toContain('required["INTERNAL_EMAIL_DISPATCH_TOKEN"] = 0');
+    expect(compose).toContain('required["INTERNAL_AUTOMATION_DISPATCH_TOKEN"] = 0');
+    expect(compose).toContain("INTERNAL_EMAIL_DISPATCH_TOKEN: ${INTERNAL_EMAIL_DISPATCH_TOKEN:-}");
+    expect(compose).toContain("INTERNAL_AUTOMATION_DISPATCH_TOKEN: ${INTERNAL_AUTOMATION_DISPATCH_TOKEN:-}");
     expect(compose).not.toContain("openssl rand");
   });
 

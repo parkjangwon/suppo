@@ -43,7 +43,7 @@ COPY . .
 RUN mkdir -p /app/apps/${APP_NAME}/public
 RUN pnpm --filter=@suppo/db generate
 RUN pnpm --filter=@suppo/${APP_NAME} build
-# Copy packages/db native deps into standalone (pnpm symlinks; BusyBox cp lacks -L)
+# Copy packages/db Prisma deps into standalone (pnpm symlinks; BusyBox cp lacks -L)
 RUN node docker/copy-standalone-deps.mjs "$APP_NAME"
 ENV AUTH_SECRET="" DATABASE_URL="" TICKET_ACCESS_SECRET="" GIT_TOKEN_ENCRYPTION_KEY=""
 

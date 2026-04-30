@@ -6,22 +6,12 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../../"),
   outputFileTracingIncludes: {
     "/**": [
-      "../../node_modules/@libsql/**",
-      "../../node_modules/@prisma/adapter-libsql/**",
       "../../node_modules/@prisma/driver-adapter-utils/**",
-      "../../node_modules/.pnpm/@libsql*/**",
-      "../../node_modules/.pnpm/@prisma+adapter-libsql@*/**",
       "../../node_modules/.pnpm/@prisma+driver-adapter-utils@*/**",
-      "../../node_modules/.pnpm/libsql*/**",
       "../../packages/db/node_modules/.prisma/**"
     ]
   },
   serverExternalPackages: [
-    "@prisma/adapter-libsql",
-    "@libsql/client",
-    "libsql",
-    "@libsql/darwin-arm64",
-    "@libsql/hrana-client",
     "nodemailer",
     "@aws-sdk/client-sesv2"
   ],

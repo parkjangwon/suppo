@@ -54,11 +54,14 @@ describe("admin health route", () => {
     mockWriteFile.mockResolvedValue(undefined);
     mockUnlink.mockResolvedValue(undefined);
     mockGetUploadDir.mockReturnValue("/var/lib/suppo/uploads");
+    delete process.env.REDIS_URL;
     process.env.INTERNAL_EMAIL_DISPATCH_TOKEN = "email-token";
     process.env.INTERNAL_AUTOMATION_DISPATCH_TOKEN = "automation-token";
   });
 
   it("reports database and uploads health without exposing secret values", async () => {
+    process.env.REDIS_URL = "redis://localhost:6379";
+
     const { GET } = await import("@/app/api/health/route");
 
     const response = await GET();
@@ -103,5 +106,34 @@ describe("admin health route", () => {
     expect(body.status).toBe("degraded");
     expect(body.checks.emailDispatchToken).toBe("unknown");
     expect(body.checks.automationDispatchToken).toBe("unknown");
+  });
+
+  it("does not degrade when Redis is not configured", async () => {
+    mockRedisAvailable.mockResolvedValue(false);
+
+    const { GET } = await import("@/app/api/health/route");
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.status).toBe("healthy");
+    expect(body.checks.redis).toBe("unknown");
+    expect(mockRedisAvailable).not.toHaveBeenCalled();
+  });
+
+  it("marks configured Redis as degraded when unavailable", async () => {
+    process.env.REDIS_URL = "redis://localhost:6379";
+    mockRedisAvailable.mockResolvedValue(false);
+
+    const { GET } = await import("@/app/api/health/route");
+
+    const response = await GET();
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.status).toBe("degraded");
+    expect(body.checks.redis).toBe("unknown");
+    expect(mockRedisAvailable).toHaveBeenCalledOnce();
   });
 });

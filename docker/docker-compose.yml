@@ -17,6 +17,8 @@ services:
             required["AUTH_SECRET"] = 0
             required["TICKET_ACCESS_SECRET"] = 0
             required["GIT_TOKEN_ENCRYPTION_KEY"] = 0
+            required["INTERNAL_EMAIL_DISPATCH_TOKEN"] = 0
+            required["INTERNAL_AUTOMATION_DISPATCH_TOKEN"] = 0
             required["INITIAL_ADMIN_PASSWORD"] = 0
           }
           $$1 in required { required[$$1] = length($$2) > 0 }
@@ -35,6 +37,8 @@ services:
         printf 'AUTH_SECRET=%s\n' "$$(rand_secret)" > /config/secrets.env
         printf 'TICKET_ACCESS_SECRET=%s\n' "$$(rand_secret)" >> /config/secrets.env
         printf 'GIT_TOKEN_ENCRYPTION_KEY=%s\n' "$$(rand_secret)" >> /config/secrets.env
+        printf 'INTERNAL_EMAIL_DISPATCH_TOKEN=%s\n' "$$(rand_secret)" >> /config/secrets.env
+        printf 'INTERNAL_AUTOMATION_DISPATCH_TOKEN=%s\n' "$$(rand_secret)" >> /config/secrets.env
         if [ -n "$$INITIAL_ADMIN_PASSWORD" ]; then
           ADMIN_PW="$$INITIAL_ADMIN_PASSWORD"
         else
@@ -151,6 +155,8 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-}
       TICKET_ACCESS_SECRET: ${TICKET_ACCESS_SECRET:-}
       GIT_TOKEN_ENCRYPTION_KEY: ${GIT_TOKEN_ENCRYPTION_KEY:-}
+      INTERNAL_EMAIL_DISPATCH_TOKEN: ${INTERNAL_EMAIL_DISPATCH_TOKEN:-}
+      INTERNAL_AUTOMATION_DISPATCH_TOKEN: ${INTERNAL_AUTOMATION_DISPATCH_TOKEN:-}
       INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL:-admin@suppo.io}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
       UPLOAD_DIR: ${UPLOAD_DIR:-uploads}

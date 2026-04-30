@@ -174,8 +174,8 @@ function matchesAutomationConditions(
   return true;
 }
 
-function buildUpdatedTags(existingTags: string | null | undefined, actions: AutomationAction) {
-  const currentTags = JSON.parse(existingTags || "[]") as string[];
+function buildUpdatedTags(existingTags: string[] | null | undefined, actions: AutomationAction) {
+  const currentTags = existingTags ?? [];
   let nextTags = [...currentTags];
 
   if (actions.addTags) {
@@ -292,7 +292,7 @@ async function applyAutomationRuleToTicket(
 
     if (actions.addTags || actions.removeTags) {
       const nextTags = buildUpdatedTags(ticket.tags, actions);
-      updates.tags = JSON.stringify(nextTags);
+      updates.tags = nextTags;
       logs.push(`태그 업데이트: ${nextTags.join(", ")}`);
     }
 

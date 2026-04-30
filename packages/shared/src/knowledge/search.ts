@@ -11,7 +11,7 @@ export interface ArticleSearchResult {
 
 /**
  * 주어진 쿼리와 관련된 지식 문서를 검색합니다 (RAG-lite).
- * SQLite 제약으로 인해 키워드 기반 다중 LIKE 검색 + 매칭 카운트 랭킹을 사용합니다.
+ * 키워드 기반 다중 contains 검색 + 매칭 카운트 랭킹을 사용합니다.
  */
 export async function searchRelevantArticles(
   query: string,
