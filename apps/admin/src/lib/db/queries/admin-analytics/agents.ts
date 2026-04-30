@@ -36,34 +36,33 @@ export async function getAgentPerformance(
   const fromISO = dateRange.from.toISOString();
   const toISO = dateRange.to.toISOString();
 
-  const stats = await db.execute({
+  const stats = await db.execute<AgentTicketStats>({
     sql: `
       SELECT
-        t.assigneeId as agentId,
-        COUNT(*) as ticketsHandled,
+        t."assigneeId" as "agentId",
+        COUNT(*) as "ticketsHandled",
         AVG(
           CASE
-            WHEN t.firstResponseAt IS NOT NULL
-            THEN (julianday(t.firstResponseAt) - julianday(t.createdAt)) * 1440
+            WHEN t."firstResponseAt" IS NOT NULL
+            THEN EXTRACT(EPOCH FROM (t."firstResponseAt" - t."createdAt")) / 60
             ELSE NULL
           END
-        ) as avgFirstResponseMinutes,
+        ) as "avgFirstResponseMinutes",
         AVG(
           CASE
-            WHEN t.resolvedAt IS NOT NULL OR t.closedAt IS NOT NULL
-            THEN (julianday(COALESCE(t.resolvedAt, t.closedAt)) - julianday(t.createdAt)) * 1440
+            WHEN t."resolvedAt" IS NOT NULL OR t."closedAt" IS NOT NULL
+            THEN EXTRACT(EPOCH FROM (COALESCE(t."resolvedAt", t."closedAt") - t."createdAt")) / 60
             ELSE NULL
           END
-        ) as avgResolutionMinutes
-      FROM Ticket t
-      WHERE t.assigneeId IN (${agentIds.map(() => '?').join(',')})
-        AND t.createdAt >= ?
-        AND t.createdAt <= ?
-      GROUP BY t.assigneeId
+        ) as "avgResolutionMinutes"
+      FROM "Ticket" t
+      WHERE t."assigneeId" = ANY($1::text[])
+        AND t."createdAt" >= $2::timestamptz
+        AND t."createdAt" <= $3::timestamptz
+      GROUP BY t."assigneeId"
     `,
-    args: [...agentIds, fromISO, toISO],
+    args: [agentIds, fromISO, toISO],
   });
-  const typedStats: AgentTicketStats[] = stats.rows as AgentTicketStats[];
 
   const openTicketCounts = await prisma.ticket.groupBy({
     by: ["assigneeId"],
@@ -82,7 +81,7 @@ export async function getAgentPerformance(
     openTicketCounts.map((o) => [o.assigneeId, o._count.id])
   );
 
-  const statsMap = new Map(typedStats.map((s) => [s.agentId, s]));
+  const statsMap = new Map(stats.rows.map((s) => [s.agentId, s]));
 
   const agentStats: AgentPerformance[] = agents.map((agent) => {
     const stat = statsMap.get(agent.id);
@@ -91,11 +90,11 @@ export async function getAgentPerformance(
       agentName: agent.name,
       ticketsHandled: stat ? Number(stat.ticketsHandled) : 0,
       openTickets: openTicketMap.get(agent.id) ?? 0,
-      avgFirstResponseMinutes: stat?.avgFirstResponseMinutes 
-        ? Number(stat.avgFirstResponseMinutes) 
+      avgFirstResponseMinutes: stat?.avgFirstResponseMinutes
+        ? Number(stat.avgFirstResponseMinutes)
         : null,
-      avgResolutionMinutes: stat?.avgResolutionMinutes 
-        ? Number(stat.avgResolutionMinutes) 
+      avgResolutionMinutes: stat?.avgResolutionMinutes
+        ? Number(stat.avgResolutionMinutes)
         : null,
     };
   });
@@ -104,13 +103,17 @@ export async function getAgentPerformance(
   const validResponseTimes = agentStats.filter((a) => a.avgFirstResponseMinutes !== null);
   const validResolutionTimes = agentStats.filter((a) => a.avgResolutionMinutes !== null);
 
-  const summaryAvgFirstResponse = validResponseTimes.length > 0
-    ? validResponseTimes.reduce((sum, a) => sum + (a.avgFirstResponseMinutes ?? 0), 0) / validResponseTimes.length
-    : null;
+  const summaryAvgFirstResponse =
+    validResponseTimes.length > 0
+      ? validResponseTimes.reduce((sum, a) => sum + (a.avgFirstResponseMinutes ?? 0), 0) /
+        validResponseTimes.length
+      : null;
 
-  const summaryAvgResolution = validResolutionTimes.length > 0
-    ? validResolutionTimes.reduce((sum, a) => sum + (a.avgResolutionMinutes ?? 0), 0) / validResolutionTimes.length
-    : null;
+  const summaryAvgResolution =
+    validResolutionTimes.length > 0
+      ? validResolutionTimes.reduce((sum, a) => sum + (a.avgResolutionMinutes ?? 0), 0) /
+        validResolutionTimes.length
+      : null;
 
   return {
     agents: agentStats,

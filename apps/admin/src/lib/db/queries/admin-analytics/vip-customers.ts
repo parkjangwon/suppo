@@ -21,29 +21,32 @@ export async function getVIPCustomers(
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   const ninetyDaysISO = ninetyDaysAgo.toISOString();
 
-  const rawData = await db.execute({
+  const rawData = await db.execute<RawVIPData>({
     sql: `
       SELECT
-        t.customerId,
-        t.customerEmail,
-        t.customerName,
-        SUM(CASE WHEN t.createdAt >= ? THEN 1 ELSE 0 END) as recentTickets,
-        COUNT(*) as lifetimeTickets,
+        t."customerId",
+        t."customerEmail",
+        t."customerName",
+        SUM(CASE WHEN t."createdAt" >= $1::timestamptz THEN 1 ELSE 0 END) as "recentTickets",
+        COUNT(*) as "lifetimeTickets",
         SUM(CASE
-          WHEN t.createdAt >= ?
-          AND t.priority IN ('URGENT', 'HIGH')
-          THEN 1 ELSE 0 END) as highPriorityTickets
-      FROM Ticket t
-      WHERE t.createdAt <= ?
-      GROUP BY t.customerId, t.customerEmail, t.customerName
-      HAVING recentTickets >= ?
-         OR lifetimeTickets >= ?
-         OR highPriorityTickets >= ?
-      ORDER BY recentTickets DESC, lifetimeTickets DESC
+          WHEN t."createdAt" >= $1::timestamptz
+            AND t.priority IN ('URGENT', 'HIGH')
+          THEN 1 ELSE 0 END) as "highPriorityTickets"
+      FROM "Ticket" t
+      WHERE t."createdAt" <= $2::timestamptz
+      GROUP BY t."customerId", t."customerEmail", t."customerName"
+      HAVING
+        SUM(CASE WHEN t."createdAt" >= $1::timestamptz THEN 1 ELSE 0 END) >= $3
+        OR COUNT(*) >= $4
+        OR SUM(CASE
+          WHEN t."createdAt" >= $1::timestamptz AND t.priority IN ('URGENT', 'HIGH')
+          THEN 1 ELSE 0 END) >= $5
+      ORDER BY "recentTickets" DESC, "lifetimeTickets" DESC
     `,
-    args: [ninetyDaysISO, ninetyDaysISO, toISO, minRecentTickets, minLifetimeTickets, minHighPriorityTickets],
+    args: [ninetyDaysISO, toISO, minRecentTickets, minLifetimeTickets, minHighPriorityTickets],
   });
-  const typedRawData: RawVIPData[] = rawData.rows as RawVIPData[];
+  const typedRawData: RawVIPData[] = rawData.rows;
 
   const customers: VIPCustomer[] = typedRawData.map((row) => {
     const reasons: VIPReason[] = [];
