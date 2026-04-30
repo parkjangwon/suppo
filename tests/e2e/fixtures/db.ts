@@ -1,12 +1,9 @@
 // tests/e2e/fixtures/db.ts
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import path from "node:path";
 
-const databaseUrl = `file:${path.resolve(
-  process.cwd(),
-  "packages/db/dev.db"
-)}`;
+const databaseUrl =
+  process.env.DATABASE_URL ?? "postgresql://suppo:suppo_dev@localhost:5432/suppo";
 
 const prisma = new PrismaClient({
   datasources: {

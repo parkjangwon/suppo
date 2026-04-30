@@ -24,10 +24,15 @@ describe("PostgreSQL compatibility", () => {
 
   it("does not ship PostgreSQL-to-SQLite migration tooling in the runtime scripts", () => {
     const scripts = readFileSync("package.json", "utf8") +
-      readFileSync("scripts/validate-env.ts", "utf8");
+      readFileSync("scripts/validate-env.ts", "utf8") +
+      readFileSync("install.sh", "utf8") +
+      readFileSync("playwright.config.ts", "utf8") +
+      readFileSync("tests/e2e/fixtures/db.ts", "utf8");
 
     expect(scripts).not.toContain("SQLite file path or LibSQL URL");
     expect(scripts).not.toContain("migrate-pg-to-sqlite");
+    expect(scripts).not.toContain("sqlite3");
+    expect(scripts).not.toContain("dev.db");
   });
 
   it("keeps fresh database schema optimized for PostgreSQL array tag searches", () => {

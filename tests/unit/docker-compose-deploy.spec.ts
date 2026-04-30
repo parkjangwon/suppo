@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 const dockerfile = readFileSync("docker/Dockerfile", "utf8");
 const compose = readFileSync("docker/docker-compose.yml", "utf8");
+const rootCompose = readFileSync("compose.yaml", "utf8");
 
 describe("Docker Compose one-click deployment", () => {
   it("copies scoped pnpm packages into Next.js standalone output with a merge script", () => {
@@ -38,5 +39,12 @@ describe("Docker Compose one-click deployment", () => {
   it("loads demo seed data by default for one-click deployments", () => {
     expect(compose).toContain("SEED_PROFILE: ${SEED_PROFILE:-demo}");
     expect(compose).not.toContain("SEED_PROFILE: ${SEED_PROFILE:-none}");
+  });
+
+  it("supports root-level docker compose up without a manual -f flag", () => {
+    expect(rootCompose).toContain("include:");
+    expect(rootCompose).toContain("docker/docker-compose.yml");
+    expect(compose).toContain("POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-suppo_dev}");
+    expect(compose).toContain("postgresql://suppo:${POSTGRES_PASSWORD:-suppo_dev}@postgres:5432/suppo");
   });
 });

@@ -1,10 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
-import path from "path";
+import path from "node:path";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
-const e2eDatabaseUrl = `file:${path.resolve(__dirname, "packages/db/dev.db")}`;
+const e2eDatabaseUrl =
+  process.env.DATABASE_URL ?? "postgresql://suppo:suppo_dev@localhost:5432/suppo";
 
 export default defineConfig({
   testDir: "./tests/e2e/specs",
