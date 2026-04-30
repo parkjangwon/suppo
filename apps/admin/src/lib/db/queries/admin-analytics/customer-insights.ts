@@ -76,7 +76,7 @@ export async function getCustomerInsights(customerId: string): Promise<CustomerI
     }),
     db.execute<{ avgHours: number | null }>({
       sql: `
-        SELECT AVG(EXTRACT(EPOCH FROM (COALESCE("resolvedAt", "closedAt") - "createdAt") / 3600)) as "avgHours"
+        SELECT AVG(EXTRACT(EPOCH FROM (COALESCE("resolvedAt", "closedAt") - "createdAt")) / 3600) as "avgHours"
         FROM "Ticket"
         WHERE "customerId" = $1
           AND ("resolvedAt" IS NOT NULL OR "closedAt" IS NOT NULL)
