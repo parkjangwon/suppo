@@ -227,9 +227,6 @@ print_success() {
 시작 명령:
 - pnpm dev:all
 - docker compose up -d
-
-오타 호환:
-- ./instal.sh 도 ./install.sh와 동일하게 동작합니다.
 EOF
 }
 
