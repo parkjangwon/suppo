@@ -12,7 +12,7 @@
 현재 프로젝트는 다음 구조를 전제로 한다.
 
 - `public/admin` 분리 Next.js 앱
-- `sqld` 기반 LibSQL 공유 DB
+- PostgreSQL 공유 DB
 - `docker/docker-compose.yml` 기반 멀티 컨테이너 배포
 - `uploads` 공유 볼륨
 
@@ -23,12 +23,12 @@
 배포 전 아래 명령으로 운영 환경 변수를 검증한다.
 
 ```bash
-pnpm ops:validate-env -- --env-file docker/env/.env.production
+pnpm ops:validate-env -- --env-file docker/.env --allow-generated-secrets --require-captcha --require-oauth
 ```
 
 필수 점검 항목:
 
-- `DATABASE_URL`
+- `DATABASE_URL` 또는 Docker Compose 파생용 `POSTGRES_PASSWORD`
 - `PUBLIC_URL`
 - `ADMIN_URL`
 - `AUTH_SECRET`
@@ -42,7 +42,7 @@ pnpm ops:validate-env -- --env-file docker/env/.env.production
 
 - `AUTH_SECRET`은 public/admin 모두 동일해야 함
 - `PUBLIC_URL`, `ADMIN_URL`은 실제 도메인과 일치해야 함
-- `sqld`는 외부에 직접 노출되지 않아야 함
+- PostgreSQL은 외부에 직접 노출되지 않아야 함
 - public/admin 모두 `uploads` 볼륨을 동일하게 마운트해야 함
 - 운영 DB에는 최신 migration이 적용되어야 함
 
@@ -132,7 +132,7 @@ pnpm test:e2e
 배포 직후 아래 명령으로 기본 상태를 확인한다.
 
 ```bash
-pnpm ops:smoke -- --env-file docker/env/.env.production
+pnpm ops:smoke -- --env-file docker/.env
 ```
 
 기본 smoke 항목:

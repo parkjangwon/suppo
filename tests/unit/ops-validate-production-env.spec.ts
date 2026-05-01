@@ -84,4 +84,61 @@ describe("validateProductionEnvironment", () => {
     ]));
     expect(validateEnvironment(env, false, { allowGeneratedSecrets: true }).filter((finding) => finding.level === "error")).toEqual([]);
   });
+
+  it("accepts Docker Compose env that derives DATABASE_URL from POSTGRES_PASSWORD", () => {
+    const {
+      DATABASE_URL: _databaseUrl,
+      AUTH_SECRET: _auth,
+      TICKET_ACCESS_SECRET: _ticket,
+      GIT_TOKEN_ENCRYPTION_KEY: _git,
+      ...env
+    } = baseEnv;
+
+    expect(validateEnvironment({
+      ...env,
+      POSTGRES_PASSWORD: "production-db-password",
+    }, false, { allowGeneratedSecrets: true }).filter((finding) => finding.level === "error")).toEqual([]);
+  });
+
+  it("rejects weak Docker Compose PostgreSQL passwords", () => {
+    const {
+      DATABASE_URL: _databaseUrl,
+      AUTH_SECRET: _auth,
+      TICKET_ACCESS_SECRET: _ticket,
+      GIT_TOKEN_ENCRYPTION_KEY: _git,
+      ...env
+    } = baseEnv;
+
+    expect(messages({
+      ...env,
+      POSTGRES_PASSWORD: "change-me-in-production",
+    })).toContain("POSTGRES_PASSWORD must be changed from the default placeholder before production");
+  });
+
+  it("requires CAPTCHA and OAuth when production launch gates are enabled", () => {
+    const {
+      TURNSTILE_SECRET_KEY: _turnstile,
+      ...env
+    } = baseEnv;
+
+    const findings = validateEnvironment(env, false, {
+      requireCaptcha: true,
+      requireOAuth: true,
+    });
+
+    expect(findings).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        level: "error",
+        message: "TURNSTILE_SECRET_KEY is required when CAPTCHA is required",
+      }),
+      expect.objectContaining({
+        level: "error",
+        message: "AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET are required when OAuth is required",
+      }),
+      expect.objectContaining({
+        level: "error",
+        message: "AUTH_GITHUB_ID and AUTH_GITHUB_SECRET are required when OAuth is required",
+      }),
+    ]));
+  });
 });

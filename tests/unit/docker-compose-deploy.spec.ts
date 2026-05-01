@@ -47,4 +47,13 @@ describe("Docker Compose one-click deployment", () => {
     expect(compose).toContain("POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-suppo_dev}");
     expect(compose).toContain("postgresql://suppo:${POSTGRES_PASSWORD:-suppo_dev}@postgres:5432/suppo");
   });
+
+  it("passes production launch integrations into the runtime containers", () => {
+    expect(compose).toContain("NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}");
+    expect(compose).toContain("TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}");
+    expect(compose).toContain("AUTH_GOOGLE_ID: ${AUTH_GOOGLE_ID:-}");
+    expect(compose).toContain("AUTH_GOOGLE_SECRET: ${AUTH_GOOGLE_SECRET:-}");
+    expect(compose).toContain("AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}");
+    expect(compose).toContain("AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}");
+  });
 });

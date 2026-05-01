@@ -120,10 +120,47 @@ EMAIL_DOMAIN=example.com                  # 발신 이메일 도메인
 INITIAL_ADMIN_EMAIL=admin@example.com
 INITIAL_ADMIN_PASSWORD=강력한_비밀번호
 SEED_PROFILE=none                         # 운영 환경에서는 demo 데이터 제외
+POSTGRES_PASSWORD=강력한_DB_비밀번호
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=...
+TURNSTILE_SECRET_KEY=...
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+AUTH_GITHUB_ID=...
+AUTH_GITHUB_SECRET=...
 ```
 
 시크릿 키(`AUTH_SECRET`, `TICKET_ACCESS_SECRET`, `GIT_TOKEN_ENCRYPTION_KEY`)는 비워 두면 첫 실행 시 자동 생성됩니다.  
 **한 번 생성된 시크릿은 절대 변경하지 마세요.** 변경하면 모든 세션과 암호화 토큰이 무효화됩니다.
+
+운영 기본 파일은 아래처럼 준비합니다.
+
+```bash
+cp docker/.env.example docker/.env
+$EDITOR docker/.env
+pnpm ops:validate-env -- --env-file docker/.env --allow-generated-secrets --require-captcha --require-oauth
+```
+
+Google/GitHub OAuth 앱에는 관리자 도메인 기준 callback URL을 등록합니다.
+
+```text
+https://admin.example.com/api/auth/callback/google
+https://admin.example.com/api/auth/callback/github
+```
+
+### Nginx + Certbot 예시
+
+Suppo 컨테이너는 `BIND_IP=127.0.0.1`로 로컬 포트에만 바인딩하고, 외부 HTTPS는 Nginx가 처리하도록 구성합니다.
+
+```bash
+sudo cp docker/nginx/suppo.conf.example /etc/nginx/sites-available/suppo
+sudo sed -i 's/help.example.com/실제_PUBLIC_도메인/g; s/admin.example.com/실제_ADMIN_도메인/g' /etc/nginx/sites-available/suppo
+sudo ln -sf /etc/nginx/sites-available/suppo /etc/nginx/sites-enabled/suppo
+sudo nginx -t
+sudo systemctl reload nginx
+sudo certbot --nginx -d 실제_PUBLIC_도메인 -d 실제_ADMIN_도메인
+```
+
+이메일 발송은 첫 오픈 후 `Admin → 설정 → 이메일`에서 Resend 또는 SMTP로 연결할 수 있습니다. 이메일을 나중에 켜는 경우에도 `INTERNAL_EMAIL_DISPATCH_TOKEN`은 자동 생성되거나 직접 설정되어 있어야 합니다.
 
 ---
 
@@ -209,7 +246,7 @@ docker compose -f docker/docker-compose.yml up --build -d
 운영 환경에서 필수 변수, URL, 시크릿 길이/중복, 업로드 경로, 초기 관리자 비밀번호가 올바른지 확인합니다.
 
 ```bash
-pnpm ops:validate-env -- --env-file docker/.env --allow-generated-secrets
+pnpm ops:validate-env -- --env-file docker/.env --allow-generated-secrets --require-captcha --require-oauth
 ```
 
 API 라우트의 권한 보호 방식도 배포 전에 감사합니다.

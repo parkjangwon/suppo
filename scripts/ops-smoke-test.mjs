@@ -26,7 +26,7 @@ function parseArgs(argv) {
 }
 
 function loadEnvironment(envFile) {
-  const defaultFiles = [".env", ".env.local", "docker/env/.env.production"];
+  const defaultFiles = [".env", ".env.local", "docker/.env", "docker/env/.env.production"];
   const files = envFile ? [envFile] : defaultFiles;
   for (const file of files) {
     config({ path: path.resolve(process.cwd(), file), override: false });

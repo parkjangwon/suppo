@@ -15,12 +15,16 @@ interface Args {
   envFile?: string;
   allowHttp: boolean;
   allowGeneratedSecrets: boolean;
+  requireCaptcha: boolean;
+  requireOAuth: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
   const args: Args = {
     allowHttp: false,
     allowGeneratedSecrets: false,
+    requireCaptcha: false,
+    requireOAuth: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -37,6 +41,14 @@ function parseArgs(argv: string[]): Args {
 
     if (arg === "--allow-generated-secrets") {
       args.allowGeneratedSecrets = true;
+    }
+
+    if (arg === "--require-captcha") {
+      args.requireCaptcha = true;
+    }
+
+    if (arg === "--require-oauth") {
+      args.requireOAuth = true;
     }
   }
 
@@ -69,9 +81,46 @@ function requireValue(env: Environment, name: string, findings: Finding[]) {
   return value;
 }
 
-function validatePostgresDatabaseUrl(env: Environment, findings: Finding[]) {
-  const value = requireValue(env, "DATABASE_URL", findings);
+function validatePostgresPassword(env: Environment, findings: Finding[]) {
+  const value = readEnv(env, "POSTGRES_PASSWORD");
   if (!value) {
+    return;
+  }
+
+  if (value === "suppo_dev" || /change-me/i.test(value)) {
+    findings.push({
+      level: "error",
+      message: "POSTGRES_PASSWORD must be changed from the default placeholder before production",
+    });
+    return;
+  }
+
+  if (value.length < 16) {
+    findings.push({
+      level: "error",
+      message: `POSTGRES_PASSWORD must be at least 16 characters (current: ${value.length})`,
+    });
+  }
+}
+
+function effectiveDatabaseUrl(env: Environment) {
+  const value = readEnv(env, "DATABASE_URL");
+  if (value) {
+    return value;
+  }
+
+  const postgresPassword = readEnv(env, "POSTGRES_PASSWORD");
+  if (postgresPassword) {
+    return `postgresql://suppo:${encodeURIComponent(postgresPassword)}@postgres:5432/suppo`;
+  }
+
+  return undefined;
+}
+
+function validatePostgresDatabaseUrl(env: Environment, findings: Finding[]) {
+  const value = effectiveDatabaseUrl(env);
+  if (!value) {
+    findings.push({ level: "error", message: "DATABASE_URL or POSTGRES_PASSWORD is required" });
     return;
   }
 
@@ -187,6 +236,12 @@ function validateWeakValues(env: Environment, findings: Finding[]) {
       message: "INITIAL_ADMIN_PASSWORD uses a weak default-like value; change it before production",
     });
   }
+  if (initialPassword && /change-me|placeholder/i.test(initialPassword)) {
+    findings.push({
+      level: "warning",
+      message: "INITIAL_ADMIN_PASSWORD looks like a placeholder; change it before production",
+    });
+  }
 
   for (const name of ["AUTH_SECRET", "TICKET_ACCESS_SECRET", "GIT_TOKEN_ENCRYPTION_KEY"]) {
     const value = readEnv(env, name);
@@ -199,13 +254,79 @@ function validateWeakValues(env: Environment, findings: Finding[]) {
   }
 }
 
+function validateCaptcha(env: Environment, findings: Finding[], requireCaptcha: boolean) {
+  const siteKey = readEnv(env, "NEXT_PUBLIC_TURNSTILE_SITE_KEY");
+  const secretKey = readEnv(env, "TURNSTILE_SECRET_KEY");
+
+  if (requireCaptcha) {
+    if (!siteKey) {
+      findings.push({
+        level: "error",
+        message: "NEXT_PUBLIC_TURNSTILE_SITE_KEY is required when CAPTCHA is required",
+      });
+    }
+    if (!secretKey) {
+      findings.push({
+        level: "error",
+        message: "TURNSTILE_SECRET_KEY is required when CAPTCHA is required",
+      });
+    }
+    return;
+  }
+
+  if (!secretKey) {
+    findings.push({
+      level: "warning",
+      message: "TURNSTILE_SECRET_KEY is missing; public ticket/chat CAPTCHA will fail in production",
+    });
+  }
+}
+
+function validateOAuth(env: Environment, findings: Finding[], requireOAuth: boolean) {
+  const googleId = readEnv(env, "AUTH_GOOGLE_ID");
+  const googleSecret = readEnv(env, "AUTH_GOOGLE_SECRET");
+  const githubId = readEnv(env, "AUTH_GITHUB_ID");
+  const githubSecret = readEnv(env, "AUTH_GITHUB_SECRET");
+
+  if (googleId && !googleSecret) {
+    findings.push({ level: "error", message: "AUTH_GOOGLE_SECRET is required when AUTH_GOOGLE_ID is set" });
+  }
+  if (!googleId && googleSecret) {
+    findings.push({ level: "error", message: "AUTH_GOOGLE_ID is required when AUTH_GOOGLE_SECRET is set" });
+  }
+  if (githubId && !githubSecret) {
+    findings.push({ level: "error", message: "AUTH_GITHUB_SECRET is required when AUTH_GITHUB_ID is set" });
+  }
+  if (!githubId && githubSecret) {
+    findings.push({ level: "error", message: "AUTH_GITHUB_ID is required when AUTH_GITHUB_SECRET is set" });
+  }
+
+  if (!requireOAuth) {
+    return;
+  }
+
+  if (!googleId || !googleSecret) {
+    findings.push({
+      level: "error",
+      message: "AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET are required when OAuth is required",
+    });
+  }
+  if (!githubId || !githubSecret) {
+    findings.push({
+      level: "error",
+      message: "AUTH_GITHUB_ID and AUTH_GITHUB_SECRET are required when OAuth is required",
+    });
+  }
+}
+
 export function validateEnvironment(
   env: Environment,
   allowHttp: boolean,
-  options: { allowGeneratedSecrets?: boolean } = {},
+  options: { allowGeneratedSecrets?: boolean; requireCaptcha?: boolean; requireOAuth?: boolean } = {},
 ) {
   const findings: Finding[] = [];
 
+  validatePostgresPassword(env, findings);
   validatePostgresDatabaseUrl(env, findings);
   const publicUrl = validateUrl(env, "PUBLIC_URL", allowHttp, findings);
   const adminBaseUrl = readEnv(env, "ADMIN_BASE_URL") ? validateUrl(env, "ADMIN_BASE_URL", allowHttp, findings) : undefined;
@@ -223,12 +344,8 @@ export function validateEnvironment(
   validateUploadDir(env, findings);
   validateWeakValues(env, findings);
 
-  if (!readEnv(env, "TURNSTILE_SECRET_KEY")) {
-    findings.push({
-      level: "warning",
-      message: "TURNSTILE_SECRET_KEY is missing; public ticket/chat CAPTCHA will fail in production",
-    });
-  }
+  validateCaptcha(env, findings, options.requireCaptcha ?? false);
+  validateOAuth(env, findings, options.requireOAuth ?? false);
 
   if (!readEnv(env, "INTERNAL_EMAIL_DISPATCH_TOKEN")) {
     findings.push({
@@ -326,6 +443,8 @@ function main() {
 
   const findings = validateEnvironment(process.env, args.allowHttp, {
     allowGeneratedSecrets: args.allowGeneratedSecrets,
+    requireCaptcha: args.requireCaptcha,
+    requireOAuth: args.requireOAuth,
   });
   printFindings(findings);
 
