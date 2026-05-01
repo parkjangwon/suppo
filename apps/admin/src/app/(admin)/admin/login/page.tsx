@@ -1,8 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { getProviders, signIn } from "next-auth/react";
 
 import { Button } from "@suppo/ui/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
@@ -14,10 +14,32 @@ import { copyText } from "@/lib/i18n/admin-copy-utils";
 export default function AdminLoginPage() {
   const router = useRouter();
   const copy = useAdminCopy();
+  const [providers, setProviders] = useState<Awaited<ReturnType<typeof getProviders>>>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const hasOAuthProvider = Boolean(providers?.google || providers?.github);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getProviders()
+      .then((availableProviders) => {
+        if (isMounted) {
+          setProviders(availableProviders);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setProviders(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCredentialsLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -89,24 +111,30 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-4 space-y-2 border-t pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => signIn("google", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
-            >
-              {copyText(copy, "loginContinueWithGoogle", "Google로 계속하기")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={() => signIn("github", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
-            >
-              {copyText(copy, "loginContinueWithGithub", "GitHub로 계속하기")}
-            </Button>
-          </div>
+          {hasOAuthProvider ? (
+            <div className="mt-4 space-y-2 border-t pt-4">
+              {providers?.google ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => signIn("google", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
+                >
+                  {copyText(copy, "loginContinueWithGoogle", "Google로 계속하기")}
+                </Button>
+              ) : null}
+              {providers?.github ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => signIn("github", { callbackUrl: BACKOFFICE_DASHBOARD_PATH })}
+                >
+                  {copyText(copy, "loginContinueWithGithub", "GitHub로 계속하기")}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
         </CardContent>
         <CardFooter className="justify-center text-xs text-muted-foreground">
           {copyText(copy, "loginOAuthFooter", "OAuth 공급자 설정은 환경변수를 통해 활성화됩니다.")}

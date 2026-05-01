@@ -138,6 +138,55 @@ enum GitEventType {
   ISSUE_LINKED
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 model Ticket {
   id                   String             @id @default(cuid())
   ticketNumber         String             @unique
@@ -227,29 +276,29 @@ model Agent {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
-  assignedTickets  Ticket[]           @relation("TicketAssignee")
-  categories       AgentCategory[]
-  authoredComments Comment[]          @relation("CommentAuthor")
-  createdTemplates ResponseTemplate[] @relation("TemplateCreator")
-  activityEntries  TicketActivity[]   @relation("ActivityActor")
-  transfersFrom    TicketTransfer[]   @relation("TransferFromAgent")
-  transfersTo      TicketTransfer[]   @relation("TransferToAgent")
-  teamMemberships  TeamMember[]
-  savedFilters           SavedFilter[]      @relation("FilterCreator")
-  absences               AgentAbsence[]     @relation("AgentAbsenceToAgent")
-  createdAbsences        AgentAbsence[]     @relation("AbsenceCreator")
-  timeEntries            TimeEntry[]        @relation("TimeEntries")
-  automationRules        AutomationRule[]   @relation("AutomationCreator")
-  authoredKnowledge      KnowledgeArticle[] @relation("KnowledgeArticleAuthor")
-  editedKnowledge        KnowledgeArticle[] @relation("KnowledgeArticleLastEditor")
-  ticketPresences        TicketPresence[]
-  commentLocks           TicketCommentLock[]
-  reportSchedules        ReportSchedule[]      @relation("ReportScheduleCreator")
-  generatedReports       GeneratedReport[]     @relation("GeneratedReportRequester")
-  knowledgeLinks         TicketKnowledgeLink[]
-  publicApiKeys          PublicApiKey[]        @relation("PublicApiKeyCreator")
-  webhookEndpoints       WebhookEndpoint[]     @relation("WebhookEndpointCreator")
-  macros                 Macro[]               @relation("MacroCreator")
+  assignedTickets   Ticket[]              @relation("TicketAssignee")
+  categories        AgentCategory[]
+  authoredComments  Comment[]             @relation("CommentAuthor")
+  createdTemplates  ResponseTemplate[]    @relation("TemplateCreator")
+  activityEntries   TicketActivity[]      @relation("ActivityActor")
+  transfersFrom     TicketTransfer[]      @relation("TransferFromAgent")
+  transfersTo       TicketTransfer[]      @relation("TransferToAgent")
+  teamMemberships   TeamMember[]
+  savedFilters      SavedFilter[]         @relation("FilterCreator")
+  absences          AgentAbsence[]        @relation("AgentAbsenceToAgent")
+  createdAbsences   AgentAbsence[]        @relation("AbsenceCreator")
+  timeEntries       TimeEntry[]           @relation("TimeEntries")
+  automationRules   AutomationRule[]      @relation("AutomationCreator")
+  authoredKnowledge KnowledgeArticle[]    @relation("KnowledgeArticleAuthor")
+  editedKnowledge   KnowledgeArticle[]    @relation("KnowledgeArticleLastEditor")
+  ticketPresences   TicketPresence[]
+  commentLocks      TicketCommentLock[]
+  reportSchedules   ReportSchedule[]      @relation("ReportScheduleCreator")
+  generatedReports  GeneratedReport[]     @relation("GeneratedReportRequester")
+  knowledgeLinks    TicketKnowledgeLink[]
+  publicApiKeys     PublicApiKey[]        @relation("PublicApiKeyCreator")
+  webhookEndpoints  WebhookEndpoint[]     @relation("WebhookEndpointCreator")
+  macros            Macro[]               @relation("MacroCreator")
 
   @@index([isActive])
 }
@@ -427,7 +476,7 @@ model ChatConversation {
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
 
-  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  ticket Ticket      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   events ChatEvent[]
 
   @@index([status, lastMessageAt])
@@ -541,7 +590,7 @@ model NotificationSetting {
 }
 
 model EmailDelivery {
-  id           String              @id @default(cuid())
+  id           String                @id @default(cuid())
   to           String
   subject      String
   body         String
@@ -551,12 +600,12 @@ model EmailDelivery {
   messageId    String?
   inReplyTo    String?
   references   String?
-  status       EmailDeliveryStatus @default(PENDING)
-  attemptCount Int                 @default(0)
+  status       EmailDeliveryStatus   @default(PENDING)
+  attemptCount Int                   @default(0)
   nextRetryAt  DateTime?
   lastError    String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
 
   @@index([status, nextRetryAt])
   @@index([category, status, nextRetryAt])
@@ -617,9 +666,9 @@ model SystemBranding {
   footerAddress  String? // 푸터 주소
 
   // Feature Flags
-  showPoweredBy     Boolean @default(true) // "Powered by Suppo" 표시 여부
-  knowledgeEnabled  Boolean @default(true) // 지식 찾기 공개 포털 노출 여부
-  customCss     String? // 커스텀 CSS
+  showPoweredBy    Boolean @default(true) // "Powered by Suppo" 표시 여부
+  knowledgeEnabled Boolean @default(true) // 지식 찾기 공개 포털 노출 여부
+  customCss        String? // 커스텀 CSS
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -652,7 +701,7 @@ model EmailSettings {
   resendApiKey String?
 
   // Delivery master switches
-  customerEmailsEnabled      Boolean @default(false)
+  customerEmailsEnabled        Boolean @default(false)
   internalNotificationsEnabled Boolean @default(false)
 
   // Internal Notification Settings
@@ -668,7 +717,7 @@ model EmailSettings {
   notifyCustomerOnAgentReply    Boolean @default(false)
   notifyCustomerOnStatusChange  Boolean @default(false)
   notifyCustomerOnCsatSurvey    Boolean @default(false)
-  notificationEmail    String?
+  notificationEmail             String?
 
   // Test Settings
   testMode Boolean @default(false)
@@ -839,7 +888,7 @@ model BusinessCalendar {
   timezone      String   @default("Asia/Seoul")
   workStartHour Int      @default(9) // 24시간 형식
   workEndHour   Int      @default(18)
-  workDays      Int[]    @default([1,2,3,4,5]) // 0=일, 1=월, ..., 6=토
+  workDays      Int[]    @default([1, 2, 3, 4, 5]) // 0=일, 1=월, ..., 6=토
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -952,16 +1001,16 @@ model GitOperationQueue {
 }
 
 model PublicApiKey {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  keyPrefix   String   @unique
-  keyHash     String   @unique
-  scopes      Json     @default("[\"tickets:read\",\"tickets:create\"]")
-  isActive    Boolean  @default(true)
+  keyPrefix   String    @unique
+  keyHash     String    @unique
+  scopes      Json      @default("[\"tickets:read\",\"tickets:create\"]")
+  isActive    Boolean   @default(true)
   lastUsedAt  DateTime?
   createdById String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   createdBy Agent @relation("PublicApiKeyCreator", fields: [createdById], references: [id], onDelete: Cascade)
 
@@ -970,20 +1019,20 @@ model PublicApiKey {
 }
 
 model WebhookEndpoint {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   name            String
   url             String
   secret          String?
   events          Json
-  isActive        Boolean  @default(true)
+  isActive        Boolean   @default(true)
   lastTriggeredAt DateTime?
   lastStatusCode  Int?
   lastError       String?
   createdById     String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  createdBy Agent               @relation("WebhookEndpointCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy  Agent                @relation("WebhookEndpointCreator", fields: [createdById], references: [id], onDelete: Cascade)
   deliveries WebhookDeliveryLog[]
 
   @@index([isActive, createdAt])
@@ -1008,59 +1057,59 @@ model WebhookDeliveryLog {
 }
 
 model ChatWidgetSettings {
-  id             String   @id @default("default")
-  widgetKey      String   @unique
-  buttonLabel    String   @default("채팅 상담")
-  buttonImageUrl String?
-  buttonImageFit String   @default("contain")
-  buttonBorderColor String?
-  buttonBorderWidth Int @default(0)
-  buttonHoverEffect String @default("lift")
-  buttonBadgeText String?
-  buttonBadgeColor String   @default("#ef4444")
-  buttonBadgePosition String @default("top-right")
-  showUnreadBadge Boolean @default(true)
-  buttonSize     String   @default("md")
-  buttonShape    String   @default("pill")
-  buttonShadow   String   @default("soft")
-  welcomeTitle   String   @default("실시간 채팅 상담")
-  welcomeMessage String   @default("메시지를 남기면 상담원이 바로 응답합니다.")
-  accentColor    String   @default("#0f172a")
-  position       String   @default("bottom-right")
-  enabled        Boolean  @default(true)
-  agentResponseTargetMinutes   Int @default(5)
-  customerFollowupTargetMinutes Int @default(30)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                            String   @id @default("default")
+  widgetKey                     String   @unique
+  buttonLabel                   String   @default("채팅 상담")
+  buttonImageUrl                String?
+  buttonImageFit                String   @default("contain")
+  buttonBorderColor             String?
+  buttonBorderWidth             Int      @default(0)
+  buttonHoverEffect             String   @default("lift")
+  buttonBadgeText               String?
+  buttonBadgeColor              String   @default("#ef4444")
+  buttonBadgePosition           String   @default("top-right")
+  showUnreadBadge               Boolean  @default(true)
+  buttonSize                    String   @default("md")
+  buttonShape                   String   @default("pill")
+  buttonShadow                  String   @default("soft")
+  welcomeTitle                  String   @default("실시간 채팅 상담")
+  welcomeMessage                String   @default("메시지를 남기면 상담원이 바로 응답합니다.")
+  accentColor                   String   @default("#0f172a")
+  position                      String   @default("bottom-right")
+  enabled                       Boolean  @default(true)
+  agentResponseTargetMinutes    Int      @default(5)
+  customerFollowupTargetMinutes Int      @default(30)
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
 }
 
 model ChatWidgetProfile {
-  id             String   @id @default(cuid())
-  name           String
-  widgetKey      String   @unique
-  buttonLabel    String
-  buttonImageUrl String?
-  buttonImageFit String   @default("contain")
-  buttonBorderColor String?
-  buttonBorderWidth Int @default(0)
-  buttonHoverEffect String @default("lift")
-  buttonBadgeText String?
-  buttonBadgeColor String   @default("#ef4444")
-  buttonBadgePosition String @default("top-right")
-  showUnreadBadge Boolean @default(true)
-  buttonSize     String   @default("md")
-  buttonShape    String   @default("pill")
-  buttonShadow   String   @default("soft")
-  welcomeTitle   String
-  welcomeMessage String
-  accentColor    String
-  position       String   @default("bottom-right")
-  enabled        Boolean  @default(true)
-  isDefault      Boolean  @default(false)
-  agentResponseTargetMinutes   Int @default(5)
-  customerFollowupTargetMinutes Int @default(30)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                            String   @id @default(cuid())
+  name                          String
+  widgetKey                     String   @unique
+  buttonLabel                   String
+  buttonImageUrl                String?
+  buttonImageFit                String   @default("contain")
+  buttonBorderColor             String?
+  buttonBorderWidth             Int      @default(0)
+  buttonHoverEffect             String   @default("lift")
+  buttonBadgeText               String?
+  buttonBadgeColor              String   @default("#ef4444")
+  buttonBadgePosition           String   @default("top-right")
+  showUnreadBadge               Boolean  @default(true)
+  buttonSize                    String   @default("md")
+  buttonShape                   String   @default("pill")
+  buttonShadow                  String   @default("soft")
+  welcomeTitle                  String
+  welcomeMessage                String
+  accentColor                   String
+  position                      String   @default("bottom-right")
+  enabled                       Boolean  @default(true)
+  isDefault                     Boolean  @default(false)
+  agentResponseTargetMinutes    Int      @default(5)
+  customerFollowupTargetMinutes Int      @default(30)
+  createdAt                     DateTime @default(now())
+  updatedAt                     DateTime @updatedAt
 
   @@index([enabled, isDefault])
 }
@@ -1219,11 +1268,11 @@ model TicketPresence {
 
 // Ticket Comment Lock (댓글 동시 편집 방지)
 model TicketCommentLock {
-  id        String   @id @default(cuid())
-  ticketId  String   @unique
-  agentId   String
+  id         String   @id @default(cuid())
+  ticketId   String   @unique
+  agentId    String
   acquiredAt DateTime @default(now())
-  expiresAt DateTime
+  expiresAt  DateTime
 
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   agent  Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
@@ -1238,21 +1287,21 @@ model ReportSchedule {
   name        String
   reportType  ReportType
   frequency   ReportFrequency
-  dayOfWeek   Int?            // 0-6 (일-토), WEEKLY용
-  dayOfMonth  Int?            // 1-31, MONTHLY용
+  dayOfWeek   Int? // 0-6 (일-토), WEEKLY용
+  dayOfMonth  Int? // 1-31, MONTHLY용
   timezone    String          @default("Asia/Seoul")
   hour        Int             @default(9)
   minute      Int             @default(0)
-  formats     Json            // ["EXCEL", "PDF"]
-  recipients  Json            // ["email1@...", "email2@..."]
-  filters     Json?           // { status: "...", categoryId: "..." }
+  formats     Json // ["EXCEL", "PDF"]
+  recipients  Json // ["email1@...", "email2@..."]
+  filters     Json? // { status: "...", categoryId: "..." }
   isActive    Boolean         @default(true)
   createdById String
   lastRunAt   DateTime?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  createdBy      Agent            @relation("ReportScheduleCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy        Agent             @relation("ReportScheduleCreator", fields: [createdById], references: [id], onDelete: Cascade)
   generatedReports GeneratedReport[]
 
   @@index([createdById])
@@ -1261,33 +1310,33 @@ model ReportSchedule {
 
 // Generated Report (생성된 보고서)
 model GeneratedReport {
-  id              String              @id @default(cuid())
-  scheduleId      String?
-  requestedById   String?
-  triggerSource   ReportTriggerSource
-  reportType      ReportType
-  format          ReportFormat
-  status          ReportRunStatus     @default(PENDING)
-  periodStart     DateTime
-  periodEnd       DateTime
-  periodKey       String
-  parameters      Json?
-  fileName        String?
-  storageKey      String?
-  mimeType        String?
-  sizeBytes       Int?
-  errorMessage    String?
-  generatedAt     DateTime?
-  emailedAt       DateTime?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  id            String              @id @default(cuid())
+  scheduleId    String?
+  requestedById String?
+  triggerSource ReportTriggerSource
+  reportType    ReportType
+  format        ReportFormat
+  status        ReportRunStatus     @default(PENDING)
+  periodStart   DateTime
+  periodEnd     DateTime
+  periodKey     String
+  parameters    Json?
+  fileName      String?
+  storageKey    String?
+  mimeType      String?
+  sizeBytes     Int?
+  errorMessage  String?
+  generatedAt   DateTime?
+  emailedAt     DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   schedule    ReportSchedule? @relation(fields: [scheduleId], references: [id], onDelete: SetNull)
   requestedBy Agent?          @relation("GeneratedReportRequester", fields: [requestedById], references: [id], onDelete: SetNull)
 
+  @@unique([scheduleId, reportType, format, periodKey])
   @@index([status, createdAt])
   @@index([scheduleId, createdAt])
-  @@unique([scheduleId, reportType, format, periodKey])
 }
 
 // Ticket-Knowledge Link (티켓-지식 연결)
@@ -1296,7 +1345,7 @@ model TicketKnowledgeLink {
   ticketId  String
   articleId String
   agentId   String
-  linkType  String   // "AI_SUGGESTION" | "AGENT_INSERT" | "MANUAL_LINK"
+  linkType  String // "AI_SUGGESTION" | "AGENT_INSERT" | "MANUAL_LINK"
   createdAt DateTime @default(now())
 
   ticket  Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
@@ -1311,11 +1360,11 @@ model TicketKnowledgeLink {
 // Macro (매크로/빠른 응답)
 model Macro {
   id          String   @id @default(cuid())
-  title       String   // 매크로 제목
-  shortcut    String   // 단축키 (예: "/greeting")
-  content     String   // 매크로 내용
-  variables   Json?    // 사용 가능한 변수 목록
-  category    String   // 카테고리
+  title       String // 매크로 제목
+  shortcut    String // 단축키 (예: "/greeting")
+  content     String // 매크로 내용
+  variables   Json? // 사용 가능한 변수 목록
+  category    String // 카테고리
   isPersonal  Boolean  @default(false) // 개인용 여부
   createdById String
   createdAt   DateTime @default(now())
