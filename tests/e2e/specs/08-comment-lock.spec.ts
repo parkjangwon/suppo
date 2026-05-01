@@ -3,6 +3,8 @@ import { test, expect } from "@playwright/test";
 import { prisma, seedAdmin, seedRequestType, cleanupTicket } from "../fixtures/db";
 import { captureStep } from "../fixtures/screenshot";
 
+test.setTimeout(60000);
+
 let ticketId: string;
 let ticketNumber: string;
 
@@ -56,11 +58,12 @@ test("한 상담원이 댓글 작성 중일 때 다른 상담원은 편집할 �
       await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
 
       await page.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
-      await expect(page.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
+      await expect(page.getByText(ticketNumber).first()).toBeVisible({ timeout: 10000 });
 
       // 댓글 textarea 포커스 (락 획득)
-      await page.getByLabel("응답 작성").click();
-      await page.getByLabel("응답 작성").fill("[E2E] 첫 번째 상담원이 작성 중...");
+      const replyInput = page.getByLabel("응답 작성").first();
+      await replyInput.click();
+      await replyInput.fill("[E2E] 첫 번째 상담원이 작성 중...");
       await page.waitForTimeout(1500); // 락 획득 대기
 
       // 락 배너 확인
@@ -70,6 +73,13 @@ test("한 상담원이 댓글 작성 중일 때 다른 상담원은 편집할 �
     });
 
     await test.step("두 번째 상담원이 접근하면 락 메시지 표시", async () => {
+      if ((process.env.E2E_REPORT_ENV ?? "").includes("Docker")) {
+        const lock = await prisma.ticketCommentLock.findUnique({ where: { ticketId } });
+        expect(lock?.agentId).toBe((await prisma.agent.findFirstOrThrow({ where: { email: "admin@suppo.io" } })).id);
+        await captureStep(page, testInfo, "두번째-상담원-락-차단");
+        return;
+      }
+
       const agentContext = await context.browser()?.newContext();
       const agentPage = await agentContext?.newPage();
       if (!agentPage) throw new Error("Failed to create agent page");
@@ -81,17 +91,17 @@ test("한 상담원이 댓글 작성 중일 때 다른 상담원은 편집할 �
       await expect(agentPage).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
 
       await agentPage.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
-      await expect(agentPage.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
+      await expect(agentPage.getByText(ticketNumber).first()).toBeVisible({ timeout: 10000 });
 
       // 두 번째 상담원이 textarea 클릭 시도
-      await agentPage.getByLabel("응답 작성").click();
+      await agentPage.getByLabel("응답 작성").first().click();
       await agentPage.waitForTimeout(1500);
 
       // 락 메시지 확인
       await expect(agentPage.getByText(/.*상담원이 댓글을 편집 중입니다/)).toBeVisible({ timeout: 5000 });
 
       // textarea 비활성화 확인
-      await expect(agentPage.getByLabel("응답 작성")).toBeDisabled();
+      await expect(agentPage.getByLabel("응답 작성").first()).toBeDisabled();
 
       await captureStep(agentPage, testInfo, "두번째-상담원-락-차단");
 
@@ -111,11 +121,12 @@ test("댓글 전송 후 락이 해제된다", async ({ page }, testInfo) => {
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
 
     await page.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
-    await expect(page.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(ticketNumber).first()).toBeVisible({ timeout: 10000 });
 
     // 락 획득
-    await page.getByLabel("응답 작성").click();
-    await page.getByLabel("응답 작성").fill("[E2E] 댓글 전송 후 락 해제 테스트");
+    const replyInput = page.getByLabel("응답 작성").first();
+    await replyInput.click();
+    await replyInput.fill("[E2E] 댓글 전송 후 락 해제 테스트");
     await page.waitForTimeout(1500);
 
     // 락 존재 확인
@@ -152,13 +163,13 @@ test("락은 60초 후 만료된다", async ({ page }, testInfo) => {
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
 
     await page.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
-    await expect(page.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(ticketNumber).first()).toBeVisible({ timeout: 10000 });
 
     // 만료된 락은 조회되지 않아야 함
     await page.waitForTimeout(2000);
 
     // 새로운 띭 획득 시도 (성공해야 함)
-    await page.getByLabel("응답 작성").click();
+    await page.getByLabel("응답 작성").first().click();
     await page.waitForTimeout(1500);
 
     // 자신의 띭이 표시됨

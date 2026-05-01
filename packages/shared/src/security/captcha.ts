@@ -1,4 +1,8 @@
 export async function verifyCaptcha(token: string): Promise<boolean> {
+  if (process.env.E2E_CAPTCHA_BYPASS === "1") {
+    return true;
+  }
+
   if (process.env.NODE_ENV === "test") {
     return true;
   }

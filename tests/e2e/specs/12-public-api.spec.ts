@@ -41,7 +41,7 @@ test("관리자가 API 키를 발급하고 공개 티켓 API로 생성/수정한
     await page.getByRole("button", { name: "API 키 발급" }).click();
     await page.getByLabel("키 이름").fill("E2E Public API Key");
     await page.getByLabel("new-api-key-scope-tickets:update").click();
-    await page.getByRole("button", { name: "발급" }).click();
+    await page.getByRole("button", { name: "생성" }).click();
 
     const issuedKey = page.getByLabel("issued-api-key");
     await expect(issuedKey).toBeVisible({ timeout: 10000 });

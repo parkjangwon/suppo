@@ -12,6 +12,7 @@ import fs from "fs";
 
 interface RowData {
   no: number;
+  environment: string;
   file: string;
   scenario: string;
   step: string;
@@ -26,6 +27,7 @@ export default class ExcelReporter implements Reporter {
   private rows: RowData[] = [];
   private rowNo = 1;
   private stepResults = new Map<string, { status: string; error: string; duration: number }>();
+  private environment = process.env.E2E_REPORT_ENV ?? "로컬 개발환경";
 
   onStepEnd(test: TestCase, _result: TestResult, step: TestStep) {
     if (step.category !== "test.step") return;
@@ -52,10 +54,13 @@ export default class ExcelReporter implements Reporter {
     const stepKeys = [...this.stepResults.keys()].filter((k) =>
       k.startsWith(test.id + "::")
     );
+    const firstScreenshot = [...attachmentsByStep.values()][0] ?? null;
+    let lastScreenshot = firstScreenshot;
 
     if (stepKeys.length === 0) {
       this.rows.push({
         no: this.rowNo++,
+        environment: this.environment,
         file,
         scenario,
         step: "-",
@@ -71,15 +76,20 @@ export default class ExcelReporter implements Reporter {
     for (const key of stepKeys) {
       const stepTitle = key.replace(`${test.id}::`, "");
       const sr = this.stepResults.get(key)!;
+      const stepScreenshot = attachmentsByStep.get(stepTitle) ?? lastScreenshot;
+      if (stepScreenshot) {
+        lastScreenshot = stepScreenshot;
+      }
       this.rows.push({
         no: this.rowNo++,
+        environment: this.environment,
         file,
         scenario,
         step: stepTitle,
         method: stepTitle,
         result: sr.status === "PASS" ? "PASS" : "FAIL",
         error: sr.error,
-        screenshotPath: attachmentsByStep.get(stepTitle) ?? null,
+        screenshotPath: stepScreenshot,
         duration: sr.duration,
       });
     }
@@ -91,13 +101,15 @@ export default class ExcelReporter implements Reporter {
 
     const now = new Date();
     const ts = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
-    const outPath = path.join(outDir, `${ts}-e2e-checklist.xlsx`);
+    const safeEnv = this.environment.replace(/[^a-zA-Z0-9가-힣]/g, "_").slice(0, 40);
+    const outPath = path.join(outDir, `${ts}-${safeEnv}-e2e-checklist.xlsx`);
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("E2E 체크리스트");
 
     ws.columns = [
       { header: "No", key: "no", width: 5 },
+      { header: "환경", key: "environment", width: 18 },
       { header: "테스트 파일", key: "file", width: 30 },
       { header: "시나리오", key: "scenario", width: 40 },
       { header: "단계", key: "step", width: 40 },
@@ -124,6 +136,7 @@ export default class ExcelReporter implements Reporter {
       const rowIndex = ws.rowCount + 1;
       const row = ws.addRow({
         no: rowData.no,
+        environment: rowData.environment,
         file: rowData.file,
         scenario: rowData.scenario,
         step: rowData.step,

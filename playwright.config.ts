@@ -28,7 +28,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@suppo/db migrate:deploy && DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@suppo/public dev`,
+      command: `cd packages/db && DATABASE_URL='${e2eDatabaseUrl}' pnpm exec prisma migrate deploy --schema=./prisma/schema.prisma && cd ../.. && DATABASE_URL='${e2eDatabaseUrl}' pnpm --filter=@suppo/public dev`,
       url: "http://127.0.0.1:3000",
       reuseExistingServer: false,
     },

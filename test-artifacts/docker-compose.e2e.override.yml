@@ -1,0 +1,13 @@
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:55432:5432"
+  public:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      E2E_CAPTCHA_BYPASS: "1"
+      E2E_WEBHOOK_PRIVATE_BYPASS: "1"
+  admin:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

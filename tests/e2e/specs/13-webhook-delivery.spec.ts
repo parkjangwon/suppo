@@ -8,6 +8,8 @@ let server: http.Server;
 let webhookUrl = "";
 let createdTicketNumber: string | null = null;
 let adminId = "";
+const WEBHOOK_LISTEN_HOST = process.env.E2E_WEBHOOK_LISTEN_HOST ?? "127.0.0.1";
+const WEBHOOK_PUBLIC_HOST = process.env.E2E_WEBHOOK_PUBLIC_HOST ?? "127.0.0.1";
 const receivedPayloads: Array<{
   headers: http.IncomingHttpHeaders;
   body: Record<string, unknown>;
@@ -33,7 +35,7 @@ test.beforeAll(async () => {
   });
 
   await new Promise<void>((resolve) => {
-    server.listen(0, "127.0.0.1", () => resolve());
+    server.listen(0, WEBHOOK_LISTEN_HOST, () => resolve());
   });
 
   const address = server.address();
@@ -41,7 +43,7 @@ test.beforeAll(async () => {
     throw new Error("Failed to start webhook receiver");
   }
 
-  webhookUrl = `http://127.0.0.1:${address.port}/webhook`;
+  webhookUrl = `http://${WEBHOOK_PUBLIC_HOST}:${address.port}/webhook`;
 
   await prisma.webhookEndpoint.create({
     data: {

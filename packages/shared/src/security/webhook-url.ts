@@ -42,7 +42,10 @@ export function validateWebhookTargetUrl(
   url: string,
   options: { allowPrivateHosts?: boolean } = {}
 ): { valid: true } | { valid: false; error: string } {
-  const allowPrivateHosts = options.allowPrivateHosts ?? process.env.NODE_ENV !== "production";
+  const allowPrivateHosts =
+    options.allowPrivateHosts ??
+    (process.env.NODE_ENV !== "production" ||
+      process.env.E2E_WEBHOOK_PRIVATE_BYPASS === "1");
   let parsed: URL;
 
   try {

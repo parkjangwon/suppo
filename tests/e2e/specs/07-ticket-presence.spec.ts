@@ -64,7 +64,7 @@ test("다른 상담원이 티켓을 조회 중일 때 표시된다", async ({ pa
 
     // 두 번째 상담원이 티켓 상세 페이지 접근
     await agentPage.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
-    await expect(agentPage.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
+    await expect(agentPage.getByText(ticketNumber).first()).toBeVisible({ timeout: 10000 });
 
     // 폴리핑 대기 (presence 등록될 때까지)
     await agentPage.waitForTimeout(2000);
@@ -96,7 +96,7 @@ test("페이지 이탈 시 presence가 제거된다", async ({ page }, testInfo)
     await expect(page).toHaveURL(/\/admin\/dashboard$/, { timeout: 10000 });
 
     await page.goto(`http://127.0.0.1:3001/admin/tickets/${ticketId}`);
-    await expect(page.getByText(ticketNumber)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(ticketNumber).first()).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(2000);
 
     // DB에 presence 존재 확인

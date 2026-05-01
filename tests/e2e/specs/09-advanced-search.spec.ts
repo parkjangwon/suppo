@@ -97,8 +97,8 @@ test.describe("고급 검색 필터", () => {
     });
 
     await test.step("상태 필터: OPEN", async () => {
-      await page.getByRole("combobox").filter({ hasText: "모든 상태" }).click();
-      await page.getByRole("option", { name: "열림" }).click();
+      await page.getByLabel("상태 필터").first().click();
+      await page.getByRole("option", { name: /열림/ }).click();
       await page.waitForTimeout(500);
 
       await captureStep(page, testInfo, "상태-필터-OPEN");
@@ -109,8 +109,8 @@ test.describe("고급 검색 필터", () => {
     });
 
       await test.step("우선순위 필터: HIGH 추가", async () => {
-      await page.getByRole("combobox").filter({ hasText: "모든 우선순위" }).click();
-      await page.getByRole("option", { name: "높음 (HIGH)" }).click();
+      await page.getByLabel("우선순위 필터").first().click();
+      await page.getByRole("option", { name: /높음/ }).click();
       await page.waitForTimeout(500);
 
       await captureStep(page, testInfo, "우선순위-필터-HIGH");
@@ -183,7 +183,7 @@ test.describe("고급 검색 필터", () => {
     });
 
     await test.step("미할당 필터", async () => {
-      await page.getByRole("combobox").filter({ hasText: "모든 담당자" }).click();
+      await page.getByLabel("담당자 필터").first().click();
       await page.getByRole("option", { name: "미할당" }).click();
       await page.waitForTimeout(500);
 
