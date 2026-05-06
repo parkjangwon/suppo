@@ -111,8 +111,6 @@ export const RESTORE_INSERT_ORDER = [
   "systemBranding",
   "sAMLProvider",
   "gitProviderCredential",
-  "requestType",
-  "responseTemplate",
   "customFieldDefinition",
   "businessCalendar",
   "holiday",
@@ -122,6 +120,8 @@ export const RESTORE_INSERT_ORDER = [
   "agent",
   "team",
   "teamMember",
+  "requestType",      // team(defaultTeamId FK), category(categoryId FK) 이후 삽입
+  "responseTemplate", // requestType(requestTypeId FK), agent(createdById FK) 이후 삽입
   "notificationSetting",
   "agentCategory",
   "agentAbsence",
@@ -320,38 +320,36 @@ export async function restoreFromZip(zipBuffer: Buffer): Promise<RestoreResult> 
     { timeout: 60000 }
   );
 
-  // 첨부파일 원자적 교체
-  const tmpDir = `${uploadDir}_restore_tmp`;
-  const backupDir = `${uploadDir}_backup_tmp`;
+  // 첨부파일 교체: uploadDir 내부에 스테이징 디렉토리 생성 (부모 디렉토리 쓰기 권한 불필요)
+  const stagingDir = path.join(uploadDir, ".restore_staging");
 
-  // 기존 temp 디렉토리 정리
-  await fs.rm(tmpDir, { recursive: true, force: true });
-  await fs.rm(backupDir, { recursive: true, force: true });
-  await fs.mkdir(tmpDir, { recursive: true });
+  await fs.mkdir(uploadDir, { recursive: true });
+  await fs.rm(stagingDir, { recursive: true, force: true });
+  await fs.mkdir(stagingDir, { recursive: true });
 
-  // ZIP의 attachments/ → tmpDir 추출
+  // ZIP의 attachments/ → stagingDir 추출
   for (const [relativePath, file] of Object.entries(zip.files)) {
     if (relativePath.startsWith("attachments/") && !file.dir) {
       const relPath = relativePath.replace(/^attachments\//, "");
-      const destPath = path.resolve(tmpDir, relPath);
-      if (!isPathInside(destPath, tmpDir)) continue;
+      const destPath = path.resolve(stagingDir, relPath);
+      if (!isPathInside(destPath, stagingDir)) continue;
       await fs.mkdir(path.dirname(destPath), { recursive: true });
       const content = await file.async("nodebuffer");
       await fs.writeFile(destPath, content);
     }
   }
 
-  // 원자적 교체: current → backup → tmp → current
-  try {
-    await fs.rename(uploadDir, backupDir).catch(() => {});
-    await fs.rename(tmpDir, uploadDir);
-    await fs.rm(backupDir, { recursive: true, force: true });
-  } catch (err) {
-    // 롤백 시도
-    await fs.rename(backupDir, uploadDir).catch(() => {});
-    await fs.rm(tmpDir, { recursive: true, force: true });
-    throw err;
+  // 기존 파일 제거 후 스테이징 내용으로 교체
+  const existing = await fs.readdir(uploadDir).catch(() => [] as string[]);
+  for (const entry of existing) {
+    if (entry === ".restore_staging") continue;
+    await fs.rm(path.join(uploadDir, entry), { recursive: true, force: true });
   }
+  const staged = await fs.readdir(stagingDir).catch(() => [] as string[]);
+  for (const entry of staged) {
+    await fs.rename(path.join(stagingDir, entry), path.join(uploadDir, entry));
+  }
+  await fs.rm(stagingDir, { recursive: true, force: true });
 
   return { schemaVersionMatch, backupSchemaVersion: manifest.schemaVersion };
 }
