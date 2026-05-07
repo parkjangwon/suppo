@@ -343,14 +343,14 @@ export function BrandingForm() {
                 />
                 {!formData.logoUrl && (
                   <p className="text-xs text-muted-foreground">
-                    PNG, JPG, GIF, SVG, WebP (최대 5MB)
+                    {copy.brandingLogoFileHint ?? "PNG, JPG, GIF, SVG, WebP (최대 5MB)"}
                   </p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>파비콘</Label>
+              <Label>{copy.brandingFaviconLabel ?? "파비콘"}</Label>
               <div className="space-y-2">
                 {formData.faviconUrl ? (
                   <div className="relative inline-block">
@@ -376,7 +376,7 @@ export function BrandingForm() {
                   >
                     <Upload className="h-6 w-6 text-muted-foreground" />
                     <span className="text-xs text-muted-foreground">
-                      {uploadingFavicon ? "업로드 중..." : "클릭하여 업로드"}
+                      {uploadingFavicon ? (copy.commonUploading ?? "업로드 중...") : (copy.commonUploadClick ?? "클릭하여 업로드")}
                     </span>
                   </div>
                 )}
@@ -389,7 +389,7 @@ export function BrandingForm() {
                 />
                 {!formData.faviconUrl && (
                   <p className="text-xs text-muted-foreground">
-                    ICO, PNG, JPG, SVG (최대 5MB)
+                    {copy.brandingFaviconFileHint ?? "ICO, PNG, JPG, SVG (최대 5MB)"}
                   </p>
                 )}
               </div>

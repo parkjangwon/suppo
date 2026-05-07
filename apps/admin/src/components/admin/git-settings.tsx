@@ -36,6 +36,7 @@ const providerInfo = {
     tokenUrl: "https://github.com/settings/tokens",
     scopeInfo: "repo, read:user",
     description: "프라이빗 리포지토리 접근을 위해 'repo' 스코프가 필요합니다.",
+    descriptionKey: "gitRepoScopeNote",
   },
   GITLAB: {
     name: "GitLab",
@@ -44,6 +45,7 @@ const providerInfo = {
     tokenUrl: "https://gitlab.com/-/profile/personal_access_tokens",
     scopeInfo: "api, read_repository, write_repository",
     description: "API 접근 및 리포지토리 읽기/쓰기 권한이 필요합니다.",
+    descriptionKey: "gitApiScopeNote",
   },
 };
 
@@ -162,7 +164,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{info.description}</p>
+                <p className="text-sm text-muted-foreground">{t(info.descriptionKey, info.description, info.description)}</p>
 
                 <div className="space-y-2">
                   <Label className="text-xs">{t("gitRequiredScopes", "필요한 권한", "Required scopes")}</Label>
@@ -229,7 +231,7 @@ export function GitSettings({ initialCredentials }: GitSettingsProps) {
                   placeholder="ghp_xxxxxxxxxxxx"
                 />
                 <p className="text-xs text-muted-foreground">
-                  {providerInfo[selectedProvider].description}
+                  {t(providerInfo[selectedProvider].descriptionKey, providerInfo[selectedProvider].description, providerInfo[selectedProvider].description)}
                 </p>
               </div>
 

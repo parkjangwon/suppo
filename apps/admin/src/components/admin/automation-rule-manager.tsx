@@ -60,6 +60,7 @@ const EMPTY_FORM = {
 
 export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerProps) {
   const copy = useAdminCopy();
+  const copyRec = copy as Record<string, string>;
   const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const [rules, setRules] = useState<AutomationRuleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -281,8 +282,8 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                     </div>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
-                    <RuleSection title={t("automationConditions", "조건")} values={summarizeConditions(rule.conditions)} noSettings={t("automationNoSettings", "설정 없음")} />
-                    <RuleSection title={t("automationActions", "동작")} values={summarizeActions(rule.actions, agents, teams)} noSettings={t("automationNoSettings", "설정 없음")} />
+                    <RuleSection title={t("automationConditions", "조건")} values={summarizeConditions(rule.conditions, copyRec)} noSettings={t("automationNoSettings", "설정 없음")} />
+                    <RuleSection title={t("automationActions", "동작")} values={summarizeActions(rule.actions, agents, teams, copyRec)} noSettings={t("automationNoSettings", "설정 없음")} />
                   </div>
                   <div className="flex items-center justify-between border-t pt-3 text-sm text-muted-foreground">
                     <span>{t("slaPolicyPriority", "우선순위")} {rule.priority}</span>
@@ -526,22 +527,22 @@ function RuleSection({ title, values, noSettings }: { title: string; values: str
   );
 }
 
-function summarizeConditions(conditions: Record<string, unknown>) {
+function summarizeConditions(conditions: Record<string, unknown>, c: Record<string, string>) {
   const result: string[] = [];
 
-  if (conditions.status) result.push(`상태: ${conditions.status}`);
-  if (conditions.priority) result.push(`우선순위: ${conditions.priority}`);
-  if (conditions.slaState === "warning") result.push("SLA 상태: 임박");
-  if (conditions.slaState === "breached") result.push("SLA 상태: 위반");
-  if (conditions.customerEmail) result.push(`이메일 패턴: ${conditions.customerEmail}`);
+  if (conditions.status) result.push(`${c.autoCondStatus ?? "상태"}: ${conditions.status}`);
+  if (conditions.priority) result.push(`${c.autoCondPriority ?? "우선순위"}: ${conditions.priority}`);
+  if (conditions.slaState === "warning") result.push(c.autoCondSlaNear ?? "SLA 상태: 임박");
+  if (conditions.slaState === "breached") result.push(c.autoCondSlaBreach ?? "SLA 상태: 위반");
+  if (conditions.customerEmail) result.push(`${c.autoCondEmail ?? "이메일 패턴"}: ${conditions.customerEmail}`);
   if (typeof conditions.createdHoursAgo === "number") {
-    result.push(`생성 후 경과: ${conditions.createdHoursAgo}시간 이상`);
+    result.push((c.autoCondCreatedAgo ?? "생성 후 경과: {hours}시간 이상").replace("{hours}", String(conditions.createdHoursAgo)));
   }
   if (typeof conditions.updatedHoursAgo === "number") {
-    result.push(`업데이트 후 경과: ${conditions.updatedHoursAgo}시간 이상`);
+    result.push((c.autoCondUpdatedAgo ?? "업데이트 후 경과: {hours}시간 이상").replace("{hours}", String(conditions.updatedHoursAgo)));
   }
   if (Array.isArray(conditions.keywords) && conditions.keywords.length > 0) {
-    result.push(`키워드: ${conditions.keywords.join(", ")}`);
+    result.push(`${c.autoCondKeywords ?? "키워드"}: ${conditions.keywords.join(", ")}`);
   }
 
   return result;
@@ -550,29 +551,30 @@ function summarizeConditions(conditions: Record<string, unknown>) {
 function summarizeActions(
   actions: Record<string, unknown>,
   agents: { id: string; name: string }[],
-  teams: { id: string; name: string }[]
+  teams: { id: string; name: string }[],
+  c: Record<string, string>
 ) {
   const result: string[] = [];
 
-  if (actions.setStatus) result.push(`상태 변경: ${actions.setStatus}`);
-  if (actions.setPriority) result.push(`우선순위 변경: ${actions.setPriority}`);
+  if (actions.setStatus) result.push(`${c.autoActionSetStatus ?? "상태 변경"}: ${actions.setStatus}`);
+  if (actions.setPriority) result.push(`${c.autoActionSetPriority ?? "우선순위 변경"}: ${actions.setPriority}`);
   if (actions.setAssigneeId !== undefined) {
     if (actions.setAssigneeId === null) {
-      result.push("담당자 해제");
+      result.push(c.autoActionUnassign ?? "담당자 해제");
     } else {
       const agentName = agents.find((agent) => agent.id === actions.setAssigneeId)?.name ?? String(actions.setAssigneeId);
-      result.push(`담당자 재배정: ${agentName}`);
+      result.push(`${c.autoActionReassign ?? "담당자 재배정"}: ${agentName}`);
     }
   }
   if (actions.setTeamId) {
     const teamName = teams.find((team) => team.id === actions.setTeamId)?.name ?? String(actions.setTeamId);
-    result.push(`팀 재지정: ${teamName}`);
+    result.push(`${c.autoActionSetTeam ?? "팀 재지정"}: ${teamName}`);
   }
   if (Array.isArray(actions.addTags) && actions.addTags.length > 0) {
-    result.push(`태그 추가: ${actions.addTags.join(", ")}`);
+    result.push(`${c.autoActionAddTags ?? "태그 추가"}: ${actions.addTags.join(", ")}`);
   }
   if (actions.sendNotification) {
-    result.push("이메일 알림 발송");
+    result.push(c.autoActionNotify ?? "이메일 알림 발송");
   }
 
   return result;

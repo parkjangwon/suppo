@@ -57,11 +57,11 @@ export default async function DashboardPage() {
   ]);
 
   const statusLabels: Record<string, string> = {
-    OPEN: "접수",
-    IN_PROGRESS: "진행중",
-    WAITING: "대기중",
-    RESOLVED: "해결됨",
-    CLOSED: "종료",
+    OPEN: copyText(copy, "ticketStatusOpen", "접수"),
+    IN_PROGRESS: copyText(copy, "ticketStatusInProgress", "진행중"),
+    WAITING: copyText(copy, "ticketStatusWaiting", "대기중"),
+    RESOLVED: copyText(copy, "ticketStatusResolved", "해결됨"),
+    CLOSED: copyText(copy, "ticketStatusClosed", "종료"),
   };
 
   const priorityLabels: Record<string, string> = {

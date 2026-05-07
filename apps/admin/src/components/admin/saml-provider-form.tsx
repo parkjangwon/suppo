@@ -230,8 +230,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
         {providers.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-gray-500">
-              등록된 SAML Provider가 없습니다
-              
+              {t("samlNoProviders", "등록된 SAML Provider가 없습니다", "No SAML providers registered")}
             </CardContent>
           </Card>
         ) : (
@@ -243,8 +242,7 @@ export function SAMLProviderForm({ providers: initialProviders, baseUrl }: SAMLP
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-lg">{provider.name}</CardTitle>
                       <Badge variant={provider.isActive ? "default" : "secondary"}>
-                        {provider.isActive ? "활성" : "비활성"}
-                        
+                        {provider.isActive ? t("samlActive", "활성", "Active") : t("samlInactive", "비활성", "Inactive")}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-600">{t("commonDomain", "도메인", "Domain")}: {provider.domain}</p>

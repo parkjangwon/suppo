@@ -13,15 +13,15 @@ import { Loader2, Clock, CalendarDays, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const TIMEZONES = [
-  { value: "Asia/Seoul", label: "서울 (UTC+9)" },
-  { value: "Asia/Tokyo", label: "도쿄 (UTC+9)" },
-  { value: "Asia/Shanghai", label: "상하이 (UTC+8)" },
-  { value: "Asia/Singapore", label: "싱가포르 (UTC+8)" },
-  { value: "UTC", label: "UTC (UTC+0)" },
-  { value: "Europe/London", label: "런던 (UTC+0/+1)" },
-  { value: "Europe/Paris", label: "파리 (UTC+1/+2)" },
-  { value: "America/New_York", label: "뉴욕 (UTC-5/-4)" },
-  { value: "America/Los_Angeles", label: "로스앤젤레스 (UTC-8/-7)" },
+  { value: "Asia/Seoul", labelKey: "tzSeoul", label: "서울 (UTC+9)" },
+  { value: "Asia/Tokyo", labelKey: "tzTokyo", label: "도쿄 (UTC+9)" },
+  { value: "Asia/Shanghai", labelKey: "tzShanghai", label: "상하이 (UTC+8)" },
+  { value: "Asia/Singapore", labelKey: "tzSingapore", label: "싱가포르 (UTC+8)" },
+  { value: "UTC", labelKey: "", label: "UTC (UTC+0)" },
+  { value: "Europe/London", labelKey: "tzLondon", label: "런던 (UTC+0/+1)" },
+  { value: "Europe/Paris", labelKey: "tzParis", label: "파리 (UTC+1/+2)" },
+  { value: "America/New_York", labelKey: "tzNewYork", label: "뉴욕 (UTC-5/-4)" },
+  { value: "America/Los_Angeles", labelKey: "tzLosAngeles", label: "로스앤젤레스 (UTC-8/-7)" },
 ];
 
 
@@ -154,7 +154,7 @@ export function BusinessHoursForm() {
               <SelectContent>
                 {TIMEZONES.map((tz) => (
                   <SelectItem key={tz.value} value={tz.value}>
-                    {tz.label}
+                    {(tz.labelKey && copy[tz.labelKey]) || tz.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -175,7 +175,7 @@ export function BusinessHoursForm() {
                   }
                   className="w-20"
                 />
-                <span className="text-sm text-muted-foreground">시</span>
+                <span className="text-sm text-muted-foreground">{copy.businessHoursTimeUnit ?? "시"}</span>
               </div>
             </div>
             <span className="mt-6 text-muted-foreground">~</span>
@@ -192,7 +192,7 @@ export function BusinessHoursForm() {
                   }
                   className="w-20"
                 />
-                <span className="text-sm text-muted-foreground">시</span>
+                <span className="text-sm text-muted-foreground">{copy.businessHoursTimeUnit ?? "시"}</span>
               </div>
             </div>
           </div>

@@ -58,15 +58,6 @@ interface Absence {
   createdBy: { id: string; name: string };
 }
 
-const absenceTypeLabels: Record<string, string> = {
-  VACATION: "휴가",
-  SICK_LEAVE: "병가",
-  BUSINESS_TRIP: "출장",
-  REMOTE_WORK: "재택근무",
-  TRAINING: "교육",
-  OTHER: "기타",
-};
-
 const absenceTypeColors: Record<string, string> = {
   VACATION: "bg-blue-100 text-blue-800 border-blue-200",
   SICK_LEAVE: "bg-red-100 text-red-800 border-red-200",
@@ -79,6 +70,14 @@ const absenceTypeColors: Record<string, string> = {
 export default function CalendarPage() {
   const { data: session } = useSession();
   const copy = useAdminCopy();
+  const absenceTypeLabels: Record<string, string> = {
+    VACATION: copyText(copy, "absenceVacation", "휴가"),
+    SICK_LEAVE: copyText(copy, "absenceSickLeave", "병가"),
+    BUSINESS_TRIP: copyText(copy, "absenceBusinessTrip", "출장"),
+    REMOTE_WORK: copyText(copy, "absenceRemoteWork", "재택근무"),
+    TRAINING: copyText(copy, "absenceTraining", "교육"),
+    OTHER: copyText(copy, "absenceOther", "기타"),
+  };
   const [currentDate, setCurrentDate] = useState(new Date());
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);

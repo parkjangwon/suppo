@@ -4,12 +4,15 @@ import { useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@suppo/ui/components/ui/button";
 import { getTicketQueuePresets, type TicketQueueFilter } from "@/lib/tickets/ticket-queue-presets";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface TicketQueueBarProps {
   currentAgentId?: string;
 }
 
 export function TicketQueueBar({ currentAgentId }: TicketQueueBarProps) {
+  const copy = useAdminCopy();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,9 +44,9 @@ export function TicketQueueBar({ currentAgentId }: TicketQueueBarProps) {
             variant={isActive ? "default" : "outline"}
             size="sm"
             onClick={() => applyQueue(preset.filter)}
-            title={preset.description}
+            title={copyText(copy, preset.descriptionKey, preset.description)}
           >
-            {preset.label}
+            {copyText(copy, preset.labelKey, preset.label)}
           </Button>
         );
       })}
