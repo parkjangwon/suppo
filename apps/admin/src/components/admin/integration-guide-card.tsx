@@ -4,18 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/u
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
 
-const CREATE_TICKET_EXAMPLE = `curl -X POST https://YOUR_ADMIN_DOMAIN/api/public/tickets \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: crn_live_xxxxxxxxxxxxxxxxx" \\
-  -d '{
-    "customerName": "홍길동",
-    "customerEmail": "hong@example.com",
-    "requestTypeId": "REQUEST_TYPE_ID",
-    "priority": "MEDIUM",
-    "subject": "외부 시스템에서 생성한 문의",
-    "description": "주문 시스템 장애 접수"
-  }'`;
-
 const WEBHOOK_EXAMPLE = `POST /your/webhook-endpoint
 Content-Type: application/json
 x-suppo-signature: <sha256 hmac>
@@ -33,6 +21,19 @@ x-suppo-signature: <sha256 hmac>
 export function IntegrationGuideCard() {
   const copy = useAdminCopy();
   const t = (key: string, fallback: string) => copyText(copy, key, fallback);
+
+  const isEn = copy.locale === "en";
+  const CREATE_TICKET_EXAMPLE = `curl -X POST https://YOUR_ADMIN_DOMAIN/api/public/tickets \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: crn_live_xxxxxxxxxxxxxxxxx" \\
+  -d '{
+    "customerName": "${isEn ? "John Doe" : "홍길동"}",
+    "customerEmail": "hong@example.com",
+    "requestTypeId": "REQUEST_TYPE_ID",
+    "priority": "MEDIUM",
+    "subject": "${isEn ? "Inquiry from external system" : "외부 시스템에서 생성한 문의"}",
+    "description": "${isEn ? "Order system failure report" : "주문 시스템 장애 접수"}"
+  }'`;
 
   return (
     <Card>
