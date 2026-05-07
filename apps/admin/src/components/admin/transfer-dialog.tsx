@@ -22,7 +22,7 @@ interface TransferDialogProps {
 export function TransferDialog({
   ticketId,
   currentAssigneeId,
-  triggerLabel = "양도",
+  triggerLabel,
   activeAgents,
   onTransferred
 }: TransferDialogProps) {

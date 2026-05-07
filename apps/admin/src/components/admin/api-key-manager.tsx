@@ -13,9 +13,9 @@ import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 const API_KEY_SCOPES = [
-  { id: "tickets:read", label: "티켓 조회" },
-  { id: "tickets:create", label: "티켓 생성" },
-  { id: "tickets:update", label: "티켓 수정" },
+  { id: "tickets:read", label: "티켓 조회", copyKey: "apiKeyScopeTicketsRead" },
+  { id: "tickets:create", label: "티켓 생성", copyKey: "apiKeyScopeTicketsCreate" },
+  { id: "tickets:update", label: "티켓 수정", copyKey: "apiKeyScopeTicketsUpdate" },
 ] as const;
 
 interface ApiKeyRecord {
@@ -206,7 +206,7 @@ export function ApiKeyManager() {
                     {copy.gitApiKeyLastUsed ?? "마지막 사용"}: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString("ko-KR") : (copy.commonNone ?? "없음")}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    권한: {apiKey.scopes.join(", ")}
+                    {copy.apiKeyPermissions ?? "권한"}: {apiKey.scopes.join(", ")}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ export function ApiKeyManager() {
                           void updateScopes(apiKey.id, nextChecked ? [...new Set(nextScopes)] : nextScopes)
                         }
                       />
-                      <span>{scope.label}</span>
+                      <span>{copy[scope.copyKey] ?? scope.label}</span>
                     </label>
                   );
                 })}
@@ -278,7 +278,7 @@ export function ApiKeyManager() {
               />
             </div>
             <div className="space-y-2">
-              <Label>권한</Label>
+              <Label>{copy.apiKeyPermissions ?? "권한"}</Label>
               <div className="space-y-2 rounded-lg border p-3">
                 {API_KEY_SCOPES.map((scope) => (
                   <label key={scope.id} className="flex items-center gap-2 text-sm">

@@ -165,7 +165,7 @@ export function EmailSettingsForm() {
       const payload = await response.json();
 
       if (!response.ok) {
-        throw new Error(payload.error ?? "테스트 메일 발송에 실패했습니다.");
+        throw new Error(payload.error ?? (copy.emailTestSendFailed ?? "테스트 메일 발송에 실패했습니다."));
       }
 
       toast.success(

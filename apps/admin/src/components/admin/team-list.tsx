@@ -65,14 +65,14 @@ export function TeamList({ teams, agents }: TeamListProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "생성에 실패했습니다");
+        throw new Error(error.message || t("teamsCreateError", "생성에 실패했습니다"));
       }
 
       setIsCreateOpen(false);
-      toast.success("팀이 생성되었습니다");
+      toast.success(t("teamsCreateSuccess", "팀이 생성되었습니다"));
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "오류가 발생했습니다");
+      toast.error(error instanceof Error ? error.message : t("commonError", "오류가 발생했습니다"));
     } finally {
       setIsSubmitting(false);
     }
@@ -86,12 +86,12 @@ export function TeamList({ teams, agents }: TeamListProps) {
         body: JSON.stringify({ isActive }),
       });
 
-      if (!response.ok) throw new Error("상태 변경에 실패했습니다");
+      if (!response.ok) throw new Error(t("teamsStatusChangeFailed", "상태 변경에 실패했습니다"));
 
-      toast.success(isActive ? "활성화되었습니다" : "비활성화되었습니다");
+      toast.success(isActive ? t("teamsActivated", "활성화되었습니다") : t("teamsDeactivated", "비활성화되었습니다"));
       router.refresh();
     } catch {
-      toast.error("상태 변경에 실패했습니다");
+      toast.error(t("teamsStatusChangeFailed", "상태 변경에 실패했습니다"));
     }
   };
 
@@ -117,19 +117,19 @@ export function TeamList({ teams, agents }: TeamListProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="예: 기술 지원팀"
+                  placeholder={t("teamsNamePlaceholder", "예: 기술 지원팀")}
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>{t("teamsDescriptionPlaceholder", "팀에 대한 설명")}</Label>
+                <Label>{t("teamsDescLabel", "팀에 대한 설명")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="팀에 대한 설명"
+                  placeholder={t("teamsDescPlaceholder", "팀에 대한 설명")}
                   rows={2}
                 />
               </div>
@@ -205,7 +205,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "생성 중..." : t("commonCreate", "생성")}
+                {isSubmitting ? t("teamsCreating", "생성 중...") : t("commonCreate", "생성")}
               </Button>
             </form>
           </DialogContent>
@@ -236,9 +236,9 @@ export function TeamList({ teams, agents }: TeamListProps) {
             <CardContent className="pt-0">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                 <Users className="w-4 h-4" />
-                <span>{t("teamsMembers", "구성원")} {team.members.length}명</span>
+                <span>{t("teamsMembers", "구성원")} {t("teamsMemberCount", "{count}명").replace("{count}", String(team.members.length))}</span>
                 <span className="mx-1">•</span>
-                <span>{t("ticketsTitle", "티켓")} {team._count.tickets}개</span>
+                <span>{t("ticketsTitle", "티켓")} {t("teamsTicketCount", "{count}개").replace("{count}", String(team._count.tickets))}</span>
               </div>
 
               <div className="space-y-1">
@@ -269,7 +269,7 @@ export function TeamList({ teams, agents }: TeamListProps) {
 
       {teams.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
-          등록된 팀이 없습니다
+          {t("teamsEmpty", "등록된 팀이 없습니다")}
         </div>
       )}
     </div>

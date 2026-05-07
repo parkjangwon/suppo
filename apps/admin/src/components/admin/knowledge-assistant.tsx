@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/u
 import { Badge } from "@suppo/ui/components/ui/badge";
 import { BookOpen, Search, Plus, X, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface KnowledgeAssistantProps {
   onInsertContent: (content: string) => void;
@@ -34,6 +35,8 @@ export function KnowledgeAssistant({
   ticketSubject,
   ticketId,
 }: KnowledgeAssistantProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [articles, setArticles] = useState<Article[]>([]);
@@ -58,7 +61,7 @@ export function KnowledgeAssistant({
       }
     } catch (error) {
       console.error("Failed to search knowledge:", error);
-      toast.error("지식 검색 중 오류가 발생했습니다.");
+      toast.error(t("knowledgeAssistantSearchError", "지식 검색 중 오류가 발생했습니다."));
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +93,7 @@ export function KnowledgeAssistant({
       }
     }
 
-    toast.success("내용이 삽입되었습니다.");
+    toast.success(t("knowledgeAssistantInsertSuccess", "내용이 삽입되었습니다."));
   };
 
   if (!isOpen) {
@@ -102,7 +105,7 @@ export function KnowledgeAssistant({
         className="gap-2"
       >
         <BookOpen className="h-4 w-4" />
-        지식 검색
+        {t("knowledgeAssistantTitle", "지식 검색")}
       </Button>
     );
   }
@@ -113,7 +116,7 @@ export function KnowledgeAssistant({
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <Lightbulb className="h-4 w-4 text-amber-500" />
-            지식 검색
+            {t("knowledgeAssistantTitle", "지식 검색")}
           </CardTitle>
           <Button
             variant="ghost"
@@ -128,7 +131,7 @@ export function KnowledgeAssistant({
       <CardContent className="space-y-3">
         <div className="flex gap-2">
           <Input
-            placeholder="검색어를 입력하세요..."
+            placeholder={t("knowledgeAssistantPlaceholder", "검색어를 입력하세요...")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -149,13 +152,13 @@ export function KnowledgeAssistant({
 
         {isLoading && (
           <p className="text-sm text-gray-500 text-center py-4">
-            검색 중...
+            {t("knowledgeAssistantSearching", "검색 중...")}
           </p>
         )}
 
         {!isLoading && hasSearched && articles.length === 0 && (
           <p className="text-sm text-gray-500 text-center py-4">
-            검색 결과가 없습니다.
+            {t("knowledgeAssistantNoResults", "검색 결과가 없습니다.")}
           </p>
         )}
 
@@ -181,7 +184,7 @@ export function KnowledgeAssistant({
                         {article.category.name}
                       </Badge>
                       <span className="text-xs text-gray-400">
-                        조회 {article.viewCount}
+                        {t("knowledgeAssistantViewCount", "조회 {count}").replace("{count}", String(article.viewCount))}
                       </span>
                     </div>
                   </div>
@@ -190,7 +193,7 @@ export function KnowledgeAssistant({
                     size="sm"
                     onClick={() => handleInsert(article)}
                     className="h-7 w-7 p-0 flex-shrink-0"
-                    title="내용 삽입"
+                    title={t("knowledgeAssistantInsertTitle", "내용 삽입")}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>

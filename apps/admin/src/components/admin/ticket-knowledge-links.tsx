@@ -32,10 +32,10 @@ interface ArticleSearchResult {
   excerpt: string | null;
 }
 
-const linkTypeLabel: Record<string, string> = {
-  AI_SUGGESTION: "AI 추천",
-  AGENT_INSERT: "상담원 삽입",
-  MANUAL_LINK: "수동 연결",
+const LINK_TYPE_KEYS: Record<string, { key: string; fallback: string }> = {
+  AI_SUGGESTION: { key: "linkTypeAiSuggestion", fallback: "AI 추천" },
+  AGENT_INSERT: { key: "linkTypeAgentInsert", fallback: "상담원 삽입" },
+  MANUAL_LINK: { key: "linkTypeManualLink", fallback: "수동 연결" },
 };
 
 const linkTypeVariant: Record<string, "default" | "secondary" | "outline"> = {
@@ -139,7 +139,7 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
-            연결된 지식 문서
+            {t("ticketKnowledgeLinkedTitle", "연결된 지식 문서")}
             {links.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {links.length}
@@ -154,7 +154,7 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
               className="gap-1"
             >
               <Plus className="h-3 w-3" />
-              문서 연결
+              {t("ticketKnowledgeLinkButton", "문서 연결")}
             </Button>
           )}
         </div>
@@ -166,7 +166,7 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
           </div>
         ) : links.length === 0 && !isAddingMode ? (
           <p className="text-sm text-muted-foreground text-center py-4">
-            연결된 지식 문서가 없습니다.
+            {t("ticketKnowledgeEmpty", "연결된 지식 문서가 없습니다.")}
           </p>
         ) : (
           <div className="space-y-2">
@@ -184,7 +184,7 @@ export function TicketKnowledgeLinks({ ticketId, canEdit = true }: TicketKnowled
                       variant={linkTypeVariant[link.linkType] ?? "outline"}
                       className="text-xs flex-shrink-0"
                     >
-                      {linkTypeLabel[link.linkType] ?? link.linkType}
+                      {LINK_TYPE_KEYS[link.linkType] ? t(LINK_TYPE_KEYS[link.linkType].key, LINK_TYPE_KEYS[link.linkType].fallback) : link.linkType}
                     </Badge>
                   </div>
                   {link.article.excerpt && (

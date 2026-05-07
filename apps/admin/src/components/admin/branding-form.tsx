@@ -125,7 +125,6 @@ export function BrandingForm() {
       return data.url;
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("파일 업로드에 실패했습니다.");
       toast.error(copy.brandingUploadFailed ?? "파일 업로드에 실패했습니다.");
       return null;
     }

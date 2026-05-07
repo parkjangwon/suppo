@@ -5,6 +5,7 @@ import { Button } from "@suppo/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { MarkdownContent } from "@suppo/shared/components/markdown-content";
 import { Loader2, Sparkles, RefreshCw, AlertCircle } from "lucide-react";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface AiInsightPanelProps {
   title: string;
@@ -16,6 +17,8 @@ interface AiInsightPanelProps {
 type State = "idle" | "loading" | "success" | "error";
 
 export function AiInsightPanel({ title, fetchFn, description }: AiInsightPanelProps) {
+  const copy = useAdminCopy() as unknown as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [state, setState] = useState<State>("idle");
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,15 +29,14 @@ export function AiInsightPanel({ title, fetchFn, description }: AiInsightPanelPr
     try {
       const text = await fetchFn();
       if (text === null) {
-        // analysisEnabled = false — 부모가 렌더링을 막아야 하지만 방어적으로 error 처리
-        setError("AI 분석 결과를 가져올 수 없습니다.");
+        setError(t("aiAnalysisUnavailable", "AI 분석 결과를 가져올 수 없습니다."));
         setState("error");
         return;
       }
       setResult(text);
       setState("success");
     } catch {
-      setError("AI 분석 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setError(t("aiAnalysisError", "AI 분석 중 오류가 발생했습니다. 다시 시도해주세요."));
       setState("error");
     }
   }
@@ -55,7 +57,7 @@ export function AiInsightPanel({ title, fetchFn, description }: AiInsightPanelPr
               className="gap-1 text-xs h-7"
             >
               <RefreshCw className="h-3 w-3" />
-              다시 생성
+              {t("aiRegenerate", "다시 생성")}
             </Button>
           )}
         </div>
@@ -68,14 +70,14 @@ export function AiInsightPanel({ title, fetchFn, description }: AiInsightPanelPr
             )}
             <Button size="sm" onClick={run} className="gap-2">
               <Sparkles className="h-4 w-4" />
-              AI 분석
+              {t("aiAnalyze", "AI 분석")}
             </Button>
           </div>
         )}
         {state === "loading" && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
             <Loader2 className="h-4 w-4 animate-spin" />
-            분석 중...
+            {t("aiAnalyzing", "분석 중...")}
           </div>
         )}
         {state === "success" && result && (
@@ -89,7 +91,7 @@ export function AiInsightPanel({ title, fetchFn, description }: AiInsightPanelPr
             </div>
             <Button variant="outline" size="sm" onClick={run} className="gap-1">
               <RefreshCw className="h-3 w-3" />
-              재시도
+              {t("aiRetry", "재시도")}
             </Button>
           </div>
         )}

@@ -24,7 +24,6 @@ const TIMEZONES = [
   { value: "America/Los_Angeles", label: "로스앤젤레스 (UTC-8/-7)" },
 ];
 
-const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
 
 interface Holiday {
   id?: string;
@@ -43,6 +42,15 @@ interface BusinessHoursData {
 
 export function BusinessHoursForm() {
   const copy = useAdminCopy() as Record<string, string>;
+  const DAY_LABELS = [
+    copy.daySunday ?? "일",
+    copy.dayMonday ?? "월",
+    copy.dayTuesday ?? "화",
+    copy.dayWednesday ?? "수",
+    copy.dayThursday ?? "목",
+    copy.dayFriday ?? "금",
+    copy.daySaturday ?? "토",
+  ];
   const [data, setData] = useState<BusinessHoursData>({
     timezone: "Asia/Seoul",
     workStartHour: 9,

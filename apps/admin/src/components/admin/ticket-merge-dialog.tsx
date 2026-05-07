@@ -170,7 +170,7 @@ export function TicketMergeDialog({
             <div className="mt-2 border rounded-lg divide-y max-h-60 overflow-y-auto">
               {filteredTickets.length === 0 ? (
                 <div className="p-4 text-sm text-gray-500 text-center">
-                  {t("commonNotFound", "병합할 수 있는 티켓이 없습니다.")}
+                  {t("ticketMergeNoTickets", "병합할 수 있는 티켓이 없습니다.")}
                 </div>
               ) : (
                 filteredTickets.map((ticket) => (
@@ -224,7 +224,7 @@ export function TicketMergeDialog({
                 <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
                 <div className="flex-1">
                   <div className="font-medium text-amber-900">
-                    병합 충돌이 감지되었습니다
+                    {t("ticketMergeConflictDetected", "병합 충돌이 감지되었습니다")}
                   </div>
                   <div className="mt-2 space-y-1">
                     {validationResult.conflicts?.map((conflict, i) => (
@@ -253,7 +253,7 @@ export function TicketMergeDialog({
 
           {/* 병합 코멘트 */}
           <div>
-            <Label htmlFor="merge-comment">{t("ticketMergeReasonPlaceholder", "병합 코멘트 (선택사항)")}</Label>
+            <Label htmlFor="merge-comment">{t("ticketMergeCommentLabel", "병합 코멘트 (선택사항)")}</Label>
             <Textarea
               id="merge-comment"
               value={mergeComment}
@@ -289,7 +289,7 @@ export function TicketMergeDialog({
                 {isValidating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    {t("ticketMergeValidate", "검증 중...")}
+                    {t("ticketMergeValidating", "검증 중...")}
                   </>
                 ) : (
                   t("ticketMergeValidate", "검증")

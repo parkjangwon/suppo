@@ -209,7 +209,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
       <TicketWorkspaceSummary
         statusLabel={statusMap[ticket.status]?.label || ticket.status || "-"}
         priorityLabel={priorityMap[ticket.priority]?.label || ticket.priority || "-"}
-        assigneeName={assignee?.name || "미할당"}
+        assigneeName={assignee?.name || t("ticketDetailUnassigned", "미할당")}
         requestTypeName={ticket.requestType?.name || "-"}
         canEdit={canEdit}
       />

@@ -35,6 +35,14 @@ const CATEGORY_LABELS: Record<ResetCategory, string> = {
   audit_logs: "감사 로그",
 };
 
+const CATEGORY_COPY_KEYS: Record<ResetCategory, string> = {
+  tickets: "systemResetTypeTickets",
+  agents: "systemResetTypeAgents",
+  settings: "systemResetTypeSettings",
+  knowledge: "systemResetTypeKnowledge",
+  audit_logs: "systemResetTypeAuditLogs",
+};
+
 const TOTAL_CATEGORIES = Object.keys(CATEGORY_LABELS).length;
 
 /** agents 선택 시 tickets/knowledge/settings 강제, settings 선택 시 tickets 강제 */
@@ -115,7 +123,7 @@ export function SystemManagement() {
   const handleRestoreClick = () => {
     if (!restoreFile) return;
     if (!restoreFile.name.toLowerCase().endsWith(".zip")) {
-      toast.error("ZIP 파일만 업로드할 수 있습니다.");
+      toast.error(copy.systemRestoreZipOnly ?? "ZIP 파일만 업로드할 수 있습니다.");
       return;
     }
     setRestoreDialogOpen(true);
@@ -188,13 +196,13 @@ export function SystemManagement() {
         body: JSON.stringify({ categories: [...selectedCategories] }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "초기화 실패");
-      toast.success("초기화가 완료되었습니다.");
+      if (!res.ok) throw new Error(json.error ?? (copy.systemResetFailed ?? "초기화 실패"));
+      toast.success(copy.systemResetSuccess ?? "초기화가 완료되었습니다.");
       setSelectedCategories(new Set());
       setResetLoading(false);
       window.location.reload();
     } catch (err) {
-      toast.error("초기화 실패: " + (err instanceof Error ? err.message : "오류"));
+      toast.error((copy.systemResetFailed ?? "초기화 실패") + ": " + (err instanceof Error ? err.message : (copy.commonError ?? "오류")));
       setResetLoading(false);
     }
   };
@@ -262,17 +270,17 @@ export function SystemManagement() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <RotateCcw className="h-5 w-5" />
-            시스템 초기화
+            {copy.systemResetTitle ?? "시스템 초기화"}
           </CardTitle>
           <CardDescription>
-            선택한 항목을 초기 설치 상태로 되돌립니다.
+            {copy.systemResetDescription ?? "선택한 항목을 초기 설치 상태로 되돌립니다."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              선택한 데이터가 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+              {copy.systemResetDangerAlert ?? "선택한 데이터가 영구 삭제됩니다. 이 작업은 되돌릴 수 없습니다."}
             </AlertDescription>
           </Alert>
 
@@ -286,7 +294,7 @@ export function SystemManagement() {
                 }}
               />
               <Label htmlFor="select-all" className="font-medium">
-                모두 선택
+                {copy.commonSelectAll ?? "모두 선택"}
               </Label>
             </div>
             <div className="ml-6 space-y-2">
@@ -301,19 +309,19 @@ export function SystemManagement() {
                           toggleCategory(key, !!checked);
                       }}
                     />
-                    <Label htmlFor={`cat-${key}`}>{label}</Label>
+                    <Label htmlFor={`cat-${key}`}>{copy[CATEGORY_COPY_KEYS[key]] ?? label}</Label>
                   </div>
                 )
               )}
             </div>
             {selectedCategories.has("agents") && (
               <p className="text-sm text-muted-foreground ml-6">
-                * <strong>상담원 계정</strong> 초기화는 <strong>티켓 및 고객 데이터</strong>, <strong>지식 베이스</strong>, <strong>설정</strong>도 함께 초기화합니다.
+                {copy.systemResetAgentDepsNote ?? "* 상담원 계정 초기화는 티켓 및 고객 데이터, 지식 베이스, 설정도 함께 초기화합니다."}
               </p>
             )}
             {!selectedCategories.has("agents") && selectedCategories.has("settings") && (
               <p className="text-sm text-muted-foreground ml-6">
-                * <strong>설정</strong> 초기화는 <strong>티켓 및 고객 데이터</strong>도 함께 초기화합니다.
+                {copy.systemResetSettingsDepsNote ?? "* 설정 초기화는 티켓 및 고객 데이터도 함께 초기화합니다."}
               </p>
             )}
           </div>
