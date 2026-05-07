@@ -1,8 +1,5 @@
 # Suppo — 헬프데스크
 
-<img width="2545" height="2615" alt="macshot-clipboard-D21C52F2-62A5-4F9A-A4FD-344C2BDC9A44" src="https://github.com/user-attachments/assets/6f127fdb-f15d-4e40-9dec-91ccc375f1b6" />
-
-
 <p align="center">
   <strong>고객 포털과 관리자 대시보드가 분리된 셀프호스팅 헬프데스크 시스템</strong>
 </p>
@@ -330,6 +327,55 @@ pnpm dev:all     # 개발 서버 실행 (Public :3000, Admin :3001)
 pnpm test        # 단위 테스트
 pnpm test:e2e    # E2E 테스트
 ```
+
+---
+
+## 스크린샷
+
+### 공개 페이지
+
+<img width="2545" height="2615" alt="macshot-clipboard-D21C52F2-62A5-4F9A-A4FD-344C2BDC9A44" src="https://github.com/user-attachments/assets/6f127fdb-f15d-4e40-9dec-91ccc375f1b6" />
+
+**[티켓 작성]**
+<img width="1644" height="1210" alt="macshot-clipboard-B55AA6FE-3B9F-4119-9EF2-DFBEECE3C992" src="https://github.com/user-attachments/assets/e1872a03-67a3-451e-bc32-7a37a601669c" />
+
+**[지식 찾기]**
+<img width="3290" height="1814" alt="macshot-clipboard-493684CE-794A-48CE-8078-6FC909D61BAF" src="https://github.com/user-attachments/assets/7c3c7898-7d22-4fbf-a975-8c25a9a6d8ee" />
+
+### 관리자 콘솔
+
+**[분석 및 리포트]**
+<img width="3287" height="2623" alt="macshot-clipboard-F35AA367-1963-45E4-8218-8E00DCAED36E" src="https://github.com/user-attachments/assets/a29e2066-9410-4967-834a-71e1e889679b" />
+**[지식]**
+<img width="1646" height="883" alt="macshot-clipboard-0C3306C2-9257-46B5-88AD-E6881DDED0B4" src="https://github.com/user-attachments/assets/5b28592f-9f1a-4491-8d47-7ef8b5ba54b7" />
+**[티켓 목록]**
+<img width="3288" height="1868" alt="macshot-clipboard-C2154BC3-F09F-4927-A99F-21CC70ED466D" src="https://github.com/user-attachments/assets/985f5385-f01d-427e-bd56-eb6d6d72d9ab" />
+<img width="1642" height="1310" alt="macshot-clipboard-616DAB30-6E69-4879-8DD8-B3B609BE5A64" src="https://github.com/user-attachments/assets/e9488731-c613-4051-a387-2613dcf14992" />
+**[상담원 관리]**
+<img width="3290" height="2014" alt="macshot-clipboard-DD30170D-FF0D-4065-8728-A42746AA8E09" src="https://github.com/user-attachments/assets/d121b275-0062-4500-8b8d-948ad0968a47" />
+**[일정 관리]**
+<img width="3284" height="1537" alt="macshot-clipboard-0405DFDD-F5BA-4311-B716-E217B1B793EF" src="https://github.com/user-attachments/assets/c599077e-5159-47b1-b01a-177ae441902a" />
+**[팀 관리]**
+<img width="3299" height="1211" alt="macshot-clipboard-C2F165F9-8CA4-48AD-8493-9102DE18F387" src="https://github.com/user-attachments/assets/b9926385-21b7-4329-a950-fa371125fd2a" />
+**[고객 관리]**
+<img width="3295" height="2628" alt="macshot-clipboard-2B1E0850-4C7A-4D97-83D3-C339F05165AD" src="https://github.com/user-attachments/assets/09e3d07d-b751-47b1-962f-4d489bb68dcb" />
+**[문의 유형]**
+<img width="1642" height="745" alt="macshot-clipboard-1B988F57-9411-46CC-8725-59B18D92A15B" src="https://github.com/user-attachments/assets/d038cb97-7a2b-472d-8096-922fcaaac146" />
+**[Git 연동]**
+<img width="1644" height="667" alt="macshot-clipboard-9C347440-7839-4F90-8BCF-429F1A0803AA" src="https://github.com/user-attachments/assets/c31f615d-39ca-4a39-b37e-9d73b8aaac05" />
+**[연동 설정]**
+<img width="1636" height="1251" alt="macshot-clipboard-CA97F3F7-F2A7-4216-87F8-D117151DDB14" src="https://github.com/user-attachments/assets/d71a2ab8-28bc-42a1-a51d-4e78c19f5b85" />
+**[브랜딩]**
+<img width="3291" height="2357" alt="macshot-clipboard-49A84A45-D0B9-4C74-9030-FECABC00317F" src="https://github.com/user-attachments/assets/0132bcb7-4bc7-4064-bf66-0f03c9726267" />
+**[AI 연동]**
+<img width="3284" height="2057" alt="macshot-clipboard-28C91B7E-BA83-4752-8ECF-48866D058D2C" src="https://github.com/user-attachments/assets/deca1ad8-8196-4a34-8735-a993d1ae26c8" />
+**[시스템 백업 복구]**
+<img width="3286" height="1929" alt="macshot-clipboard-6F695B51-0455-4A76-A822-228351E10DDE" src="https://github.com/user-attachments/assets/33646c53-4aab-4115-ba5b-ddf37ecc88ea" />
+**[응답 템플릿]**
+<img width="1641" height="1030" alt="macshot-clipboard-019CF787-8B4E-44D8-86C2-0A9FED7E425D" src="https://github.com/user-attachments/assets/5eec65ae-81ef-45b5-bd60-09145cedfe66" />
+**[감사 로그]**
+<img width="3251" height="2270" alt="macshot-clipboard-59F52321-E1EA-4A25-84E6-B8CEB5AD3822" src="https://github.com/user-attachments/assets/ead092e0-80b5-40b8-a138-5cb93f66626f" />
+
 
 ---
 
