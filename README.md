@@ -1,5 +1,8 @@
 # Suppo — 헬프데스크
 
+<img width="2545" height="2615" alt="macshot-clipboard-D21C52F2-62A5-4F9A-A4FD-344C2BDC9A44" src="https://github.com/user-attachments/assets/6f127fdb-f15d-4e40-9dec-91ccc375f1b6" />
+
+
 <p align="center">
   <strong>고객 포털과 관리자 대시보드가 분리된 셀프호스팅 헬프데스크 시스템</strong>
 </p>
