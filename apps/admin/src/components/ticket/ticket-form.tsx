@@ -89,7 +89,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
             type="text"
             {...register("customerName")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-offset-0 focus:border-transparent outline-none transition-all"
-            placeholder="홍길동"
+            placeholder={t("ticketFormCustomerNamePlaceholder", "홍길동")}
           />
           {errors.customerName && (
             <p className="text-sm text-red-500">{errors.customerName.message}</p>
@@ -141,7 +141,7 @@ export function TicketForm({ requestTypes }: TicketFormProps) {
             type="text"
             {...register("customerOrganization")}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:border-transparent outline-none transition-all"
-            placeholder="회사명 또는 소속 기관"
+            placeholder={t("ticketFormCustomerOrganizationPlaceholder", "회사명 또는 소속 기관")}
           />
         </div>
       </div>

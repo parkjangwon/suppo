@@ -1314,6 +1314,9 @@ const ADMIN_COPY_EXTRA: Record<AdminLocale, Record<string, string>> = {
     commonEditPlaceholder: "변경하려면 입력",
     // Ticket lookup form
     ticketLookupNotFound: "일치하는 티켓을 찾을 수 없습니다",
+    ticketFormCustomerNamePlaceholder: "홍길동",
+    ticketFormCustomerOrganizationPlaceholder: "회사명 또는 소속 기관",
+    templateVarExamplePrefix: "예:",
     ticketLookupError: "오류가 발생했습니다. 다시 시도해주세요.",
     ticketLookupTicketNumber: "티켓 번호",
     ticketLookupEmail: "이메일",
@@ -2213,6 +2216,9 @@ const ADMIN_COPY_EXTRA: Record<AdminLocale, Record<string, string>> = {
     commonEditPlaceholder: "Type to change",
     // Ticket lookup form
     ticketLookupNotFound: "No matching ticket found",
+    ticketFormCustomerNamePlaceholder: "John Smith",
+    ticketFormCustomerOrganizationPlaceholder: "Company or organization",
+    templateVarExamplePrefix: "e.g.",
     ticketLookupError: "An error occurred. Please try again.",
     ticketLookupTicketNumber: "Ticket number",
     ticketLookupEmail: "Email",

@@ -201,7 +201,7 @@ export function TemplateForm({
               type="button"
               onClick={() => insertVariable(variable.name)}
               className="text-xs px-2 py-1 bg-white border rounded hover:border-blue-400 hover:text-blue-600 transition-colors"
-              title={`${variable.description} (예: ${variable.example})`}
+              title={`${variable.description} (${t("templateVarExamplePrefix", "예:")} ${variable.example})`}
             >
               {`{{${variable.name}}}`}
             </button>
