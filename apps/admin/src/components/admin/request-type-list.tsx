@@ -416,7 +416,7 @@ function RequestTypeForm({
             <SelectContent>
               <SelectItem value="WEB">{t("requestTypeChannelWeb", "웹", "Web")}</SelectItem>
               <SelectItem value="EMAIL">{t("requestTypeChannelEmail", "이메일", "Email")}</SelectItem>
-              <SelectItem value="API">API</SelectItem>
+              <SelectItem value="API">{t("requestTypeChannelApi", "API", "API")}</SelectItem>
               <SelectItem value="IN_APP">{t("requestTypeChannelInApp", "앱 내", "In-app")}</SelectItem>
             </SelectContent>
           </Select>

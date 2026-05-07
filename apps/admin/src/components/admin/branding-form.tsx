@@ -47,7 +47,7 @@ export function BrandingForm() {
     adminPanelTitle: "Suppo Admin",
     appTitle: copy.brandingAppTitlePlaceholder ?? "고객 지원 센터",
     welcomeMessage: copy.brandingWelcomeMessagePlaceholder ?? "무엇을 도와드릴까요?",
-    footerText: "© 2026 parkjangwon. All rights reserved.",
+    footerText: copy.brandingFooterCopyright ?? "© 2026 parkjangwon. All rights reserved.",
     footerPhone: "",
     footerEmail: "",
     footerHomepage: "",

@@ -281,8 +281,8 @@ export function WebhookEndpointManager() {
               <Input id="webhook-name" aria-label={copy.webhookNameAriaLabel ?? "Webhook 이름"} value={name} onChange={(event) => setName(event.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="webhook-url">URL</Label>
-              <Input id="webhook-url" aria-label="Webhook URL" value={url} onChange={(event) => setUrl(event.target.value)} />
+              <Label htmlFor="webhook-url">{copy.webhookUrlLabel ?? "URL"}</Label>
+              <Input id="webhook-url" aria-label={copy.webhookUrlAriaLabel ?? "Webhook URL"} value={url} onChange={(event) => setUrl(event.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="webhook-secret">{copy.webhookSecretLabel ?? "서명 시크릿"}</Label>

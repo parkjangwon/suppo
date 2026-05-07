@@ -108,7 +108,7 @@ export function SavedFilters({ currentFilter, currentSort, onApplyFilter }: Save
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm">
             <Bookmark className="h-4 w-4 mr-2" />
-            {t("savedFilterSaving", "저장된 필터")}
+            {t("savedFiltersTitle", "저장된 필터")}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
@@ -131,14 +131,14 @@ export function SavedFilters({ currentFilter, currentSort, onApplyFilter }: Save
                     )}
                   </div>
                   {filter.isShared && (
-                    <span className="text-xs bg-primary/10 text-primary px-1 rounded">{t("commonConnected", "공유")}</span>
+                    <span className="text-xs bg-primary/10 text-primary px-1 rounded">{t("savedFilterShared", "공유")}</span>
                   )}
                 </DropdownMenuItem>
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setSaveDialogOpen(true)}>
                 <Save className="h-4 w-4 mr-2" />
-                {t("savedFilterSaving", "현재 필터 저장")}
+                {t("savedFiltersSaveCurrentTitle", "현재 필터 저장")}
               </DropdownMenuItem>
             </>
           )}
@@ -153,7 +153,7 @@ export function SavedFilters({ currentFilter, currentSort, onApplyFilter }: Save
       {saveDialogOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-background rounded-lg p-6 w-full max-w-md space-y-4">
-            <h3 className="text-lg font-semibold">{t("savedFilterSaving", "필터 저장")}</h3>
+            <h3 className="text-lg font-semibold">{t("savedFiltersSaveDialogTitle", "필터 저장")}</h3>
             <input
               type="text"
               placeholder={t("savedFilterNamePlaceholder", "필터 이름")}

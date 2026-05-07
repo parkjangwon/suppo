@@ -203,9 +203,9 @@ export function EmailSettingsForm() {
               onChange={(e) => setSettings({ ...settings, provider: e.target.value })}
               className="w-full px-3 py-2 border rounded-md"
             >
-              <option value="nodemailer">SMTP (Nodemailer)</option>
-              <option value="ses">AWS SES</option>
-              <option value="resend">Resend</option>
+              <option value="nodemailer">{copy.emailProviderSmtp ?? "SMTP (Nodemailer)"}</option>
+              <option value="ses">{copy.emailProviderSes ?? "AWS SES"}</option>
+              <option value="resend">{copy.emailProviderResend ?? "Resend"}</option>
             </select>
           </div>
 
@@ -243,7 +243,7 @@ export function EmailSettingsForm() {
                   type="password"
                   value={smtpPassword}
                   onChange={(e) => setSmtpPassword(e.target.value)}
-                  placeholder={settings.hasSmtpPassword ? (copy.commonEdit ?? "변경하려면 입력") : (copy.emailPasswordPlaceholder ?? "비밀번호 입력")}
+                  placeholder={settings.hasSmtpPassword ? (copy.commonEditPlaceholder ?? "변경하려면 입력") : (copy.emailPasswordPlaceholder ?? "비밀번호 입력")}
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -271,7 +271,7 @@ export function EmailSettingsForm() {
                   type="password"
                   value={sesSecretKey}
                   onChange={(e) => setSesSecretKey(e.target.value)}
-                  placeholder={settings.hasSesSecretKey ? (copy.commonEdit ?? "변경하려면 입력") : (copy.emailSecretPlaceholder ?? "Secret Key 입력")}
+                  placeholder={settings.hasSesSecretKey ? (copy.commonEditPlaceholder ?? "변경하려면 입력") : (copy.emailSecretPlaceholder ?? "Secret Key 입력")}
                 />
               </div>
               <div className="space-y-2">

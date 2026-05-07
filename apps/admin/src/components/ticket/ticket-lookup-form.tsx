@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBranding } from "@suppo/shared/branding/context";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import { Label } from "@suppo/ui/components/ui/label";
 import { Loader2 } from "lucide-react";
 
 export function TicketLookupForm() {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [ticketNumber, setTicketNumber] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -31,10 +34,10 @@ export function TicketLookupForm() {
       if (response.ok) {
         router.push(`/ticket/${ticketNumber}`);
       } else {
-        setError("일치하는 티켓을 찾을 수 없습니다");
+        setError(t("ticketLookupNotFound", "일치하는 티켓을 찾을 수 없습니다"));
       }
     } catch {
-      setError("오류가 발생했습니다. 다시 시도해주세요.");
+      setError(t("ticketLookupError", "오류가 발생했습니다. 다시 시도해주세요."));
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +52,7 @@ export function TicketLookupForm() {
       )}
       
       <div className="space-y-2">
-        <Label htmlFor="ticketNumber" className="text-slate-700">티켓 번호</Label>
+        <Label htmlFor="ticketNumber" className="text-slate-700">{t("ticketLookupTicketNumber", "티켓 번호")}</Label>
         <input
           id="ticketNumber"
           type="text"
@@ -62,7 +65,7 @@ export function TicketLookupForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-slate-700">이메일</Label>
+        <Label htmlFor="email" className="text-slate-700">{t("ticketLookupEmail", "이메일")}</Label>
         <input
           id="email"
           type="email"
@@ -83,10 +86,10 @@ export function TicketLookupForm() {
         {isLoading ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />
-            조회 중...
+            {t("ticketLookupSearching", "조회 중...")}
           </>
         ) : (
-          "조회"
+          t("ticketLookupButton", "조회")
         )}
       </button>
     </form>

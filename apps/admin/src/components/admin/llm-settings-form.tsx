@@ -162,8 +162,8 @@ export function LLMSettingsForm() {
               }
               className="w-full rounded-md border px-3 py-2"
             >
-              <option value="ollama">Ollama</option>
-              <option value="gemini">Gemini</option>
+              <option value="ollama">{copy.llmProviderOllama ?? "Ollama"}</option>
+              <option value="gemini">{copy.llmProviderGemini ?? "Gemini"}</option>
             </select>
           </div>
 
@@ -205,7 +205,7 @@ export function LLMSettingsForm() {
                   type="password"
                   value={geminiApiKey}
                   onChange={(event) => setGeminiApiKey(event.target.value)}
-                  placeholder={settings.hasGeminiApiKey ? (copy.commonEdit ?? "변경하려면 입력") : "AIza..."}
+                  placeholder={settings.hasGeminiApiKey ? (copy.commonEditPlaceholder ?? "변경하려면 입력") : "AIza..."}
                 />
               </div>
 

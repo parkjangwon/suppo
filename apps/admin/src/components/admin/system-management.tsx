@@ -238,13 +238,25 @@ export function SystemManagement() {
             </AlertDescription>
           </Alert>
           <div className="flex items-center gap-3">
-            <Input
-              key={fileInputKey}
-              type="file"
-              accept=".zip"
-              onChange={handleRestoreFileChange}
-              className="max-w-xs"
-            />
+            <label className="flex cursor-pointer items-center gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => {
+                const el = document.getElementById("restore-file-input");
+                if (el) el.click();
+              }}>
+                {copy.systemFileSelectButton ?? "파일 선택"}
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {restoreFile ? restoreFile.name : (copy.systemFileNoSelection ?? "선택된 파일 없음")}
+              </span>
+              <input
+                id="restore-file-input"
+                key={fileInputKey}
+                type="file"
+                accept=".zip"
+                onChange={handleRestoreFileChange}
+                className="sr-only"
+              />
+            </label>
             <Button
               variant="destructive"
               disabled={!restoreFile || restoreLoading}
