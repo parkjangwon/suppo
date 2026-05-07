@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Star, MessageSquare } from "lucide-react";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface CSATData {
   id: string;
@@ -16,6 +18,8 @@ interface CSATTabProps {
 }
 
 export function CSATTab({ ticketId }: CSATTabProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const [csat, setCsat] = useState<CSATData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,7 +44,7 @@ export function CSATTab({ ticketId }: CSATTabProps) {
     return (
       <Card>
         <CardContent className="pt-6">
-          <div className="text-center text-muted-foreground">불러오는 중...</div>
+          <div className="text-center text-muted-foreground">{copy.commonLoading}</div>
         </CardContent>
       </Card>
     );
@@ -50,14 +54,14 @@ export function CSATTab({ ticketId }: CSATTabProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">고객 만족도</CardTitle>
+          <CardTitle className="text-lg">{t("csatTitle", "고객 만족도")}</CardTitle>
         </CardHeader>
         <CardContent className="text-center py-8">
           <p className="text-muted-foreground">
-            아직 만족도 조사 응답이 없습니다.
+            {t("csatEmpty", "아직 만족도 조사 응답이 없습니다.")}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            티켓이 해결된 후 고객에게 설문 링크가 발송됩니다.
+            {t("csatEmptyDesc", "티켓이 해결된 후 고객에게 설문 링크가 발송됩니다.")}
           </p>
         </CardContent>
       </Card>
@@ -67,7 +71,7 @@ export function CSATTab({ ticketId }: CSATTabProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">고객 만족도</CardTitle>
+        <CardTitle className="text-lg">{t("csatTitle", "고객 만족도")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-center gap-4">
@@ -99,7 +103,7 @@ export function CSATTab({ ticketId }: CSATTabProps) {
           </div>
         )}
         <div className="text-center text-sm text-muted-foreground">
-          응답일: {new Date(csat.submittedAt).toLocaleDateString("ko-KR")}
+          {t("csatSubmittedAt", "응답일:")} {new Date(csat.submittedAt).toLocaleDateString("ko-KR")}
         </div>
       </CardContent>
     </Card>

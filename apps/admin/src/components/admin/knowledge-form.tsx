@@ -136,7 +136,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
 
       const savedArticle = await response.json();
 
-      toast.success(publish ? "문서가 게시되었습니다" : "문서가 저장되었습니다");
+      toast.success(publish ? t("knowledgePublishSuccess", "문서가 게시되었습니다") : t("knowledgeSaveSuccess", "문서가 저장되었습니다"));
 
       if (!isEditing) {
         router.push(`/admin/knowledge/${savedArticle.id}/edit`);
@@ -171,14 +171,14 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
             variant={showPreview ? "outline" : "default"}
             onClick={() => setShowPreview(false)}
           >
-            편집
+            {t("knowledgeEditMode", "편집")}
           </Button>
           <Button
             variant={showPreview ? "default" : "outline"}
             onClick={() => setShowPreview(true)}
           >
             <Eye className="h-4 w-4 mr-2" />
-            미리보기
+            {t("knowledgePreviewMode", "미리보기")}
           </Button>
         </div>
         <div className="flex gap-2">
@@ -191,14 +191,14 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
             disabled={isSaving || isPublishing}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isSaving ? "저장 중..." : t("commonSaveDraft", "초안 저장")}
+            {isSaving ? t("commonSaving", "저장 중...") : t("commonSaveDraft", "초안 저장")}
           </Button>
           <Button
             onClick={handlePublish}
             disabled={isSaving || isPublishing}
           >
             <Send className="h-4 w-4 mr-2" />
-            {isPublishing ? "게시 중..." : t("commonPublish", "게시하기")}
+            {isPublishing ? t("knowledgePublishing", "게시 중...") : t("commonPublish", "게시하기")}
           </Button>
         </div>
       </div>
@@ -206,7 +206,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
       {showPreview ? (
         <Card>
           <CardHeader>
-            <CardTitle>{title || "제목 없음"}</CardTitle>
+            <CardTitle>{title || t("knowledgeNoTitle", "제목 없음")}</CardTitle>
           </CardHeader>
           <CardContent>
             {excerpt && (
@@ -219,58 +219,58 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
         <div className="grid gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>기본 정보</CardTitle>
+              <CardTitle>{t("knowledgeBasicInfo", "기본 정보")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">제목 *</Label>
+                <Label htmlFor="title">{t("knowledgeTitleLabel", "제목 *")}</Label>
                 <Input
                   id="title"
                   value={title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="문서 제목을 입력하세요"
+                  placeholder={t("knowledgeTitlePlaceholder", "문서 제목을 입력하세요")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">슬러그 (URL) *</Label>
+                <Label htmlFor="slug">{t("knowledgeSlugLabel", "슬러그 (URL) *")}</Label>
                 <Input
                   id="slug"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
-                  placeholder="문서-url-slug"
+                  placeholder={t("knowledgeSlugPlaceholder", "문서-url-slug")}
                 />
                 <p className="text-xs text-gray-500">
-                  /knowledge/{slug || "문서-url"} 에서 접근할 수 있습니다
+                  {t("knowledgeSlugHint", "/knowledge/{slug} 에서 접근할 수 있습니다").replace("{slug}", slug || t("knowledgeSlugDefault", "문서-url"))}
                 </p>
               </div>
 
               <div className="rounded-lg border border-border/60 bg-muted/30 p-3 text-sm text-muted-foreground">
                 {isPublished && isPublic
-                  ? "현재 게시된 공개 문서입니다. 고객 포털에서 공개 링크로 접근할 수 있습니다."
+                  ? t("knowledgeStatusPublicDesc", "현재 게시된 공개 문서입니다.")
                   : isPublished && !isPublic
-                    ? "현재 게시된 내부 문서입니다. 상담원/관리자용으로만 유지되며 고객 포털에는 노출되지 않습니다."
+                    ? t("knowledgeStatusInternalDesc", "현재 게시된 내부 문서입니다.")
                     : isPublic
-                      ? "현재 초안 상태입니다. 게시하면 고객 포털에서 공개 링크로 접근할 수 있습니다."
-                      : "현재 초안 상태의 내부 문서입니다. 게시 전까지 고객 포털에는 노출되지 않습니다."}
+                      ? t("knowledgeStatusDraftPublicDesc", "현재 초안 상태입니다.")
+                      : t("knowledgeStatusDraftInternalDesc", "현재 초안 상태의 내부 문서입니다.")}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="excerpt">요약</Label>
+                <Label htmlFor="excerpt">{t("knowledgeExcerptLabel", "요약")}</Label>
                 <Textarea
                   id="excerpt"
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
-                  placeholder="문서 내용을 간략히 요약해주세요 (선택사항)"
+                  placeholder={t("knowledgeExcerptPlaceholder", "문서 내용을 간략히 요약해주세요 (선택사항)")}
                   rows={2}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">카테고리 *</Label>
+                <Label htmlFor="category">{t("knowledgeCategoryLabel", "카테고리 *")}</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="카테고리 선택" />
+                    <SelectValue placeholder={t("knowledgeCategorySelect", "카테고리 선택")} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
@@ -283,7 +283,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label>태그</Label>
+                <Label>{t("knowledgeTagsLabel", "태그")}</Label>
                 <div className="flex gap-2 flex-wrap">
                   {tags.map((tag) => (
                     <Badge key={tag} variant="secondary" className="gap-1">
@@ -301,7 +301,7 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
                   <Input
                     value={newTag}
                     onChange={(e) => setNewTag(e.target.value)}
-                    placeholder="새 태그 입력"
+                    placeholder={t("knowledgeTagInputPlaceholder", "새 태그 입력")}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -319,25 +319,25 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
 
           <Card>
             <CardHeader>
-              <CardTitle>내용</CardTitle>
+              <CardTitle>{t("knowledgeContentSectionTitle", "내용")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="마크다운 형식으로 내용을 작성하세요..."
+                placeholder={t("knowledgeContentPlaceholder", "마크다운 형식으로 내용을 작성하세요...")}
                 rows={20}
                 className="font-mono"
               />
               <p className="text-xs text-gray-500 mt-2">
-                **굵게**, *기울임*, `코드`, ### 제목 등 마크다운 문법을 사용할 수 있습니다
+                {t("knowledgeMarkdownHint", "**굵게**, *기울임*, `코드`, ### 제목 등 마크다운 문법을 사용할 수 있습니다")}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>공개 설정</CardTitle>
+              <CardTitle>{t("knowledgeVisibilityTitle", "공개 설정")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-2">
@@ -347,11 +347,11 @@ export function KnowledgeForm({ article, categories }: KnowledgeFormProps) {
                   onCheckedChange={(checked) => setIsPublic(checked === true)}
                 />
                 <Label htmlFor="isPublic" className="font-normal">
-                  고객 포털에 공개
+                  {t("knowledgePublicLabel", "고객 포털에 공개")}
                 </Label>
               </div>
               <p className="text-sm text-gray-500">
-                체크 해제 시 상담원만 볼 수 있는 내부 문서가 됩니다
+                {t("knowledgeInternalHint", "체크 해제 시 상담원만 볼 수 있는 내부 문서가 됩니다")}
               </p>
             </CardContent>
           </Card>

@@ -14,6 +14,8 @@ import { Badge } from "@suppo/ui/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@suppo/ui/components/ui/tabs";
 import { FileText, Sparkles, History, Star, Loader2 } from "lucide-react";
 import { renderTemplate, TemplateContext } from "@/lib/templates/renderer";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface Template {
   id: string;
@@ -43,6 +45,8 @@ export function TemplateSelector({
   disabled,
   templateContext,
 }: TemplateSelectorProps) {
+  const copy = useAdminCopy();
+  const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<GroupedTemplates>({
@@ -118,7 +122,7 @@ export function TemplateSelector({
           {template.isRecommended && (
             <Badge variant="secondary" className="text-xs shrink-0">
               <Sparkles className="h-3 w-3 mr-1" />
-              추천
+              {t("templatesColRecommended", "추천")}
             </Badge>
           )}
         </div>
@@ -144,14 +148,14 @@ export function TemplateSelector({
           className="gap-2"
         >
           <FileText className="h-4 w-4" />
-          템플릿
+          {t("templatesSelectorButton", "템플릿")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            응답 템플릿 선택
+            {t("templatesSelectorTitle", "응답 템플릿 선택")}
           </DialogTitle>
         </DialogHeader>
 
@@ -164,21 +168,21 @@ export function TemplateSelector({
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="recommended" className="gap-1">
                 <Sparkles className="h-3.5 w-3.5" />
-                추천
+                {t("templatesTabRecommended", "추천")}
                 {templates.recommended.length > 0 && (
                   <span className="ml-1 text-xs">({templates.recommended.length})</span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="general" className="gap-1">
                 <Star className="h-3.5 w-3.5" />
-                일반
+                {t("templatesTabGeneral", "일반")}
                 {templates.general.length > 0 && (
                   <span className="ml-1 text-xs">({templates.general.length})</span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="recent" className="gap-1">
                 <History className="h-3.5 w-3.5" />
-                최근 사용
+                {t("templatesTabRecent", "최근 사용")}
                 {templates.recent.length > 0 && (
                   <span className="ml-1 text-xs">({templates.recent.length})</span>
                 )}
@@ -196,9 +200,9 @@ export function TemplateSelector({
                 ) : (
                   <div className="text-center py-12 text-muted-foreground">
                     <Sparkles className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>추천 템플릿이 없습니다</p>
+                    <p>{t("templatesNoRecommended", "추천 템플릿이 없습니다")}</p>
                     <p className="text-sm mt-1">
-                      문의 유형에 맞는 템플릿을 설정할 수 있습니다
+                      {t("templatesNoRecommendedHint", "문의 유형에 맞는 템플릿을 설정할 수 있습니다")}
                     </p>
                   </div>
                 )}
@@ -216,7 +220,7 @@ export function TemplateSelector({
                 ) : (
                   <div className="text-center py-12 text-muted-foreground">
                     <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>공유 템플릿이 없습니다</p>
+                    <p>{t("templatesNoGeneral", "공유 템플릿이 없습니다")}</p>
                   </div>
                 )}
               </div>
@@ -233,7 +237,7 @@ export function TemplateSelector({
                 ) : (
                   <div className="text-center py-12 text-muted-foreground">
                     <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>최근 사용한 템플릿이 없습니다</p>
+                    <p>{t("templatesNoRecent", "최근 사용한 템플릿이 없습니다")}</p>
                   </div>
                 )}
               </div>

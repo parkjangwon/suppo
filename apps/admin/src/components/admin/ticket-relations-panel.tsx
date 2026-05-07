@@ -56,7 +56,7 @@ export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">티켓 관계</CardTitle>
+        <CardTitle className="text-lg">{t("ticketRelationsTitle", "티켓 관계")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -67,12 +67,12 @@ export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
           relations.map((relation) => (
             <div key={relation.id} className="rounded-lg border border-border/60 p-4">
               <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant="outline">{t("ticketMergeSuccess", "병합 이력")}</Badge>
+                <Badge variant="outline">{t("ticketMergeHistory", "병합 이력")}</Badge>
                 <span>{new Date(relation.mergedAt).toLocaleString("ko-KR")}</span>
               </div>
               <div className="grid gap-3 lg:grid-cols-2">
-                <RelationTicketCard title={t("ticketMergeFieldAssignee", "원본 티켓")} ticket={relation.sourceTicket} />
-                <RelationTicketCard title={t("ticketMergeFieldTeam", "대상 티켓")} ticket={relation.targetTicket} />
+                <RelationTicketCard title={t("ticketMergeSourceTicket", "원본 티켓")} ticket={relation.sourceTicket} />
+                <RelationTicketCard title={t("ticketMergeTargetTicket", "대상 티켓")} ticket={relation.targetTicket} />
               </div>
             </div>
           ))

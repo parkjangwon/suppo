@@ -115,10 +115,10 @@ export function KnowledgeList({
         throw new Error("Failed to delete article");
       }
 
-      toast.success("문서가 삭제되었습니다");
+      toast.success(t("knowledgeDeleteSuccess", "문서가 삭제되었습니다"));
       router.refresh();
     } catch {
-      toast.error("삭제 중 오류가 발생했습니다");
+      toast.error(t("knowledgeDeleteError", "삭제 중 오류가 발생했습니다"));
     } finally {
       setIsDeleting(null);
     }
@@ -177,14 +177,14 @@ export function KnowledgeList({
           <Button variant="outline" size="sm" asChild>
             <Link href="/admin/knowledge/contributors">
               <BarChart3 className="h-4 w-4 mr-2" />
-              기여자 통계
+              {t("knowledgeContributorStats", "기여자 통계")}
             </Link>
           </Button>
           <CategoryManager categories={categories} />
           <Button asChild>
             <Link href="/admin/knowledge/new">
               <Plus className="h-4 w-4 mr-2" />
-              새 문서
+              {t("knowledgeNewArticle", "새 문서")}
             </Link>
           </Button>
         </div>
@@ -194,20 +194,20 @@ export function KnowledgeList({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>제목</TableHead>
-              <TableHead>카테고리</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>조회수</TableHead>
-              <TableHead>작성자</TableHead>
-              <TableHead>수정일</TableHead>
-              <TableHead className="w-[150px]">작업</TableHead>
+              <TableHead>{copy.commonTitle}</TableHead>
+              <TableHead>{t("knowledgeCategoryPlaceholder", "카테고리")}</TableHead>
+              <TableHead>{t("knowledgeStatus", "상태")}</TableHead>
+              <TableHead>{t("knowledgeColViews", "조회수")}</TableHead>
+              <TableHead>{t("knowledgeColAuthor", "작성자")}</TableHead>
+              <TableHead>{t("knowledgeColUpdated", "수정일")}</TableHead>
+              <TableHead className="w-[150px]">{t("knowledgeColActions", "작업")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {articles.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                  문서가 없습니다
+                  {t("knowledgeEmpty", "문서가 없습니다")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -229,14 +229,14 @@ export function KnowledgeList({
                   <TableCell>
                     {article.isPublished ? (
                       <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                        게시됨
+                        {t("knowledgeStatusPublished", "게시됨")}
                       </Badge>
                     ) : (
-                      <Badge variant="secondary">초안</Badge>
+                      <Badge variant="secondary">{t("knowledgeStatusDraft", "초안")}</Badge>
                     )}
                     {!article.isPublic && article.isPublished && (
                       <Badge variant="outline" className="ml-1">
-                        내부
+                        {t("knowledgeInternalBadge", "내부")}
                       </Badge>
                     )}
                   </TableCell>
@@ -251,21 +251,21 @@ export function KnowledgeList({
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="공개 링크"
+                          title={t("knowledgePublicLink", "공개 링크")}
                           asChild
                         >
                           <a
                             href={`${publicBaseUrl}/knowledge/${article.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label="공개 링크"
+                            aria-label={t("knowledgePublicLink", "공개 링크")}
                           >
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         </Button>
                       ) : (
                         <Badge variant="outline" className="text-xs text-gray-500">
-                          공개 안 됨
+                          {t("knowledgeNotPublic", "공개 안 됨")}
                         </Badge>
                       )}
                       {canEdit(article) && (
@@ -294,20 +294,21 @@ export function KnowledgeList({
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>문서 삭제</AlertDialogTitle>
+                              <AlertDialogTitle>{t("knowledgeDeleteTitle", "문서 삭제")}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                &quot;{article.title}&quot; 문서를 삭제하시겠습니까?
-                                이 작업은 되돌릴 수 없습니다.
+                                &quot;{article.title}&quot;
+                                <br />
+                                {t("commonIrreversible", "이 작업은 되돌릴 수 없습니다.")}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>취소</AlertDialogCancel>
+                              <AlertDialogCancel>{copy.commonCancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDelete(article.id)}
                                 className="bg-red-600 hover:bg-red-700"
                                 disabled={isDeleting === article.id}
                               >
-                                {isDeleting === article.id ? "삭제 중..." : "삭제"}
+                                {isDeleting === article.id ? t("commonDeleting", "삭제 중...") : copy.commonDelete}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

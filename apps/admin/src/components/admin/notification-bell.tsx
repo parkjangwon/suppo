@@ -11,15 +11,17 @@ import {
 import { cn } from "@suppo/shared/utils";
 import { useNotifications } from "@/hooks/use-notifications";
 import type { NotificationEvent } from "@suppo/shared/notifications/sse-service";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 const TYPE_META: Record<
   NotificationEvent["type"],
-  { icon: React.ComponentType<{ className?: string }>; label: string; color: string }
+  { icon: React.ComponentType<{ className?: string }>; color: string; labelKey: string; labelFallback: string }
 > = {
-  "ticket.assigned": { icon: Ticket, label: "티켓 배정", color: "text-blue-500" },
-  "ticket.commented": { icon: MessageSquare, label: "새 댓글", color: "text-green-500" },
-  "ticket.status_changed": { icon: RefreshCw, label: "상태 변경", color: "text-purple-500" },
-  "sla.warning": { icon: AlertTriangle, label: "SLA 경고", color: "text-amber-500" },
+  "ticket.assigned": { icon: Ticket, color: "text-blue-500", labelKey: "notifTypeTicketAssigned", labelFallback: "티켓 배정" },
+  "ticket.commented": { icon: MessageSquare, color: "text-green-500", labelKey: "notifTypeNewComment", labelFallback: "새 댓글" },
+  "ticket.status_changed": { icon: RefreshCw, color: "text-purple-500", labelKey: "notifTypeStatusChanged", labelFallback: "상태 변경" },
+  "sla.warning": { icon: AlertTriangle, color: "text-amber-500", labelKey: "notifTypeSlaWarning", labelFallback: "SLA 경고" },
 };
 
 function NotificationItem({
@@ -29,6 +31,7 @@ function NotificationItem({
   event: NotificationEvent;
   onDismiss: (id: string) => void;
 }) {
+  const copy = useAdminCopy();
   const meta = TYPE_META[event.type];
   const Icon = meta.icon;
   const ts = new Date(event.timestamp);
@@ -53,7 +56,7 @@ function NotificationItem({
         type="button"
         onClick={() => onDismiss(event.id)}
         className="absolute right-2 top-2 hidden rounded-md p-0.5 text-muted-foreground hover:text-foreground group-hover:flex"
-        aria-label="닫기"
+        aria-label={copyText(copy, "commonClose", "닫기")}
       >
         <X className="h-3 w-3" />
       </button>
@@ -62,6 +65,8 @@ function NotificationItem({
 }
 
 export function NotificationBell() {
+  const copy = useAdminCopy();
+  const t = (key: string, fallback: string) => copyText(copy, key, fallback);
   const { notifications, unreadCount, markAllRead, dismiss } = useNotifications();
   const [open, setOpen] = React.useState(false);
 
@@ -77,7 +82,7 @@ export function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative h-9 w-9 rounded-xl"
-          aria-label="알림"
+          aria-label={t("notificationTitle", "알림")}
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
@@ -93,7 +98,7 @@ export function NotificationBell() {
         sideOffset={8}
       >
         <div className="flex items-center justify-between border-b px-4 py-3">
-          <span className="text-sm font-semibold">알림</span>
+          <span className="text-sm font-semibold">{t("notificationTitle", "알림")}</span>
           {notifications.length > 0 && (
             <button
               type="button"
@@ -102,7 +107,7 @@ export function NotificationBell() {
               }}
               className="text-xs text-muted-foreground hover:text-foreground"
             >
-              모두 지우기
+              {t("notificationClearAll", "모두 지우기")}
             </button>
           )}
         </div>
@@ -110,7 +115,7 @@ export function NotificationBell() {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
               <Bell className="mb-2 h-8 w-8 opacity-20" />
-              <p className="text-sm">새 알림이 없습니다</p>
+              <p className="text-sm">{t("notificationEmpty", "새 알림이 없습니다")}</p>
             </div>
           ) : (
             <div className="space-y-0.5">

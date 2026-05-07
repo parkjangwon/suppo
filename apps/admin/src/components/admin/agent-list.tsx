@@ -189,7 +189,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
   const handleCreate = async () => {
     if (!createForm.name.trim() || !createForm.email.trim()) {
-      toast.error("이름과 이메일을 입력해주세요");
+      toast.error(t("agentsNameEmailRequired", "이름과 이메일을 입력해주세요"));
       return;
     }
 
@@ -203,7 +203,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.error ?? "상담원 추가에 실패했습니다");
+        toast.error(data.error ?? t("agentsCreateError", "상담원 추가에 실패했습니다"));
         return;
       }
 
@@ -213,10 +213,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       if (data.tempPassword) {
         setTempPasswordInfo({ agentName: data.agent.name, tempPassword: data.tempPassword });
       } else {
-        toast.success("상담원이 추가되었습니다");
+        toast.success(t("agentsCreateSuccess", "상담원이 추가되었습니다"));
       }
     } catch {
-      toast.error("상담원 추가 중 오류가 발생했습니다");
+      toast.error(t("agentsCreateError", "상담원 추가 중 오류가 발생했습니다"));
     } finally {
       setIsSaving(false);
     }
@@ -235,7 +235,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.error ?? "상담원 수정에 실패했습니다");
+        toast.error(data.error ?? t("agentsUpdateError", "상담원 수정에 실패했습니다"));
         return;
       }
 
@@ -243,9 +243,9 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
         prev.map((agent) => (agent.id === editingAgent.id ? data.agent : agent))
       );
       setEditingAgent(null);
-      toast.success("상담원 정보가 수정되었습니다");
+      toast.success(t("agentsUpdateSuccess", "상담원 정보가 수정되었습니다"));
     } catch {
-      toast.error("상담원 수정 중 오류가 발생했습니다");
+      toast.error(t("agentsUpdateError", "상담원 수정 중 오류가 발생했습니다"));
     } finally {
       setIsSaving(false);
     }
@@ -253,7 +253,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
   const handleDeactivate = async (agent: AgentItem) => {
     const confirmed = window.confirm(
-      `"${agent.name}" 상담원을 비활성화하시겠습니까?\n처리중인 티켓은 자동으로 재할당됩니다.`
+      t("agentsDeactivateConfirm", '"{name}" 상담원을 비활성화하시겠습니까?\n처리중인 티켓은 자동으로 재할당됩니다.').replace("{name}", agent.name)
     );
     if (!confirmed) return;
 
@@ -267,16 +267,16 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.error ?? "비활성화에 실패했습니다");
+        toast.error(data.error ?? t("agentsDeactivateError", "비활성화에 실패했습니다"));
         return;
       }
 
       setAgents((prev) =>
         prev.map((a) => (a.id === agent.id ? { ...a, isActive: false } : a))
       );
-      toast.success("상담원이 비활성화되었습니다");
+      toast.success(t("agentsDeactivateSuccess", "상담원이 비활성화되었습니다"));
     } catch {
-      toast.error("비활성화 처리 중 오류가 발생했습니다");
+      toast.error(t("agentsDeactivateError", "비활성화 처리 중 오류가 발생했습니다"));
     } finally {
       setIsSaving(false);
     }
@@ -284,7 +284,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
   const handleDelete = async (agent: AgentItem) => {
     const confirmed = window.confirm(
-      `"${agent.name}" 상담원을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`
+      t("agentsDeleteConfirm", '"{name}" 상담원을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.').replace("{name}", agent.name)
     );
     if (!confirmed) return;
 
@@ -296,14 +296,14 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.error ?? "삭제에 실패했습니다");
+        toast.error(data.error ?? t("agentsDeleteError", "삭제에 실패했습니다"));
         return;
       }
 
       setAgents((prev) => prev.filter((a) => a.id !== agent.id));
-      toast.success("상담원이 삭제되었습니다");
+      toast.success(t("agentsDeleteSuccess", "상담원이 삭제되었습니다"));
     } catch {
-      toast.error("삭제 처리 중 오류가 발생했습니다");
+      toast.error(t("agentsDeleteError", "삭제 처리 중 오류가 발생했습니다"));
     } finally {
       setIsSaving(false);
     }
@@ -311,7 +311,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
   const handleResetPassword = async (agent: AgentItem) => {
     const confirmed = window.confirm(
-      `"${agent.name}" 상담원의 비밀번호를 초기화하시겠습니까?\n새 임시 비밀번호가 생성됩니다.`
+      t("agentsResetPasswordConfirm", '"{name}" 상담원의 비밀번호를 초기화하시겠습니까?\n새 임시 비밀번호가 생성됩니다.').replace("{name}", agent.name)
     );
     if (!confirmed) return;
 
@@ -323,13 +323,13 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
       const data = await response.json();
       if (!response.ok) {
-        toast.error(data.error ?? "비밀번호 초기화에 실패했습니다");
+        toast.error(data.error ?? t("agentsResetPasswordError", "비밀번호 초기화에 실패했습니다"));
         return;
       }
 
       setTempPasswordInfo({ agentName: agent.name, tempPassword: data.tempPassword });
     } catch {
-      toast.error("비밀번호 초기화 중 오류가 발생했습니다");
+      toast.error(t("agentsResetPasswordError", "비밀번호 초기화 중 오류가 발생했습니다"));
     } finally {
       setIsSaving(false);
     }
@@ -358,7 +358,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
         <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 dark:text-blue-400">{t("commonAll", "전체")} 상담원</p>
+                <p className="text-sm text-blue-600 dark:text-blue-400">{t("agentsTotalStatLabel", "전체 상담원")}</p>
                 <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">{stats.total}</p>
               </div>
               <Users className="w-8 h-8 text-blue-500 dark:text-blue-400 opacity-80" />
@@ -369,7 +369,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
         <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-emerald-600 dark:text-emerald-400">{t("commonActive", "활성")} 상담원</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">{t("agentsActiveStatLabel", "활성 상담원")}</p>
                 <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{stats.active}</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
@@ -415,7 +415,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
         {isAdmin && (
           <Button onClick={() => setIsCreateDialogOpen(true)} size="lg" className="gap-2">
             <Plus className="w-4 h-4" />
-            상담원 추가
+            {copy.agentsNewAgent}
           </Button>
         )}
       </div>
@@ -464,21 +464,21 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEditDialog(agent)}>
-                        정보 수정
+                        {t("agentsEditInfo", "정보 수정")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => handleResetPassword(agent)}
                         className="text-blue-600 dark:text-blue-400"
                       >
                         <KeyRound className="w-3 h-3 mr-2" />
-                        비밀번호 초기화
+                        {t("agentsResetPassword", "비밀번호 초기화")}
                       </DropdownMenuItem>
                       {agent.isActive ? (
                         <DropdownMenuItem
                           onClick={() => handleDeactivate(agent)}
                           className="text-amber-600"
                         >
-                          비활성화
+                          {t("agentsDeactivate", "비활성화")}
                         </DropdownMenuItem>
                       ) : (
                         <DropdownMenuItem
@@ -487,7 +487,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                           }}
                           className="text-emerald-600"
                         >
-                          활성화
+                          {t("agentsActivate", "활성화")}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -495,7 +495,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                         onClick={() => handleDelete(agent)}
                         className="text-destructive"
                       >
-                        삭제
+                        {copy.commonDelete}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -530,7 +530,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                     variant="outline"
                     className="bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-200"
                   >
-                    부재중
+                    {t("agentsAbsent", "부재중")}
                   </Badge>
                 )}
               </div>
@@ -591,7 +591,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           </div>
           <h3 className="text-lg font-medium mb-2">{t("commonNotFound", "찾을 수 없습니다")}</h3>
           <p className="text-sm text-muted-foreground">
-            다른 검색어를 시도하거나 상담원을 추가해보세요
+            {t("agentsSearchEmptyDesc", "다른 검색어를 시도하거나 상담원을 추가해보세요")}
           </p>
         </div>
       )}
@@ -604,7 +604,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
               {t("commonCreate", "생성")} {t("agentsTitle", "상담원 관리")}
             </DialogTitle>
             <DialogDescription>
-              새로운 상담원을 등록합니다. 이메일로 로그인 정보가 발송됩니다.
+              {t("agentsCreateDesc", "새로운 상담원을 등록합니다. 이메일로 로그인 정보가 발송됩니다.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -617,7 +617,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                 onChange={(e) =>
                   setCreateForm((prev) => ({ ...prev, name: e.target.value }))
                 }
-                placeholder="홍길동"
+                placeholder={t("agentsNamePlaceholder", "홍길동")}
               />
             </div>
 
@@ -663,9 +663,9 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ADMIN">{t("agentsRoleAdmin", "관리자")}</SelectItem>
-                    <SelectItem value="TEAM_LEAD">{t("teamsLead", "팀장")}</SelectItem>
+                    <SelectItem value="TEAM_LEAD">{t("agentsRoleTeamLead", "팀장")}</SelectItem>
                     <SelectItem value="AGENT">{t("agentsRoleAgent", "상담원")}</SelectItem>
-                    <SelectItem value="VIEWER">{t("commonView", "보기")}</SelectItem>
+                    <SelectItem value="VIEWER">{t("agentsRoleReadOnly", "읽기전용")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -748,7 +748,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                           <SelectValue placeholder={t("agentsTeamLeadPlaceholder", "팀장으로 지정할 팀 선택")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">팀장 없음</SelectItem>
+                          <SelectItem value="none">{t("agentsNoTeamLead", "팀장 없음")}</SelectItem>
                           {teams
                             .filter((t) => createForm.teams.includes(t.id))
                             .map((team) => (
@@ -770,7 +770,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
               {t("commonCancel", "취소")}
             </Button>
             <Button onClick={handleCreate} disabled={isSaving}>
-              {isSaving ? "추가 중..." : t("commonCreate", "생성")}
+              {isSaving ? t("commonAdding", "추가 중...") : t("commonCreate", "생성")}
             </Button>
           </div>
         </DialogContent>
@@ -789,11 +789,15 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-blue-500" />
-              임시 비밀번호 발급
+              {t("agentsTempPasswordTitle", "임시 비밀번호 발급")}
             </DialogTitle>
             <DialogDescription>
-              <strong>{tempPasswordInfo?.agentName}</strong> 상담원의 임시 비밀번호입니다.
-              이 화면을 닫으면 다시 확인할 수 없습니다.
+              {(() => {
+                const template = t("agentsTempPasswordFor", "{name} 상담원의 임시 비밀번호입니다.");
+                const parts = template.split("{name}");
+                return <>{parts[0]}<strong>{tempPasswordInfo?.agentName}</strong>{parts[1]}</>;
+              })()}
+              {" "}{t("agentsTempPasswordWarning", "이 화면을 닫으면 다시 확인할 수 없습니다.")}
             </DialogDescription>
           </DialogHeader>
 
@@ -818,7 +822,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              상담원에게 이 비밀번호를 전달해주세요. 첫 로그인 시 비밀번호 변경이 강제됩니다.
+              {t("agentsTempPasswordInstruction", "상담원에게 이 비밀번호를 전달해주세요. 첫 로그인 시 비밀번호 변경이 강제됩니다.")}
             </p>
           </div>
 
@@ -829,7 +833,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                 setCopied(false);
               }}
             >
-              확인
+              {t("agentsConfirm", "확인")}
             </Button>
           </div>
         </DialogContent>
@@ -839,12 +843,14 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
               <DialogTitle>{t("commonEdit", "수정")} {t("agentsTitle", "상담원 관리")}</DialogTitle>
-            <DialogDescription>{editingAgent?.name} 상담원의 정보를 수정합니다.</DialogDescription>
+            <DialogDescription>
+              {t("agentsEditDesc", "{name} 상담원의 정보를 수정합니다.").replace("{name}", editingAgent?.name ?? "")}
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">이름</Label>
+              <Label htmlFor="edit-name">{t("agentsName", "이름")}</Label>
               <Input
                 id="edit-name"
                 value={editForm.name}
@@ -855,7 +861,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-email">이메일</Label>
+              <Label htmlFor="edit-email">{t("agentsEmail", "이메일")}</Label>
               <Input
                 id="edit-email"
                 type="email"
@@ -867,7 +873,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-phone">전화번호</Label>
+              <Label htmlFor="edit-phone">{t("agentsPhone", "전화번호")}</Label>
               <Input
                 id="edit-phone"
                 value={editForm.phone}
@@ -883,7 +889,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-role">역할</Label>
+                <Label htmlFor="edit-role">{t("agentsRole", "역할")}</Label>
                 <Select
                   value={editForm.role}
                   onValueChange={(value) =>
@@ -894,16 +900,16 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ADMIN">관리자</SelectItem>
-                    <SelectItem value="TEAM_LEAD">팀장</SelectItem>
-                    <SelectItem value="AGENT">상담원</SelectItem>
-                    <SelectItem value="VIEWER">읽기전용</SelectItem>
+                    <SelectItem value="ADMIN">{t("agentsRoleAdmin", "관리자")}</SelectItem>
+                    <SelectItem value="TEAM_LEAD">{t("agentsRoleTeamLead", "팀장")}</SelectItem>
+                    <SelectItem value="AGENT">{t("agentsRoleAgent", "상담원")}</SelectItem>
+                    <SelectItem value="VIEWER">{t("agentsRoleReadOnly", "읽기전용")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="edit-maxTickets">최대 티켓 수</Label>
+                <Label htmlFor="edit-maxTickets">{t("agentsMaxTickets", "최대 티켓 수")}</Label>
                 <Input
                   id="edit-maxTickets"
                   type="number"
@@ -923,7 +929,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
             <Separator />
 
             <div className="space-y-3">
-              <Label>전문 카테고리</Label>
+              <Label>{t("agentsSpecialtyCategory", "전문 카테고리")}</Label>
               <div className="grid grid-cols-2 gap-2">
                 {categories.map((category) => (
                   <label
@@ -948,7 +954,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
               <>
                 <Separator />
                 <div className="space-y-3">
-                  <Label>소속 팀</Label>
+                  <Label>{t("agentsBelongingTeam", "소속 팀")}</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {teams.map((team) => (
                       <label
@@ -969,7 +975,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                   </div>
                   {editForm.teams.length > 0 && (
                     <div className="space-y-2">
-                      <Label>팀장 역할</Label>
+                      <Label>{t("agentsTeamLeadRole", "팀장 역할")}</Label>
                       <Select
                         value={editForm.leaderTeamId || "none"}
                         onValueChange={(value) =>
@@ -977,10 +983,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="팀장으로 지정할 팀 선택" />
+                          <SelectValue placeholder={t("agentsTeamLeadPlaceholder", "팀장으로 지정할 팀 선택")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">팀장 없음</SelectItem>
+                          <SelectItem value="none">{t("agentsNoTeamLead", "팀장 없음")}</SelectItem>
                           {teams
                             .filter((t) => editForm.teams.includes(t.id))
                             .map((team) => (
@@ -999,10 +1005,10 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
 
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setEditingAgent(null)}>
-              취소
+              {copy.commonCancel}
             </Button>
             <Button onClick={handleEdit} disabled={isSaving}>
-              {isSaving ? "저장 중..." : "저장"}
+              {isSaving ? t("commonSaving", "저장 중...") : copy.commonSave}
             </Button>
           </div>
         </DialogContent>

@@ -119,7 +119,7 @@ export function TemplateForm({
       });
 
       if (res.ok) {
-        toast.success(template ? "템플릿이 수정되었습니다." : "템플릿이 생성되었습니다.");
+        toast.success(template ? t("templatesSaveUpdateSuccess", "템플릿이 수정되었습니다.") : t("templatesSaveSuccess", "템플릿이 생성되었습니다."));
         onSuccess();
       } else {
         const data = await res.json();
@@ -146,25 +146,25 @@ export function TemplateForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="title">템플릿 제목 *</Label>
+        <Label htmlFor="title">{t("templatesTitleLabel", "템플릿 제목 *")}</Label>
         <Input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="예: 로그인 오류 안내"
+          placeholder={t("templatesTitlePlaceholder", "예: 로그인 오류 안내")}
           required
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="category">카테고리</Label>
+          <Label htmlFor="category">{t("templatesCategorySelect", "카테고리")}</Label>
           <Select value={categoryId || "none"} onValueChange={(v) => setCategoryId(v === "none" ? "" : v)}>
             <SelectTrigger>
-              <SelectValue placeholder="카테고리 선택" />
+              <SelectValue placeholder={t("templatesCategorySelect", "카테고리 선택")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">선택 안 함</SelectItem>
+              <SelectItem value="none">{t("templatesNoneOption", "선택 안 함")}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
@@ -175,13 +175,13 @@ export function TemplateForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="requestType">추천 문의 유형</Label>
+          <Label htmlFor="requestType">{t("templatesFormRequestType", "추천 문의 유형")}</Label>
           <Select value={requestTypeId || "none"} onValueChange={(v) => setRequestTypeId(v === "none" ? "" : v)}>
             <SelectTrigger>
-              <SelectValue placeholder="문의 유형 선택" />
+              <SelectValue placeholder={t("templatesFormRequestTypeSelect", "문의 유형 선택")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="none">선택 안 함</SelectItem>
+              <SelectItem value="none">{t("templatesNoneOption", "선택 안 함")}</SelectItem>
               {requestTypes.map((rt) => (
                 <SelectItem key={rt.id} value={rt.id}>
                   {rt.name}
@@ -193,7 +193,7 @@ export function TemplateForm({
       </div>
 
       <div className="space-y-2">
-        <Label>사용 가능한 변수</Label>
+        <Label>{t("templatesFormAvailableVars", "사용 가능한 변수")}</Label>
         <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg">
           {DEFAULT_VARIABLES.map((variable) => (
             <button
@@ -210,22 +210,22 @@ export function TemplateForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="content">템플릿 내용 *</Label>
+        <Label htmlFor="content">{t("templatesFormContent", "템플릿 내용 *")}</Label>
         <Textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="템플릿 내용을 입력하세요. 변수를 사용하려면 위의 버튼을 클릭하세요."
+          placeholder={t("templatesFormContentPlaceholder", "템플릿 내용을 입력하세요. 변수를 사용하려면 위의 버튼을 클릭하세요.")}
           rows={8}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label>템플릿에 사용된 변수</Label>
+        <Label>{t("templatesFormUsedVars", "템플릿에 사용된 변수")}</Label>
         <div className="flex flex-wrap gap-2 min-h-[40px] p-3 border rounded-lg">
           {variables.length === 0 ? (
-            <span className="text-sm text-gray-400">사용된 변수가 없습니다</span>
+            <span className="text-sm text-gray-400">{t("templatesFormNoVars", "사용된 변수가 없습니다")}</span>
           ) : (
             variables.map((variable) => (
               <Badge key={variable} variant="secondary" className="gap-1">
@@ -245,7 +245,7 @@ export function TemplateForm({
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="sortOrder">정렬 순서</Label>
+          <Label htmlFor="sortOrder">{t("templatesFormSortOrder", "정렬 순서")}</Label>
           <Input
             id="sortOrder"
             type="number"
@@ -263,7 +263,7 @@ export function TemplateForm({
               onCheckedChange={(checked) => setIsShared(checked === true)}
             />
             <Label htmlFor="isShared" className="text-sm cursor-pointer">
-              팀원과 공유
+              {t("templatesFormShareWithTeam", "팀원과 공유")}
             </Label>
           </div>
         </div>
@@ -276,7 +276,7 @@ export function TemplateForm({
               onCheckedChange={(checked) => setIsRecommended(checked === true)}
             />
             <Label htmlFor="isRecommended" className="text-sm cursor-pointer">
-              추천 템플릿으로 표시
+              {t("templatesFormMarkRecommended", "추천 템플릿으로 표시")}
             </Label>
           </div>
         </div>
@@ -285,10 +285,9 @@ export function TemplateForm({
       <div className="flex items-start gap-2 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">
         <Info className="h-4 w-4 mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium">템플릿 사용 방법</p>
+          <p className="font-medium">{t("templatesFormHowToUseTitle", "템플릿 사용 방법")}</p>
           <p className="mt-1">
-            템플릿을 저장하면 티켓 응답 작성 시 &quot;템플릿&quot; 버튼을 통해 빠르게 불러올 수 있습니다.
-            문의 유형을 지정하면 해당 유형의 티켓에 추천 템플릿으로 표시됩니다.
+            {t("templatesFormHowToUseDesc", "템플릿을 저장하면 티켓 응답 작성 시 \"템플릿\" 버튼을 통해 빠르게 불러올 수 있습니다. 문의 유형을 지정하면 해당 유형의 티켓에 추천 템플릿으로 표시됩니다.")}
           </p>
         </div>
       </div>
@@ -296,7 +295,7 @@ export function TemplateForm({
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button type="submit" disabled={loading}>
           {loading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-          {template ? "수정하기" : "생성하기"}
+          {template ? t("templatesFormUpdate", "수정하기") : t("templatesFormCreate", "생성하기")}
         </Button>
       </div>
     </form>

@@ -107,7 +107,7 @@ export function TemplateList({
       });
 
       if (res.ok) {
-        toast.success("템플릿이 삭제되었습니다.");
+        toast.success(t("templatesDeleteSuccess", "템플릿이 삭제되었습니다."));
         router.refresh();
       } else {
         const data = await res.json();
@@ -130,7 +130,7 @@ export function TemplateList({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="템플릿 검색"
+              placeholder={t("templatesSearchPlaceholder", "템플릿 검색")}
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               className="pl-10"
@@ -148,7 +148,7 @@ export function TemplateList({
             <DialogHeader>
               <DialogTitle>{t("commonCreate", "생성")} {t("templatesTitle", "템플릿")}</DialogTitle>
               <DialogDescription>
-                자주 사용하는 응답 템플릿을 생성합니다.
+                {t("templatesCreateDescription", "자주 사용하는 응답 템플릿을 생성합니다.")}
               </DialogDescription>
             </DialogHeader>
             <TemplateForm
@@ -167,13 +167,13 @@ export function TemplateList({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[300px]">제목</TableHead>
-              <TableHead>카테고리</TableHead>
-              <TableHead>문의 유형</TableHead>
-              <TableHead>공유</TableHead>
-              <TableHead>추천</TableHead>
-              <TableHead>작성자</TableHead>
-              <TableHead className="text-right">관리</TableHead>
+              <TableHead className="w-[300px]">{copy.commonTitle}</TableHead>
+              <TableHead>{t("templatesCategorySelect", "카테고리")}</TableHead>
+              <TableHead>{t("templatesColRequestType", "문의 유형")}</TableHead>
+              <TableHead>{t("templatesColShared", "공유")}</TableHead>
+              <TableHead>{t("templatesColRecommended", "추천")}</TableHead>
+              <TableHead>{t("templatesColAuthor", "작성자")}</TableHead>
+              <TableHead className="text-right">{copy.commonActions}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -181,7 +181,7 @@ export function TemplateList({
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>등록된 템플릿이 없습니다</p>
+                  <p>{t("templatesEmpty", "등록된 템플릿이 없습니다")}</p>
                 </TableCell>
               </TableRow>
             ) : (
@@ -209,7 +209,7 @@ export function TemplateList({
                     {template.requestTypeId ? (
                       <Badge variant="secondary">
                         {requestTypes.find((rt) => rt.id === template.requestTypeId)?.name ||
-                          "알 수 없음"}
+                          t("commonUnknown", "알 수 없음")}
                       </Badge>
                     ) : (
                       <span className="text-gray-400">-</span>
@@ -219,17 +219,17 @@ export function TemplateList({
                     {template.isShared ? (
                       <div className="flex items-center gap-1 text-green-600">
                         <Users className="h-4 w-4" />
-                        <span className="text-xs">공유</span>
+                        <span className="text-xs">{t("templatesShared", "공유")}</span>
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-400">개인</span>
+                      <span className="text-xs text-gray-400">{t("templatesPrivate", "개인")}</span>
                     )}
                   </TableCell>
                   <TableCell>
                     {template.isRecommended ? (
                       <Badge variant="default" className="text-xs">
                         <Sparkles className="h-3 w-3 mr-1" />
-                        추천
+                        {t("templatesColRecommended", "추천")}
                       </Badge>
                     ) : (
                       <span className="text-gray-400">-</span>
@@ -255,9 +255,9 @@ export function TemplateList({
                             </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>템플릿 수정</DialogTitle>
+                              <DialogTitle>{t("templatesEditTitle", "템플릿 수정")}</DialogTitle>
                               <DialogDescription>
-                                템플릿 정보를 수정합니다.
+                                {t("templatesEditDescription", "템플릿 정보를 수정합니다.")}
                               </DialogDescription>
                             </DialogHeader>
                               {editingTemplate && (
@@ -298,20 +298,20 @@ export function TemplateList({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>템플릿 삭제</AlertDialogTitle>
+            <AlertDialogTitle>{t("templatesDeleteTitle", "템플릿 삭제")}</AlertDialogTitle>
             <AlertDialogDescription>
-              &quot;{deletingTemplate?.title}&quot; 템플릿을 삭제하시겠습니까?
+              &quot;{deletingTemplate?.title}&quot;
               <br />
-              이 작업은 되돌릴 수 없습니다.
+              {t("commonIrreversible", "이 작업은 되돌릴 수 없습니다.")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>취소</AlertDialogCancel>
+            <AlertDialogCancel>{copy.commonCancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deletingTemplate && handleDelete(deletingTemplate)}
               className="bg-red-500 hover:bg-red-600"
             >
-              삭제
+              {copy.commonDelete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

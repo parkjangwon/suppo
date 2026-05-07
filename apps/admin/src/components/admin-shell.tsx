@@ -109,7 +109,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           className="pointer-events-none absolute inset-y-0 left-0 w-[3px]"
           style={{ background: `linear-gradient(180deg, ${branding.primaryColor}55 0%, ${branding.primaryColor}12 100%)` }}
         />
-        <SidebarBrand adminPanelTitle={branding.adminPanelTitle} />
+        <SidebarBrand adminPanelTitle={branding.adminPanelTitle} copy={copy} />
         <SidebarNavigation sections={navSections} pathname={pathname} className="flex-1 overflow-y-auto px-3 py-4" />
         <div className="border-t border-border/70 bg-background/70 px-3 py-3 backdrop-blur">
           <div className="mb-2 flex justify-end">
@@ -118,6 +118,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <SidebarLocaleSwitch
             currentLocale={currentLocale}
             onToggle={() => handleLocaleChange(currentLocale === "ko" ? "en" : "ko")}
+            copy={copy}
           />
           <SidebarUserSummary
             isLoading={isLoading}
@@ -176,6 +177,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <SidebarLocaleSwitch
               currentLocale={currentLocale}
               onToggle={() => handleLocaleChange(currentLocale === "ko" ? "en" : "ko")}
+              copy={copy}
             />
             <SidebarUserSummary
               isLoading={isLoading}
@@ -194,7 +196,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SidebarBrand({ adminPanelTitle }: { adminPanelTitle: string }) {
+function SidebarBrand({ adminPanelTitle, copy }: { adminPanelTitle: string; copy: ReturnType<typeof useAdminCopy> }) {
   return (
     <div className="border-b border-border/70 px-4 py-4">
       <Link
@@ -208,7 +210,9 @@ function SidebarBrand({ adminPanelTitle }: { adminPanelTitle: string }) {
           <div className="truncate text-[15px] font-semibold tracking-tight text-foreground">
             {adminPanelTitle}
           </div>
-          <div className="text-[11px] font-medium text-muted-foreground">Console</div>
+          <div className="text-[11px] font-medium text-muted-foreground">
+            {copyText(copy, "commonConsole", "Console")}
+          </div>
         </div>
       </Link>
     </div>
@@ -334,9 +338,11 @@ function SidebarNavigation({
 function SidebarLocaleSwitch({
   currentLocale,
   onToggle,
+  copy,
 }: {
   currentLocale: "ko" | "en";
   onToggle: () => void;
+  copy: ReturnType<typeof useAdminCopy>;
 }) {
   return (
     <button
@@ -348,10 +354,12 @@ function SidebarLocaleSwitch({
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          Language
+          {copyText(copy, "commonLanguage", "Language")}
         </div>
         <div className="text-sm font-medium text-foreground">
-          {currentLocale === "ko" ? "한국어 → English" : "English → 한국어"}
+          {currentLocale === "ko"
+            ? copyText(copy, "commonSwitchToEn", "한국어 → English")
+            : copyText(copy, "commonSwitchToKo", "English → 한국어")}
         </div>
       </div>
       <Check className="h-4 w-4 text-primary" />

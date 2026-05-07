@@ -5,6 +5,7 @@ import { ShieldAlert } from "lucide-react";
 import { Button } from "@suppo/ui/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
+import { copyText } from "@/lib/i18n/admin-copy-utils";
 
 interface AdminOnlyPageStateProps {
   title: string;
@@ -25,7 +26,7 @@ export function AdminOnlyPageState({
             <ShieldAlert className="h-6 w-6" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-medium text-muted-foreground">관리자 전용 페이지</p>
+            <p className="text-sm font-medium text-muted-foreground">{copyText(copy, "adminOnlyPageLabel", "관리자 전용 페이지")}</p>
             <CardTitle className="text-2xl">{title}</CardTitle>
           </div>
         </CardHeader>
