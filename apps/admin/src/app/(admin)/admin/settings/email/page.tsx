@@ -22,7 +22,7 @@ export default async function EmailSettingsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsEmail}
-        description="이메일 발송 계정과 알림 정책은 관리자만 변경할 수 있습니다."
+        description={copy.settingsEmailAdminOnly}
       />
     );
   }
@@ -32,7 +32,7 @@ export default async function EmailSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{copy.settingsEmail}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          SMTP 서버 연동 및 이메일 알림 설정을 관리합니다.
+          {copy.settingsEmailDesc}
         </p>
       </div>
 

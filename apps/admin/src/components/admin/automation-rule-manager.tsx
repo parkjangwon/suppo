@@ -376,7 +376,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                 aria-label={t("automationConditionCustomerEmail", "고객 이메일 조건")}
                 value={form.conditionCustomerEmail}
                 onChange={(e) => setForm((prev) => ({ ...prev, conditionCustomerEmail: e.target.value }))}
-                placeholder="예: .*@enterprise.com"
+                placeholder={t("automationEmailPlaceholder", "예: .*@enterprise.com")}
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -385,7 +385,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                 aria-label={t("automationConditionKeywords", "키워드 조건")}
                 value={form.conditionKeywords}
                 onChange={(e) => setForm((prev) => ({ ...prev, conditionKeywords: e.target.value }))}
-                placeholder="예: 결제, 장애, 환불"
+                placeholder={t("automationKeywordsPlaceholder", "예: 결제, 장애, 환불")}
               />
             </div>
             <div className="space-y-2">
@@ -411,7 +411,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                 step="1"
                 value={form.conditionCreatedHoursAgo}
                 onChange={(e) => setForm((prev) => ({ ...prev, conditionCreatedHoursAgo: e.target.value }))}
-                placeholder="예: 24"
+                placeholder={t("automationHoursPlaceholder", "예: 24")}
               />
             </div>
             <div className="space-y-2">
@@ -423,7 +423,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                 step="1"
                 value={form.conditionUpdatedHoursAgo}
                 onChange={(e) => setForm((prev) => ({ ...prev, conditionUpdatedHoursAgo: e.target.value }))}
-                placeholder="예: 24"
+                placeholder={t("automationHoursPlaceholder", "예: 24")}
               />
             </div>
             <div className="space-y-2">
@@ -484,7 +484,7 @@ export function AutomationRuleManager({ agents, teams }: AutomationRuleManagerPr
                 aria-label={t("automationActionAddTags", "추가 태그")}
                 value={form.actionAddTags}
                 onChange={(e) => setForm((prev) => ({ ...prev, actionAddTags: e.target.value }))}
-                placeholder="예: vip, urgent-followup"
+                placeholder={t("automationTagsPlaceholder", "예: vip, urgent-followup")}
               />
             </div>
             <div className="flex items-center justify-between rounded-lg border p-3 md:col-span-2">

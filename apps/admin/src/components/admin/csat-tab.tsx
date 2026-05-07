@@ -103,7 +103,7 @@ export function CSATTab({ ticketId }: CSATTabProps) {
           </div>
         )}
         <div className="text-center text-sm text-muted-foreground">
-          {t("csatSubmittedAt", "응답일:")} {new Date(csat.submittedAt).toLocaleDateString("ko-KR")}
+          {t("csatSubmittedAt", "응답일:")} {new Date(csat.submittedAt).toLocaleDateString(copy.locale === "en" ? "en-US" : "ko-KR")}
         </div>
       </CardContent>
     </Card>

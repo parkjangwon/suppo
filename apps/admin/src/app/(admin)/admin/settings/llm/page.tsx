@@ -22,7 +22,7 @@ export default async function LLMSettingsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsLLM}
-        description="LLM 제공자와 분석 정책 변경은 관리자만 수행할 수 있습니다."
+        description={copy.settingsLLMAdminOnly}
       />
     );
   }
@@ -32,7 +32,7 @@ export default async function LLMSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{copy.settingsLLM}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ollama 또는 Gemini 연동과 분석 프롬프트를 관리합니다.
+          {copy.settingsLLMDesc}
         </p>
       </div>
 

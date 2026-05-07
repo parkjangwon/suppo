@@ -23,7 +23,7 @@ export default async function CustomFieldsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsCustomFields}
-        description="티켓 스키마를 바꾸는 커스텀 필드 설정은 관리자만 변경할 수 있습니다."
+        description={copy.settingsCustomFieldsAdminOnly}
       />
     );
   }
@@ -38,7 +38,7 @@ export default async function CustomFieldsPage() {
         <div>
           <h1 className="text-2xl font-bold">{copy.settingsCustomFields}</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            티켓에 추가 정보를 저장하는 사용자 정의 필드를 관리합니다.
+            {copy.settingsCustomFieldsDesc}
           </p>
         </div>
       </div>

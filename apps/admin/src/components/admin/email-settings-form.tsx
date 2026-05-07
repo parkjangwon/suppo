@@ -169,8 +169,7 @@ export function EmailSettingsForm() {
       }
 
       toast.success(
-        copy.emailTestSendSuccess ??
-          `테스트 메일을 발송했습니다. 수신자: ${payload.recipient}`,
+        (copy.emailTestSendSuccess ?? "테스트 메일을 발송했습니다. 수신자: {recipient}").replace("{recipient}", payload.recipient),
       );
     } catch (error) {
       toast.error(error instanceof Error ? error.message : (copy.emailTestSendFailed ?? "테스트 메일 발송에 실패했습니다."));

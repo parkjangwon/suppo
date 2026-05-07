@@ -304,7 +304,7 @@ export function TicketList({
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">
                 <Checkbox
-                  aria-label="전체 선택"
+                  aria-label={t("commonSelectAll", "전체 선택")}
                   checked={allVisibleSelected}
                   onCheckedChange={(checked) => toggleVisibleTickets(Boolean(checked))}
                 />
@@ -377,7 +377,7 @@ export function TicketList({
                   )}
                 </td>
                 <td className="px-4 py-3 text-sm text-gray-500">
-                  {new Date(ticket.createdAt).toLocaleDateString("ko-KR")}
+                  {new Date(ticket.createdAt).toLocaleDateString(copy.locale === "en" ? "en-US" : "ko-KR")}
                 </td>
               </tr>
             ))}

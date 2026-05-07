@@ -299,8 +299,10 @@ export function AuditLogList({ initialLogs, initialPagination, analysisEnabled }
         {!isLoading && pagination.totalPages > 1 && (
           <div className="flex items-center justify-between px-4 py-4 border-t">
             <div className="text-sm text-muted-foreground">
-              총 {pagination.total}개 중 {(pagination.page - 1) * pagination.limit + 1}-
-              {Math.min(pagination.page * pagination.limit, pagination.total)}개
+              {(copy.paginationTotal ?? "총 {total}건 중 {start}-{end}")
+                .replace("{total}", String(pagination.total))
+                .replace("{start}", String((pagination.page - 1) * pagination.limit + 1))
+                .replace("{end}", String(Math.min(pagination.page * pagination.limit, pagination.total)))}
             </div>
             <div className="flex items-center space-x-2">
               <Button

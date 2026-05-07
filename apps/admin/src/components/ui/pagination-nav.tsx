@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@suppo/ui/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface PaginationNavProps {
   page: number;
@@ -14,6 +15,7 @@ interface PaginationNavProps {
 export function PaginationNav({ page, totalPages, totalCount, pageSize }: PaginationNavProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const copy = useAdminCopy();
 
   if (totalPages <= 1) return null;
 
@@ -36,7 +38,10 @@ export function PaginationNav({ page, totalPages, totalCount, pageSize }: Pagina
   return (
     <div className="flex items-center justify-between pt-2">
       <p className="text-sm text-muted-foreground">
-        총 {totalCount.toLocaleString()}건 중 {start}-{end}
+        {(copy.paginationTotal ?? "총 {total}건 중 {start}-{end}")
+          .replace("{total}", totalCount.toLocaleString())
+          .replace("{start}", String(start))
+          .replace("{end}", String(end))}
       </p>
       <div className="flex items-center gap-1">
         <Button
@@ -44,7 +49,7 @@ export function PaginationNav({ page, totalPages, totalCount, pageSize }: Pagina
           size="sm"
           onClick={() => goTo(page - 1)}
           disabled={page === 1}
-          aria-label="이전 페이지"
+          aria-label={copy.paginationPrev ?? "이전 페이지"}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -72,7 +77,7 @@ export function PaginationNav({ page, totalPages, totalCount, pageSize }: Pagina
           size="sm"
           onClick={() => goTo(page + 1)}
           disabled={page === totalPages}
-          aria-label="다음 페이지"
+          aria-label={copy.paginationNext ?? "다음 페이지"}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

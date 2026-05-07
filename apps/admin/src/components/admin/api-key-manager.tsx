@@ -203,7 +203,7 @@ export function ApiKeyManager() {
                     </div>
                   ) : null}
                   <div className="text-xs text-muted-foreground">
-                    {copy.gitApiKeyLastUsed ?? "마지막 사용"}: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString("ko-KR") : (copy.commonNone ?? "없음")}
+                    {copy.gitApiKeyLastUsed ?? "마지막 사용"}: {apiKey.lastUsedAt ? new Date(apiKey.lastUsedAt).toLocaleString(copy.locale === "en" ? "en-US" : "ko-KR") : (copy.commonNone ?? "없음")}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {copy.apiKeyPermissions ?? "권한"}: {apiKey.scopes.join(", ")}
@@ -287,7 +287,7 @@ export function ApiKeyManager() {
                       aria-label={`new-api-key-scope-${scope.id}`}
                       onCheckedChange={(checked) => toggleScope(scope.id, Boolean(checked))}
                     />
-                    <span>{scope.label}</span>
+                    <span>{copy[scope.copyKey] ?? scope.label}</span>
                   </label>
                 ))}
               </div>

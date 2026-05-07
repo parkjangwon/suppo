@@ -31,7 +31,7 @@ export default async function AdminCustomersPage({
     return (
       <AdminOnlyPageState
         title={copy.navCustomers}
-        description="고객 목록과 메모 관리는 관리자만 접근할 수 있습니다."
+        description={copy.customersAdminOnly}
       />
     );
   }
@@ -41,11 +41,11 @@ export default async function AdminCustomersPage({
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">
-            고객 관리
+            {copy.navCustomers}
           </h1>
         </div>
         <p className="text-muted-foreground">
-          DATABASE_URL이 설정되지 않아 목록을 불러올 수 없습니다.
+          {copy.customersDbError}
         </p>
       </div>
     );
@@ -89,7 +89,7 @@ export default async function AdminCustomersPage({
         <div>
           <h1 className="text-2xl font-bold">{copy.navCustomers}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            고객 목록 조회 및 관리
+            {copy.customersSubtitle}
           </p>
         </div>
       </div>

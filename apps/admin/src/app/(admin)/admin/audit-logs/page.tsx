@@ -27,7 +27,7 @@ export default async function AdminAuditLogsPage() {
     return (
       <AdminOnlyPageState
         title={copy.navAuditLogs}
-        description="시스템 감사 로그는 관리자만 조회할 수 있습니다."
+        description={copy.auditLogsAdminOnly}
       />
     );
   }
@@ -62,7 +62,7 @@ export default async function AdminAuditLogsPage() {
         <div>
           <h1 className="text-2xl font-bold">{copy.navAuditLogs}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            시스템 내 모든 활동 내역을 조회하고 추적합니다.
+            {copy.auditLogsSubtitle}
           </p>
         </div>
       </div>

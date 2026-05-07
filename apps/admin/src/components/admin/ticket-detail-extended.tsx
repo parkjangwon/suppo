@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatPhoneNumber } from "@suppo/shared/utils/phone-format";
@@ -42,6 +42,8 @@ interface TicketDetailProps {
 export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }: TicketDetailProps) {
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
+  const dateLocale = copy.locale === "en" ? enUS : ko;
+  const dateFormatFull = copy.dateFormatFull ?? "yyyy년 MM월 dd일 HH:mm";
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isGeneratingSuggestion, setIsGeneratingSuggestion] = useState(false);
@@ -147,7 +149,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
             <Badge variant="outline">{ticket.ticketNumber}</Badge>
           </div>
             <p className="text-sm text-muted-foreground">
-            {t("commonCreate", "생성일")}: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
+            {t("commonCreate", "생성일")}: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: dateLocale })}
           </p>
           <TicketViewingIndicator viewers={viewers} />
         </div>
@@ -236,7 +238,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                       {ticket.customerName} ({ticket.customerEmail})
                     </CardTitle>
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
+                      {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: dateLocale })}
                     </span>
                   </div>
                 </CardHeader>
@@ -364,18 +366,18 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
               </div>
               <div>
                 <div className="text-sm font-medium text-muted-foreground">{t("commonCreate", "생성일")}</div>
-                <div>{format(new Date(ticket.createdAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}</div>
+                <div>{format(new Date(ticket.createdAt), dateFormatFull, { locale: dateLocale })}</div>
               </div>
               {ticket.resolvedAt && (
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">{t("ticketStatusResolved", "해결일")}</div>
-                  <div>{format(new Date(ticket.resolvedAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}</div>
+                  <div>{format(new Date(ticket.resolvedAt), dateFormatFull, { locale: dateLocale })}</div>
                 </div>
               )}
               {ticket.closedAt && (
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">{t("ticketStatusClosed", "종료일")}</div>
-                  <div>{format(new Date(ticket.closedAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}</div>
+                  <div>{format(new Date(ticket.closedAt), dateFormatFull, { locale: dateLocale })}</div>
                 </div>
               )}
             </CardContent>

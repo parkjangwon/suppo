@@ -33,29 +33,29 @@ interface SystemBranding {
   customCss?: string;
 }
 
-const defaultFormData: SystemBranding = {
-  companyName: "Suppo",
-  logoUrl: "",
-  faviconUrl: "",
-  primaryColor: "#0f172a",
-  secondaryColor: "#3b82f6",
-  homepageTitle: "Suppo",
-  homepageSubtitle: "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
-  adminPanelTitle: "Suppo Admin",
-  appTitle: "고객 지원 센터",
-  welcomeMessage: "무엇을 도와드릴까요?",
-  footerText: "© 2026 parkjangwon. All rights reserved.",
-  footerPhone: "",
-  footerEmail: "",
-  footerHomepage: "",
-  footerAddress: "",
-  showPoweredBy: true,
-  knowledgeEnabled: true,
-  customCss: "",
-};
-
 export function BrandingForm() {
   const copy = useAdminCopy() as Record<string, string>;
+
+  const defaultFormData: SystemBranding = {
+    companyName: "Suppo",
+    logoUrl: "",
+    faviconUrl: "",
+    primaryColor: "#0f172a",
+    secondaryColor: "#3b82f6",
+    homepageTitle: "Suppo",
+    homepageSubtitle: copy.brandingDescPlaceholder ?? "민원 티켓을 생성하고 상태를 바로 조회할 수 있습니다.",
+    adminPanelTitle: "Suppo Admin",
+    appTitle: copy.brandingAppTitlePlaceholder ?? "고객 지원 센터",
+    welcomeMessage: copy.brandingWelcomeMessagePlaceholder ?? "무엇을 도와드릴까요?",
+    footerText: "© 2026 parkjangwon. All rights reserved.",
+    footerPhone: "",
+    footerEmail: "",
+    footerHomepage: "",
+    footerAddress: "",
+    showPoweredBy: true,
+    knowledgeEnabled: true,
+    customCss: "",
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);

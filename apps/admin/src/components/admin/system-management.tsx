@@ -27,23 +27,8 @@ import { Alert, AlertDescription } from "@suppo/ui/components/ui/alert";
 
 type ResetCategory = "tickets" | "agents" | "settings" | "knowledge" | "audit_logs";
 
-const CATEGORY_LABELS: Record<ResetCategory, string> = {
-  tickets: "티켓 및 고객 데이터",
-  agents: "상담원 계정",
-  settings: "설정",
-  knowledge: "지식 베이스",
-  audit_logs: "감사 로그",
-};
-
-const CATEGORY_COPY_KEYS: Record<ResetCategory, string> = {
-  tickets: "systemResetTypeTickets",
-  agents: "systemResetTypeAgents",
-  settings: "systemResetTypeSettings",
-  knowledge: "systemResetTypeKnowledge",
-  audit_logs: "systemResetTypeAuditLogs",
-};
-
-const TOTAL_CATEGORIES = Object.keys(CATEGORY_LABELS).length;
+const RESET_CATEGORIES: ResetCategory[] = ["tickets", "agents", "settings", "knowledge", "audit_logs"];
+const TOTAL_CATEGORIES = RESET_CATEGORIES.length;
 
 /** agents 선택 시 tickets/knowledge/settings 강제, settings 선택 시 tickets 강제 */
 function enforceDependencies(
@@ -81,6 +66,14 @@ function enforceDependencies(
 
 export function SystemManagement() {
   const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
+  const CATEGORY_LABELS: Record<ResetCategory, string> = {
+    tickets: t("systemResetTypeTickets", "티켓 및 고객 데이터"),
+    agents: t("systemResetTypeAgents", "상담원 계정"),
+    settings: t("systemResetTypeSettings", "설정"),
+    knowledge: t("systemResetTypeKnowledge", "지식 베이스"),
+    audit_logs: t("systemResetTypeAuditLogs", "감사 로그"),
+  };
   // ── 백업 ────────────────────────────────────────────────────
   const [backupLoading, setBackupLoading] = useState(false);
 
@@ -175,9 +168,7 @@ export function SystemManagement() {
     if (allSelected) {
       setSelectedCategories(new Set());
     } else {
-      setSelectedCategories(
-        new Set(Object.keys(CATEGORY_LABELS) as ResetCategory[])
-      );
+      setSelectedCategories(new Set(RESET_CATEGORIES));
     }
   };
 
@@ -298,8 +289,7 @@ export function SystemManagement() {
               </Label>
             </div>
             <div className="ml-6 space-y-2">
-              {(Object.entries(CATEGORY_LABELS) as [ResetCategory, string][]).map(
-                ([key, label]) => (
+              {RESET_CATEGORIES.map((key) => (
                   <div key={key} className="flex items-center gap-2">
                     <Checkbox
                       id={`cat-${key}`}
@@ -309,10 +299,9 @@ export function SystemManagement() {
                           toggleCategory(key, !!checked);
                       }}
                     />
-                    <Label htmlFor={`cat-${key}`}>{copy[CATEGORY_COPY_KEYS[key]] ?? label}</Label>
+                    <Label htmlFor={`cat-${key}`}>{CATEGORY_LABELS[key]}</Label>
                   </div>
-                )
-              )}
+                ))}
             </div>
             {selectedCategories.has("agents") && (
               <p className="text-sm text-muted-foreground ml-6">

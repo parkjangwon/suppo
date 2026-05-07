@@ -21,7 +21,7 @@ export default async function SystemSettingsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsSystem}
-        description="백업, 복구, 초기화와 같은 시스템 작업은 관리자만 실행할 수 있습니다."
+        description={copy.settingsSystemAdminOnly}
       />
     );
   }
@@ -31,7 +31,7 @@ export default async function SystemSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{copy.settingsSystem}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          데이터 백업, 복구, 시스템 초기화를 관리합니다.
+          {copy.settingsSystemDesc}
         </p>
       </div>
       <SystemManagement />

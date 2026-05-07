@@ -233,7 +233,7 @@ export function RequestTypeList({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="문의 유형 검색"
+              placeholder={t("requestTypeSearchPlaceholder", "문의 유형 검색", "Search request types")}
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
               className="pl-10"

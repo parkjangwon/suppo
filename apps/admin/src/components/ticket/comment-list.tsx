@@ -1,6 +1,6 @@
 import NextImage from "next/image";
 import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
 import { FileText, Image as ImageIcon, Download, User, Headphones } from "lucide-react";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
@@ -34,6 +34,7 @@ function getFileIcon(mimeType?: string) {
 export function CommentList({ comments }: CommentListProps) {
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
+  const dateLocale = copy.locale === "en" ? enUS : ko;
   if (!comments || comments.length === 0) {
     return (
       <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
@@ -87,7 +88,7 @@ export function CommentList({ comments }: CommentListProps) {
                 </div>
               </div>
               <span className="text-xs text-slate-400">
-                {format(new Date(comment.createdAt), "yyyy년 MM월 dd일 HH:mm", { locale: ko })}
+                {format(new Date(comment.createdAt), copy.dateFormatFull ?? "yyyy년 MM월 dd일 HH:mm", { locale: dateLocale })}
               </span>
             </div>
             

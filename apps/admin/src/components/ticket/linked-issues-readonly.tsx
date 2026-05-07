@@ -3,8 +3,9 @@
 
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
 import type { IssueDetail, IssueFullDetail, GitProvider } from "@suppo/shared/git/provider";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import {
   getStateBadgeClass,
   getLabelTextColor,
@@ -27,6 +28,9 @@ interface LinkedIssuesReadonlyProps {
 }
 
 export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesReadonlyProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
+  const dateLocale = copy.locale === "en" ? enUS : ko;
   const [issueDetails, setIssueDetails] = useState<Record<string, IssueDetail | null | undefined>>({});
   const [, setIsLoadingDetails] = useState(false);
   const [expandedIssues, setExpandedIssues] = useState<Set<string>>(new Set());
@@ -86,7 +90,7 @@ export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesRea
 
   return (
     <section className="mt-8 space-y-4 border-t pt-8">
-      <h3 className="text-lg font-medium">연결된 이슈</h3>
+      <h3 className="text-lg font-medium">{t("gitLinkedIssues", "연결된 이슈")}</h3>
       <ul className="space-y-2">
         {initialLinks.map((link) => {
           const basicDetail = issueDetails[link.id];
@@ -141,14 +145,14 @@ export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesRea
                     </div>
                   )}
                   {fullDetail === null && (
-                    <p className="text-xs text-slate-400">상세 정보를 불러올 수 없습니다.</p>
+                    <p className="text-xs text-slate-400">{t("gitIssueDetailLoadFailed", "상세 정보를 불러올 수 없습니다.")}</p>
                   )}
                   {fullDetail && (
                     <div className="space-y-3 text-xs text-slate-600">
                       {/* 기본 정보 */}
                       <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
                         {fullDetail.assignees.length > 0 && (
-                          <span>담당자: {fullDetail.assignees.map((a) => a.login).join(", ")}</span>
+                          <span>{t("gitAssigneesLabel", "담당자")}: {fullDetail.assignees.map((a) => a.login).join(", ")}</span>
                         )}
                         {fullDetail.labels.length > 0 && (
                           <div className="flex flex-wrap gap-1">
@@ -167,17 +171,17 @@ export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesRea
                           </div>
                         )}
                         {fullDetail.milestone && (
-                          <span>마일스톤: {formatMilestone(fullDetail.milestone)}</span>
+                          <span>{t("gitMilestoneLabel", "마일스톤")}: {formatMilestone(fullDetail.milestone)}</span>
                         )}
                         <span className="text-slate-400 ml-auto">
-                          {formatDistanceToNow(new Date(fullDetail.updatedAt), { addSuffix: true, locale: ko })} 업데이트
+                          {formatDistanceToNow(new Date(fullDetail.updatedAt), { addSuffix: true, locale: dateLocale })} {t("gitUpdatedSuffix", "업데이트")}
                         </span>
                       </div>
 
                       {/* PR 섹션 */}
                       {fullDetail.linkedPRs.length > 0 && (
                         <div className="space-y-1.5">
-                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">연결된 Pull Request</p>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t("gitLinkedPRs", "연결된 Pull Request")}</p>
                           {fullDetail.linkedPRs.map((pr) => {
                             const reviewText = getReviewDecisionText(pr.reviewDecision);
                             return (
@@ -228,13 +232,13 @@ export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesRea
                       {/* 코멘트 섹션 */}
                       {fullDetail.comments.length > 0 && (
                         <div className="space-y-1.5">
-                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">코멘트</p>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">{t("gitComments", "코멘트")}</p>
                           {fullDetail.comments.map((comment) => (
                             <div key={comment.id} className="border rounded-md p-2 bg-white space-y-1">
                               <div className="flex items-center gap-1.5">
                                 <span className="font-medium">{comment.author.login}</span>
                                 <span className="text-slate-400">
-                                  · {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: ko })}
+                                  · {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: dateLocale })}
                                 </span>
                               </div>
                               <p className="text-slate-600 line-clamp-3 whitespace-pre-wrap">{comment.body}</p>
@@ -247,7 +251,7 @@ export function LinkedIssuesReadonly({ ticketId, initialLinks }: LinkedIssuesRea
                               rel="noreferrer"
                               className="text-indigo-600 hover:underline text-xs block text-right"
                             >
-                              GitHub에서 전체 보기 ({fullDetail.commentCount}개) →
+                              {t("gitViewAllOnGitHub", "GitHub에서 전체 보기")} ({fullDetail.commentCount}{t("commonCountSuffix", "개")}) →
                             </a>
                           )}
                         </div>

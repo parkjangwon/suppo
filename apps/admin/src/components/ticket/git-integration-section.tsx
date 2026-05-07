@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@suppo/ui/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
 import { toast } from "sonner";
 import type { IssueDetail, IssueFullDetail, GitProvider } from "@suppo/shared/git/provider";
 import {
@@ -55,6 +55,7 @@ export function GitIntegrationSection({
 }: GitIntegrationSectionProps) {
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
+  const dateLocale = copy.locale === "en" ? enUS : ko;
   const [provider, setProvider] = useState<GitProvider>("GITHUB");
   const [repoFullName, setRepoFullName] = useState("");
   const [query, setQuery] = useState("");
@@ -387,7 +388,7 @@ export function GitIntegrationSection({
                           {/* 기본 정보 */}
                           <div className="flex flex-wrap gap-x-4 gap-y-1 items-center">
                             {fullDetail.assignees.length > 0 && (
-                              <span>담당자: {fullDetail.assignees.map((a) => a.login).join(", ")}</span>
+                              <span>{t("gitAssigneesLabel", "담당자")}: {fullDetail.assignees.map((a) => a.login).join(", ")}</span>
                             )}
                             {fullDetail.labels.length > 0 && (
                               <div className="flex flex-wrap gap-1">
@@ -406,10 +407,10 @@ export function GitIntegrationSection({
                               </div>
                             )}
                             {fullDetail.milestone && (
-                              <span>마일스톤: {formatMilestone(fullDetail.milestone)}</span>
+                              <span>{t("gitMilestoneLabel", "마일스톤")}: {formatMilestone(fullDetail.milestone)}</span>
                             )}
                             <span className="text-slate-400 ml-auto">
-                              {formatDistanceToNow(new Date(fullDetail.updatedAt), { addSuffix: true, locale: ko })} 업데이트
+                              {formatDistanceToNow(new Date(fullDetail.updatedAt), { addSuffix: true, locale: dateLocale })} {t("gitUpdatedSuffix", "업데이트")}
                             </span>
                           </div>
 
@@ -473,7 +474,7 @@ export function GitIntegrationSection({
                                   <div className="flex items-center gap-1.5">
                                     <span className="font-medium">{comment.author.login}</span>
                                     <span className="text-slate-400">
-                                      · {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: ko })}
+                                      · {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: dateLocale })}
                                     </span>
                                   </div>
                                   <p className="text-slate-600 line-clamp-3 whitespace-pre-wrap">{comment.body}</p>
@@ -486,7 +487,7 @@ export function GitIntegrationSection({
                                   rel="noreferrer"
                                   className="text-indigo-600 hover:underline text-xs block text-right"
                                 >
-                                  {t("commonView", "GitHub에서 전체 보기")} ({fullDetail.commentCount}개) →
+                                  {t("gitViewAllOnGitHub", "GitHub에서 전체 보기")} ({fullDetail.commentCount}{t("commonCountSuffix", "개")}) →
                                 </a>
                               )}
                             </div>

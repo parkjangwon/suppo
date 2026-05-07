@@ -96,10 +96,13 @@ export function VIPCustomersTable({ preset }: VIPCustomersTableProps) {
 }
 
 function VIPReasonBadge({ reason }: { reason: string }) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const variants: Record<string, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-    "high-volume": { label: "높은 이용", variant: "default" },
-    "high-priority": { label: "고위험", variant: "destructive" },
-    "long-term": { label: "장기 고객", variant: "secondary" },
+    "high-volume": { label: t("analyticsVipReasonHighVolume", "높은 이용", "High volume"), variant: "default" },
+    "high-priority": { label: t("analyticsVipReasonHighPriority", "고위험", "High priority"), variant: "destructive" },
+    "long-term": { label: t("analyticsVipReasonLongTerm", "장기 고객", "Long-term customer"), variant: "secondary" },
   };
 
   const config = variants[reason] ?? { label: reason, variant: "outline" };

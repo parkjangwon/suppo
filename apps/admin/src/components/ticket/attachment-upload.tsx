@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { X, Upload } from "lucide-react";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface AttachmentUploadProps {
   files: File[];
@@ -16,6 +17,8 @@ export function AttachmentUpload({
   maxFiles = 20,
   maxSize = 10 * 1024 * 1024,
 }: AttachmentUploadProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,13 +31,13 @@ export function AttachmentUpload({
     setError(null);
 
     if (files.length + newFiles.length > maxFiles) {
-      setError(`최대 ${maxFiles}개의 파일만 첨부할 수 있습니다.`);
+      setError(t("attachmentMaxFilesError", `최대 ${maxFiles}개의 파일만 첨부할 수 있습니다.`).replace("{n}", String(maxFiles)));
       return;
     }
 
     const validFiles = newFiles.filter((file) => {
       if (file.size > maxSize) {
-        setError(`파일 크기는 10MB를 초과할 수 없습니다: ${file.name}`);
+        setError(t("attachmentFileSizeError", `파일 크기는 10MB를 초과할 수 없습니다: ${file.name}`).replace("{file}", file.name));
         return false;
       }
       return true;
@@ -63,10 +66,10 @@ export function AttachmentUpload({
       >
         <Upload className="h-8 w-8 text-gray-400 mb-2" />
         <p className="text-sm text-gray-600">
-          클릭하거나 파일을 여기로 드래그하여 업로드하세요
+          {t("attachmentDropzoneHint", "클릭하거나 파일을 여기로 드래그하여 업로드하세요")}
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          최대 {maxFiles}개, 각 파일당 최대 10MB
+          {t("attachmentDropzoneLimit", "최대 {n}개, 각 파일당 최대 10MB").replace("{n}", String(maxFiles))}
         </p>
         <input
           type="file"

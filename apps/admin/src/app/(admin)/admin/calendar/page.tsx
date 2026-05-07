@@ -15,7 +15,7 @@ import {
   subMonths,
   parseISO,
 } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Button } from "@suppo/ui/components/ui/button";
 import {
@@ -70,6 +70,7 @@ const absenceTypeColors: Record<string, string> = {
 export default function CalendarPage() {
   const { data: session } = useSession();
   const copy = useAdminCopy();
+  const dateLocale = copy.locale === "en" ? enUS : ko;
   const absenceTypeLabels: Record<string, string> = {
     VACATION: copyText(copy, "absenceVacation", "휴가"),
     SICK_LEAVE: copyText(copy, "absenceSickLeave", "병가"),
@@ -261,7 +262,7 @@ export default function CalendarPage() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-lg font-semibold min-w-[120px] text-center">
-                {format(currentDate, "yyyy년 MM월", { locale: ko })}
+                {format(currentDate, copyText(copy, "dateFormatMonthYear", "yyyy년 MM월"), { locale: dateLocale })}
               </span>
               <Button
                 variant="outline"

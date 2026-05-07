@@ -94,7 +94,7 @@ export default async function KnowledgePage({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-6">
-            고객과 상담원을 위한 지식 문서를 관리합니다. 공개된 문서는 고객 포털에서 검색되어 볼 수 있습니다.
+            {copy.knowledgeSubtitle}
           </p>
           <KnowledgeList
             articles={articles}

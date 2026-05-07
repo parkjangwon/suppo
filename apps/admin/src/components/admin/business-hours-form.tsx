@@ -263,7 +263,7 @@ export function BusinessHoursForm() {
               <Input
                 value={newHoliday.name}
                 onChange={(e) => setNewHoliday((p) => ({ ...p, name: e.target.value }))}
-                placeholder="예: 광복절"
+                placeholder={copy.businessHoursHolidayPlaceholder ?? "예: 광복절"}
                 className="h-9"
               />
             </div>

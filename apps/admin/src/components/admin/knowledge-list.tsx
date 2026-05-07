@@ -243,7 +243,7 @@ export function KnowledgeList({
                   <TableCell>{article.viewCount.toLocaleString()}</TableCell>
                   <TableCell>{article.author?.name}</TableCell>
                   <TableCell>
-                    {new Date(article.updatedAt).toLocaleDateString("ko-KR")}
+                    {new Date(article.updatedAt).toLocaleDateString(copy.locale === "en" ? "en-US" : "ko-KR")}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
@@ -273,7 +273,7 @@ export function KnowledgeList({
                           variant="ghost"
                           size="icon"
                           asChild
-                          title="수정"
+                          title={t("commonEdit", "수정")}
                         >
                           <Link href={`/admin/knowledge/${article.id}/edit`}>
                             <Pencil className="h-4 w-4" />
@@ -287,7 +287,7 @@ export function KnowledgeList({
                               variant="ghost"
                               size="icon"
                               className="text-red-600 hover:text-red-700"
-                              title="삭제"
+                              title={t("commonDelete", "삭제")}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

@@ -367,7 +367,7 @@ export default async function ContributorsPage() {
                     <p className="font-medium text-sm">{article.title}</p>
                     <p className="text-xs text-gray-500">
                       {t("knowledgeAuthorLabel", "작성자", "Author")}: {article.author.name} ·{" "}
-                      {new Date(article.createdAt).toLocaleDateString("ko-KR")}
+                      {new Date(article.createdAt).toLocaleDateString(copy.locale === "en" ? "en-US" : "ko-KR")}
                     </p>
                   </div>
                 </div>

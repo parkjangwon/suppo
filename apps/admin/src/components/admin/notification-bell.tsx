@@ -35,7 +35,7 @@ function NotificationItem({
   const meta = TYPE_META[event.type];
   const Icon = meta.icon;
   const ts = new Date(event.timestamp);
-  const timeStr = ts.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+  const timeStr = ts.toLocaleTimeString(copy.locale === "en" ? "en-US" : "ko-KR", { hour: "2-digit", minute: "2-digit" });
 
   return (
     <div

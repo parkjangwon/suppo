@@ -57,7 +57,7 @@ export function RepeatInquiriesTable({ preset }: RepeatInquiriesTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>고객</TableHead>
+              <TableHead>{t("navCustomers", "고객", "Customers")}</TableHead>
               <TableHead className="text-right">{t("analyticsTicketCount", "티켓 수", "Tickets")}</TableHead>
               <TableHead className="text-right">{t("knowledgeCategories", "카테고리", "Categories")}</TableHead>
               <TableHead>{t("analyticsPattern", "패턴", "Pattern")}</TableHead>
@@ -92,10 +92,13 @@ export function RepeatInquiriesTable({ preset }: RepeatInquiriesTableProps) {
 }
 
 function PatternBadge({ pattern }: { pattern: string }) {
+  const copy = useAdminCopy();
+  const t = (key: string, ko: string, en?: string) =>
+    copyText(copy, key, copy.locale === "en" ? (en ?? ko) : ko);
   const variants: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-    "same-category": { label: "동일 카테고리", variant: "default" },
-    "cross-category": { label: "다양한 카테고리", variant: "secondary" },
-    "mixed": { label: "혼합", variant: "outline" },
+    "same-category": { label: t("analyticsPatternSameCategory", "동일 카테고리", "Same category"), variant: "default" },
+    "cross-category": { label: t("analyticsPatternCrossCategory", "다양한 카테고리", "Cross category"), variant: "secondary" },
+    "mixed": { label: t("analyticsPatternMixed", "혼합", "Mixed"), variant: "outline" },
   };
 
   const config = variants[pattern] ?? { label: pattern, variant: "outline" };

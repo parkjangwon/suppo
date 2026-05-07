@@ -22,7 +22,7 @@ export default async function BusinessHoursSettingsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsBusinessHours}
-        description="영업시간 및 공휴일 설정은 관리자만 변경할 수 있습니다."
+        description={copy.settingsBusinessHoursAdminOnly}
       />
     );
   }
@@ -32,7 +32,7 @@ export default async function BusinessHoursSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{copy.settingsBusinessHours}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          비즈니스 시간 및 공휴일을 설정하여 SLA 계산에 적용합니다.
+          {copy.settingsBusinessHoursDesc}
         </p>
       </div>
 

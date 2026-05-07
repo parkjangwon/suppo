@@ -92,7 +92,7 @@ export default async function TemplatesPage({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-6">
-            자주 사용하는 응답 템플릿을 관리합니다. 템플릿은 변수를 사용하여 동적으로 내용을 생성할 수 있습니다.
+            {copy.templatesSubtitle}
           </p>
           <TemplateList 
             templates={templates} 

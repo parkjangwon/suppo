@@ -202,7 +202,7 @@ export function WebhookEndpointManager() {
                     <div className="text-sm text-muted-foreground">{webhook.url}</div>
                     <div className="text-xs text-muted-foreground">{copy.webhookEventsLabel ?? "이벤트"}: {webhook.events.join(", ")}</div>
                     <div className="text-xs text-muted-foreground">
-                      {copy.webhookLastTriggered ?? "마지막 호출"}: {webhook.lastTriggeredAt ? new Date(webhook.lastTriggeredAt).toLocaleString("ko-KR") : (copy.commonNone ?? "없음")}
+                      {copy.webhookLastTriggered ?? "마지막 호출"}: {webhook.lastTriggeredAt ? new Date(webhook.lastTriggeredAt).toLocaleString(locale === "en" ? "en-US" : "ko-KR") : (copy.commonNone ?? "없음")}
                     </div>
                     {webhook.lastStatusCode ? (
                       <div className="text-xs text-muted-foreground">{copy.webhookResponseCode ?? "최근 응답 코드"}: {webhook.lastStatusCode}</div>
@@ -247,7 +247,7 @@ export function WebhookEndpointManager() {
                               {delivery.isTest ? (copy.webhookTestLabel ?? " · 테스트") : ""}
                             </span>
                             <span className="text-muted-foreground">
-                              {new Date(delivery.createdAt).toLocaleString("ko-KR")}
+                              {new Date(delivery.createdAt).toLocaleString(locale === "en" ? "en-US" : "ko-KR")}
                             </span>
                           </div>
                           <div className="mt-1 text-muted-foreground">
@@ -278,7 +278,7 @@ export function WebhookEndpointManager() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="webhook-name">{copy.commonName ?? "이름"}</Label>
-              <Input id="webhook-name" aria-label="Webhook 이름" value={name} onChange={(event) => setName(event.target.value)} />
+              <Input id="webhook-name" aria-label={copy.webhookNameAriaLabel ?? "Webhook 이름"} value={name} onChange={(event) => setName(event.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="webhook-url">URL</Label>
@@ -286,7 +286,7 @@ export function WebhookEndpointManager() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="webhook-secret">{copy.webhookSecretLabel ?? "서명 시크릿"}</Label>
-              <Input id="webhook-secret" aria-label="Webhook 시크릿" value={secret} onChange={(event) => setSecret(event.target.value)} />
+              <Input id="webhook-secret" aria-label={copy.webhookSecretAriaLabel ?? "Webhook 시크릿"} value={secret} onChange={(event) => setSecret(event.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>{copy.commonEvents ?? "이벤트"}</Label>

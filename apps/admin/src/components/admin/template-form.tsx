@@ -48,18 +48,6 @@ interface TemplateFormProps {
   onSuccess: () => void;
 }
 
-const DEFAULT_VARIABLES = [
-  { name: "ticket.id", description: "티켓 번호", example: "TKT-001" },
-  { name: "ticket.number", description: "티켓 번호", example: "TKT-001" },
-  { name: "ticket.subject", description: "티켓 제목", example: "로그인 오류" },
-  { name: "ticket.status", description: "티켓 상태", example: "처리 중" },
-  { name: "ticket.priority", description: "우선순위", example: "높음" },
-  { name: "customer.name", description: "고객 이름", example: "홍길동" },
-  { name: "customer.email", description: "고객 이메일", example: "hong@example.com" },
-  { name: "category.name", description: "카테고리 이름", example: "기술 지원" },
-  { name: "agent.name", description: "담당 상담원 이름", example: "김상담" },
-];
-
 export function TemplateForm({
   template,
   categories,
@@ -68,6 +56,18 @@ export function TemplateForm({
 }: TemplateFormProps) {
   const copy = useAdminCopy() as unknown as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
+
+  const DEFAULT_VARIABLES = [
+    { name: "ticket.id", description: t("templateVarTicketId", "티켓 번호"), example: "TKT-001" },
+    { name: "ticket.number", description: t("templateVarTicketNumber", "티켓 번호"), example: "TKT-001" },
+    { name: "ticket.subject", description: t("templateVarTicketSubject", "티켓 제목"), example: copy.locale === "en" ? "Login error" : "로그인 오류" },
+    { name: "ticket.status", description: t("templateVarTicketStatus", "티켓 상태"), example: copy.locale === "en" ? "In progress" : "처리 중" },
+    { name: "ticket.priority", description: t("templateVarTicketPriority", "우선순위"), example: copy.locale === "en" ? "High" : "높음" },
+    { name: "customer.name", description: t("templateVarCustomerName", "고객 이름"), example: copy.locale === "en" ? "John Doe" : "홍길동" },
+    { name: "customer.email", description: t("templateVarCustomerEmail", "고객 이메일"), example: "hong@example.com" },
+    { name: "category.name", description: t("templateVarCategoryName", "카테고리 이름"), example: copy.locale === "en" ? "Technical Support" : "기술 지원" },
+    { name: "agent.name", description: t("templateVarAgentName", "담당 상담원 이름"), example: copy.locale === "en" ? "Jane Smith" : "김상담" },
+  ];
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState(template?.title || "");
   const [content, setContent] = useState(template?.content || "");

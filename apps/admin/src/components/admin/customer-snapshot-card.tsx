@@ -69,17 +69,17 @@ export function CustomerSnapshotCard({ customerId }: CustomerSnapshotCardProps) 
         ) : data ? (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <SnapshotMetric label={t("customersTotalTickets", "총 문의")} value={`${data.stats.totalTickets}건`} />
-              <SnapshotMetric label={t("ticketStatusOpen", "열림")} value={`${data.stats.openTickets}건`} />
+              <SnapshotMetric label={t("customersTotalTickets", "총 문의")} value={`${data.stats.totalTickets}${t("commonCountSuffix", "건")}`} />
+              <SnapshotMetric label={t("ticketStatusOpen", "열림")} value={`${data.stats.openTickets}${t("commonCountSuffix", "건")}`} />
               <SnapshotMetric
                 label={t("customersCsat", "고객 만족도")}
-                value={data.stats.avgCsat != null ? `${data.stats.avgCsat.toFixed(1)}점` : "-"}
+                value={data.stats.avgCsat != null ? `${data.stats.avgCsat.toFixed(1)}${t("csatScoreSuffix", "점")}` : "-"}
               />
               <SnapshotMetric
                 label={t("customersRecentInquiry", "최근 문의")}
                 value={
                   data.stats.lastTicketAt
-                    ? new Date(data.stats.lastTicketAt).toLocaleDateString("ko-KR")
+                    ? new Date(data.stats.lastTicketAt).toLocaleDateString(copy.locale === "en" ? "en-US" : "ko-KR")
                     : "-"
                 }
               />

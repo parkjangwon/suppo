@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@suppo/ui/components/ui/card";
 import { Badge } from "@suppo/ui/components/ui/badge";
 import { Lightbulb, ExternalLink, BookOpen } from "lucide-react";
+import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 
 interface KnowledgeSuggestionsProps {
   subject: string;
@@ -20,6 +21,8 @@ interface SuggestedArticle {
 }
 
 export function KnowledgeSuggestions({ subject, description }: KnowledgeSuggestionsProps) {
+  const copy = useAdminCopy() as Record<string, string>;
+  const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const [suggestions, setSuggestions] = useState<SuggestedArticle[]>([]);
   const [, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -71,12 +74,12 @@ export function KnowledgeSuggestions({ subject, description }: KnowledgeSuggesti
       <CardHeader className="pb-3">
         <CardTitle className="text-sm flex items-center gap-2 text-blue-800">
           <Lightbulb className="h-4 w-4" />
-          먼저 확인해 보세요
+          {t("knowledgeSuggestionsTitle", "먼저 확인해 보세요")}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-xs text-blue-600 mb-3">
-          비슷한 내용의 도움말을 찾았습니다. 티켓을 생성하기 전에 먼저 확인해 보세요.
+          {t("knowledgeSuggestionsDesc", "비슷한 내용의 도움말을 찾았습니다. 티켓을 생성하기 전에 먼저 확인해 보세요.")}
         </p>
         <div className="space-y-2">
           {suggestions.map((article) => (
@@ -107,7 +110,7 @@ export function KnowledgeSuggestions({ subject, description }: KnowledgeSuggesti
           ))}
         </div>
         <p className="text-xs text-blue-600 mt-3 pt-3 border-t border-blue-100">
-          원하는 답변을 찾지 못하셨나요? 아래에서 티켓을 계속 생성하실 수 있습니다.
+          {t("knowledgeSuggestionsFooter", "원하는 답변을 찾지 못하셨나요? 아래에서 티켓을 계속 생성하실 수 있습니다.")}
         </p>
       </CardContent>
     </Card>

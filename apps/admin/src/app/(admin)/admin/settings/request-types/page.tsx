@@ -29,7 +29,7 @@ export default async function RequestTypesPage({
     return (
       <AdminOnlyPageState
         title={copy.settingsRequestTypes}
-        description="문의 유형과 자동 분류 정책은 관리자만 변경할 수 있습니다."
+        description={copy.settingsRequestTypesAdminOnly}
       />
     );
   }
@@ -82,7 +82,7 @@ export default async function RequestTypesPage({
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-6">
-            고객이 선택할 수 있는 문의 유형을 관리합니다. 각 유형별로 기본 담당 팀과 우선순위를 설정할 수 있습니다.
+            {copy.settingsRequestTypesDesc}
           </p>
           <RequestTypeList
             requestTypes={requestTypes}

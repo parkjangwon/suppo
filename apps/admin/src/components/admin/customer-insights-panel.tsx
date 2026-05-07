@@ -120,7 +120,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
             <span className="text-muted-foreground">{t("analyticsLastTicket", "마지막 티켓", "Last ticket")}:</span>
             <span>
               {data.stats.lastTicketAt
-                ? new Date(data.stats.lastTicketAt).toLocaleDateString("ko-KR")
+                ? new Date(data.stats.lastTicketAt).toLocaleDateString(copy.locale === "en" ? "en-US" : "ko-KR")
                 : "-"}
             </span>
           </div>

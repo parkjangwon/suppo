@@ -72,7 +72,7 @@ export default function CustomerDetailPage() {
         setCustomer(data);
         setMemo(data.memo || "");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "오류가 발생했습니다.");
+        setError(err instanceof Error ? err.message : copyText(copy, "commonError", "오류가 발생했습니다."));
       } finally {
         setLoading(false);
       }
@@ -145,7 +145,7 @@ export default function CustomerDetailPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{copyText(copy, "customerDetailTitle", "고객 상세 정보")}</h1>
         <Button variant="outline" onClick={() => router.back()}>
-          돌아가기
+          {copyText(copy, "commonBack", "돌아가기")}
         </Button>
       </div>
 
@@ -182,7 +182,7 @@ export default function CustomerDetailPage() {
               )}
               <div>
                 <div className="text-sm font-medium text-muted-foreground">{copyText(copy, "customersTotalTickets", "총 티켓 수")}</div>
-                <div>{customer.ticketCount}개</div>
+                <div>{customer.ticketCount}{copyText(copy, "commonCountSuffix", "개")}</div>
               </div>
             </CardContent>
           </Card>
@@ -263,7 +263,7 @@ export default function CustomerDetailPage() {
                   {customer.analyzedAt ? (
                     <TimelineItem
                       title={copyText(copy, "customerAiAnalysisTitle", "AI 고객 분석")}
-                      description={copyText(copy, "customerAnalysisTimestampDescription", `${new Date(customer.analyzedAt).toLocaleString("ko-KR")} 기준으로 고객 분석이 갱신되었습니다.`)}
+                      description={copyText(copy, "customerAnalysisTimestampDescription", copy.locale === "en" ? `Customer analysis updated as of ${new Date(customer.analyzedAt).toLocaleString("en-US")}.` : `${new Date(customer.analyzedAt).toLocaleString("ko-KR")} 기준으로 고객 분석이 갱신되었습니다.`)}
                     />
                   ) : null}
                   {customer.tickets.slice(0, 3).map((ticket) => (
@@ -294,7 +294,7 @@ export default function CustomerDetailPage() {
                         </Badge>
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        생성일: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
+                        {copyText(copy, "ticketCreatedLabel", "생성일")}: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: ko })}
                       </div>
                     </Link>
                   ))}

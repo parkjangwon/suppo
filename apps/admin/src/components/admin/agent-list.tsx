@@ -262,7 +262,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
       const response = await fetch(`/api/agents/${agent.id}/deactivate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason: "관리자에 의한 비활성화" }),
+        body: JSON.stringify({ reason: t("agentDeactivateReason", "관리자에 의한 비활성화") }),
       });
 
       const data = await response.json();

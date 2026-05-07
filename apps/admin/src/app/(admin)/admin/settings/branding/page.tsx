@@ -22,7 +22,7 @@ export default async function BrandingSettingsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsBranding}
-        description="서비스 로고와 고객 포털 브랜딩 변경은 관리자만 수행할 수 있습니다."
+        description={copy.settingsBrandingAdminOnly}
       />
     );
   }
@@ -32,7 +32,7 @@ export default async function BrandingSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{copy.settingsBranding}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          고객 지원 포털의 로고, 색상, 텍스트를 커스터마이징할 수 있습니다.
+          {copy.settingsBrandingDesc}
         </p>
       </div>
 

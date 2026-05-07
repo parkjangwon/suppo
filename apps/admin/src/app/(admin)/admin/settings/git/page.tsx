@@ -24,7 +24,7 @@ export default async function GitSettingsPage() {
     return (
       <AdminOnlyPageState
         title={copy.settingsGit}
-        description="외부 저장소 연동 정보는 관리자만 관리할 수 있습니다."
+        description={copy.settingsGitAdminOnly}
       />
     );
   }
@@ -43,7 +43,7 @@ export default async function GitSettingsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">{copy.settingsGit}</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          GitHub/GitLab 연동 설정
+          {copy.settingsGitDesc}
         </p>
       </div>
 

@@ -29,11 +29,11 @@ export default async function AdminAgentsPage() {
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">
-            상담원 관리
+            {copy.navAgents}
           </h1>
         </div>
         <p className="text-muted-foreground">
-          DATABASE_URL이 설정되지 않아 목록을 불러올 수 없습니다.
+          {copy.agentsDbError}
         </p>
       </div>
     );
@@ -101,7 +101,7 @@ export default async function AdminAgentsPage() {
         <div>
           <h1 className="text-2xl font-bold">{copy.navAgents}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            상담원 추가, 수정, 팀 배정 및 권한 관리
+            {copy.agentsSubtitle}
           </p>
         </div>
       </div>

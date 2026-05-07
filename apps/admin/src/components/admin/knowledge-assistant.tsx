@@ -77,7 +77,7 @@ export function KnowledgeAssistant({
   }, [isOpen, ticketSubject, query, searchArticles]);
 
   const handleInsert = async (article: Article) => {
-    const content = `[${article.title}]\n\n${article.content}\n\n참고: ${article.category.name} 도움말`;
+    const content = `[${article.title}]\n\n${article.content}\n\n${copy.knowledgeReferencePrefix ?? "참고"}: ${article.category.name} ${copy.knowledgeHelpSuffix ?? "도움말"}`;
     onInsertContent(content);
 
     // 티켓-지식 링크 자동 생성 (AGENT_INSERT)

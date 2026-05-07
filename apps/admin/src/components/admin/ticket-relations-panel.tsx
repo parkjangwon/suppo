@@ -68,7 +68,7 @@ export function TicketRelationsPanel({ ticketId }: TicketRelationsPanelProps) {
             <div key={relation.id} className="rounded-lg border border-border/60 p-4">
               <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
                 <Badge variant="outline">{t("ticketMergeHistory", "병합 이력")}</Badge>
-                <span>{new Date(relation.mergedAt).toLocaleString("ko-KR")}</span>
+                <span>{new Date(relation.mergedAt).toLocaleString(copy.locale === "en" ? "en-US" : "ko-KR")}</span>
               </div>
               <div className="grid gap-3 lg:grid-cols-2">
                 <RelationTicketCard title={t("ticketMergeSourceTicket", "원본 티켓")} ticket={relation.sourceTicket} />
