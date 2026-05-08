@@ -85,6 +85,7 @@ export function CommentThread({
   const handleSaveEdit = async (commentId: string) => {
     if (!editContent.trim()) {
       toast.error(t("commentContentRequired", "내용을 입력해주세요"));
+
       return;
     }
 
@@ -106,7 +107,7 @@ export function CommentThread({
       setEditContent("");
       onCommentUpdated?.();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("commentUpdateError", "수정에 실패했습니다"));
+      toast.error(error instanceof Error ? error.message : t("commentUpdateFailed", "수정에 실패했습니다"));
     } finally {
       setIsSubmitting(false);
     }
@@ -127,7 +128,7 @@ export function CommentThread({
       toast.success(t("commentDeleteSuccess", "댓글이 삭제되었습니다"));
       onCommentUpdated?.();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t("commentDeleteError", "삭제에 실패했습니다"));
+      toast.error(error instanceof Error ? error.message : t("commentDeleteFailed", "삭제에 실패했습니다"));
     } finally {
       setIsSubmitting(false);
     }
@@ -173,11 +174,11 @@ export function CommentThread({
                     variant="destructive"
                     className="text-xs bg-amber-500 hover:bg-amber-600"
                   >
-                    {t("commentInternalNoteAriaLabel", "내부 메모")}
+                    {t("commentInternalNoteLabel", "내부 메모")}
                   </Badge>
                 )}
                 {wasEdited && !isEditing && (
-                  <span className="text-xs text-muted-foreground">({t("commentUpdateSuccess", "수정됨")})</span>
+                  <span className="text-xs text-muted-foreground">({t("commentEdited", "수정됨")})</span>
                 )}
               </div>
               <div className="flex items-center gap-2">
@@ -212,10 +213,10 @@ export function CommentThread({
                         <AlertDialogHeader>
                           <AlertDialogTitle className="flex items-center gap-2">
                             <AlertCircle className="h-5 w-5 text-destructive" />
-                            {t("commentDeleteSuccess", "댓글 삭제")}
+                            {t("commentDeleteTitle", "댓글 삭제")}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            {t("commentDeleteError", "이 댓글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")}
+                            {t("commentDeleteConfirm", "이 댓글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

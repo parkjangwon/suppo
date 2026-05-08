@@ -51,7 +51,7 @@ export function CustomerReplyForm({ ticketId }: CustomerReplyFormProps) {
         setError(data.error || t("customerReplyFailed", "답변 등록에 실패했습니다."));
       }
     } catch {
-      setError(t("customerReplyError", "오류가 발생했습니다. 다시 시도해주세요."));
+      setError(t("customerReplyError", "오류가 발생했습니다. 다시 시도하세요."));
     } finally {
       setIsLoading(false);
     }
@@ -59,8 +59,8 @@ export function CustomerReplyForm({ ticketId }: CustomerReplyFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-4 border-t pt-8">
-      <h3 className="text-lg font-medium">{t("customerReplyPlaceholder", "답변 추가")}</h3>
-      
+      <h3 className="text-lg font-medium">{t("customerReplyTitle", "답변 추가")}</h3>
+
       {error && (
         <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
           {error}
@@ -68,21 +68,21 @@ export function CustomerReplyForm({ ticketId }: CustomerReplyFormProps) {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="content">{t("customerReplyPlaceholder", "추가 메시지")}</Label>
+        <Label htmlFor="content">{t("customerReplyLabel", "추가 메시지")}</Label>
         <textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className="w-full min-h-[120px] p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder={t("customerReplyPlaceholder", "추가로 문의하실 내용을 입력해주세요.")}
+          placeholder={t("customerReplyTextPlaceholder", "추가로 문의하실 내용을 입력해주세요.")}
         />
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Paperclip className="h-4 w-4" />
-          <span>{t("commonAdd", "첨부 파일")}</span>
-          <span className="text-xs text-gray-400">{t("commonNone", "(이미지, 문서 등)")}</span>
+          <span>{t("commonAttachments", "첨부 파일")}</span>
+          <span className="text-xs text-gray-400">{t("commentAttachmentHint", "(이미지, 문서 등)")}</span>
         </div>
         <AttachmentUpload 
           files={files} 

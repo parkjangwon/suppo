@@ -128,12 +128,12 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
         const titles = data.referencedArticles
           .map((a: { id: string; title: string }) => a.title)
           .join(", ");
-        toast.info(`${t("knowledgeLinked", "참고 문서")}: ${titles}`, { duration: 5000 });
+        toast.info(`${t("knowledgeLinkedArticles", "참고 문서")}: ${titles}`, { duration: 5000 });
       }
 
       return data.suggestion;
     } catch {
-      toast.error(t("commentAiSuggestLoading", "AI 답변 생성 중 오류가 발생했습니다."));
+      toast.error(t("commentAiSuggestError", "AI 답변 생성 중 오류가 발생했습니다."));
       return null;
     } finally {
       setIsGeneratingSuggestion(false);
@@ -149,7 +149,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
             <Badge variant="outline">{ticket.ticketNumber}</Badge>
           </div>
             <p className="text-sm text-muted-foreground">
-            {t("commonCreate", "생성일")}: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: dateLocale })}
+            {t("ticketDetailCreatedDate", "생성일")}: {format(new Date(ticket.createdAt), "yyyy.MM.dd HH:mm", { locale: dateLocale })}
           </p>
           <TicketViewingIndicator viewers={viewers} />
         </div>
@@ -161,7 +161,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
             onValueChange={(value) => handleUpdate("status", value)}
           >
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder={t("ticketDetailCurrentStatus", "상태")} />
+              <SelectValue placeholder={t("ticketDetailStatus", "상태")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="OPEN">{statusMap.OPEN.label}</SelectItem>
@@ -218,7 +218,6 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-          {/* AI 요약 */}
           {ticket.summary && (
             <TicketSummary summary={ticket.summary} />
           )}
@@ -246,7 +245,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                   <div className="whitespace-pre-wrap">{ticket.description}</div>
                   {ticket.attachments && ticket.attachments.length > 0 && (
                     <div className="mt-4 pt-4 border-t">
-                      <h4 className="text-sm font-medium mb-2">{t("commonView", "첨부파일")}</h4>
+                      <h4 className="text-sm font-medium mb-2">{t("commonAttachments", "첨부파일")}</h4>
                       <ul className="space-y-1">
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {(ticket.attachments as Array<any>).map((file) => (
@@ -288,24 +287,34 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                         </div>
                         <div>
                           <span className="font-medium">{activity.actor?.name || t("commonSystem", "시스템")}</span>
-                          <span className="text-muted-foreground mx-1">{t("commonView", "님이")}</span>
+                          {" — "}
                           {activity.action === "STATUS_CHANGED" && (
-                            <span>{t("ticketDetailCurrentStatus", "상태를")} <Badge variant="outline">{statusMap[activity.oldValue]?.label || activity.oldValue}</Badge>에서 <Badge variant="outline">{statusMap[activity.newValue]?.label || activity.newValue}</Badge>로 변경했습니다.</span>
+                            <span>
+                              {t("ticketDetailActivityStatusChanged", "상태 변경")}:{" "}
+                              <Badge variant="outline">{statusMap[activity.oldValue]?.label || activity.oldValue}</Badge>
+                              {" → "}
+                              <Badge variant="outline">{statusMap[activity.newValue]?.label || activity.newValue}</Badge>
+                            </span>
                           )}
                           {activity.action === "PRIORITY_CHANGED" && (
-                            <span>{t("ticketDetailPriority", "우선순위를")} <span className="font-medium">{priorityMap[activity.oldValue]?.label || activity.oldValue}</span>에서 <span className="font-medium">{priorityMap[activity.newValue]?.label || activity.newValue}</span>로 변경했습니다.</span>
+                            <span>
+                              {t("ticketDetailActivityPriorityChanged", "우선순위 변경")}:{" "}
+                              <span className="font-medium">{priorityMap[activity.oldValue]?.label || activity.oldValue}</span>
+                              {" → "}
+                              <span className="font-medium">{priorityMap[activity.newValue]?.label || activity.newValue}</span>
+                            </span>
                           )}
                           {activity.action === "ASSIGNED" && (
-                            <span>{t("ticketDetailAssigneeChange", "담당자를 할당했습니다.")}</span>
+                            <span>{t("ticketDetailActivityAssigned", "담당자 할당")}</span>
                           )}
                           {activity.action === "TRANSFERRED" && (
-                            <span>{t("ticketTransferLabel", "티켓을 양도했습니다.")}</span>
+                            <span>{t("ticketDetailActivityTransferred", "티켓 양도")}</span>
                           )}
                         </div>
                       </div>
                     ))}
                     {(!ticket.activities || ticket.activities.length === 0) && (
-                      <p className="text-muted-foreground text-center py-4">{t("commonNotFound", "활동 로그가 없습니다.")}</p>
+                      <p className="text-muted-foreground text-center py-4">{t("ticketDetailActivityEmpty", "활동 로그가 없습니다.")}</p>
                     )}
                   </div>
                 </CardContent>
@@ -321,7 +330,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{t("customersTitle", "고객 정보")}</CardTitle>
+              <CardTitle className="text-lg">{t("ticketDetailCustomerInfo", "고객 정보")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -357,7 +366,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">{t("ticketsTitle", "티켓 정보")}</CardTitle>
+              <CardTitle className="text-lg">{t("ticketDetailTicketInfo", "티켓 정보")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -365,18 +374,18 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                 <div>{ticket.requestType?.name || "-"}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-muted-foreground">{t("commonCreate", "생성일")}</div>
+                <div className="text-sm font-medium text-muted-foreground">{t("ticketDetailCreatedDate", "생성일")}</div>
                 <div>{format(new Date(ticket.createdAt), dateFormatFull, { locale: dateLocale })}</div>
               </div>
               {ticket.resolvedAt && (
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">{t("ticketStatusResolved", "해결일")}</div>
+                  <div className="text-sm font-medium text-muted-foreground">{t("ticketDetailResolvedDate", "해결일")}</div>
                   <div>{format(new Date(ticket.resolvedAt), dateFormatFull, { locale: dateLocale })}</div>
                 </div>
               )}
               {ticket.closedAt && (
                 <div>
-                  <div className="text-sm font-medium text-muted-foreground">{t("ticketStatusClosed", "종료일")}</div>
+                  <div className="text-sm font-medium text-muted-foreground">{t("ticketDetailClosedDate", "종료일")}</div>
                   <div>{format(new Date(ticket.closedAt), dateFormatFull, { locale: dateLocale })}</div>
                 </div>
               )}

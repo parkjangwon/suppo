@@ -102,10 +102,10 @@ export function CommentSection({
       const suggestion = await onAiSuggestion();
       if (suggestion) {
         setReply((prev) => prev + (prev ? "\n\n" : "") + suggestion);
-        toast.success(t("commentAiSuggest", "AI 답변 제안이 입력되었습니다."));
+        toast.success(t("commentAiSuggestSuccess", "AI 답변 제안이 입력되었습니다."));
       }
     } catch {
-      toast.error(t("commentAiSuggestLoading", "AI 답변 생성 중 오류가 발생했습니다."));
+      toast.error(t("commentAiSuggestError", "AI 답변 생성 중 오류가 발생했습니다."));
     }
   }
 
@@ -158,7 +158,7 @@ export function CommentSection({
       {canEdit && (
         <Card>
           <CardHeader>
-            <CardTitle>{t("commentWriteAriaLabel", "응답 작성")}</CardTitle>
+            <CardTitle>{t("commentWriteTitle", "응답 작성")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <CommentLockBanner
@@ -167,11 +167,11 @@ export function CommentSection({
               onRelease={releaseLock}
             />
             <Label htmlFor="reply" className="sr-only">
-              {t("commentWriteAriaLabel", "응답 작성")}
+              {t("commentWriteTitle", "응답 작성")}
             </Label>
             <Textarea
               id="reply"
-              aria-label={t("commentWriteAriaLabel", "응답 작성")}
+              aria-label={t("commentWriteTitle", "응답 작성")}
               placeholder={isLocked && !isLockedByMe ? t("commentLockedPlaceholder", "다른 상담원이 편집 중입니다...") : t("commentResponsePlaceholder", "응답을 입력하세요...")}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
@@ -194,8 +194,8 @@ export function CommentSection({
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Paperclip className="h-4 w-4" />
-                <span>{t("commonAdd", "첨부 파일")}</span>
-                <span className="text-xs text-gray-400">{t("commonNone", "(이미지, 문서 등)")}</span>
+                <span>{t("commonAttachments", "첨부 파일")}</span>
+                <span className="text-xs text-gray-400">{t("commentAttachmentHint", "(이미지, 문서 등)")}</span>
               </div>
               <AttachmentUpload
                 files={files}
@@ -210,12 +210,12 @@ export function CommentSection({
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="internal"
-                    aria-label={t("commentInternalNoteAriaLabel", "내부 메모로 저장")}
+                    aria-label={t("commentInternalNoteLabel", "내부 메모로 저장")}
                     checked={isInternal}
                     onCheckedChange={(checked) => setIsInternal(checked === true)}
                   />
                   <Label htmlFor="internal" className="text-sm cursor-pointer">
-                    {t("commentInternalNoteAriaLabel", "내부 메모로 저장")}
+                    {t("commentInternalNoteLabel", "내부 메모로 저장")}
                   </Label>
                 </div>
                 <TemplateSelector
@@ -235,7 +235,7 @@ export function CommentSection({
                     className="gap-2"
                   >
                     <Sparkles className="h-4 w-4" />
-                    {isGeneratingSuggestion ? t("commonCreating", "생성 중...") : t("commentAiSuggest", "AI 답변 제안")}
+                    {isGeneratingSuggestion ? t("commonCreating", "생성 중...") : t("commentAiSuggestLabel", "AI 답변 제안")}
                   </Button>
                 )}
               </div>

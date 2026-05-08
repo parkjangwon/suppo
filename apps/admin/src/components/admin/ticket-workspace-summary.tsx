@@ -26,7 +26,7 @@ export function TicketWorkspaceSummary({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <SummaryItem label={t("ticketDetailCurrentStatus", "현재 상태")} value={statusLabel} />
+          <SummaryItem label={t("ticketDetailStatus", "현재 상태")} value={statusLabel} />
           <SummaryItem label={t("ticketDetailPriority", "우선순위")} value={priorityLabel} />
           <SummaryItem label={t("ticketDetailAssignee", "담당자")} value={assigneeName} />
           <SummaryItem label={t("ticketsFilterRequestType", "문의 유형")} value={requestTypeName} />

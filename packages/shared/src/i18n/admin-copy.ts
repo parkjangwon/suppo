@@ -56,6 +56,51 @@ export interface AdminCopy {
   ticketDetailStatusChange: string;
   ticketDetailAssigneeChange: string;
   ticketDetailStatusChangePlaceholder: string;
+  ticketDetailUpdateFailed: string;
+  ticketDetailUpdateSuccess: string;
+  ticketDetailCreatedDate: string;
+  ticketDetailResolvedDate: string;
+  ticketDetailClosedDate: string;
+  ticketDetailCustomerInfo: string;
+  ticketDetailTicketInfo: string;
+  ticketDetailCanEdit: string;
+  ticketDetailCanEditDesc: string;
+  ticketDetailReadOnly: string;
+  ticketDetailReadOnlyDesc: string;
+  ticketDetailActivityEmpty: string;
+  ticketDetailActivityStatusChanged: string;
+  ticketDetailActivityPriorityChanged: string;
+  ticketDetailActivityAssigned: string;
+  ticketDetailActivityTransferred: string;
+  ticketWorkspaceSummaryTitle: string;
+  ticketsFilterRequestType: string;
+  knowledgeLinkedArticles: string;
+  analyticsAverageRating: string;
+  commonSend: string;
+  commonAttachments: string;
+  commentWriteTitle: string;
+  commentResponsePlaceholder: string;
+  commentLockedPlaceholder: string;
+  commentAttachmentHint: string;
+  commentInternalNoteLabel: string;
+  commentAiSuggestLabel: string;
+  commentAiSuggestSuccess: string;
+  commentAiSuggestError: string;
+  commentContentRequired: string;
+  commentUpdateSuccess: string;
+  commentUpdateFailed: string;
+  commentEdited: string;
+  commentDeleteTitle: string;
+  commentDeleteConfirm: string;
+  commentDeleteSuccess: string;
+  commentDeleteFailed: string;
+  commentAuthorCustomer: string;
+  commentAuthorAgent: string;
+  customerReplyTitle: string;
+  customerReplyLabel: string;
+  customerReplyTextPlaceholder: string;
+  customerReplyFailed: string;
+  customerReplyError: string;
   // Agents
   agentsTitle: string;
   agentsNewAgent: string;
@@ -202,6 +247,51 @@ const ADMIN_COPY: Record<AdminLocale, AdminCopy> = {
     ticketDetailStatusChange: "상태 변경",
     ticketDetailAssigneeChange: "담당자 변경",
     ticketDetailStatusChangePlaceholder: "상태를 선택하세요",
+    ticketDetailUpdateFailed: "업데이트에 실패했습니다",
+    ticketDetailUpdateSuccess: "업데이트 되었습니다",
+    ticketDetailCreatedDate: "생성일",
+    ticketDetailResolvedDate: "해결일",
+    ticketDetailClosedDate: "종료일",
+    ticketDetailCustomerInfo: "고객 정보",
+    ticketDetailTicketInfo: "티켓 정보",
+    ticketDetailCanEdit: "바로 처리 가능",
+    ticketDetailCanEditDesc: "응답 작성과 내부 메모 등록을 바로 진행할 수 있습니다.",
+    ticketDetailReadOnly: "읽기 전용 모드",
+    ticketDetailReadOnlyDesc: "담당자이거나 관리자일 때 응답과 내부 메모를 남길 수 있습니다.",
+    ticketDetailActivityEmpty: "활동 로그가 없습니다.",
+    ticketDetailActivityStatusChanged: "상태 변경",
+    ticketDetailActivityPriorityChanged: "우선순위 변경",
+    ticketDetailActivityAssigned: "담당자 할당",
+    ticketDetailActivityTransferred: "티켓 양도",
+    ticketWorkspaceSummaryTitle: "처리 요약",
+    ticketsFilterRequestType: "문의 유형",
+    knowledgeLinkedArticles: "참고 문서",
+    analyticsAverageRating: "만족도",
+    commonSend: "전송",
+    commonAttachments: "첨부 파일",
+    commentWriteTitle: "응답 작성",
+    commentResponsePlaceholder: "응답을 입력하세요...",
+    commentLockedPlaceholder: "다른 상담원이 편집 중입니다...",
+    commentAttachmentHint: "(이미지, 문서 등)",
+    commentInternalNoteLabel: "내부 메모로 저장",
+    commentAiSuggestLabel: "AI 답변 제안",
+    commentAiSuggestSuccess: "AI 답변 제안이 입력되었습니다.",
+    commentAiSuggestError: "AI 답변 생성 중 오류가 발생했습니다.",
+    commentContentRequired: "내용을 입력해주세요",
+    commentUpdateSuccess: "댓글이 수정되었습니다",
+    commentUpdateFailed: "수정에 실패했습니다",
+    commentEdited: "수정됨",
+    commentDeleteTitle: "댓글 삭제",
+    commentDeleteConfirm: "이 댓글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+    commentDeleteSuccess: "댓글이 삭제되었습니다",
+    commentDeleteFailed: "삭제에 실패했습니다",
+    commentAuthorCustomer: "고객",
+    commentAuthorAgent: "상담원",
+    customerReplyTitle: "답변 추가",
+    customerReplyLabel: "추가 메시지",
+    customerReplyTextPlaceholder: "추가로 문의하실 내용을 입력해주세요.",
+    customerReplyFailed: "답변 등록에 실패했습니다.",
+    customerReplyError: "오류가 발생했습니다. 다시 시도해주세요.",
     // Agents
     agentsTitle: "상담원 관리",
     agentsNewAgent: "새 상담원",
@@ -348,6 +438,51 @@ const ADMIN_COPY: Record<AdminLocale, AdminCopy> = {
     ticketDetailStatusChange: "Change Status",
     ticketDetailAssigneeChange: "Change Assignee",
     ticketDetailStatusChangePlaceholder: "Select status",
+    ticketDetailUpdateFailed: "Update failed",
+    ticketDetailUpdateSuccess: "Updated successfully",
+    ticketDetailCreatedDate: "Created",
+    ticketDetailResolvedDate: "Resolved",
+    ticketDetailClosedDate: "Closed",
+    ticketDetailCustomerInfo: "Customer Information",
+    ticketDetailTicketInfo: "Ticket Information",
+    ticketDetailCanEdit: "Ready to handle",
+    ticketDetailCanEditDesc: "You can write responses and add internal notes.",
+    ticketDetailReadOnly: "Read-only mode",
+    ticketDetailReadOnlyDesc: "Only assignees and administrators can add responses and internal notes.",
+    ticketDetailActivityEmpty: "No activity logs.",
+    ticketDetailActivityStatusChanged: "changed status",
+    ticketDetailActivityPriorityChanged: "changed priority",
+    ticketDetailActivityAssigned: "assigned the ticket",
+    ticketDetailActivityTransferred: "transferred the ticket",
+    ticketWorkspaceSummaryTitle: "Summary",
+    ticketsFilterRequestType: "Request type",
+    knowledgeLinkedArticles: "Referenced articles",
+    analyticsAverageRating: "Satisfaction",
+    commonSend: "Send",
+    commonAttachments: "Attachments",
+    commentWriteTitle: "Write response",
+    commentResponsePlaceholder: "Type a response...",
+    commentLockedPlaceholder: "Another agent is editing...",
+    commentAttachmentHint: "(images, documents, etc.)",
+    commentInternalNoteLabel: "Save as internal note",
+    commentAiSuggestLabel: "AI Suggestion",
+    commentAiSuggestSuccess: "AI suggestion applied.",
+    commentAiSuggestError: "Failed to generate AI response.",
+    commentContentRequired: "Please enter content",
+    commentUpdateSuccess: "Comment updated",
+    commentUpdateFailed: "Failed to update",
+    commentEdited: "Edited",
+    commentDeleteTitle: "Delete comment",
+    commentDeleteConfirm: "Are you sure you want to delete this comment? This action cannot be undone.",
+    commentDeleteSuccess: "Comment deleted",
+    commentDeleteFailed: "Failed to delete",
+    commentAuthorCustomer: "Customer",
+    commentAuthorAgent: "Agent",
+    customerReplyTitle: "Add reply",
+    customerReplyLabel: "Additional message",
+    customerReplyTextPlaceholder: "Enter your additional questions here.",
+    customerReplyFailed: "Failed to submit reply.",
+    customerReplyError: "An error occurred. Please try again.",
     // Agents
     agentsTitle: "Agents",
     agentsNewAgent: "New Agent",
