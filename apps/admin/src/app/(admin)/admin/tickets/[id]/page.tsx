@@ -9,6 +9,7 @@ import { ChevronLeft } from "lucide-react";
 import { Button } from "@suppo/ui/components/ui/button";
 import { getAdminCopy } from "@suppo/shared/i18n/admin-copy";
 import { copyText } from "@/lib/i18n/admin-copy-utils";
+import { getAnalysisEnabled } from "@/lib/settings/get-analysis-enabled";
 
 export const metadata: Metadata = {
   title: "티켓 상세 | Suppo",
@@ -31,7 +32,7 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
 
   try {
     const { id } = await params;
-    const [ticket, agents] = await Promise.all([
+    const [ticket, agents, aiEnabled] = await Promise.all([
       prisma.ticket.findUnique({
         where: { id },
         include: {
@@ -67,6 +68,7 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
         },
       }),
       prisma.agent.findMany({ where: { isActive: true }, orderBy: { name: "asc" } }),
+      getAnalysisEnabled(),
     ]);
 
     if (!ticket) {
@@ -84,11 +86,12 @@ export default async function TicketDetailPage({ params }: TicketDetailPageProps
           </Button>
         </div>
 
-        <TicketDetail 
-          ticket={ticket} 
-          agents={agents} 
-          currentAgentId={agent.id || ""} 
-          isAdmin={agent.role === "ADMIN"} 
+        <TicketDetail
+          ticket={ticket}
+          agents={agents}
+          currentAgentId={agent.id || ""}
+          isAdmin={agent.role === "ADMIN"}
+          aiEnabled={aiEnabled}
         />
       </div>
     );
