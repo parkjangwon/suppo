@@ -28,7 +28,7 @@ import {
 } from "@suppo/ui/components/ui/select";
 import { Separator } from "@suppo/ui/components/ui/separator";
 import { toast } from "sonner";
-import { getBackofficeRoleLabel, type BackofficeRole } from "@suppo/shared/auth/config";
+import { type BackofficeRole } from "@suppo/shared/auth/config";
 import { useAdminCopy } from "@suppo/shared/i18n/admin-context";
 import {
   Users,
@@ -513,7 +513,7 @@ export function AgentList({ initialAgents, categories, teams = [], isAdmin = fal
                   ) : (
                     <User className="w-3 h-3 mr-1" />
                   )}
-                  {getBackofficeRoleLabel(agent.role)}
+                  {agent.role === "ADMIN" ? t("agentsRoleAdmin", "관리자") : agent.role === "TEAM_LEAD" ? t("agentsRoleTeamLead", "팀장") : agent.role === "VIEWER" ? t("agentsRoleViewer", "조회자") : t("agentsRoleAgent", "상담원")}
                 </Badge>
                 <Badge
                   variant={agent.isActive ? "default" : "secondary"}

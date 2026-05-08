@@ -63,7 +63,7 @@ export function ApiKeyManager() {
   async function copyToClipboard(text: string, label: string) {
     await navigator.clipboard.writeText(text);
     markCopied(text);
-    toast.success(copy.commonCopiedLabel ?? `${label}이(가) 복사되었습니다.`);
+    toast.success(copy.commonCopiedLabel ?? "Copied");
   }
 
   async function createApiKey() {
