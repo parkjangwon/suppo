@@ -72,7 +72,7 @@ export function CustomerSnapshotCard({ customerId }: CustomerSnapshotCardProps) 
               <SnapshotMetric label={t("customersTotalTickets", "총 문의")} value={`${data.stats.totalTickets}${t("commonCountSuffix", "건")}`} />
               <SnapshotMetric label={t("ticketStatusOpen", "열림")} value={`${data.stats.openTickets}${t("commonCountSuffix", "건")}`} />
               <SnapshotMetric
-                label={t("customersCsat", "고객 만족도")}
+                label={t("csatTitle", "고객 만족도")}
                 value={data.stats.avgCsat != null ? `${data.stats.avgCsat.toFixed(1)}${t("csatScoreSuffix", "점")}` : "-"}
               />
               <SnapshotMetric

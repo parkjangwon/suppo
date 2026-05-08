@@ -87,7 +87,7 @@ export function CustomerInsightsPanel({ customerId }: CustomerInsightsPanelProps
         <StatCard title={t("ticketStatusOpen", "열림")} value={data.stats.openTickets} />
         <StatCard title={t("ticketStatusResolved", "해결됨")} value={data.stats.resolvedTickets} />
         <StatCard
-          title={t("customersCsat", "고객 만족도")}
+          title={t("csatTitle", "고객 만족도")}
           value={data.stats.avgCsat ? data.stats.avgCsat.toFixed(1) : "-"}
         />
       </div>
