@@ -394,7 +394,14 @@ function SidebarUserSummary({
               {isLoading ? copy.commonLoading : userName || copyText(copy, "commonUnknown", "알 수 없음")}
             </span>
             <span className="text-xs font-medium text-muted-foreground">
-              {userRole ? getBackofficeRoleLabel(userRole as BackofficeRole) : copy.agentsRoleAgent}
+              {userRole ? (
+                {
+                  ADMIN: copy.agentsRoleAdmin,
+                  TEAM_LEAD: copyText(copy, "agentsRoleTeamLead", "팀장"),
+                  AGENT: copy.agentsRoleAgent,
+                  VIEWER: copy.agentsRoleViewer,
+                }[userRole as BackofficeRole] ?? copy.agentsRoleAgent
+              ) : copy.agentsRoleAgent}
             </span>
           </div>
         </div>

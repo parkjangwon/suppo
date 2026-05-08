@@ -197,7 +197,7 @@ export function TicketList({
               onClick={() => setIsAdvancedSearch(true)}
             >
               <Search className="h-4 w-4 mr-2" />
-              {t("advancedSearchPlaceholder", "고급 검색")}
+              {t("advancedSearchLabel", "고급 검색")}
             </Button>
           </div>
 

@@ -84,6 +84,7 @@ export interface AdminCopy {
   customersEmail: string;
   customersOrganization: string;
   customersPhone: string;
+  customersRecentInquiry: string;
   // Knowledge
   knowledgeTitle: string;
   knowledgeNewArticle: string;
@@ -231,6 +232,7 @@ const ADMIN_COPY: Record<AdminLocale, AdminCopy> = {
     customersEmail: "이메일",
     customersOrganization: "소속/회사",
     customersPhone: "전화번호",
+    customersRecentInquiry: "최근 문의",
     // Knowledge
     knowledgeTitle: "지식",
     knowledgeNewArticle: "새 문서",
@@ -374,6 +376,7 @@ const ADMIN_COPY: Record<AdminLocale, AdminCopy> = {
     customersEmail: "Email",
     customersOrganization: "Organization",
     customersPhone: "Phone",
+    customersRecentInquiry: "Recent inquiry",
     // Knowledge
     knowledgeTitle: "Knowledge",
     knowledgeNewArticle: "New Article",
