@@ -63,10 +63,10 @@ export function HelpdeskOperationsCenter({
           {queuePresets.map((preset) => (
             <Card key={preset.key}>
               <CardHeader>
-                <CardTitle className="text-base">{copyText(copy, preset.labelKey as keyof typeof copy, preset.label)}</CardTitle>
+                <CardTitle className="text-base">{copyText(copy, preset.labelKey, preset.label)}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">{copyText(copy, preset.descriptionKey as keyof typeof copy, preset.description)}</p>
+                <p className="text-sm text-muted-foreground">{copyText(copy, preset.descriptionKey, preset.description)}</p>
                 <Button variant="outline" size="sm" asChild>
                   <Link href={buildQueueHref(preset.filter)}>
                     {copyText(copy, "helpdeskOpenQueue", "이 큐 열기")}
