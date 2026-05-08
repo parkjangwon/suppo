@@ -184,12 +184,14 @@ export function CommentSection({
               rows={6}
             />
 
-            <KnowledgeAssistant
-              onInsertContent={(content) =>
-                setReply((prev) => prev + (prev ? "\n\n" : "") + content)
-              }
-              ticketId={ticketId}
-            />
+            {onAiSuggestion && (
+              <KnowledgeAssistant
+                onInsertContent={(content) =>
+                  setReply((prev) => prev + (prev ? "\n\n" : "") + content)
+                }
+                ticketId={ticketId}
+              />
+            )}
 
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-gray-600">

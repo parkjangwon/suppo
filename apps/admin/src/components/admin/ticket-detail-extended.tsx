@@ -37,9 +37,10 @@ interface TicketDetailProps {
   agents: { id: string; name: string }[];
   currentAgentId: string;
   isAdmin: boolean;
+  aiEnabled?: boolean;
 }
 
-export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }: TicketDetailProps) {
+export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin, aiEnabled = false }: TicketDetailProps) {
   const copy = useAdminCopy() as Record<string, string>;
   const t = (key: string, fallback: string) => copy[key] ?? fallback;
   const dateLocale = copy.locale === "en" ? enUS : ko;
@@ -218,7 +219,7 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-6">
-          {ticket.summary && (
+          {aiEnabled && ticket.summary && (
             <TicketSummary summary={ticket.summary} />
           )}
 
@@ -266,8 +267,8 @@ export function TicketDetailExtended({ ticket, agents, currentAgentId, isAdmin }
                 comments={ticket.comments}
                 canEdit={canEdit}
                 requestTypeId={ticket.requestTypeId}
-                onAiSuggestion={handleAiSuggestion}
-                isGeneratingSuggestion={isGeneratingSuggestion}
+                onAiSuggestion={aiEnabled ? handleAiSuggestion : undefined}
+                isGeneratingSuggestion={aiEnabled ? isGeneratingSuggestion : false}
                 currentAgentId={currentAgentId}
                 isAdmin={isAdmin}
                 ticketAssigneeId={ticket.assigneeId}
