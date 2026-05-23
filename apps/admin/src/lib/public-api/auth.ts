@@ -3,7 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "@suppo/db";
 import type { NextRequest } from "next/server";
 
-export const PUBLIC_API_SCOPES = ["tickets:read", "tickets:create", "tickets:update"] as const;
+export const PUBLIC_API_SCOPES = ["tickets:read", "tickets:create", "tickets:update", "kb:write"] as const;
 export type PublicApiScope = (typeof PUBLIC_API_SCOPES)[number];
 export const DEFAULT_PUBLIC_API_KEY_SCOPES: PublicApiScope[] = ["tickets:read", "tickets:create"];
 
