@@ -15,8 +15,12 @@ const PUBLIC_ROUTES = new Set([
 ]);
 
 const API_KEY_ROUTES = new Set([
+  "public/agents",
+  "public/kb/articles",
+  "public/kb/articles/search",
   "public/tickets",
   "public/tickets/[id]",
+  "public/tickets/[id]/comments",
 ]);
 
 const INTERNAL_TOKEN_ROUTES = new Set([
